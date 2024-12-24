@@ -1,0 +1,9 @@
+#include "EventNtuple/fcl/from_mcs-mixed.fcl"
+
+# Add another TrackQuality module
+physics.producers.TrkQualAllNew : @local::TrkQualAll
+physics.producers.TrkQualAllNew.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.1.dat"
+physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllNew ]
+
+# Add it to the EventNtuple output
+physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAll", "TrkQualAllNew" ]

@@ -135,7 +135,7 @@ MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKK
 DeM : { input : "MergeKKDeM"
   branch : "dem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : "TrkQualDeM"
+  trkQualTags : ["TrkQualDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
@@ -175,7 +175,7 @@ Off : { input : "MergeKKOff"
 All : { input : "MergeKKAll"
   branch : "trk"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : "TrkQualAll"
+  trkQualTags : ["TrkQualAll"]
 }
 DeMCalib : { input : "MergeKKDeMCalib"
   branch : "trk"
