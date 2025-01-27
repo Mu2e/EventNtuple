@@ -171,7 +171,7 @@ namespace mu2e {
 
   void InfoMCStructHelper::fillAllSimInfos(const KalSeedMC& kseedmc, const PrimaryParticle& primary, std::vector<std::vector<SimInfo>>& all_siminfos, int n_generations, int n_match) {
     std::vector<SimInfo> siminfos;
-
+    
     // interpret -1 as no llimit
     if (n_generations == -1) {
       n_generations = std::numeric_limits<int>::max();
@@ -179,14 +179,29 @@ namespace mu2e {
     if (n_match == -1 ) {
       n_match = std::numeric_limits<int>::max();
     }
+    
+    //create vector of art Ptr to particles:
+    std::vector<art::Ptr<SimParticle> > allParts;
+
+    //loop over all sime particles in KalSeedMC
     for(int imatch = 0 ; imatch < std::min(n_match,static_cast<int>(kseedmc.simParticles().size())); ++imatch) {
       auto trkprimaryptr = kseedmc.simParticle(imatch).simParticle(_spcH);
       auto trkprimary = trkprimaryptr->originParticle();
       auto current_sim_particle_ptr = trkprimaryptr;
-      auto current_sim_particle = trkprimary;
-
+      auto current_sim_particle = trkprimary; 
+      
       for (int i_generation = 0; i_generation < n_generations; ++i_generation) {
+        bool isSame = false;
+        for(unsigned int ipart = 0; ipart < allParts.size() ; ipart++){
+          MCRelationship checkrel(current_sim_particle_ptr,allParts.at(ipart));
+          if(checkrel==MCRelationship::same) {
+              isSame = true;
+            }
+        }
+        if(!isSame) allParts.push_back(current_sim_particle_ptr);
+      
         SimInfo sim_info;
+        
         fillSimInfo(current_sim_particle, sim_info);
         sim_info.trkrel = MCRelationship(current_sim_particle_ptr, trkprimaryptr);
         sim_info.rank = imatch;
@@ -208,7 +223,11 @@ namespace mu2e {
         }
         // record the index this object will have
         sim_info.index = siminfos.size();
-        siminfos.push_back(sim_info);
+        
+        if(!isSame) {
+          siminfos.push_back(sim_info);
+        }
+
         if (current_sim_particle.parent().isNonnull()) {
           current_sim_particle_ptr = current_sim_particle.parent();
           current_sim_particle = current_sim_particle_ptr->originParticle();
@@ -217,6 +236,7 @@ namespace mu2e {
           break; // this particle doesn't have a parent
         }
       }
+
     }
 
     // Now add all the primary particles
