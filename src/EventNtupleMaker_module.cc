@@ -402,12 +402,12 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 3);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 0);
     // add event info branch
-    _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
+    _ntuple->Branch("evtinfo.",&_einfo,_buffsize,_splitlevel);
     if (_fillmc) {
-      _ntuple->Branch("evtinfomc",&_einfomc,_buffsize,_splitlevel);
+      _ntuple->Branch("evtinfomc.",&_einfomc,_buffsize,_splitlevel);
     }
     // hit counting branch
-    _ntuple->Branch("hitcount",&_hcnt);
+    _ntuple->Branch("hitcount.",&_hcnt);
     // track counting branches
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
       BranchConfig i_branchConfig = _allBranches.at(i_branch);
@@ -486,7 +486,7 @@ namespace mu2e {
     // general CRV info
     if(_fillcrvcoincs) {
       // coincidence branches should be here FIXME
-      _ntuple->Branch("crvsummary",&_crvsummary,_buffsize,_splitlevel);
+      _ntuple->Branch("crvsummary.",&_crvsummary,_buffsize,_splitlevel);
       _ntuple->Branch("crvcoincs.",&_crvcoincs,_buffsize,_splitlevel);
       if(_fillcrvpulses) {
         _ntuple->Branch("crvpulses.",&_crvpulses,_buffsize,_splitlevel);
@@ -495,7 +495,7 @@ namespace mu2e {
         _ntuple->Branch("crvdigis.",&_crvdigis,_buffsize,_splitlevel);
       }
       if(_fillmc){
-        _ntuple->Branch("crvsummarymc",&_crvsummarymc,_buffsize,_splitlevel);
+        _ntuple->Branch("crvsummarymc.",&_crvsummarymc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmc.",&_crvcoincsmc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmcplane.",&_crvcoincsmcplane,_buffsize,_splitlevel);
         if(_fillcrvpulses) {
