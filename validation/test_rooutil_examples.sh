@@ -4,7 +4,7 @@ scripts=( "PrintEvents.C" "CreateNtuple.C" "CreateTrackNtuple.C" "PlotCRVPEs.C" 
           "PlotEntranceMomentumCRVCut.C" "PlotEntranceMomentumResolution.C" "PlotEntranceMomentumResolution_TrkQualCut.C"
           "PlotMCParentPosZ.C" "PlotMCParticleMom.C" "PlotMuonPosZ.C" "PlotStoppingTargetFoilSegment.C" "PlotTrackNHits_RecoVsTrue.C"
           "PlotTrkCaloHitEnergy.C" "PrintEventsNoMC.C" "TrackCounting.C" "PlotTrackHitTimes.C" "PlotTrackHitTimesMC.C" "PlotStrawMaterials.C"
-          "PlotGenCosmicMom.C" "PlotCRVTotalPEs.C" )
+          "PlotGenCosmicMom.C" "PlotCRVTotalPEs.C" "PlotEntranceMomentum_UpstreamDownstream.C" )
 
 for script in "${scripts[@]}"
 do

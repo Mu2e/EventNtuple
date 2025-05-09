@@ -38,7 +38,6 @@ bool is_upstream(TrackSegment& segment) { // track fit segment is going in -z di
   else { return false; }
 }
 
-
 //+ Track Segment Cuts - Locations
 bool tracker_entrance(TrackSegment& segment) { // track fit segment is at the tracker entrance
   if (segment.trkseg != nullptr) {
@@ -54,14 +53,14 @@ bool tracker_entrance(TrackSegment& segment) { // track fit segment is at the tr
 
 bool tracker_middle(TrackSegment& segment) {  // track fit segment is at the middle of the tracker
   if (segment.trkseg != nullptr) {
-    if (segment.trkseg->sid==mu2e::SurfaceIdDetail::TT_Mid) { return true; }
-    else { return false; }
+    if (segment.trkseg->sid==mu2e::SurfaceIdDetail::TT_Mid) { std::cout << "returning true1" << std::endl; return true; }
+    else { std::cout << "returning false1" << std::endl; return false; }
   }
   if (segment.trksegmc != nullptr) {
-    if (segment.trksegmc->sid==mu2e::SurfaceIdDetail::TT_Mid) { return true; }
-    else { return false; }
+    if (segment.trksegmc->sid==mu2e::SurfaceIdDetail::TT_Mid) { std::cout << "returning true2" << std::endl; return true; }
+    else { std::cout << "returning false2" << std::endl; return false; }
   }
-  else { return false; }
+  else { std::cout << "returning false3" << std::endl; return false; }
 }
 
 bool tracker_exit(TrackSegment& segment) { // track fit segment is at the tracker exit
@@ -111,6 +110,30 @@ bool has_reco_step(TrackSegment& segment) { // track fit segment has an reco Sur
   else { return false; }
 }
 
+//+ Track Cuts - Direction
+bool is_downstream(Track& track) { // reconstructed fit segment at tracker middle is going in +z direction
+  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && !has_mc_step(segment) && has_reco_step(segment); });
+  if (tracker_middle_segments.size() > 1) {
+    std::cout << "WARNING: " << tracker_middle_segments.size() << " track segments at tracker middle. Something might have gone wrong..." << std::endl;
+    return false;
+  }
+  else if (tracker_middle_segments.size() == 0) {
+    return false;
+  }
+  return is_downstream(tracker_middle_segments.at(0));
+}
+
+bool is_upstream(Track& track) { // reconstructed fit segment at tracker middle is going in -z direction
+  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && !has_mc_step(segment) && has_reco_step(segment); });
+  if (tracker_middle_segments.size() > 1) {
+    std::cout << "WARNING: " << tracker_middle_segments.size() << " track segments at tracker middle. Something might have gone wrong..." << std::endl;
+    return false;
+  }
+  else if (tracker_middle_segments.size() == 0) {
+    return false;
+  }
+  return is_upstream(tracker_middle_segments.at(0));
+}
 
 //+ Track Cuts - Particle Types
 bool is_particle(Track& track, mu2e::PDGCode::type particle) { // track fit used particle hypothesis
