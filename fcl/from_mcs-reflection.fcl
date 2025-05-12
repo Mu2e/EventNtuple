@@ -4,7 +4,7 @@
 #include "Offline/TrkReco/fcl/prolog.fcl"
 #include "EventNtuple/fcl/prolog.fcl"
 BEGIN_PROLOG
-TAR : {
+EN : {
   @table::EventNtupleMaker
   FitType : LoopHelix
   diagLevel : 2
@@ -14,12 +14,12 @@ TAR : {
   FillTriggerInfo : false
   SurfaceStepCollectionTag : "compressRecoMCs"
 }
-TARBranch : {
+ENBranch : {
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 }
 }
 END_PROLOG
-process_name: TAReflect
+process_name: ENeflect
 source : { module_type : RootInput }
 services : @local::Services.Reco
 physics :
@@ -41,20 +41,20 @@ physics :
   eTrig : [ Reflecte ]
   muTrig : [ Reflectmu ]
   analyzers : {
-    TARe : {
-      @table::TAR
+    ENe : {
+      @table::EN
       SelectEvents : [ "eTrig" ]
       branches : [
-        { @table::TARBranch
+        { @table::ENBranch
           input: "Reflecte"
         }
       ]
     }
-    TARmu : {
-      @table::TAR
+    ENmu : {
+      @table::EN
       SelectEvents : [ "muTrig" ]
       branches : [
-        { @table::TARBranch
+        { @table::ENBranch
           input: "Reflectmu"
         }
       ]
@@ -68,12 +68,12 @@ physics :
       }
     } # printModule
   }
-  eEnd : [ "TARe" ]
-  muEnd : [ "TARmu" ]
+  eEnd : [ "ENe" ]
+  muEnd : [ "ENmu" ]
   CLPrint : [ "printModule" ]
 }
 
 physics.trigger_paths : [ "eTrig", "muTrig"]
 physics.end_paths : [ "eEnd", "muEnd", "CLPrint" ]
 services.TimeTracker.printSummary: true
-services.TFileService.fileName: "nts.owner.TAReflect.version.sequence.root"
+services.TFileService.fileName: "nts.owner.ENreflection.version.sequence.root"
