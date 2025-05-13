@@ -384,7 +384,7 @@ namespace mu2e {
     all_tminfos.push_back(tminfos);
   }
 
-  void InfoStructHelper::fillCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& all_tchinfos) {
+  void InfoStructHelper::fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& all_tchinfos) {
     TrkCaloHitInfo tchinfo;
     if (kseed.hasCaloCluster()) {
       auto const& tch = kseed.caloHit();
@@ -474,5 +474,47 @@ namespace mu2e {
       trkpidInfo._diskbrad[idisk] = sqrt(extpos.Perp2());
     }
   }
+
+  void InfoStructHelper::fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos) {
+    CaloClusterInfo clusterinfo;
+    clusterinfo.diskID_ = ccptr.diskID();
+    clusterinfo.time_ = ccptr.time();
+    clusterinfo.timeErr_ = ccptr.timeErr();
+    clusterinfo.energyDep_ = ccptr.energyDep();
+    clusterinfo.energyDepErr_ = ccptr.energyDepErr();
+    clusterinfo.cog_ = ccptr.cog3Vector();
+    clusterinfo.size_ = ccptr.size();
+    clusterinfo.isSplit_ = ccptr.isSplit();
+    //clusterinfo.hits_ = ;
+    clusterinfos.push_back(clusterinfo);
+  }
+
+  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos) {
+    CaloHitInfo hitinfo;
+    hitinfo.crystalId_ = chptr.crystalID();
+    hitinfo.nSiPMs_ = chptr.nSiPMs();
+    hitinfo.time_ = chptr.time();
+    hitinfo.timeErr_ = chptr.timeErr();
+    hitinfo.eDep_ = chptr.energyDep();
+    hitinfo.eDepErr_ = chptr.energyDepErr();
+    //hitinfo.recoDigis_ = ;
+    //hitinfo.clusterIdx_ = ;
+    hitinfos.push_back(hitinfo);
+  }
+
+  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos) {
+    CaloRecoDigiInfo recodigiinfo;
+    recodigiinfo.eDep_ = crdptr.energyDep();
+    recodigiinfo.eDepErr_ = crdptr.energyDepErr();
+    recodigiinfo.time_ = crdptr.time();
+    recodigiinfo.timeErr_ = crdptr.timeErr();
+    recodigiinfo.chi2_ = crdptr.chi2();
+    recodigiinfo.ndf_ = crdptr.ndf();
+    recodigiinfo.pileUp_ = crdptr.pileUp();
+    //recodigiinfo.caloDigi_ = ;
+    //recodigiinfo.caloHitIdx_ = ;
+    recodigiinfos.push_back(recodigiinfo);
+  }
+
 
 }
