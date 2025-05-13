@@ -11,7 +11,9 @@
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
+#include "Offline/RecoDataProducts/inc/CaloRecoDigi.hh"
 #include "Offline/RecoDataProducts/inc/TrkCaloHitPID.hh"
 #include "Offline/RecoDataProducts/inc/ProtonBunchTime.hh"
 #include "Offline/TrkReco/inc/TrkUtilities.hh"
@@ -147,6 +149,12 @@ namespace mu2e {
         fhicl::Atom<bool> fillhits{Name("FillHitInfo"),Comment("Global switch to turn on/off hit-level info"), false};
         fhicl::Atom<std::string> fittype{Name("FitType"),Comment("Type of track Fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"),"Unknown"};
         fhicl::Atom<bool> helices{Name("FillHelixInfo"),false};
+        // Calorimeter input
+        fhicl::Atom<art::InputTag> caloClustersTag{Name("CaloClustersTag"), Comment("Tag for Calorimeter cluster collection"), art::InputTag()};
+        // Calorimeter flags
+        fhicl::Atom<bool> fillCaloClusters{Name("FillCaloClusters"),Comment("Flag for turning on Calo Clusters branch"), true};
+        fhicl::Atom<bool> fillCaloHits{Name("FillCaloHits"),Comment("Flag for turning on Calo Hits branch"), true};
+        fhicl::Atom<bool> fillCaloRecoDigis{Name("FillCaloRecoDigis"),Comment("Flag for turning on Calo RecoDigis branch"), false};
         // CRV -- input tags
         fhicl::Atom<art::InputTag> crvCoincidencesTag{Name("CrvCoincidencesTag"), Comment("Tag for CrvCoincidenceCluster Collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> crvRecoPulsesTag{Name("CrvRecoPulsesTag"), Comment("Tag for CrvRecopPulse Collection"), art::InputTag()};
@@ -263,6 +271,14 @@ namespace mu2e {
       // event weights
       std::vector<art::Handle<EventWeight> > _wtHandles;
       EventWeightInfo _wtinfo;
+
+      // Calorimeter
+      art::Handle<CaloClusterCollection> _caloClusters;
+      std::vector<CaloClusterInfo> _caloCIs;
+      std::vector<CaloHitInfo> _caloHIs;
+      std::vector<CaloRecoDigiInfo> _caloRDIs;
+      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis;
+
       // CRV (inputs)
       std::map<BranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
       art::Handle<CrvCoincidenceClusterMCAssns>      _crvMCAssns;
@@ -322,6 +338,10 @@ namespace mu2e {
     _hascrv(conf().hascrv()),
     _fillmc(conf().fillmc()),
    _fillcalomc(conf().fillCaloMC()),
+    // Calorimeter
+    _fillcaloclusters(conf().fillCaloClusters()),
+    _fillcalohits(conf().fillCaloHits()),
+    _fillcalorecodigis(conf().fillCaloRecoDigis()),
     // CRV
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
@@ -485,7 +505,18 @@ namespace mu2e {
     if(_conf.filltrig()) {
       _ntuple->Branch("trigbits",&_trigbits,_buffsize,_splitlevel);
     }
-    // calorimeter information for the downstream electron track
+
+    // Calorimeter
+    if (_fillcaloclusters){
+      _ntuple->Branch("caloclusters.",&_caloCIs,_buffsize,_splitlevel);
+    }
+    if (_fillcalohits){
+      _ntuple->Branch("calohits.",&_caloHIs,_buffsize,_splitlevel);
+    }
+    if (_fillcalorecodigis){
+      _ntuple->Branch("calorecodigis.",&_caloRDIs,_buffsize,_splitlevel);
+    }
+
     // general CRV info
     if(_fillcrvcoincs) {
       // coincidence branches should be here FIXME
@@ -657,6 +688,15 @@ namespace mu2e {
         }
         ntrks++; // count total # of tracks
       }
+    }
+
+    // Calorimeter
+    if(_fillcaloclusters){
+      _caloCIs.clear();
+      event.getByLabel(_conf.caloClustersTag(),_caloClusters);
+      //for (const auto& cluster : _caloClusters){
+      //  _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs); //FIXME placeholder
+      //}
     }
 
     // TODO we want MC information when we don't have a track
