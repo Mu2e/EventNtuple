@@ -15,6 +15,7 @@
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
+#include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 
 #include "EventNtuple/inc/HitCount.hh"
 #include "EventNtuple/inc/TrkInfo.hh"
@@ -29,6 +30,9 @@
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
+#include "EventNtuple/inc/CaloClusterInfo.hh"
+#include "EventNtuple/inc/CaloHitInfo.hh"
+#include "EventNtuple/inc/CaloRecoDigiInfo.hh"
 #include "art/Framework/Principal/Handle.h"
 #include <vector>
 #include <functional>
@@ -61,9 +65,13 @@ namespace mu2e {
     void fillTrkQualInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas);
     void fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& tshinfos );
     void fillMatInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawMatInfo>>& tminfos );
-    void fillCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& tchinfo );
+    void fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& tchinfo );
     void fillTrkPIDInfo(const TrkCaloHitPID& tchp, const KalSeed& kseed, TrkPIDInfo& trkpidInfo);
     void fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos);
+
+    void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
+    void fillCaloHitInfo(const CaloHit& ccptr, std::vector<CaloHitInfo>& hitinfos);
+    void fillCaloRecoDigiInfo(const CaloRecoDigi& ccptr, std::vector<CaloRecoDigiInfo>& recodigiinfos);
   };
 }
 
