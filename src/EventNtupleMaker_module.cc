@@ -694,9 +694,9 @@ namespace mu2e {
     if(_fillcaloclusters){
       _caloCIs.clear();
       event.getByLabel(_conf.caloClustersTag(),_caloClusters);
-      //for (const auto& cluster : _caloClusters){
-      //  _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs); //FIXME placeholder
-      //}
+      for (const auto& cluster : *_caloClusters.product()){
+        _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs); //FIXME placeholder
+      }
     }
 
     // TODO we want MC information when we don't have a track
