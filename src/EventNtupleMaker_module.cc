@@ -800,7 +800,7 @@ namespace mu2e {
     }
 
     // calorimeter info
-    _infoStructHelper.fillCaloHitInfo(kseed,  _allTCHIs.at(i_branch)); // fillCaloHitInfo handles whether there is a calo hit or not
+    _infoStructHelper.fillTrkCaloHitInfo(kseed,  _allTCHIs.at(i_branch)); // fillTrkCaloHitInfo handles whether there is a calo hit or not
     if (kseed.hasCaloCluster()) {
       _tcnt._ndec = 1; // only 1 possible calo hit at the moment FIXME: should work with the above
       // test
