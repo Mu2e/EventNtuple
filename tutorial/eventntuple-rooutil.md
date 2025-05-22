@@ -1,15 +1,16 @@
 # Analyzing the EventNtuple with RooUtil (Draft)
 
 ## Introduction
-In the [previous exercise](eventntuple-basics.md), we learned how to access the EventNtuple directly and get information about the branches and leaves contained in it. As mentioned, this has limited use for a real analysis.
+RooUtil offers an analyzer-friendly interface to EventNtuple for ROOT-based analyses.
 
-RooUtil offers an analyzer-friendly interface for ROOT-based analyses. In this exercise, we will use RooUtil to:
-
-* plot information from the ntuple,
-* make cuts on the ntuple,
-* produce a reduced ntuple(?)
+## Learning Objectives
+By the end of this tutorial, you will be able to:
+* analyze EventNtuple datasets,
+* select subsets of the data, and
+* create histograms of selected data
 
 Quick reference information about RooUtil is in the EventNtuple repository [here](https://www.github.com/Mu2e/EventNtuple/utils/rooutil/README.md)
+
 
 ## Setting Up
 We will create a ROOT macro to make plots.

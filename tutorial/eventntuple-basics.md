@@ -1,10 +1,17 @@
-# Taking a direct look at the EventNtuple (Draft)
+# EventNtuple Basics (Draft)
 
 ## Introduction
+The EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html) that contains Mu2e data from the tracker, calorimeter, and CRV. You can think of it like a giant spreadsheet: each row is a Mu2e event and each leaf is a column.
 
-Now that we have a list of EventNtuple files, let's take a look at one directly to understand the structure of the EventNtuple.
+## Learning Objectives
 
-The EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html). You can think of it like a giant spreadsheet: each row is a Mu2e event and each leaf is a column.
+By the end of this tutorial, you will be able to:
+* 
+* describe the difference between single-object branches, vector branches, and vector-of-vector branches, and
+* find the leaf and branch definitions using either ```ntuplehelper``` or GitHub
+
+
+## EventNtuple Structure
 
 The actual structure is a bit more complicated. We collect leaves that related to the same underlying object into branches. For example, all leaves related to the reconstructed track are on the ```trk``` branch. Also, leaves and branches might not be a single number like in a spreadsheet, but an array of numbers (or even an array of arrays of numbers). For example, the ```trk``` branch is an array because there can be more than one track in an event.
 
@@ -78,9 +85,3 @@ For example the ```trkhits``` branch is a vector-of-vectors because a single tra
 ```
 [ [trk1_hit1, trk1_hit2, ..., trk1_hitM], [trk2_hit1, trk2_hit2, ..., trk2_hitN], ..., [trkN_hit1, trkN_hit2, ..., trkN_hitM] ]
 ```
-
-## Conclusion
-You can now:
-
-* directly open the EventNtuple file in ROOT and/or python, and
-* get information about branches in leaves with ```ntuplehelper```
