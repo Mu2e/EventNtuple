@@ -9,7 +9,7 @@ By the end of this tutorial, you will be able to:
 * select subsets of the data, and
 * create histograms of selected data
 
-Quick reference information about RooUtil is in the EventNtuple repository [here](https://www.github.com/Mu2e/EventNtuple/utils/rooutil/README.md)
+Quick reference information about RooUtil is in the EventNtuple repository [here](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
 
 
 ## Setting Up
