@@ -1,4 +1,4 @@
-# EventNtuple Basics (Draft)
+# EventNtuple Basics
 
 ## Introduction
 The EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html) that contains Mu2e data from the tracker, calorimeter, and CRV. You can think of it like a giant spreadsheet: each row is a Mu2e event and each leaf is a column. You will soon realize that the structure is a little more complex than that...
@@ -51,7 +51,7 @@ ntuple->Print()
 ```
 import uproot
 ntuple = uproot.open(filename+":EventNtuple/ntuple")
-...
+ntuple.show()
 ```
 
 That's a lot of branches! But what do they _mean_?
@@ -77,25 +77,28 @@ ntuplehelper branch.*
 
 As you can see, you get a brief description of the branch, as well as a description of every leaf on that branch.
 
-Note that you can also list all branches with ```ntuplehelper --list-all-branches``` (command line) or ```nthelper.list_all_branches()``` (python). This complete list is also documented in the EventNtuple repository [here](https://github.com/Mu2e/EventNtuple/blob/main/doc/branches.md))
+You can list all branches with ```ntuplehelper --list-all-branches``` (command line) or ```nthelper.list_all_branches()``` (python). This complete list is also documented in the EventNtuple repository [here](https://github.com/Mu2e/EventNtuple/blob/main/doc/branches.md))
 
 ## The Structure of the EventNtuple
 
-Each entry in the EventNtuple corresponds to a single Mu2e event ([wiki link](https://mu2ewiki.fnal.gov/wiki/Computing_Concepts#Events)).
+The structure of the EventNtuple is complex due to the reality of our data. Each entry in the EventNtuple corresponds to a single Mu2e [event](https://mu2ewiki.fnal.gov/wiki/Computing_Concepts#Events). Within an event, we can have different numbers of tracks, and within each track we can have different numbers of hits.
 
-You might have noticed when the list of all branches was printed was that some branches were described as "single-object" branches, some where described as "vector" objects, and the rest were described as "vector of vector" branches.
+### Single-Object, Vector, and Vector-of-Vector Branches
 
-Single object branches describe a whole event.
+You might have noticed when the list of all branches was printed was that some branches were described as "single-object" branches, some where described as "vector" branches, and the rest were described as "vector of vector" branches.
+* a single-object branch contains information that describes a single event (e.g. event ID, total number of hits in the tracker)
+* a vector branch contains a list of multiple objects that are in the same event (e.g. information about multiple track fits)
+* a vector-of-vector branch contains a list of objects
 
-Vector object branches.  For example the ```trk``` branch is a vector because a single event contains more than one track. Their structure will look something like:
+### Some Examples
+
+The ```trk``` branch is a vector branch because a single event can contain more than one track fit. The ```trk``` branch looks something like this:
 
 ```
 [ trk1, trk2, ..., trkN ]
 ```
 
-Vector-of-vector branches.
-
-For example the ```trkhits``` branch is a vector-of-vectors because a single track contains more than one hit. Their structure will look something like:
+The ```trkhits``` branch is a vector-of-vectors branch because a single track fit contains more than one hit. Their structure will look something like:
 
 ```
 [ [trk1_hit1, trk1_hit2, ..., trk1_hitM], [trk2_hit1, trk2_hit2, ..., trk2_hitN], ..., [trkN_hit1, trkN_hit2, ..., trkN_hitM] ]
