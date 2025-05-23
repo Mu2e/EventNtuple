@@ -14,6 +14,8 @@ By the end of this tutorial, you will be able to:
 Because the EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html), it can be accessed in either ROOT or python like any other TTree.
 
 ### Getting a list of EventNtuple files
+(Note these instructions may soon be outdated when Mu2e moves to the next generation of file handling tools. If they do not work, or you know that we have already updated, then post a message on the #analysis-tools Slack channel to let the Analysis Tools conveners know).
+
 First, get a list of EventNtuple datasets as follows:
 
 ```
@@ -31,8 +33,6 @@ samListLocations -d --defname=nts.name.of.dataset.root > filelist.txt
 ```
 
 If you have authentication errors then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
-
-(Note the above instructions may soon be outdated when Mu2e moves to the next generation of file handling tools. If the instructions do not work, or you know that we have already updated, then post a message on the #analysis-tools Slack channel to let the Analysis Tools conveners know).
 
 ### Printing the EventNtuple
 
