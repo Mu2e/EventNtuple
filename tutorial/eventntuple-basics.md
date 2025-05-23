@@ -1,7 +1,7 @@
 # EventNtuple Basics (Draft)
 
 ## Introduction
-The EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html) that contains Mu2e data from the tracker, calorimeter, and CRV. You can think of it like a giant spreadsheet: each row is a Mu2e event and each leaf is a column. You will soon realize that the structure is a little more complext than a simple spreadsheet.
+The EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html) that contains Mu2e data from the tracker, calorimeter, and CRV. You can think of it like a giant spreadsheet: each row is a Mu2e event and each leaf is a column. You will soon realize that the structure is a little more complex than that...
 
 ## Learning Objectives
 
@@ -13,7 +13,28 @@ By the end of this tutorial, you will be able to:
 ## Accessing the EventNtuple
 Because the EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html), it can be accessed in either ROOT or python like any other TTree.
 
-First, get a list of files following the instructions on the wiki [here]() and pick a file.
+### Getting a list of EventNtuple files
+First, get a list of EventNtuple datasets as follows:
+
+```
+setup mu2efiletools
+mu2eDatasetList --tier=nts | grep v06_03_00
+```
+replacing ```v06_03_00``` with the most recent version number of EventNtuple from the [Mu2e wiki page](https://mu2ewiki.fnal.gov/wiki/EventNtuple#Version_History_%26_Musings).
+
+
+Pick a dataset from the list and to get a list of files that are already [prestaged](https://mu2ewiki.fnal.gov/wiki/Prestage), do the following:
+
+```
+setup dhtools
+samListLocations -d --defname=nts.name.of.dataset.root > filelist.txt
+```
+
+If you have authentication errors then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
+
+(Note the above instructions may soon be outdated when Mu2e moves to the next generation of file handling tools. If the instructions do not work, or you know that we have already updated, then post a message on the #analysis-tools Slack channel to let the Analysis Tools conveners know).
+
+### Printing the EventNtuple
 
 You can print the branches and leaves of the EventNtuple in your file in ROOT or python.
 
@@ -33,13 +54,13 @@ ntuple = uproot.open(filename+":EventNtuple/ntuple")
 ...
 ```
 
-As you can see, there are a lot of branches. But what do they _mean_? Pick a branch that you want to understand more about and continue to the next section
+That's a lot of branches! But what do they _mean_?
 
 ## Understanding Branches with ```ntuplehelper```
 
 We will use the [```ntuplehelper```](https://github.com/Mu2e/EventNtuple/blob/main/doc/ntuplehelper.md) to find out more about your branch.
 
-The ```ntuplehelper``` is a command line tool that prints descriptions of branches and leaves. To understand more about the branch you selected, do the following (replacing ```branch``` with the name of the branch you want to know more about).
+The ```ntuplehelper``` is a command line tool that prints descriptions of branches and leaves. Pick a branch from the list of branches that you want to understand more about and do the following (replacing ```branch``` with the name of the branch you chose).
 
 * on the command line:
 
