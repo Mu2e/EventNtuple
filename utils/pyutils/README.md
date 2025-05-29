@@ -55,7 +55,8 @@ pyplot      # Plotting and visualisation
 pyprint     # Array visualisation 
 pyselect    # Data selection and cut management 
 pyvector    # Element wise wector operations
-# import pymcutil  # Monte Carlo utilities (coming soon)
+pymcutil    # Monte Carlo utilities (coming soon)
+pylogger    # Helper module for managing printouts
 ```
 
 ### 2.1 Tutorials
@@ -64,8 +65,8 @@ To learn by example, follow the `pyutils` tutorial series.
 
 1. [pyutils_basics.ipynb](../../example-analysis-scripts/pyutils-examples/pyutils_basics.ipynb) - Introduction to core functionality
 1. [pyutils_on_EAF.ipynb](../../example-analysis-scripts/pyutils-examples/pyutils_on_EAF.ipynb) - Reading data with `pyutils` from the Elastic Analysis Facility (EAF) 
-1. [pyutils_multifile.ipynb](../../example-analysis-scripts/pyutils-examples/pyutils_multifile.ipynb) - Parallelising analysis with file lists and SAM definitions 
-1. More to come...
+1. [pyutils_multifile.ipynb](../../example-analysis-scripts/pyutils-examples/pyutils_multifile.ipynb) - Basic parallelisation with file lists and SAM definitions, as well as complex parallelised analysis tasks using the `pyprocess` `Skeleton` template class.
+
 
 ### 2.2 Module documentation 
 
@@ -75,7 +76,7 @@ Help information be accessed with `help(name)`, where `name` can be the module n
 
 #### `pyread` 
 
-A low-level file reading interface (supports local and remote files). 
+Contains the `Reader` class: a utility for reading files with uproot (supports local and remote files). Called by `pyprocess`, which is the main interface for processing data.
 
 <details>
 <summary><strong>Click for details<strong></summary>
@@ -99,10 +100,10 @@ CLASSES
      |      Initialise the reader
      |
      |      Args:
-     |          use_remote: Whether to use remote access methods
-     |          location: Remote files only. File location: tape (default), disk, scratch, nersc
-     |          schema: Remote files only. Schema when writing the URL: root (default), http, path , dcap, samFile
-     |          verbosity: Print detail level (0: minimal, 1: medium, 2: maximum)
+     |          use_remote (bool, opt): Whether to use remote access methods
+     |          location (str, opt): File location for remote files: tape (default), disk, scratch, nersc
+     |          schema (str, opt): Schema for remote file path: root (default), http, path , dcap, samFile
+     |          verbosity (int, opt): Level of output detail (0: errors only, 1: info & warnings, 2: max)
      |
      |  read_file(self, file_path)
      |      Read a file using the appropriate method
@@ -120,66 +121,9 @@ CLASSES
 
 ---
 
-#### `pyprocess`
-
-A file listing and parallel processing utility. 
-
-<details>
-<summary><strong>Click for details<strong></summary>
-
-```
-NAME
-    pyprocess
-
-CLASSES
-    builtins.object
-        Processor
-
-    class Processor(builtins.object)
-     |  Processor(verbosity=1)
-     |
-     |  Handles file list operations and parallel processing of multiple files
-     |
-     |  Methods defined here:
-     |
-     |  __init__(self, verbosity=1)
-     |      Initialise the processor
-     |
-     |      Args:
-     |          verbosity: Print detail level (0: minimal, 1: medium, 2: maximum)
-     |
-     |  get_file_list(self, defname=None, file_list_path=None)
-     |      Get a list of files from a SAM definition OR a text file
-     |
-     |      Args:
-     |          defname: SAM definition name
-     |          file_list_path: Path to a plain text file containing file paths
-     |
-     |      Returns:
-     |          List of file paths
-     |
-     |  process_files_parallel(self, file_list, process_func, max_workers=None)
-     |      Process multiple files in parallel with a given a process function
-     |
-     |      Args:
-     |          file_list: List of files to process
-     |          process_func: Function to call for each file (must accept file name as first argument)
-     |          max_workers: Maximum number of worker threads
-     |
-     |      Returns:
-     |          List of results from each processed file
-     |
-     |  ----------------------------------------------------------------------
-```
-</details>
-
----
-
 #### `pyimport`
 
-A high-level interface for importing ROOT TTree branches into awkward arrays. Depends on `pyread` and `pyprocess` to enable imports for SAM datasets and file lists. 
-
->**Note**: Returns a concatenated awkward array, which does not scale well for large datasets. Working on allowing filtering and histogram accumulation to resolve this. 
+Contains the `Importer` class: a utility for importing ROOT TTree branches into Awkward arrays. Called by `pyprocess`, which is the main interface for processing data.
 
 <details>
 <summary><strong>Click for details<strong></summary>
@@ -193,16 +137,20 @@ CLASSES
         Importer
 
     class Importer(builtins.object)
-     |  Importer(dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
+     |  Importer(file_name, branches, dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
      |
-     |  High-level interface for importing branches from files and datasets
+     |  Utility class for importing branches from ROOT TTree files
+     |
+     |  Intended to used via by the pyprocess Processor class
      |
      |  Methods defined here:
      |
-     |  __init__(self, dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
+     |  __init__(self, file_name, branches, dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
      |      Initialise the importer
      |
      |      Args:
+     |          file_name: Name of the file
+     |          branches: Flat list or grouped dict of branches to import
      |          dir_name: Ntuple directory in file
      |          tree_name: Ntuple name in file directory
      |          use_remote: Flag for reading remote files
@@ -210,33 +158,130 @@ CLASSES
      |          schema: Remote files only. Schema used when writing the URL: root (default), http, path, dcap, samFile
      |          verbosity: Print detail level (0: minimal, 1: medium, 2: maximum)
      |
-     |  import_dataset(self, defname=None, file_list_path=None, branches=None, max_workers=None)
-     |      Import branches from a SAM definition or a file list
-     |
-     |      Wraps import_file in a process function and sends it to Processor
-     |
-     |      Args:
-     |          defname: SAM definition name
-     |          file_list: file list path
-     |          branches: Flat list or grouped dict of branches to import
-     |          max_workers: Maximum number of parallel workers
-     |
-     |      Returns:
-     |          Concatenated awkward array with imported data from all files
-     |
-     |  import_file(self, file_name, branches=None, quiet=False)
-     |      Import branches from a single file
-     |
-     |      Args:
-     |          file_name: Path to the file
-     |          branches: Flat list or grouped dict of branches to import
-     |          quiet: limit verbosity if calling from import_dataset
+     |  import_branches(self)
+     |      Internal function to open ROOT file and import specified branches
      |
      |      Returns:
      |          Awkward array with imported data
      |
      |  ----------------------------------------------------------------------
 ```
+
+</details>
+
+---
+
+#### `pyprocess`
+
+**This is the primary interface for processing data**: supports processing of single files, file lists, and SAM definitions. Contains the `Processor` class, which provides methods for producing file lists and parallel processing, where the `process_data` method provides a single entry point for these utilties. It also contains the `Skeleton` class, which provides a template class for performing complex analyses.
+
+<details>
+<summary><strong>Click for details<strong></summary>
+
+```
+NAME
+    pyprocess
+
+CLASSES
+    builtins.object
+        Processor
+        Skeleton
+
+    class Processor(builtins.object)
+     |  Processor(dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
+     |
+     |  Interface for processing files or datasets
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, dir_name='EventNtuple', tree_name='ntuple', use_remote=False, location='tape', schema='root', verbosity=1)
+     |      Initialise the processor
+     |
+     |      Args:
+     |          dir_name (str, opt): Ntuple directory in file
+     |          tree_name (str, opt): Ntuple name in file directory
+     |          use_remote (bool, opt): Flag for reading remote files
+     |          location (str, opt): Remote files only. File location: tape (default), disk, scratch, nersc
+     |          schema (str, opt): Remote files only. Schema used when writing the URL: root (default), http, path, dcap, samFile
+     |          verbosity (int, opt): Level of output detail (0: errors only, 1: info, warnings, 2: max)
+     |
+     |  get_file_list(self, defname=None, file_list_path=None)
+     |      Utility to get a list of files from a SAM definition OR a text file
+     |
+     |      Args:
+     |          defname: SAM definition name
+     |          file_list_path: Path to a plain text file containing file paths
+     |
+     |      Returns:
+     |          List of file paths
+     |
+     |  process_data(self, file_name=None, file_list_path=None, defname=None, branches=None, max_workers=None, custom_process_func=None, use_processes=False)
+     |      Process the data
+     |
+     |      Args:
+     |          file_name: File name
+     |          defname: SAM definition name
+     |          file_list_path: Path to file list
+     |          branches: Flat list or grouped dict of branches to import
+     |          max_workers: Maximum number of parallel workers
+     |          custom_process_func: Optional custom processing function for each file
+     |          use_processes: Whether to use processes rather than threads
+     |
+     |      Returns:
+     |          - If custom_process_func is None: a concatenated awkward array with imported data from all files
+     |          - If custom_process_func is not None: a list of outputs from the custom process
+     |
+     |  ----------------------------------------------------------------------
+
+    class Skeleton(builtins.object)
+     |  Skeleton(verbosity=1)
+     |
+     |  Template class for creating a custom analysis processor
+     |
+     |  This template demonstrates how to create a class to run
+     |  custom analysis jobs with the Processor framework
+     |
+     |  To use this skeleton:
+     |  1. Either initilaise the entire class or pass it as an argument to your Processor class
+     |  2. Customize the __init__ method with your configuration
+     |  3. Implement your processing logic in the process method
+     |  4. Add any additional helper methods you need
+     |  5. Override methods as needed
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, verbosity=1)
+     |      Initialise your file processor with configuration parameters
+     |
+     |      Customise this method to include parameters specific to your analysis.
+     |
+     |      Args:
+     |          verbosity (int, opt): Level of output detail (0: errors only, 1: info, 2: debug, 3: max)
+     |
+     |  execute(self)
+     |      Run the processor on the configured files
+     |
+     |      Returns:
+     |          Combined results from all processed files
+     |
+     |  process_file(self, file_name)
+     |      Process a single file
+     |
+     |      This is the core method that will be called for each file.
+     |      Implement your file processing logic here.
+     |
+     |      Args:
+     |          file_name: Name of the file to process
+     |
+     |      Returns:
+     |          Any data structure representing the processed result
+     |
+     |  process_results(self)
+     |      Run post processing on the results list
+     |
+     |  ----------------------------------------------------------------------q
+```
+
 </details>
 
 ---
@@ -251,27 +296,14 @@ Tools for creating publication-quality histograms and graphs from flattened arra
 <summary><strong>Click for details<strong></summary>
 
 ```
-NAME
-    pyplot
-
-CLASSES
-    builtins.object
-        Plot
-
-    class Plot(builtins.object)
-     |  Plot(style_path=None, verbosity=1)
-     |
-     |  Methods for creating various types of plots. It also includes methods
-     |  for statistical analysis, automatic formatting, and scientific notation handling.
-     |
      |  Methods defined here:
      |
      |  __init__(self, style_path=None, verbosity=1)
      |      Initialise the Plot class.
      |
      |      Args:
-     |          style_path (str, optional): Path to matplotlib style file. (Default: Mu2e style)
-     |          verbosity: Print detail level (0: minimal, 1: medium, 2: maximum)
+     |          style_path (str, opt): Path to matplotlib style file. (Default: Mu2e style)
+     |          verbosity (int, opt): Level of output detail (0: errors only, 1: info & warnings, 2: max)
      |
      |  get_stats(self, array, xmin, xmax)
      |      Calculate 'stat box' statistics from a 1D array.
@@ -284,8 +316,7 @@ CLASSES
      |      Returns:
      |        tuple: (n_entries, mean, mean_err, std_dev, std_dev_err, underflows, overflows)
      |
-     |  plot_1D(self, array, nbins=100, xmin=-1.0, xmax=1.0, weights=None, title=None, xlabel=None, ylabel=None, col='black', leg_pos='best', out_path=None, dpi=300, log_x=False, log_y=False, norm_by_area=False, unde
-r_over=False, stat_box=True, stat_box_errors=False, error_bars=False, ax=None, show=True)
+     |  plot_1D(self, array, nbins=100, xmin=-1.0, xmax=1.0, weights=None, title=None, xlabel=None, ylabel=None, col='black', leg_pos='best', out_path=None, dpi=300, log_x=False, log_y=False, norm_by_area=False, under_over=False, stat_box=True, stat_box_errors=False, error_bars=False, ax=None, show=True)
      |      Create a 1D histogram from an array of values.
      |
      |      Args:
@@ -313,8 +344,7 @@ r_over=False, stat_box=True, stat_box_errors=False, error_bars=False, ax=None, s
      |      Raises:
      |        ValueError: If array is empty or None
      |
-     |  plot_1D_overlay(self, hists_dict, weights=None, nbins=100, xmin=-1.0, xmax=1.0, title=None, xlabel=None, ylabel=None, out_path=None, dpi=300, leg_pos='best', log_x=False, log_y=False, norm_by_area=False, ax=N
-one, show=True)
+     |  plot_1D_overlay(self, hists_dict, weights=None, nbins=100, xmin=-1.0, xmax=1.0, title=None, xlabel=None, ylabel=None, out_path=None, dpi=300, leg_pos='best', log_x=False, log_y=False, norm_by_area=False, ax=None, show=True)
      |      Overlay multiple 1D histograms from a dictionary of arrays.
      |
      |      Args:
@@ -338,8 +368,7 @@ one, show=True)
      |          ValueError: If hists_dict is empty or None
      |          ValueError: If weights length doesn't match number of histograms
      |
-     |  plot_2D(self, x, y, weights=None, nbins_x=100, xmin=-1.0, xmax=1.0, nbins_y=100, ymin=-1.0, ymax=1.0, title=None, xlabel=None, ylabel=None, zlabel=None, out_path=None, cmap='inferno', dpi=300, log_x=False, lo
-g_y=False, log_z=False, colorbar=True, ax=None, show=True)
+     |  plot_2D(self, x, y, weights=None, nbins_x=100, xmin=-1.0, xmax=1.0, nbins_y=100, ymin=-1.0, ymax=1.0, title=None, xlabel=None, ylabel=None, zlabel=None, out_path=None, cmap='inferno', dpi=300, log_x=False, log_y=False, log_z=False, colorbar=True, ax=None, show=True)
      |      Plot a 2D histogram from two arrays of the same length.
      |
      |      Args:
@@ -369,8 +398,7 @@ g_y=False, log_z=False, colorbar=True, ax=None, show=True)
      |      Raises:
      |          ValueError: If input arrays are empty or different lengths
      |
-     |  plot_graph(self, x, y, xerr=None, yerr=None, title=None, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None, col='black', linestyle='None', out_path=None, dpi=300, log_x=False, log_y=False, 
-ax=None, show=True)
+     |  plot_graph(self, x, y, xerr=None, yerr=None, title=None, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None, col='black', linestyle='None', out_path=None, dpi=300, log_x=False, log_y=False, ax=None, show=True)
      |      Plot a scatter graph with optional error bars.
      |
      |      Args:
@@ -397,8 +425,7 @@ ax=None, show=True)
      |      Raises:
      |        ValueError: If input arrays have different lengths
      |
-     |  plot_graph_overlay(self, graphs, title=None, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None, legend_position='best', linestyle='None', out_path=None, log_x=False, log_y=False, dpi=300, a
-x=None, show=True)
+     |  plot_graph_overlay(self, graphs, title=None, xlabel=None, ylabel=None, xmin=None, xmax=None, ymin=None, ymax=None, legend_position='best', linestyle='None', out_path=None, log_x=False, log_y=False, dpi=300, ax=None, show=True)
      |      Overlay multiple scatter graphs with optional error bars.
      |
      |      Args:
@@ -446,6 +473,7 @@ x=None, show=True)
      |
      |  ----------------------------------------------------------------------
 ```
+
 </details>
 
 ---
@@ -521,6 +549,7 @@ CLASSES
      |
      |  ----------------------------------------------------------------------
 ```
+
 </details>
 
 ---
@@ -564,14 +593,14 @@ CLASSES
      |  hasTrkCrvCoincs(self, trks, ntuple, tmax)
      |      simple function to remove anything close to a crv coinc
      |
-     |  has_n_hits(self, data, nhits)
+     |  has_n_hits(self, data, n_hits)
      |      Return boolean array for tracks with hits above a specified value
      |
      |      Hits in this context is nactive planes
      |
      |      Args:
      |          data (awkward.Array): Input array containing the trk.nactive branch
-     |          nhits (int): The minimum number of track hits
+     |          n_hits (int): The minimum number of track hits (nactive)
      |
      |  is_downstream(self, data, branch_name='trksegs')
      |      Return boolean array for upstream track segments
@@ -640,7 +669,7 @@ CLASSES
      |      Return boolean array for tracks above a specified quality
      |
      |      Args:
-     |          data (awkward.Array): Input array containing the trkqual.resutl branch
+     |          data (awkward.Array): Input array containing the trkqual.result branch
      |          quality (float): The numerical output of the MVA
      |
      |  ----------------------------------------------------------------------
@@ -652,7 +681,7 @@ CLASSES
 
 #### `pyvector`
 
-Tools for 3D element wise vector operations in a pure Python environment. 
+Tools for 3D element-wise vector operations in a pure Python environment. 
 
 <details>
 <summary><strong>Click for details<strong></summary>
@@ -691,6 +720,51 @@ CLASSES
      |      Args:
      |          branch (awkward.Array): The branch, such as trgsegs or crvcoincs
      |          vector_name: The parameter associated with the vector, such as 'mom' or 'pos'
+     |
+     |  ----------------------------------------------------------------------
+```
+
+</details>
+
+---
+
+#### `pylogger`
+
+Helper module for managing printouts across the `pyutils` suite.
+
+
+<details>
+<summary><strong>Click for details<strong></summary>
+
+    
+```
+NAME
+    pylogger
+
+CLASSES
+    builtins.object
+        Logger
+
+    class Logger(builtins.object)
+     |  Logger(verbosity=1, print_prefix='[pylogger]')
+     |
+     |  Helper class for consistent logging with emoji indicators
+     |
+     |  Methods defined here:
+     |
+     |  __init__(self, verbosity=1, print_prefix='[pylogger]')
+     |      Initialize the Logger
+     |
+     |      Args:
+     |          verbosity (int, opt): Level of output detail (0: errors only, 1: info, 2: max)
+     |          print_prefix (str, opt): Prefix for printouts, e.g. "[pyprocess]"
+     |
+     |  log(self, message, level_name=None)
+     |      Print a message based on verbosity level
+     |
+     |      Args:
+     |          message (str): The message to print
+     |          level (str, optional): Level name (error, info, success, warning, debug, max)
      |
      |  ----------------------------------------------------------------------
 ```

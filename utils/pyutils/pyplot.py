@@ -8,6 +8,8 @@ from scipy import stats
 from matplotlib.ticker import ScalarFormatter
 import matplotlib.colors as colors
 
+from pylogger import Logger
+
 class Plot:
     """ 
     Methods for creating various types of plots. It also includes methods 
@@ -20,8 +22,8 @@ class Plot:
         Initialise the Plot class.
         
         Args:
-            style_path (str, optional): Path to matplotlib style file. (Default: Mu2e style)
-            verbosity: Print detail level (0: minimal, 1: medium, 2: maximum) 
+            style_path (str, opt): Path to matplotlib style file. (Default: Mu2e style)
+            verbosity (int, opt): Level of output detail (0: errors only, 1: info & warnings, 2: max)
         """
         self.style_path = style_path
         self.verbosity = verbosity 
@@ -29,11 +31,14 @@ class Plot:
         if self.style_path is None:
             self.style_path = os.path.join(os.path.dirname(__file__), "mu2e.mplstyle")                   
         plt.style.use(self.style_path)
-        self.print_prefix = "[pyplot] "
 
-        if self.verbosity > 0:
-            print(f"{self.print_prefix}Initialised Plot with {self.style_path.rsplit('/', 1)[-1]} and verbosity = {self.verbosity}")
-  
+        self.logger = Logger( # Start logger
+            print_prefix = "[pyplot]", 
+            verbosity = verbosity
+        )
+
+        self.logger.log(f"Initialised Plot with {self.style_path.rsplit('/', 1)[-1]} and verbosity = {self.verbosity}", "info")
+
     def round_to_sig_fig(self, val, sf): 
         """
         Round a value to a specified number of significant figures.
@@ -172,7 +177,8 @@ class Plot:
         """
         # Input validation
         if array is None or len(array) == 0:
-            raise ValueError(f"{self.print_prefix}❌ Empty or None array passed to plot_1D")
+            self.logger.log(f"Empty or None array passed to plot_1D", "error")
+            return None
         
         # Create or use provided axes
         new_fig = False
@@ -240,12 +246,10 @@ class Plot:
         # Save
         if out_path:
             plt.savefig(out_path, dpi=dpi, bbox_inches='tight')
-            print(f"{self.print_prefix}✅ Wrote:\n\t{out_path}")
+            self.logger.log(f"Wrote:\n\t{out_path}", "success")
         # Show 
         if show: 
             plt.show()
-        # Clear memory
-        # plt.close() 
 
     def plot_1D_overlay(
         self,
@@ -292,9 +296,11 @@ class Plot:
         """
         # Input validation
         if not hists_dict:
-            raise ValueError("Empty or None histogram dictionary provided")
+            self.logger.log("Empty or None histogram dictionary provided", "error")
+            return None
         if weights is not None and len(weights) != len(hists_dict):
-            raise ValueError("Number of weight arrays does not match the number of histograms")
+            self.logger.log("Number of weight arrays does not match the number of histograms", "error")
+            return None
 
         # Create or use provided axes
         new_fig = False
@@ -342,14 +348,11 @@ class Plot:
         # Save if output path provided
         if out_path:
             plt.savefig(out_path, dpi=dpi, bbox_inches="tight")
-            print(f"{self.print_prefix}✅  Wrote:\n\t{out_path}")
+            self.logger.log(f"Wrote:\n\t{out_path}", "success")
         # Show 
         if show:
             plt.show()
-            
-        # Clear memory
-        # plt.close()
-  
+
     def plot_2D(
         self,
         x,
@@ -420,9 +423,11 @@ class Plot:
 
         # Validate inputs
         if len(x) == 0 or len(y) == 0:
-            raise ValueError("Input arrays are empty")
+            self.logger.log("Input arrays are empty", "error")
+            return None
         if len(x) != len(y):
-            raise ValueError("Input arrays have different lengths")
+            self.logger.log("Input arrays have different lengths", "error")
+            return None
         
         # Create or use provided axes
         new_fig = False
@@ -480,16 +485,13 @@ class Plot:
 
         # Save if path provided
         if out_path:
-            plt.savefig(out_path, dpi=dpi, bbox_inches='tight')
-            print(f"{self.print_prefix}✅  Wrote:\n\t{out_path}")
+            plt.savefig(out_path, dpi=dpi, bbox_inches="tight")
+            self.logger.log(f"Wrote:\n\t{out_path}", "success")
 
         # Show if requested
         if show:
             plt.show()
-          
-        # Clear memory
-        # plt.close()
-    
+
     def plot_graph(
         self,
         x,
@@ -541,7 +543,8 @@ class Plot:
         """
         # Input validation
         if len(x) != len(y):
-            raise ValueError("x and y arrays must have the same length")
+            self.logger.log("Input arrays have different lengths", "error")
+            return None
 
         # Create or use provided axes
         new_fig = False
@@ -591,14 +594,11 @@ class Plot:
         # Save if path provided
         if out_path:
             plt.savefig(out_path, dpi=dpi, bbox_inches='tight')
-            print(f"{self.print_prefix}✅  Wrote:\n\t{out_path}")
+            self.logger.log(f"Wrote:\n\t{out_path}", "success")
 
         # Show if requested
         if show:
             plt.show()
-        
-        # Clear memory
-        # plt.close()
   
     def plot_graph_overlay(
         self,
@@ -662,12 +662,15 @@ class Plot:
         for label, graph_data in graphs.items():
             # Validate graph data
             if not isinstance(graph_data, dict):
-                raise ValueError(f"{self.print_prefix}❌ Graph data for {label} must be a dictionary")
+                self.logger.log(f"Graph data for {label} must be a dictionary", "error")
+                return None
             if 'x' not in graph_data or 'y' not in graph_data:
-                raise ValueError(f"{self.print_prefix}❌ Graph data for {label} must contain 'x' and 'y' arrays")
+                self.logger.log(f"Graph data for {label} must contain 'x' and 'y' arrays", "error")
+                return None 
             if len(graph_data['x']) != len(graph_data['y']):
-                raise ValueError(f"{self.print_prefix}❌ X and Y arrays for {label} must have same length")
-          
+                self.logger.log(f"X and Y arrays for {label} must have same length", "error")
+                return None 
+                
         # Get data
         x = graph_data['x']
         y = graph_data['y']
@@ -718,11 +721,8 @@ class Plot:
         # Save if path provided
         if out_path:
             plt.savefig(out_path, dpi=dpi, bbox_inches='tight')
-            print(f"{self.print_prefix}✅  Wrote:\n\t{out_path}")
+            self.logger.log(f"Wrote:\n\t{out_path}", "success")
 
         # Show 
         if show:
             plt.show()
-          
-        # Clear memory
-        # plt.close()

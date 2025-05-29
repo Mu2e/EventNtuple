@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import awkward as ak
+from pylogger import Logger
 
 class Print:
     """
@@ -17,9 +18,13 @@ class Print:
         """ 
         self.verbose = verbose  
         self.precision = precision
-        self.print_prefix = "[pyprint] "
 
-        print(f"{self.print_prefix}Initialised Print with verbose = {self.verbose} and precision = {self.precision}")
+        self.logger = Logger( # Start logger
+            print_prefix = "[pyprint]", 
+            verbosity = 1
+        )
+
+        self.logger.log(f"Initialised Print with verbose = {self.verbose} and precision = {self.precision}", "info")
 
     def _set_precision(self, value):
         """
@@ -62,7 +67,7 @@ class Print:
                         # Format the values with specified precision
                         value = self._set_precision(value)
                     except Exception as e:
-                        print(f"{self.print_prefix}❌ Exception on {full_field}: {e}")
+                        self.logger.log(f"Exception on {full_field}: {e}", "error")
                 # Print array 
                 print(f"{full_field}: {value}")
     
@@ -94,7 +99,8 @@ class Print:
           field2.subfield1: value
           -------------------------------------------------------------------------------------
         """
-        print(f"\n{self.print_prefix}---> Printing {n_events} event(s)...\n")
+        self.logger.log(f"Printing {n_events} event(s)...\n", "info")
+        
         for i, event in enumerate(array, start=1): # Iterate event-by-event 
             print("-"*85)
             self.print_event(event) # Call self.print_event() 

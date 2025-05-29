@@ -1,17 +1,20 @@
 import uproot
 import awkward as ak
 from pyread import Reader
-from pyprocess import Processor
+from pylogger import Logger
 
 class Importer:
-    """High-level interface for importing branches from files and datasets"""
+    """Utility class for importing branches from ROOT TTree files
+
+    Intended to used via by the pyprocess Processor class
+    """
     
-    def __init__(self, dir_name="EventNtuple", tree_name="ntuple", 
-                 use_remote=False, location="tape", schema="root", 
-                 verbosity=1):
+    def __init__(self, file_name, branches, dir_name="EventNtuple", tree_name="ntuple", use_remote=False, location="tape", schema="root", verbosity=1):
         """Initialise the importer
         
         Args:
+            file_name: Name of the file
+            branches: Flat list or grouped dict of branches to import
             dir_name: Ntuple directory in file 
             tree_name: Ntuple name in file directory
             use_remote: Flag for reading remote files 
@@ -19,190 +22,101 @@ class Importer:
             schema: Remote files only. Schema used when writing the URL: root (default), http, path, dcap, samFile
             verbosity: Print detail level (0: minimal, 1: medium, 2: maximum) 
         """
+        self.file_name = file_name
+        self.branches = branches
         self.dir_name = dir_name
         self.tree_name = tree_name
         self.use_remote = use_remote
         self.location = location
         self.schema = schema
-        self.verbosity = verbosity 
+        self.verbosity = verbosity
 
-        # Create reader and processor only when needed
-        self.reader = None
-        self.processor = None
-        
-        # Print prefix
-        self.print_prefix = "[pyimport] "
-        
-        # Confirm init
-        if verbosity > 0:
-            print(f"{self.print_prefix}Initialised Importer with path '{dir_name}/{tree_name}' and verbosity={self.verbosity}") 
-        
-    def _get_array(self, file_name, branches=None, quiet=False):
+        self.logger = Logger( # Start logger
+            print_prefix = "[pyimport]", 
+            verbosity = verbosity
+        )
     
-        """Process file and extract specified branches
+        # Create reader 
+        self.reader = Reader(
+            use_remote=self.use_remote,
+            location=self.location,
+            schema=self.schema,
+            verbosity=self.verbosity 
+        )
         
-            This is the core function that actually extracts the data
-        """
-    
-        try:
-            # Open the file
-            file = self.reader.read_file(file_name)
+    def import_branches(self):
+        """Internal function to open ROOT file and import specified branches
             
+        Returns:
+            Awkward array with imported data
+        """
+
+        # Get uproot object
+        # Init file variable before try block
+        # Reader has it's own try blocks
+        file = self.reader.read_file(self.file_name) 
+        
+        try:
             # Access the tree
             if self.dir_name in file and self.tree_name in file[self.dir_name]:
                 # Get tree
                 tree = file[self.dir_name][self.tree_name]
                 # Print tree info 
-                if self.verbosity > 1 and not quiet:
-                    print(f"{self.print_prefix} Accessing branches in tree:")
-                    tree.show(filter_name=branches, interpretation_width=100)
+                self.logger.log("Accessing branches in tree:", "max")
+                if self.verbosity > 1:
+                    tree.show(filter_name=self.branches, interpretation_width=100)
                 
-                # Get array for specifed branches 
+                # Result container
                 result = {}
 
-                if branches is None: 
-                    print(f"{self.print_prefix}❌ Please provide a list of branches, or branches='*' to import all") 
+                if self.branches is None: 
+                    self.logger.log("Please provide a list of branches, or self.branches='*' to import all", "error")
                     return None
         
                 # Flat list
-                elif isinstance(branches, list):
-                    result = tree.arrays(filter_name=branches, library="ak")
+                elif isinstance(self.branches, list):
+                    result = tree.arrays(filter_name=self.branches, library="ak")
         
                 # Grouped dictionary
-                elif isinstance(branches, dict):
+                elif isinstance(self.branches, dict):
                     data = {}
                     # Get arrays per field/group
-                    for group, sub_branches in branches.items():
+                    for group, sub_branches in self.branches.items():
                         data[group] = tree.arrays(filter_name=sub_branches, library="ak")
                     # Zip them together 
                     result = ak.zip(data) 
         
                 # If using "*" get all branches
-                elif branches == "*":
-                    branches = [branch for branch in tree.keys()] 
-                    if self.verbosity > 0:
-                        print(f"{self.print_prefix} Importing all branches")
+                elif self.branches == "*":
+                    self.branches = [branch for branch in tree.keys()] 
+                    self.logger.log("Importing all branches", "info")
                     # Return array 
-                    result = tree.arrays(filter_name=branches, library="ak")
+                    result = tree.arrays(filter_name=self.branches, library="ak")
                     
                 else: 
-                    print(f"{self.print_prefix}❌ Branches type {branches.type} not recognised") 
+                    self.logger.log(f"Branches type {self.branches.type} not recognised", "error")
                     return None
+                
+                if result is not None:
+                    self.logger.log(f"Imported branches", "success")
+                    self.logger.log(f"Array structure:", "max")
+                    if self.verbosity > 1:
+                        result.type.show()
+                else:
+                    self.logger.log(f"Failed to import branches", "error")           
 
-                # Close file
-                file.close()
                 # Return
                 return result
                 
             else:
-                print(f"{self.print_prefix}❌ Could not find tree {self.dir_name}/{self.tree_name} in file {file_name}")
+                self.logger.log(f"Could not find tree {self.dir_name}/{self.tree_name} in file {self.file_name}", "error")
                 return None
     
         except Exception as e:
-            print(f"{self.print_prefix}❌ Error getting branches in file {file_name}: {e}")
-            return None
-    
-    def import_file(self, file_name, branches=None, quiet=False): 
-        """Import branches from a single file 
-        
-        Args:
-            file_name: Path to the file
-            branches: Flat list or grouped dict of branches to import
-            quiet: limit verbosity if calling from import_dataset
-            
-        Returns:
-            Awkward array with imported data
-        """
-        
-        # Initialise reader instance 
-        self.reader = Reader(
-            use_remote=self.use_remote,
-            location=self.location,
-            schema=self.schema,
-            verbosity=0 # Reduce verbosity for multiprocess
-        )
-
-        # Result container
-        result = {}
-
-        # Get the branches 
-        result = self._get_array(
-            file_name,
-            branches=branches,
-            quiet=quiet # Reduce verbosity for multiprocess
-        )
-        
-        if result is not None:
-            if self.verbosity > 0 and not quiet:
-                print(f"{self.print_prefix}✅ Imported branches")
-            if self.verbosity > 1 and not quiet:
-                print(f"{self.print_prefix} Array structure:")
-                result.type.show()
-        else:
-            print(f"{self.print_prefix}❌ Failed to import branches")
-            
-        return result
-
-    def import_dataset(self, defname=None, file_list_path=None, branches=None, max_workers=None):
-        """Import branches from a SAM definition or a file list
-        
-        Wraps import_file in a process function and sends it to Processor
-        
-        Args:
-            defname: SAM definition name
-            file_list: file list path
-            branches: Flat list or grouped dict of branches to import
-            max_workers: Maximum number of parallel workers
-            
-        Returns:
-            Concatenated awkward array with imported data from all files
-        """
-
-        # Check inputs
-        if bool(defname is None) == bool(file_list_path is None): # Both None or both have values
-            print(f"{self.print_prefix}❌ Please provide exactly one of 'defname' or 'file_list'")
+            self.logger.log(f"Exception getting branches in file {self.file_name}: {e}", "error")
             return None
 
-        # Initialise processor 
-        processor = Processor(verbosity=self.verbosity) 
-        
-        # Prepare file list
-        file_list = []
-        if defname: 
-            # Get file list from SAM definition
-            file_list = processor.get_file_list(defname=defname)
-        elif file_list_path: 
-            # Get file list from file list path 
-            file_list = processor.get_file_list(file_list_path=file_list_path)
-
-        # Wrap import_file() in process function
-        def process_func(file_name):
-            return self.import_file(
-                file_name=file_name,
-                branches=branches,
-                quiet=True
-            )
-
-        # Get list of arrays 
-        arrays = processor.process_files_parallel(
-            file_list,
-            process_func,
-            max_workers=max_workers
-        )
-
-        # Concatenate them
-        result = ak.concatenate(arrays)
-
-        if result is not None:
-            if self.verbosity > 0:
-                print(f"{self.print_prefix}✅ Returning concatenated array containing {len(result)} events")
-            if self.verbosity > 1:
-                print(f"{self.print_prefix}Array structure:")
-                result.type.show()
-        else:
-            print(f"{self.print_prefix}❌ Concatenated array is None: failed to import branches")
-        
-        if len(result) == 0:
-            print(f"{self.print_prefix}⚠️ No events found in array")
-            
-        return result
+        finally:
+            # Ensure the file is closed
+            if hasattr(file, "close"):
+                file.close()
