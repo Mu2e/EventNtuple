@@ -18,7 +18,10 @@
 
 RooUtil is a utility class to help analyze the EventNtuple in ROOT-based analysis frameworks. It handles all the ROOT and provides user-friendly classes that allow for coherent looping through parallel branches.
 
-This documentation contains quick references. A thorough set of tutorial exercises are in the [Tutorial repo](https://github.com/Mu2e/Tutorial/AnalysisTools/)
+This documentation contains quick references. For additional help:
+
+* see the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial)
+* look at the [example ROOT macros](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples)
 
 ## ```RooUtil``` Class
 The constructor takes two arguments:
@@ -149,7 +152,7 @@ Many cuts are already available in ```common_cuts.hh`` and can be easiliy listed
 rooutilhelper --list-available-cuts
 ```
 
-Feel free to add to common_cuts.hh. Some notes on the file:
+Feel free to add to common_cuts.hh and put in a pull request on GitHub. Some notes on the file:
 * We use the following special characters for the cuts to be printed nicely with ```rooutilhelper```:
    * ```//+``` gives the cut section heading
    * ```bool function_name(args) // explanation``` ensures the cut name has an explanation printed too
