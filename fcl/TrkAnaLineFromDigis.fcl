@@ -70,8 +70,8 @@ services.GeometryService.bFieldFile: "Offline/Mu2eG4/geom/bfgeom_no_field.txt"
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
 # restrict reco to just KKLine
-physics.producers.SelectRecoMC.KalSeedCollections  : ["KKLine"]
-physics.producers.SelectRecoMC.HelixSeedCollections  : []
+physics.producers.SelectReco.KalSeedCollections  : ["KKLine"]
+physics.producers.SelectReco.HelixSeedCollections  : []
 # since this is a diagnostic test, save failed fits as well
 physics.producers.KKLine.ModuleSettings.SaveAllFits : true
 
