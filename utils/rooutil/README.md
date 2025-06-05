@@ -18,7 +18,7 @@
 
 RooUtil is a utility class to help analyze the EventNtuple in ROOT-based analysis frameworks. It handles all the ROOT and provides user-friendly classes that allow for coherent looping through parallel branches.
 
-This documentation contains quick references. A thorough set of tutorial exercises are in the [Tutorial repo](https://github.com/Mu2e/Tutorial/AnalysisTools/)
+This documentation contains quick references. For a tutorial see the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial)
 
 ## ```RooUtil``` Class
 The constructor takes two arguments:
