@@ -121,3 +121,8 @@ As an example, let's discuss the track fits. In each event the reconstruction wi
 ### Complicated Inter-Branch Relations
 
 In this example, the ```trk``` branch and the outer vector of the ```trkhits``` branch have the same length so they correspond 1:1 with each other. However, this is not generally true for all branches. For example, the ```trkhits``` and ```trkhitsmc``` have different lengths because the reconstruction sometimes misses a true a hit. To hide these complications from analyzers we have RooUtil and pyutils, which you will learn about in the next exercises of the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial).
+
+## Conclusion
+You should now be able to:
+* describe the difference between single-object branches, vector branches, and vector-of-vector branches, and
+* find the leaf and branch definitions using either ```ntuplehelper``` or GitHub
