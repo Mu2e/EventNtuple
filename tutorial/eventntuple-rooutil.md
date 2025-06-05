@@ -14,7 +14,7 @@ Each section in this tutorial gives you a small skeleton macro and then a few ch
 <details>
 <summary>Hint</summary>
 
-your first hint is that there are various places to find help for RooUtil:
+there are a few places to get additional help as you work through these challenges:
 * the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
 * the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
 * the #analysis-tools Slack channel
@@ -23,7 +23,7 @@ your first hint is that there are various places to find help for RooUtil:
 
 
 ## Setting Up
-In this tutorial, should set up your working area like so:
+In this tutorial, you should set up your working area like so:
 
 ```
 cd /to/a/new/working/area/
@@ -278,3 +278,8 @@ see [ROOT documentation on files](https://root.cern/manual/root_files/)
 </details>
 
 Additional Challenge #3: Plot variables from the ```CrvCoinc``` class. Can you find a ```CrvCoinc``` close in time to a ```Track```?
+<details>
+<summary>Hint</summary>
+
+see the quick reference README section on [```CrvCoinc```](../utils/rooutil/README.md#The-CrvCoinc-Class).
+</details>
