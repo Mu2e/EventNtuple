@@ -1,7 +1,3 @@
-# EventNtuple Tutorial
+# EventNtuple Tutorials for the Analysis Tools Tutorial
 
-This repository contains two tutorials:
-* [EventNtuple Basics](eventntuple-basics.md), and
-* [RooUtil](eventntuple-rooutil.md)
-
-These are part of the Analysis Tools Tutorials. We advise you to start [there](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial)
+This repository contains two tutorials that are part of the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial). We recommend that you start there.
