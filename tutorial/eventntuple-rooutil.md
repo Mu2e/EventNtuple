@@ -248,15 +248,20 @@ Challenge #1: Plot the reconstructed momentum of tracks at the middle of the tra
 use ```rooutilhelper --list-available-cuts``` to find a suitable common cut
 </details>
 
-Challenge #2: Plot the momentum resolution of tracks
+Challenge #2: Plot the momentum resolution of tracks (i.e. the difference between the reconstructed momentum and MC-truth momentumum)
 <details>
 <summary>Hint</summary>
 
 you will need to make sure that the ```TrackSegment``` has both a reconstructed step and a MC-truth step using the common cut functions
 </details>
 
-## Final Challenges
-Here are a few additional challenges for those who are interested:
+## Conclusion
+This tutorial hasn't covered every single class in RooUtil but hopefully it has shown you how to:
+* analyze EventNtuple datasets,
+* select subsets of the data, and
+* create histograms of selected data.
+
+For those that want to explore more, here are a few additional challenges:
 
 Additional Challenge #1: Plot the starting position of the parents of particles that create tracks in the tracker
 <details>
@@ -273,9 +278,3 @@ see [ROOT documentation on files](https://root.cern/manual/root_files/)
 </details>
 
 Additional Challenge #3: Plot variables from the ```CrvCoinc``` class. Can you find a ```CrvCoinc``` close in time to a ```Track```?
-
-## Conclusion
-You should now be able to:
-* analyze EventNtuple datasets,
-* select subsets of the data, and
-* create histograms of selected data.
