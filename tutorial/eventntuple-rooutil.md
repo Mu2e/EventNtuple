@@ -68,8 +68,7 @@ void EventLoop() {
 
 where ```filename``` can be the name of a single ROOT file containing an EventNtuple, or the name of a file list containing the names of many ROOT files.
 
-Here are a few things to try in this script:
-* printing the event ID of each event to the terminal
+Challenge #1: Print the event ID of each event to the terminal
 
 <details>
 <summary>Hint</summary>
@@ -77,12 +76,45 @@ Here are a few things to try in this script:
 use ```ntuplehelper``` to look at the ```evtinfo``` branch
 </details>
 
+Challenge #2: Plot the event ID of each event into a histogram
 
-## Plotting an Event-Level Variable
+<details>
+<summary>Hint</summary>
 
-## Cutting
+use ROOT's [histogram class](https://root.cern/manual/histograms/)
+</details>
+
+Challenge #3: Plot only on the odd-numbered event IDs into a histogram and raw it on the same set of axes as the histogram in Challenge #2
+
+<details>
+<summary>Hint</summary>
+
+use the ```"HIST SAME"``` histogram [drawing option](https://root.cern/manual/histograms/#drawing-options)
+</details>
+
 
 ## Analyzer-Friendly Classes: ```Tracks```, ```TrackSegments``` etc.
+
+```
+#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+
+void TrackLoop() {
+   std::string filename = "name-of-file-list";
+   RooUtil util(filename);
+
+   // Loop through the events
+   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
+      auto& event = util.GetEvent(i_event);
+
+      const auto& tracks = event.GetTracks();
+      for (const auto& track : tracks) {
+      	  track.branchname->leafname;
+      }
+   }
+}
+```
+where ```branchname``` and ```leafname``` are the same as [Track class](../utils/rooutil/README.md#The-Track-Class)
+
 
 
 ## Places to find help
