@@ -9,6 +9,24 @@ By the end of this tutorial, you will be able to:
 * describe the difference between single-object branches, vector branches, and vector-of-vector branches, and
 * find the leaf and branch definitions using either ```ntuplehelper``` or GitHub
 
+## Setting Up
+In this tutorial, you have a choice between using ROOT and python. Choose now.
+
+If you chose ROOT, do the following:
+
+```
+cd /to/a/new/working/area/
+mu2einit
+muse setup Analysis
+```
+
+If you chose python, do the following:
+
+```
+cd /to/a/new/working/area
+mu2einit
+pyenv ana
+```
 
 ## Accessing the EventNtuple
 Because the EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html), it can be accessed in either ROOT or python like any other TTree.
@@ -32,11 +50,11 @@ setup dhtools
 samListLocations -d --defname=nts.name.of.dataset.root > filelist.txt
 ```
 
-If you have authentication errors then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
+Check the contents of ```filelist.txt```. If it is empty, then pick another dataset. If you have authentication errors, then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
 
 ### Printing the EventNtuple
 
-You can print the branches and leaves of the EventNtuple in your file in ROOT or python.
+You can print the branches and leaves of the EventNtuple in ROOT or python. From your ```filelist.txt` pick a single file and use it in the following:
 
 * in ROOT:
 
@@ -49,9 +67,10 @@ ntuple->Print()
 * in python:
 
 ```
-import uproot
-ntuple = uproot.open(filename+":EventNtuple/ntuple")
-ntuple.show()
+python
+>>> import uproot
+>>> ntuple = uproot.open("/path/to/nts.root:EventNtuple/ntuple")
+>>> ntuple.show()
 ```
 
 That's a lot of branches! But what do they _mean_?
@@ -70,6 +89,8 @@ ntuplehelper branch.*
 
 * in python
 ```
+muse setup Analysis
+python
 >>> import ntuplehelper
 >>> nthelper = ntuplehelper.nthelper()
 >>> nthelper.whatis("branch.*")
