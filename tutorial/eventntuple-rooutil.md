@@ -1,4 +1,4 @@
-# Analyzing the EventNtuple with RooUtil (Draft)
+# Analyzing the EventNtuple with RooUtil
 
 ## Introduction
 RooUtil offers an analyzer-friendly interface to EventNtuple for ROOT-based analyses. RooUtil handles the relationships between branches. The idea is that you use RooUtil to loop through the EventNtuple and select the specific events/tracks/etc that you need for your analysis and put them into ROOT histograms / ntuples / RDataFrames.
@@ -9,7 +9,18 @@ By the end of this tutorial, you will be able to:
 * select subsets of the data, and
 * create histograms of selected data.
 
-Quick reference information about RooUtil is in the EventNtuple repository [here](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
+Each section in this tutorial gives you a small skeleton macro and then a few challenges that you should use to fill out the skeleton. Most challenges also provide a hints that you can show by clicking the arrow:
+
+<details>
+<summary>Hint</summary>
+
+your first hint is that there are various places to find help for RooUtil:
+* the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
+* the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
+* the #analysis-tools Slack channel
+
+</details>
+
 
 ## Setting Up
 In this tutorial, should set up your working area like so:
@@ -109,8 +120,8 @@ void TrackLoop() {
    for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
       auto& event = util.GetEvent(i_event);
 
-      const auto& tracks = event.GetTracks();
-      for (const auto& track : tracks) {
+      auto tracks = event.GetTracks();
+      for (auto& track : tracks) {
       	  track.branchname->leafname;
       }
    }
@@ -143,17 +154,57 @@ look at the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/roout
 </details>
 
 ## Selecting Tracks
-There will be multiple track fits in each event. At the moment, we are plotting information from all of them.
+There will be multiple track fits in each event. At the moment, we are plotting information from all of them and so we need to select which ones we want to analyze. There are a some common cuts already defined in a header file that you can ```#include``` in your macro.
+
+In a new ROOT macro named ```TrackCutLoop.C```, you can do the following:
+
+```
+#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+
+void TrackCutLoop() {
+   std::string filename = "name-of-file-list";
+   RooUtil util(filename);
+
+   // Loop through the events
+   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
+      auto& event = util.GetEvent(i_event);
+
+      auto tracks = event.GetTracks(common_cut_function_name);
+      for (auto& track : tracks) {
+      	  track.branchname->leafname;
+      }
+   }
+}
+```
+
+where ```common_cut_function_name``` is the name of a function in ```common_cuts.hh```. You can get a list of these cuts with the ```rooutilhelper``` like so:
 
 ```
 rooutilhelper --list-available-cuts
 ```
 
+To use the common cuts, the macro should be compiled like so:
+
+```
+root -l TrackCutLoop.C++
+```
+
 Challenge #1: Plot the number of hits in track fits that used the e-minus particle hypothesis
+<details>
+<summary>Hint</summary>
+
+use ```rooutilhelper --list-available-cuts``` to find a suitable common cut
+</details>
 
 Challenge #2: Plot the number of hits in track fits that are travelling downstream
+<details>
+<summary>Hint</summary>
 
-Challenge #3: Select tracks that are **both** downstream and used the e-minus particle hypothesis
+use ```rooutilhelper --list-available-cuts``` to find a suitable common cut. You might notice there are two: use the one related to ```Track```
+</details>
+
+Challenge #3: Plot the number of hits in track fits that are **both** travelling downstream and used the e-minus particle hypothesis
 
 <details>
 <summary>Hint</summary>
@@ -162,7 +213,47 @@ look at the section in the quick reference README on [combining cut functions](.
 </details>
 
 ## Plotting Track Momentum with ```TrackSegment``` Class
+What we actually want to measure in Mu2e is the momentum of particles. Our reconstruction algorithm doesn't give us one momentum per track because it can account for changes in momentum as the particle travels downstream and passes through material. We store the momentum of particles at various surfaces along the track in  ```TrackSegments```.
 
+```
+#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+
+void TrackSegmentLoop() {
+   std::string filename = "name-of-file-list";
+   RooUtil util(filename);
+
+   // Loop through the events
+   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
+      auto& event = util.GetEvent(i_event);
+
+      auto tracks = event.GetTracks(common_cut_function_name);
+      for (auto& track : tracks) {
+          auto track_segments = track.GetSegments(common_cut_function_name);
+	  for (auto& track_segment : track_segments) {
+	    track_segment.branchname->leafname;
+	  }
+      }
+   }
+}
+```
+where the ```branchname``` and ```leafname``` can only be those that are available in the [```TrackSegment``` class](../utils/rooutil/README.md#The-TrackSegment-Class).
+
+Here we need to be careful because not all tracks will have a reconstructed track segment at every surface so we need to use the ```has_reco_step()``` common cut function when we get tracker segments
+
+Challenge #1: Plot the reconstructed momentum of tracks at the middle of the tracker
+<details>
+<summary>Hint</summary>
+
+use ```rooutilhelper --list-available-cuts``` to find a suitable common cut
+</details>
+
+Challenge #2: Plot the momentum resolution of tracks
+<details>
+<summary>Hint</summary>
+
+you will need to make sure that the ```TrackSegment``` has both a reconstructed step and a MC-truth step using the common cut functions
+</details>
 
 ## Final Challenges
 Here are a few additional challenges for those who are interested:
@@ -171,7 +262,7 @@ Additional Challenge #1: Plot the starting position of the parents of particles 
 <details>
 <summary>Hint</summary>
 
-use the ```trkmcsim``` branch which contains the MC-truth genealogy from the simulation
+use the ```trkmcsim``` branch in the ```Track``` class. The ```trkmcsim``` branch contains the MC-truth genealogy from the simulation
 </details>
 
 Additional Challenge #2: Write your histograms to an output ROOT file. (This will save you from having to run over all the data whenever you want to either make cosmetic changes to the histogram or use it for additional analysis / fitting)
@@ -181,10 +272,10 @@ Additional Challenge #2: Write your histograms to an output ROOT file. (This wil
 see [ROOT documentation on files](https://root.cern/manual/root_files/)
 </details>
 
-Additional Challenge #3: Plot variables from the ```CrvCoinc``` class
+Additional Challenge #3: Plot variables from the ```CrvCoinc``` class. Can you find a ```CrvCoinc``` close in time to a ```Track```?
 
-## Places To Find Help
-There are various places to find help for RooUtil:
-* the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
-* the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
-* the #analysis-tools Slack channel
+## Conclusion
+You should now be able to:
+* analyze EventNtuple datasets,
+* select subsets of the data, and
+* create histograms of selected data.
