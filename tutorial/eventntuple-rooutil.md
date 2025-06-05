@@ -1,39 +1,53 @@
 # Analyzing the EventNtuple with RooUtil (Draft)
 
 ## Introduction
-RooUtil offers an analyzer-friendly interface to EventNtuple for ROOT-based analyses.
+RooUtil offers an analyzer-friendly interface to EventNtuple for ROOT-based analyses. RooUtil handles the relationships between branches. The idea is that you use RooUtil to loop through the EventNtuple and select the specific events/tracks/etc. that you need for your analysis and put them into ROOT histograms / ntuples / RDataFrames. 
 
 ## Learning Objectives
 By the end of this tutorial, you will be able to:
 * analyze EventNtuple datasets,
 * select subsets of the data, and
-* create histograms of selected data
+* create histograms of selected data.
 
 Quick reference information about RooUtil is in the EventNtuple repository [here](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
 
-
-## Setting Up
-We will create a ROOT macro to make plots.
+## Loading an EventNtuple Dataset
+RooUtil is easy to set up. Once you have a list of EventNtuple files (see instructions [here](./eventntuple-basics.md#Getting-a-list-of-EventNtuple-files)), you can set up RooUtil in a ROOT macro like so:
 
 ```
 #include "EventNtuple/utils/rooutil/RooUtil.hh"
 
-void MacroName() {
-   std::string filename = "name-of-file"; // see below
+void LoadRooUtil() {
+   std::string filename = "name-of-file-list";
+   RooUtil util(filename);
+   std::cout << filename << " has " << util.GetNEvents() << " events" << std::endl;
+}
+```
+
+(Technical detail: RooUtil is loading the data into a [ROOT TChain](https://root.cern.ch/doc/master/classTChain.html))
+
+## The ```Event``` Class
+All the branches in the EventNtuple can be accessed with the [```Event``` class](../utils/rooutil/README.md#The-Event-Class).
+
+```
+#include "EventNtuple/utils/rooutil/RooUtil.hh"
+
+void EventLoop() {
+   std::string filename = "name-of-file";
    RooUtil util(filename);
 
    // Loop through the events
    for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
       auto& event = util.GetEvent(i_event);
-      
+      event.branchname->leafname;
    }
 }
 ```
 
-where ```filename``` can be the name of a single ROOT file containing an EventNtuple, or the name of a filelist containing the names of many ROOT files.
+where ```filename``` can be the name of a single ROOT file containing an EventNtuple, or the name of a file list containing the names of many ROOT files. (Follow instructions  to get a file list)
 
-## The ```Event``` Class
-All the branches in the EventNtuple can be
+* Try printing the event id
+
 
 ## Plotting an Event-Level Variable
 
@@ -41,4 +55,9 @@ All the branches in the EventNtuple can be
 
 ## Analyzer-Friendly Classes: ```Tracks```, ```TrackSegments``` etc.
 
-## Creating Ntuples?
+
+## Places to find help
+There are various places to find help for RooUtil:
+* the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
+* the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
+* the #analysis-tools Slack channel
