@@ -136,14 +136,52 @@ the reconstructed information is in the ```trkmc``` branch
 
 Challenge #3: Plot the number of hits on the MC-truth track against the number of hits on the reconstructed track in a 2D histogram
 
-## Selecting Tracks
+<details>
+<summary>Hint</summary>
 
+look at the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples)
+</details>
+
+## Selecting Tracks
+There will be multiple track fits in each event. At the moment, we are plotting information from all of them.
+
+```
+rooutilhelper --list-available-cuts
+```
+
+Challenge #1: Plot the number of hits in track fits that used the e-minus particle hypothesis
+
+Challenge #2: Plot the number of hits in track fits that are travelling downstream
+
+Challenge #3: Select tracks that are **both** downstream and used the e-minus particle hypothesis
+
+<details>
+<summary>Hint</summary>
+
+look at the section in the quick reference README on [combining cut functions](../utils/rooutil/README.md#Combining-Cut-Functions)
+</details>
 
 ## Plotting Track Momentum with ```TrackSegment``` Class
 
 
 ## Final Challenges
+Here are a few additional challenges for those who are interested:
 
+Additional Challenge #1: Plot the starting position of the parents of particles that create tracks in the tracker
+<details>
+<summary>Hint</summary>
+
+use the ```trkmcsim``` branch which contains the MC-truth genealogy from the simulation
+</details>
+
+Additional Challenge #2: Write your histograms to an output ROOT file. (This will save you from having to run over all the data whenever you want to either make cosmetic changes to the histogram or use it for additional analysis / fitting)
+<details>
+<summary>Hint</summary>
+
+see [ROOT documentation on files](https://root.cern/manual/root_files/)
+</details>
+
+Additional Challenge #3: Plot variables from the ```CrvCoinc``` class
 
 ## Places To Find Help
 There are various places to find help for RooUtil:

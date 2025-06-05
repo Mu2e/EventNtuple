@@ -152,7 +152,7 @@ Many cuts are already available in ```common_cuts.hh`` and can be easiliy listed
 rooutilhelper --list-available-cuts
 ```
 
-Feel free to add to common_cuts.hh. Some notes on the file:
+Feel free to add to common_cuts.hh and put in a pull request on GitHub. Some notes on the file:
 * We use the following special characters for the cuts to be printed nicely with ```rooutilhelper```:
    * ```//+``` gives the cut section heading
    * ```bool function_name(args) // explanation``` ensures the cut name has an explanation printed too
