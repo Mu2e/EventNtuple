@@ -93,7 +93,10 @@ use the ```"HIST SAME"``` histogram [drawing option](https://root.cern/manual/hi
 </details>
 
 
-## Analyzer-Friendly Classes: ```Tracks```, ```TrackSegments``` etc.
+## Plotting Track Variables with the ```Track``` Class
+We can access every single branch through the ```Event``` class. However, as described in [EventNtuple Basics](./eventntuple-basics#Complicated-Inter-Branch-Relations) some branches are related to each other and are meant to be looped through coherently. In RooUtil, analyzer-friendly classes are available to handle these relationships.
+
+Here we will look at the ```Track``` class. In a new ROOT macro named ```TrackLoop.C```, you can loop through all the tracks in all the events like so:
 
 ```
 #include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
@@ -113,11 +116,36 @@ void TrackLoop() {
    }
 }
 ```
-where ```branchname``` and ```leafname``` are the same as [Track class](../utils/rooutil/README.md#The-Track-Class)
+where ```branchname``` and ```leafname``` are the same as in the EventNtuple. Howver, only track-related branches are available. These branches are listed in the quick-reference README [here](../utils/rooutil/README.md#The-Track-Class).
+
+Challenge #1: Plot the number of hits on the reconstructed track in a histogram
+
+<details>
+<summary>Hint</summary>
+
+the reconstructed information is in the ```trk``` branch
+</details>
+
+Challenge #2: Plot the number of hits on the MC-truth track in a histogram
+
+<details>
+<summary>Hint</summary>
+
+the reconstructed information is in the ```trkmc``` branch
+</details>
+
+Challenge #3: Plot the number of hits on the MC-truth track against the number of hits on the reconstructed track in a 2D histogram
+
+## Selecting Tracks
 
 
+## Plotting Track Momentum with ```TrackSegment``` Class
 
-## Places to find help
+
+## Final Challenges
+
+
+## Places To Find Help
 There are various places to find help for RooUtil:
 * the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
 * the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
