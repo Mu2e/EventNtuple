@@ -106,21 +106,16 @@ The structure of the EventNtuple is complex due to the reality of our data. Each
 
 ### Single-Object, Vector, and Vector-of-Vector Branches
 
-You might have noticed when the list of all branches was printed was that some branches were described as "single-object" branches, some where described as "vector" branches, and the rest were described as "vector of vector" branches.
-* a single-object branch contains information that describes a single event (e.g. event ID, total number of hits in the tracker)
-* a vector branch contains a list of multiple objects that are in the same event (e.g. information about multiple track fits)
-* a vector-of-vector branch contains a list of objects
+You might have noticed when printing branches with ```ntuplehelper```, that some branches were described as "single-object" branches, some where described as "vector" branches, and the rest were described as "vector of vector" branches. The definitions of these are:
+* a single-object branch contains information that describes a single event
+* a vector branch contains a list of multiple objects that are in the same event
+* a vector-of-vector branch contains a list of list of objects
 
-### Some Examples
+As an example, let's discuss the track fits. In each event the reconstruction will attempt multiple track fits to the same set of hits in the tracker. Each of these fits will assume something different about the particle that made the hits (e.g. whether the particle was positively or negatively charged, or whether the particle was an electron or a muon). Each fit will independently decide which hits are included or excluded based on these fit hypotheses. The total number of hits in the tracker will remain the same but the number of hits in each fit might be different. So we have three different types of branches:
+* ```hitcount```: total number of hits in the tracker (a single-object branch)
+* ```trk```: information about all the fits in that event (a vector branch)
+  * structure: ```[ trk1, trk2, ..., trkN ]```
+* ```trkhits```: information about the hits used in each fit (a vector-of-vector branch)
+  * structure: ```[ [trk1_hit1, trk1_hit2, ..., trk1_hitX], [trk2_hit1, trk2_hit2, ..., trk2_hitY], ..., [trkN_hit1, trkN_hit2, ..., trkN_hitZ] ]```
 
-The ```trk``` branch is a vector branch because a single event can contain more than one track fit. The ```trk``` branch looks something like this:
-
-```
-[ trk1, trk2, ..., trkN ]
-```
-
-The ```trkhits``` branch is a vector-of-vectors branch because a single track fit contains more than one hit. Their structure will look something like:
-
-```
-[ [trk1_hit1, trk1_hit2, ..., trk1_hitM], [trk2_hit1, trk2_hit2, ..., trk2_hitN], ..., [trkN_hit1, trkN_hit2, ..., trkN_hitM] ]
-```
+In this example, the ```trk``` branch and the outer vector of the ```trkhits``` branch have the same length so they correspond 1:1 with each other. However, this is not generally true for all branches. For example, the ```trkhits``` and ```trkhitsmc``` have different lengths because the reconstruction sometimes misses a true a hit. To hide these complications from analyzers we have RooUtil and pyutils, which you will learn about in the next exercises of the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial).
