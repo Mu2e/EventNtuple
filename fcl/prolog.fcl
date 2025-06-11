@@ -224,18 +224,18 @@ De : { input : "MergeKKDe"
 EventNtupleMaker : {
   module_type : EventNtupleMaker
   branches : [ @local::All ]
-  RecoCountTag : "SelectRecoMC"
+  RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
   PBTMCTag : "EWMProducer"
-  CrvCoincidencesTag : "SelectRecoMC:CrvCoincidenceClusterFinder"
+  CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
   CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
-  CrvRecoPulsesTag : "SelectRecoMC"
+  CrvRecoPulsesTag : "SelectReco"
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
   CrvDigiMCsTag : "compressRecoMCs"
-  CrvDigisTag : "SelectRecoMC"
+  CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
   CrvPlaneY : 2653
   FillMCInfo : true
@@ -249,7 +249,7 @@ EventNtupleMaker : {
   FillCaloMC : true
   FillHelixInfo : false
   PrimaryParticleTag : "compressRecoMCs"
-  KalSeedMCAssns : "SelectRecoMC"
+  KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"
