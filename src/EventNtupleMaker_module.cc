@@ -326,6 +326,7 @@ namespace mu2e {
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
+    _crvPlaneY(conf().crvPlaneY()),
     _infoMCStructHelper(conf().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
