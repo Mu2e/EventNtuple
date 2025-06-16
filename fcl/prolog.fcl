@@ -3,6 +3,7 @@
 #include "Offline/CommonMC/fcl/prolog.fcl"
 #include "Offline/fcl/TrkCaloDt.fcl"
 
+#include "EventNtuple/fcl/prolog_crv_planes.fcl"
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
@@ -237,7 +238,7 @@ EventNtupleMaker : {
   CrvDigiMCsTag : "compressRecoMCs"
   CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
-  CrvPlaneY : 2653
+  CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
   FillTrkPIDInfo : false
   FillHitInfo : true

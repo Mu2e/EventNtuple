@@ -326,6 +326,7 @@ namespace mu2e {
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
+    _crvPlaneY(conf().crvPlaneY()),
     _infoMCStructHelper(conf().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
@@ -681,7 +682,7 @@ namespace mu2e {
       _crvHelper.FillCrvHitInfoCollections(
                                            _crvCoincidences, _crvCoincidenceMCs,
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
-                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY);
+                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, *_pph);
       if(_fillcrvpulses){
         _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs,
                                               _crvpulses, _crvpulsesmc);
