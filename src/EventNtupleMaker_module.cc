@@ -682,7 +682,7 @@ namespace mu2e {
       _crvHelper.FillCrvHitInfoCollections(
                                            _crvCoincidences, _crvCoincidenceMCs,
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
-                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, *_pph);
+                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
       if(_fillcrvpulses){
         _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs,
                                               _crvpulses, _crvpulsesmc);

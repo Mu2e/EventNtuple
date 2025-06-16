@@ -30,7 +30,7 @@ namespace mu2e
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
       CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
-      const PrimaryParticle& primary) {
+      art::Handle<PrimaryParticle> const& primary) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
 
@@ -160,7 +160,7 @@ namespace mu2e
     //locate points where the cosmic MC trajectories cross the xz plane of CRV-T
     if(mcTrajectories.isValid())
     {
-      auto bestprimarysp = primary.primarySimParticles().front();
+      auto bestprimarysp = primary->primarySimParticles().front();
       for(auto trajectoryIter=mcTrajectories->begin(); trajectoryIter!=mcTrajectories->end(); trajectoryIter++)
       {
         const art::Ptr<SimParticle> &trajectorySimParticle = trajectoryIter->first;
