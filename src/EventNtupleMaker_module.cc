@@ -403,7 +403,7 @@ namespace mu2e {
     _ntuple=tfs->make<TTree>("ntuple","Mu2e Event Ntuple");
     _hVersion = tfs->make<TH1I>("version", "version number",3,0,3);
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
-    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 4);
+    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 5);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 0);
     // add event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
@@ -682,7 +682,7 @@ namespace mu2e {
       _crvHelper.FillCrvHitInfoCollections(
                                            _crvCoincidences, _crvCoincidenceMCs,
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
-                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, *_pph);
+                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
       if(_fillcrvpulses){
         _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs,
                                               _crvpulses, _crvpulsesmc);
