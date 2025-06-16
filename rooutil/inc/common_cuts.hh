@@ -11,9 +11,9 @@
 #include "Offline/MCDataProducts/inc/GenId.hh"
 #include "Offline/MCDataProducts/inc/MCRelationship.hh"
 
-#include "EventNtuple/utils/rooutil/inc/Track.hh"
-#include "EventNtuple/utils/rooutil/inc/TrackSegment.hh"
-#include "EventNtuple/utils/rooutil/inc/CrvCoinc.hh"
+#include "EventNtuple/rooutil/inc/Track.hh"
+#include "EventNtuple/rooutil/inc/TrackSegment.hh"
+#include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 
 //+ Track Segment Cuts - Directions
 bool is_downstream(TrackSegment& segment) { // track fit segment is going in +z direction

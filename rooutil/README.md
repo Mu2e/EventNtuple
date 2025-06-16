@@ -21,7 +21,7 @@ RooUtil is a utility class to help analyze the EventNtuple in ROOT-based analysi
 This documentation contains quick references. For additional help:
 
 * see the [Analysis Tools Tutorial](https://mu2ewiki.fnal.gov/wiki/Analysis_Tools_Tutorial)
-* look at the [example ROOT macros](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples)
+* look at the [example ROOT macros](https://github.com/Mu2e/EventNtuple/tree/main/rooutil/examples)
 
 ## ```RooUtil``` Class
 The constructor takes two arguments:
@@ -32,7 +32,7 @@ The constructor takes two arguments:
 All branches and leaves can be accessed through the ```Event``` class like so:
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 void PrintEvents(std::string filename) {
 
   RooUtil util(filename);
@@ -130,11 +130,11 @@ bool function_name(Object& obj);
 
 can be passed to the various ```GetObject()``` and ```CountObject()``` functions.
 
-Here is an example using the ```is_e_minus()``` function that is defined in ```EventNtuple/utils/rooutil/inc/common_cuts.hh```
+Here is an example using the ```is_e_minus()``` function that is defined in ```EventNtuple/rooutil/inc/common_cuts.hh```
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
-#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/common_cuts.hh"
 ...
 RooUtil util(filename);
 for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {

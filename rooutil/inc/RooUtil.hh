@@ -7,7 +7,7 @@
 #include "TTree.h"
 #include "TH1I.h"
 
-#include "EventNtuple/utils/rooutil/inc/Event.hh"
+#include "EventNtuple/rooutil/inc/Event.hh"
 
 class RooUtil {
 public:

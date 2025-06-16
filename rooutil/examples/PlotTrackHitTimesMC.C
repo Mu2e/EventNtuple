@@ -3,8 +3,8 @@
 // This uses cut functions defined in common_cuts.hh
 //
 
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
-#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/common_cuts.hh"
 
 #include "TH1F.h"
 #include "TH2F.h"

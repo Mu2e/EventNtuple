@@ -28,7 +28,7 @@ include(BuildPlugins)
 add_subdirectory(src)
 
 install_headers(SUBDIRNAME EventNtuple SUBDIRS inc)
-install_headers(SUBDIRNAME EventNtuple SUBDIRS utils/rooutil/inc)
+install_headers(SUBDIRNAME EventNtuple SUBDIRS rooutil/inc)
 
 
 install(DIRECTORY utils DESTINATION python)

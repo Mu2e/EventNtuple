@@ -1,5 +1,5 @@
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
-#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/common_cuts.hh"
 
 #include <iostream>
 

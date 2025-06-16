@@ -2,7 +2,7 @@
 // This macro prints the a couple of leaves from each branch
 // to test direct access to the branches via RooUtil's Event class
 //
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 
 #include <iostream>
 

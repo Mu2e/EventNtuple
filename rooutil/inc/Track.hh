@@ -6,9 +6,9 @@
 #include "EventNtuple/inc/TrkSegInfo.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 
-#include "EventNtuple/utils/rooutil/inc/TrackSegment.hh"
-#include "EventNtuple/utils/rooutil/inc/MCParticle.hh"
-#include "EventNtuple/utils/rooutil/inc/TrackHit.hh"
+#include "EventNtuple/rooutil/inc/TrackSegment.hh"
+#include "EventNtuple/rooutil/inc/MCParticle.hh"
+#include "EventNtuple/rooutil/inc/TrackHit.hh"
 
 struct Track {
   Track(mu2e::TrkInfo* trk, std::vector<mu2e::TrkSegInfo>* trksegs, mu2e::TrkCaloHitInfo* trkcalohit)

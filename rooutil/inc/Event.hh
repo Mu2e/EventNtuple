@@ -29,8 +29,8 @@
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
 
-#include "EventNtuple/utils/rooutil/inc/Track.hh"
-#include "EventNtuple/utils/rooutil/inc/CrvCoinc.hh"
+#include "EventNtuple/rooutil/inc/Track.hh"
+#include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 
 #include "TChain.h"
 

@@ -15,8 +15,8 @@ Each section in this tutorial gives you a small skeleton macro and then a few ch
 <summary>Hint</summary>
 
 there are a few places to get additional help as you work through these challenges:
-* the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/utils/rooutil/README.md)
-* the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples) can be used as a reference
+* the [quick reference README](https://www.github.com/Mu2e/EventNtuple/blob/main/rooutil/README.md)
+* the [examples](https://github.com/Mu2e/EventNtuple/tree/main/rooutil/examples) can be used as a reference
 * the #analysis-tools Slack channel
 
 </details>
@@ -36,7 +36,7 @@ muse setup Analysis
 RooUtil is easy to set up. Once you have a list of EventNtuple files (see instructions [here](./eventntuple-basics.md#Getting-a-list-of-EventNtuple-files)), you can set up RooUtil in a ROOT macro names ```LoadRooUtil.C``` like so:
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 
 void LoadRooUtil() {
    std::string filename = "name-of-file-list";
@@ -60,10 +60,10 @@ root -l -b LoadRooUtil.C+
 (Technical detail: RooUtil is loading the data into a [ROOT TChain](https://root.cern.ch/doc/master/classTChain.html))
 
 ## The ```Event``` Class
-All the branches in the EventNtuple can be accessed with the [```Event``` class](../utils/rooutil/README.md#The-Event-Class). In a new ROOT macro called ```EventLoop.C``` you can write:
+All the branches in the EventNtuple can be accessed with the [```Event``` class](../rooutil/README.md#The-Event-Class). In a new ROOT macro called ```EventLoop.C``` you can write:
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 
 void EventLoop() {
    std::string filename = "name-of-file-list";
@@ -110,7 +110,7 @@ We can access every single branch through the ```Event``` class. However, as des
 Here we will look at the ```Track``` class. In a new ROOT macro named ```TrackLoop.C```, you can loop through all the tracks in all the events like so:
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 
 void TrackLoop() {
    std::string filename = "name-of-file-list";
@@ -127,7 +127,7 @@ void TrackLoop() {
    }
 }
 ```
-where ```branchname``` and ```leafname``` are the same as in the EventNtuple. Howver, only track-related branches are available. These branches are listed in the quick-reference README [here](../utils/rooutil/README.md#The-Track-Class).
+where ```branchname``` and ```leafname``` are the same as in the EventNtuple. Howver, only track-related branches are available. These branches are listed in the quick-reference README [here](../rooutil/README.md#The-Track-Class).
 
 Challenge #1: Plot the number of hits on the reconstructed track in a histogram
 
@@ -150,7 +150,7 @@ Challenge #3: Plot the number of hits on the MC-truth track against the number o
 <details>
 <summary>Hint</summary>
 
-look at the [examples](https://github.com/Mu2e/EventNtuple/tree/main/utils/rooutil/examples)
+look at the [examples](https://github.com/Mu2e/EventNtuple/tree/main/rooutil/examples)
 </details>
 
 ## Selecting Tracks
@@ -159,8 +159,8 @@ There will be multiple track fits in each event. At the moment, we are plotting 
 In a new ROOT macro named ```TrackCutLoop.C```, you can do the following:
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
-#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/common_cuts.hh"
 
 void TrackCutLoop() {
    std::string filename = "name-of-file-list";
@@ -209,15 +209,15 @@ Challenge #3: Plot the number of hits in track fits that are **both** travelling
 <details>
 <summary>Hint</summary>
 
-look at the section in the quick reference README on [combining cut functions](../utils/rooutil/README.md#Combining-Cut-Functions)
+look at the section in the quick reference README on [combining cut functions](../rooutil/README.md#Combining-Cut-Functions)
 </details>
 
 ## Plotting Track Momentum with ```TrackSegment``` Class
 What we actually want to measure in Mu2e is the momentum of particles. Our reconstruction algorithm doesn't give us one momentum per track because it can account for changes in momentum as the particle travels downstream and passes through material. We store the momentum of particles at various surfaces along the track in  ```TrackSegments```.
 
 ```
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
-#include "EventNtuple/utils/rooutil/inc/common_cuts.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/common_cuts.hh"
 
 void TrackSegmentLoop() {
    std::string filename = "name-of-file-list";
@@ -237,7 +237,7 @@ void TrackSegmentLoop() {
    }
 }
 ```
-where the ```branchname``` and ```leafname``` can only be those that are available in the [```TrackSegment``` class](../utils/rooutil/README.md#The-TrackSegment-Class).
+where the ```branchname``` and ```leafname``` can only be those that are available in the [```TrackSegment``` class](../rooutil/README.md#The-TrackSegment-Class).
 
 Here we need to be careful because not all tracks will have a reconstructed track segment at every surface so we need to use the ```has_reco_step()``` common cut function when we get tracker segments
 
@@ -281,5 +281,5 @@ Additional Challenge #3: Plot variables from the ```CrvCoinc``` class. Can you f
 <details>
 <summary>Hint</summary>
 
-see the quick reference README section on [```CrvCoinc```](../utils/rooutil/README.md#The-CrvCoinc-Class).
+see the quick reference README section on [```CrvCoinc```](../rooutil/README.md#The-CrvCoinc-Class).
 </details>

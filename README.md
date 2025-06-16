@@ -33,7 +33,7 @@ checkEventNtuple file1.root file2.root
 
 ## How to Analyze an EventNtuple
 To help with analyzing the EventNtuple given its complex structure, we have two sets of utilities:
-* [RooUtil](utils/rooutil/README.md) for ROOT-based analyses, and
+* [RooUtil](rooutil/README.md) for ROOT-based analyses, and
 * [PyUtil](utils/pyutils/README.md) for python-based analyses.
 
 Feel free to send questions, comments, or suggestions for improvement to the #analysis-tools Slack channel.
