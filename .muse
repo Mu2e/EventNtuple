@@ -2,6 +2,5 @@
 ROOT_LIBRARY_PATH
 
 PYTHONPATH utils
-PYTHONPATH utils/helper
-PYTHONPATH utils/pyutils
+PYTHONPATH helper
 PATH bin

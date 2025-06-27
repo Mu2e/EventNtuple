@@ -3,6 +3,7 @@
 #include "Offline/CommonMC/fcl/prolog.fcl"
 #include "Offline/fcl/TrkCaloDt.fcl"
 
+#include "EventNtuple/fcl/prolog_crv_planes.fcl"
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
@@ -224,20 +225,20 @@ De : { input : "MergeKKDe"
 EventNtupleMaker : {
   module_type : EventNtupleMaker
   branches : [ @local::All ]
-  RecoCountTag : "SelectRecoMC"
+  RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
   PBTMCTag : "EWMProducer"
-  CrvCoincidencesTag : "SelectRecoMC:CrvCoincidenceClusterFinder"
+  CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
   CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
-  CrvRecoPulsesTag : "SelectRecoMC"
+  CrvRecoPulsesTag : "SelectReco"
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
   CrvDigiMCsTag : "compressRecoMCs"
-  CrvDigisTag : "SelectRecoMC"
+  CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
-  CrvPlaneY : 2653
+  CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
   FillTrkPIDInfo : false
   FillHitInfo : true
@@ -249,7 +250,7 @@ EventNtupleMaker : {
   FillCaloMC : true
   FillHelixInfo : false
   PrimaryParticleTag : "compressRecoMCs"
-  KalSeedMCAssns : "SelectRecoMC"
+  KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"

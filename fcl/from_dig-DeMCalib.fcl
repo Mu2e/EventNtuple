@@ -4,7 +4,7 @@
 # as this script is intended to support calibration detailed hit information is added
 #include "Offline/fcl/minimalMessageService.fcl"
 #include "Offline/fcl/standardServices.fcl"
-#include "Production/JobConfig/reco/prolog.fcl"
+#include "Production/JobConfig/recoMC/prolog.fcl"
 #include "EventNtuple/fcl/prolog.fcl"
 
 process_name: EventNtuple
@@ -50,8 +50,8 @@ physics :
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
 # restrict reco to just DeM
-physics.producers.SelectRecoMC.KalSeedCollections  : ["KKDeM"]
-physics.producers.SelectRecoMC.HelixSeedCollections  : ["MHDeM"]
+physics.producers.SelectReco.KalSeedCollections  : ["KKDeM"]
+physics.producers.SelectReco.HelixSeedCollections  : ["MHDeM"]
 physics.producers.KKDeM.ModuleSettings.HelixSeedCollections : [ "MHDeM" ]
 physics.producers.KKDeM.ModuleSettings.ComboHitCollection : "makeSH"
 physics.producers.KKDeM.ModuleSettings.CaloClusterCollection : "CaloClusterMaker"

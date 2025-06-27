@@ -6,11 +6,11 @@
 log_file="test_fcls.log"
 rm ${log_file}
 
-mock_dataset="mcs.mu2e.ensembleMDS1gOnSpillTriggered.MDC2020aq_perfect_v1_3.art"
-primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aq_best_v1_3.art"
-mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020am_best_v1_3.art"
-extracted_dataset="mcs.mu2e.CosmicCRYExtractedCatTriggered.MDC2020ae_best_v1_3.art"
-digi_dataset="dig.mu2e.ensembleMDS1gOnSpillTriggered.MDC2020aq_perfect_v1_3.art"
+mock_dataset="mcs.mu2e.DIOtail95OnSpillTriggered.MDC2020aw_best_v1_3.art" # TODO: revert back to mock data when ready
+primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art"
+mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
+extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
+digi_dataset="dig.mu2e.DIOtail95OnSpillTriggered.MDC2020au_perfect_v1_3.art"
 crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
 
 all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_vst_dataset )

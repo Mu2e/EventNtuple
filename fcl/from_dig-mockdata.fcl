@@ -1,7 +1,7 @@
 #include "Offline/fcl/minimalMessageService.fcl"
 #include "Offline/fcl/standardProducers.fcl"
 #include "Offline/fcl/standardServices.fcl"
-#include "Production/JobConfig/reco/prolog.fcl"
+#include "Production/JobConfig/recoMC/prolog.fcl"
 #include "EventNtuple/fcl/prolog.fcl"
 
 process_name : EventNtuple
@@ -33,7 +33,7 @@ outputs : {
 }
 
 physics.EventNtuplePath : [
-  @sequence::Reconstruction.OnSpillMCPath,
+  @sequence::Reconstruction.OnSpillPath,
   @sequence::EventNtuple.Path
 ]
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPathNoMC ]
@@ -43,7 +43,7 @@ physics.trigger_paths : [ EventNtuplePath ]
 physics.end_paths : [ EventNtupleEndPath ]
 
 #include "Production/JobConfig/common/epilog.fcl"
-#include "Production/JobConfig/reco/epilog.fcl"
+#include "Production/JobConfig/recoMC/epilog.fcl"
 
 outputs.Output.fileName: "mcs.owner.description.version.sequencer.art"
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"

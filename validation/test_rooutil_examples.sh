@@ -8,7 +8,7 @@ scripts=( "PrintEvents.C" "CreateNtuple.C" "CreateTrackNtuple.C" "PlotCRVPEs.C" 
 
 for script in "${scripts[@]}"
 do
-    root -l -b -q utils/rooutil/examples/${script}++\(${filename}\)
+    root -l -b -q rooutil/examples/${script}++\(${filename}\)
 
     if [ $? != 0 ]; then # quit as soon as one script fails
         echo $script " failed"
@@ -18,4 +18,4 @@ done
 
 # Check the that reduced ntuple runs in RooUtil
 filename="\"example_ntuple.root\""
-root -l -b -q utils/rooutil/examples/PrintEvents.C++\(${filename}\)
+root -l -b -q rooutil/examples/PrintEvents.C++\(${filename}\)

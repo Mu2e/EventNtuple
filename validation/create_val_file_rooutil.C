@@ -3,7 +3,7 @@
 // -- this macro creates a histogram for every leaf in the EventNtuple using the RooUtil interface
 //
 
-#include "EventNtuple/utils/rooutil/inc/RooUtil.hh"
+#include "EventNtuple/rooutil/inc/RooUtil.hh"
 // TODO: can add common_cuts.hh here
 
 #include "TH1F.h"
