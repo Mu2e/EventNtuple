@@ -351,6 +351,13 @@ namespace mu2e {
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
+
+    // Calo branch logic
+    // If asking for child, parent must be there too
+    // This might change in the future
+    if (_fillcalorecodigis) _fillcalohits = true;
+    if (_fillcalohits) _fillcaloclusters = true;
+
     // decode fit type
     for(size_t ifit=0;ifit < fitNames.size();++ifit){
       auto const& fname = fitNames[ifit];
@@ -693,10 +700,41 @@ namespace mu2e {
 
     // Calorimeter
     if(_fillcaloclusters){
+      
+      //Clear lists for this event
       _caloCIs.clear();
+      _caloHIs.clear();
+      _caloRDIs.clear();
+
+      //Get the clusters
       event.getByLabel(_conf.caloClustersTag(),_caloClusters);
       for (const auto& cluster : *_caloClusters.product()){
-        _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs); //FIXME placeholder
+
+        int cluster_idx = _caloCIs.size();
+        _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs);
+
+        if (_fillcalohits){
+          for (const auto& hit : cluster.caloHitsPtrVector()){
+
+            int hit_idx = _caloHIs.size();
+            _infoStructHelper.fillCaloHitInfo(*hit,_caloHIs,cluster_idx);
+
+            //Update the cluster
+            _caloCIs.back().hits_.push_back(hit_idx);
+
+            if (_fillcalorecodigis){
+              for (const auto& recodigi : hit->recoCaloDigis()){
+
+                int recodigi_idx = _caloRDIs.size();
+                _infoStructHelper.fillCaloRecoDigiInfo(*recodigi,_caloRDIs,hit_idx);
+
+                //Update the hit
+                _caloHIs.back().recoDigis_.push_back(recodigi_idx);
+
+              }
+            }
+          }
+        }
       }
     }
 

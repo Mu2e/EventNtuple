@@ -70,8 +70,8 @@ namespace mu2e {
     void fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos);
 
     void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
-    void fillCaloHitInfo(const CaloHit& ccptr, std::vector<CaloHitInfo>& hitinfos);
-    void fillCaloRecoDigiInfo(const CaloRecoDigi& ccptr, std::vector<CaloRecoDigiInfo>& recodigiinfos);
+    void fillCaloHitInfo(const CaloHit& ccptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx);
+    void fillCaloRecoDigiInfo(const CaloRecoDigi& ccptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx);
   };
 }
 

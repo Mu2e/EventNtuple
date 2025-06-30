@@ -489,7 +489,7 @@ namespace mu2e {
     clusterinfos.push_back(clusterinfo);
   }
 
-  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos) {
+  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1) {
     CaloHitInfo hitinfo;
     hitinfo.crystalId_ = chptr.crystalID();
     hitinfo.nSiPMs_ = chptr.nSiPMs();
@@ -498,11 +498,11 @@ namespace mu2e {
     hitinfo.eDep_ = chptr.energyDep();
     hitinfo.eDepErr_ = chptr.energyDepErr();
     //hitinfo.recoDigis_ = ;
-    //hitinfo.clusterIdx_ = ;
+    hitinfo.clusterIdx_ = clusterIdx;
     hitinfos.push_back(hitinfo);
   }
 
-  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos) {
+  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx = -1) {
     CaloRecoDigiInfo recodigiinfo;
     recodigiinfo.eDep_ = crdptr.energyDep();
     recodigiinfo.eDepErr_ = crdptr.energyDepErr();
@@ -512,7 +512,7 @@ namespace mu2e {
     recodigiinfo.ndf_ = crdptr.ndf();
     recodigiinfo.pileUp_ = crdptr.pileUp();
     //recodigiinfo.caloDigi_ = ;
-    //recodigiinfo.caloHitIdx_ = ;
+    recodigiinfo.caloHitIdx_ = hitIdx;
     recodigiinfos.push_back(recodigiinfo);
   }
 
