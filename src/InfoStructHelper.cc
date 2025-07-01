@@ -485,7 +485,6 @@ namespace mu2e {
     clusterinfo.cog_ = ccptr.cog3Vector();
     clusterinfo.size_ = ccptr.size();
     clusterinfo.isSplit_ = ccptr.isSplit();
-    //clusterinfo.hits_ = ;
     clusterinfos.push_back(clusterinfo);
   }
 
@@ -497,7 +496,6 @@ namespace mu2e {
     hitinfo.timeErr_ = chptr.timeErr();
     hitinfo.eDep_ = chptr.energyDep();
     hitinfo.eDepErr_ = chptr.energyDepErr();
-    //hitinfo.recoDigis_ = ;
     hitinfo.clusterIdx_ = clusterIdx;
     hitinfos.push_back(hitinfo);
   }
@@ -511,7 +509,6 @@ namespace mu2e {
     recodigiinfo.chi2_ = crdptr.chi2();
     recodigiinfo.ndf_ = crdptr.ndf();
     recodigiinfo.pileUp_ = crdptr.pileUp();
-    //recodigiinfo.caloDigi_ = ;
     recodigiinfo.caloHitIdx_ = hitIdx;
     recodigiinfos.push_back(recodigiinfo);
   }

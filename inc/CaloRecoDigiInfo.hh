@@ -1,5 +1,5 @@
 //
-// CaloRecoDigiInfo: information for calorimeter hits
+// CaloRecoDigiInfo: calorimeter recodigis with index of raw digi and of parent hit
 //
 #ifndef CaloRecoDigiInfo_HH
 #define CaloRecoDigiInfo_HH

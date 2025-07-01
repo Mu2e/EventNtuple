@@ -1,5 +1,5 @@
 //
-// CaloHitInfo: information for calorimeter hits
+// CaloHitInfo: calorimeter hits with indeces of recodigis and of parent cluster
 //
 #ifndef CaloHitInfo_HH
 #define CaloHitInfo_HH
