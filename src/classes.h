@@ -22,6 +22,7 @@
 #include "EventNtuple/inc/CaloClusterInfo.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
 #include "EventNtuple/inc/CaloRecoDigiInfo.hh"
+#include "EventNtuple/inc/CaloDigiInfo.hh"
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
 #include "EventNtuple/inc/CrvHitInfoMC.hh"
 #include "EventNtuple/inc/CrvWaveformInfo.hh"

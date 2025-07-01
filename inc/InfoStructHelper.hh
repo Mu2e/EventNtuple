@@ -33,6 +33,7 @@
 #include "EventNtuple/inc/CaloClusterInfo.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
 #include "EventNtuple/inc/CaloRecoDigiInfo.hh"
+#include "EventNtuple/inc/CaloDigiInfo.hh"
 #include "art/Framework/Principal/Handle.h"
 #include <vector>
 #include <functional>
@@ -70,8 +71,9 @@ namespace mu2e {
     void fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos);
 
     void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
-    void fillCaloHitInfo(const CaloHit& ccptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx);
-    void fillCaloRecoDigiInfo(const CaloRecoDigi& ccptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx);
+    void fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1);
+    void fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx = -1);
+    void fillCaloDigiInfo(const CaloDigi& cdptr, std::vector<CaloDigiInfo>& digiinfos, int recodigiIdx = -1);
   };
 }
 

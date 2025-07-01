@@ -151,10 +151,14 @@ namespace mu2e {
         fhicl::Atom<bool> helices{Name("FillHelixInfo"),false};
         // Calorimeter input
         fhicl::Atom<art::InputTag> caloClustersTag{Name("CaloClustersTag"), Comment("Tag for Calorimeter cluster collection"), art::InputTag()};
+        fhicl::Atom<art::InputTag> caloHitsTag{Name("CaloHitsTag"), Comment("Tag for Calorimeter hit collection"), art::InputTag()};
+        fhicl::Atom<art::InputTag> caloRecoDigisTag{Name("CaloRecoDigisTag"), Comment("Tag for Calorimeter recodigi collection"), art::InputTag()};
+        fhicl::Atom<art::InputTag> caloDigisTag{Name("CaloDigisTag"), Comment("Tag for Calorimeter digi collection"), art::InputTag()};
         // Calorimeter flags
         fhicl::Atom<bool> fillCaloClusters{Name("FillCaloClusters"),Comment("Flag for turning on Calo Clusters branch"), true};
-        fhicl::Atom<bool> fillCaloHits{Name("FillCaloHits"),Comment("Flag for turning on Calo Hits branch"), true};
+        fhicl::Atom<bool> fillCaloHits{Name("FillCaloHits"),Comment("Flag for turning on Calo Hits branch"), false};
         fhicl::Atom<bool> fillCaloRecoDigis{Name("FillCaloRecoDigis"),Comment("Flag for turning on Calo RecoDigis branch"), false};
+        fhicl::Atom<bool> fillCaloDigis{Name("FillCaloDigis"),Comment("Flag for turning on Calo Digis branch"), false};
         // CRV -- input tags
         fhicl::Atom<art::InputTag> crvCoincidencesTag{Name("CrvCoincidencesTag"), Comment("Tag for CrvCoincidenceCluster Collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> crvRecoPulsesTag{Name("CrvRecoPulsesTag"), Comment("Tag for CrvRecopPulse Collection"), art::InputTag()};
@@ -274,10 +278,14 @@ namespace mu2e {
 
       // Calorimeter
       art::Handle<CaloClusterCollection> _caloClusters;
+      art::Handle<CaloHitCollection> _caloHits;
+      art::Handle<CaloRecoDigiCollection> _caloRecoDigis;
+      art::Handle<CaloDigiCollection> _caloDigis;
       std::vector<CaloClusterInfo> _caloCIs;
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
-      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis;
+      std::vector<CaloDigiInfo> _caloDIs;
+      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis, _fillcalodigis;
 
       // CRV (inputs)
       std::map<BranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
@@ -342,6 +350,7 @@ namespace mu2e {
     _fillcaloclusters(conf().fillCaloClusters()),
     _fillcalohits(conf().fillCaloHits()),
     _fillcalorecodigis(conf().fillCaloRecoDigis()),
+    _fillcalodigis(conf().fillCaloDigis()),
     // CRV
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
@@ -351,12 +360,6 @@ namespace mu2e {
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
-
-    // Calo branch logic
-    // If asking for child, parent must be there too
-    // This might change in the future
-    if (_fillcalorecodigis) _fillcalohits = true;
-    if (_fillcalohits) _fillcaloclusters = true;
 
     // decode fit type
     for(size_t ifit=0;ifit < fitNames.size();++ifit){
@@ -523,6 +526,9 @@ namespace mu2e {
     }
     if (_fillcalorecodigis){
       _ntuple->Branch("calorecodigis.",&_caloRDIs,_buffsize,_splitlevel);
+    }
+    if (_fillcalodigis){
+      _ntuple->Branch("calodigis.",&_caloDIs,_buffsize,_splitlevel);
     }
 
     // general CRV info
@@ -699,12 +705,12 @@ namespace mu2e {
     }
 
     // Calorimeter
+    // Clear lists for this event
+    _caloCIs.clear();
+    _caloHIs.clear();
+    _caloRDIs.clear();
+    _caloDIs.clear();
     if(_fillcaloclusters){
-      
-      //Clear lists for this event
-      _caloCIs.clear();
-      _caloHIs.clear();
-      _caloRDIs.clear();
 
       //Get the clusters
       event.getByLabel(_conf.caloClustersTag(),_caloClusters);
@@ -731,11 +737,85 @@ namespace mu2e {
                 //Update the hit
                 _caloHIs.back().recoDigis_.push_back(recodigi_idx);
 
+                if (_fillcalodigis){
+                  const auto& digi = recodigi->caloDigiPtr();
+          
+                  int digi_idx = _caloDIs.size();
+                  _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
+    
+                  //Update the recodigi
+                  _caloRDIs.back().caloDigiIdx_ = digi_idx;
+    
+                }
               }
             }
           }
         }
       }
+    } else { //No clusters
+
+      if (_fillcalohits){
+        //Get the hits
+        event.getByLabel(_conf.caloHitsTag(),_caloHits);
+        for (const auto& hit : *_caloHits.product()){
+
+          int hit_idx = _caloHIs.size();
+          _infoStructHelper.fillCaloHitInfo(hit,_caloHIs);
+
+          if (_fillcalorecodigis){
+            for (const auto& recodigi : hit.recoCaloDigis()){
+
+              int recodigi_idx = _caloRDIs.size();
+              _infoStructHelper.fillCaloRecoDigiInfo(*recodigi,_caloRDIs,hit_idx);
+
+              //Update the hit
+              _caloHIs.back().recoDigis_.push_back(recodigi_idx);
+
+              if (_fillcalodigis){
+                const auto& digi = recodigi->caloDigiPtr();
+        
+                int digi_idx = _caloDIs.size();
+                _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
+  
+                //Update the recodigi
+                _caloRDIs.back().caloDigiIdx_ = digi_idx;
+  
+              }
+            }
+          }
+        }
+      } else { //No hits
+
+        if (_fillcalorecodigis){
+          //Get the recodigis
+          event.getByLabel(_conf.caloRecoDigisTag(),_caloRecoDigis);
+          for (const auto& recodigi : *_caloRecoDigis.product()){
+
+            int recodigi_idx = _caloRDIs.size();
+            _infoStructHelper.fillCaloRecoDigiInfo(recodigi,_caloRDIs);
+
+            if (_fillcalodigis){
+              const auto& digi = recodigi.caloDigiPtr();
+              int digi_idx = _caloDIs.size();
+              _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
+
+              //Update the recodigi
+              _caloRDIs.back().caloDigiIdx_ = digi_idx;
+
+            }
+          }
+        } else { //No recodigis
+
+          if (_fillcalodigis){
+            //Get the digis
+            event.getByLabel(_conf.caloDigisTag(),_caloDigis);
+            for (const auto& digi : *_caloDigis.product()){
+              _infoStructHelper.fillCaloDigiInfo(digi,_caloDIs);
+            }
+          }
+        }
+      }
+
     }
 
     // TODO we want MC information when we don't have a track

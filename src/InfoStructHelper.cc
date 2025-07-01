@@ -488,7 +488,7 @@ namespace mu2e {
     clusterinfos.push_back(clusterinfo);
   }
 
-  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1) {
+  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx) {
     CaloHitInfo hitinfo;
     hitinfo.crystalId_ = chptr.crystalID();
     hitinfo.nSiPMs_ = chptr.nSiPMs();
@@ -500,7 +500,7 @@ namespace mu2e {
     hitinfos.push_back(hitinfo);
   }
 
-  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx = -1) {
+  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx) {
     CaloRecoDigiInfo recodigiinfo;
     recodigiinfo.eDep_ = crdptr.energyDep();
     recodigiinfo.eDepErr_ = crdptr.energyDepErr();
@@ -512,6 +512,17 @@ namespace mu2e {
     recodigiinfo.caloHitIdx_ = hitIdx;
     recodigiinfos.push_back(recodigiinfo);
   }
+
+  void InfoStructHelper::fillCaloDigiInfo(const CaloDigi& cdptr, std::vector<CaloDigiInfo>& digiinfos, int recodigiIdx) {
+    CaloDigiInfo digiinfo;
+    digiinfo.SiPMID_ = cdptr.SiPMID();
+    digiinfo.t0_ = cdptr.t0();
+    digiinfo.waveform_ = cdptr.waveform();
+    digiinfo.peakpos_ = cdptr.peakpos();
+    digiinfo.caloRecoDigiIdx_ = recodigiIdx;
+    digiinfos.push_back(digiinfo);
+  }
+
 
 
 }
