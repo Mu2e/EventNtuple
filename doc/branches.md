@@ -73,7 +73,7 @@ The vector is sorted in reverse chronological order, such that the last element 
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.
-While each branch can be read independently, i.e. all the hits of the event, each element contains indexes to the other branches for parentage link.
+While each branch can be read independently, each element contains indexes to the other branches for parentage link.
 The cluster element contains the vector 'hits_' containing the indexes of the hits branch belonging to this cluster.
 Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.
 Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
