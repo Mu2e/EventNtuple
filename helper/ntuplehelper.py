@@ -289,7 +289,7 @@ class nthelper:
                         # Check whether this row is an explanation for a leaf that we are asking for
                         for i_leaf in leaves:
                             if i_leaf == "*":
-                                if (row.find(" = ") != -1) and (row.find(";") != -1) and (row.find("//") != -1):
+                                if (row.find(";") != -1) and (row.find("//") != -1):
                                     if i_leaf not in leaf_explanations: # we want to only take the first occurance
                                         leaf_explanations[i_leaf] = "\n"+row
                                     else:
