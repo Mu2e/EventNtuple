@@ -70,6 +70,19 @@ The vector is sorted in reverse chronological order, such that the last element 
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | trkmcsim |  Vector-of-vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
+## Calorimeter Branches
+
+These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.
+While each branch can be read independently, each element contains indexes to the other branches for parentage link.
+The cluster element contains the vector 'hits_' containing the indexes of the hits branch belonging to this cluster.
+Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.
+Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| caloclusters |  Vector branch |   calorimeter clusters with indeces of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
+| calohits |  Vector branch |   calorimeter hits with indeces of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
+| calorecodigis |  Vector branch |   calorimeter recodigis with index of raw digi and of parent hit| [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
+| calodigis |  Vector branch |   calorimeter raw digis with index of parent recodigi if any| [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
 ## CRV Branches
 
 These branches contain a vector where each element is a CRV hit that happened during the event.
