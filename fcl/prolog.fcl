@@ -225,26 +225,26 @@ De : { input : "MergeKKDe"
 EventNtupleMaker : {
   module_type : EventNtupleMaker
   branches : [ @local::All ]
-  RecoCountTag : "SelectRecoMC"
+  RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
   PBTMCTag : "EWMProducer"
-  CrvCoincidencesTag : "SelectRecoMC:CrvCoincidenceClusterFinder"
+  CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
   CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
-  CrvRecoPulsesTag : "SelectRecoMC"
+  CrvRecoPulsesTag : "SelectReco"
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
   CaloClustersTag : "CaloClusterMaker"
   CaloHitsTag : "CaloHitMaker"
   CaloRecoDigisTag : ""
-  CaloDigisTag : "SelectRecoMC"
+  CaloDigisTag : "SelectReco"
   FillCaloClusters : true
   FillCaloHits : true
   FillCaloRecoDigis : false
   FillCaloDigis : false
   CrvDigiMCsTag : "compressRecoMCs"
-  CrvDigisTag : "SelectRecoMC"
+  CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
   CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
@@ -258,7 +258,7 @@ EventNtupleMaker : {
   FillCaloMC : true
   FillHelixInfo : false
   PrimaryParticleTag : "compressRecoMCs"
-  KalSeedMCAssns : "SelectRecoMC"
+  KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"
