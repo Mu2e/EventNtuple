@@ -46,12 +46,12 @@ physics :
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ RecoPath ]
 
-physics.producers.TrkQualDeM.KalSeedPtrCollection : "MergeKKDeMCalib"
+physics.producers.TrkQualDeM.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
-# restrict reco to just DeM
-physics.producers.SelectReco.KalSeedCollections  : ["KKDeM"]
+# restrict reco to just De
+physics.producers.SelectReco.KalSeedCollections  : ["KKDe"]
 physics.producers.KKDeM.ModuleSettings.HelixSeedCollections : [ "MHDe" ]
 physics.producers.KKDeM.ModuleSettings.ComboHitCollection : "makeSH"
 physics.producers.KKDeM.ModuleSettings.CaloClusterCollection : "CaloClusterMaker"
