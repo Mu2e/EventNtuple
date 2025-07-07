@@ -67,9 +67,11 @@ git checkout --no-track -b vXX-YY-ZZ mu2e/main
 ```
 * update version number in ```src/EventNtupleMaker_module.cc``` and commit
 * make sure EventNtuple runs following these [steps](validation/README.md#Validating-eventntuple-runs)
-* create a comparison booklet following these [steps](vaidation/README.md#Validating-EventNtuple-Contents)
+* create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood
 * open PR with final changes and merge
+* make sure EventNtuple builds with spack following these [steps](validation/README.md#Validating-EventNtuple-Builds-(Spack/CMake)), fix any errors and merge them
+   * this needs to be done after merging so that we can checkout the ```main``` branch
 * create new release on GitHub
    * auto-generate release notes but add text to highlight important changes
 * ask for a new Musing to be made
