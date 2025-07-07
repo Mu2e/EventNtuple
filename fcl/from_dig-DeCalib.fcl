@@ -22,7 +22,7 @@ physics :
     @sequence::Reconstruction.DeReco,
     @sequence::Reconstruction.CrvReco,
     MergeKKDeCalib,
-    TrkQualDeM,
+    TrkQualDe,
     @sequence::Reconstruction.MCReco
   ]
   analyzers : {
@@ -32,7 +32,7 @@ physics :
       branches :  [
         { input: "MergeKKDeCalib"
           branch : "trk"
-          trkQualTag : "TrkQualDeM"
+          trkQualTag : "TrkQualDe"
           options : { fillMC : true fillHits : true  genealogyDepth : -1 }
         }
       ]
@@ -46,7 +46,7 @@ physics :
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ RecoPath ]
 
-physics.producers.TrkQualDeM.KalSeedPtrCollection : "MergeKKDeCalib"
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
