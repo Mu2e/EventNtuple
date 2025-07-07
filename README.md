@@ -70,7 +70,7 @@ git checkout --no-track -b vXX-YY-ZZ mu2e/main
 * create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood
 * open PR with final changes and merge
-* make sure EventNtuple builds with spack following these [steps](validation/README.md#Validating-EventNtuple-Builds-(Spack/CMake)), fix any errors and merge them
+* make sure EventNtuple builds with spack following these [steps](validation/README.md#Validating-EventNtuple-Builds-SpackCMake), fix any errors and merge them
    * this needs to be done after merging so that we can checkout the ```main``` branch
 * create new release on GitHub
    * auto-generate release notes but add text to highlight important changes
