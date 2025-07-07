@@ -103,6 +103,7 @@ Some branches are not contained in any of the above classes:
 * ```crvdigis```
 * ```crvpulses``` and ```crvpulsesmc```
 * ```crvcoincsmcplane```
+* ```caloclusters```, ```calohits```, ```calorecodigis```, ```calodigis```
 
 Reach out to the developers on the #analysis-tools Slack channel if you have a need to have these added somewhere.
 

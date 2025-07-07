@@ -211,5 +211,33 @@ void PrintEvents(std::string filename) {
         std::cout << "crvcoincmcplane: " << crvcoincmcplane.pdgId << "," << crvcoincmcplane.primary.z() << ", " << crvcoincmcplane.kineticEnergy << ", " << crvcoincmcplane.dataSource << std::endl;
       }
     }
+
+    // caloclusters branch
+    if (event.caloclusters != nullptr) {
+      for (const auto& calocluster : *(event.caloclusters)) {
+        std::cout << "calocluster: " << calocluster.diskID_ << ", " << calocluster.time_ << ", " << calocluster.timeErr_ << ", " << calocluster.energyDep_ << ", " << calocluster.energyDepErr_ << ", " << calocluster.isSplit_ << std::endl;
+      }
+    }
+
+    // calohits branch
+    if (event.calohits != nullptr) {
+      for (const auto& calohit : *(event.calohits)) {
+        std::cout << "calohit: " << calohit.crystalId_ << ", " << calohit.time_ << ", " << calohit.timeErr_ << ", " << calohit.eDep_ << ", " << calohit.eDepErr_ << ", " << calohit.clusterIdx_ << std::endl;
+      }
+    }
+
+    // calorecodigis branch
+    if (event.calorecodigis != nullptr) {
+      for (const auto& calorecodigi : *(event.calorecodigis)) {
+        std::cout << "calorecodigi: " << calorecodigi.time_ << ", " << calorecodigi.timeErr_ << ", " << calorecodigi.eDep_ << ", " << calorecodigi.eDepErr_ << ", " << calorecodigi.caloHitIdx_ << std::endl;
+      }
+    }
+
+    // calodigis branch
+    if (event.calodigis != nullptr) {
+      for (const auto& calodigi : *(event.calodigis)) {
+        std::cout << "calodigi: " << calodigi.SiPMID_ << ", " << calodigi.t0_ << ", " << calodigi.peakpos_ << ", " << calodigi.caloRecoDigiIdx_ << std::endl;
+      }
+    }
   }
 }

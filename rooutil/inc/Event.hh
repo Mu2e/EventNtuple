@@ -13,6 +13,11 @@
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
 
+#include "EventNtuple/inc/CaloClusterInfo.hh"
+#include "EventNtuple/inc/CaloHitInfo.hh"
+#include "EventNtuple/inc/CaloRecoDigiInfo.hh"
+#include "EventNtuple/inc/CaloDigiInfo.hh"
+
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
 #include "EventNtuple/inc/CrvHitInfoMC.hh"
 #include "EventNtuple/inc/CrvWaveformInfo.hh"
@@ -117,6 +122,20 @@ struct Event {
     if (ntuple->GetBranch("trkmats")) {
       ntuple->SetBranchAddress("trkmats", &this->trkmats);
     }
+
+    if (ntuple->GetBranch("caloclusters")) {
+      ntuple->SetBranchAddress("caloclusters", &this->caloclusters);
+    }
+    if (ntuple->GetBranch("calohits")) {
+      ntuple->SetBranchAddress("calohits", &this->calohits);
+    }
+    if (ntuple->GetBranch("calorecodigis")) {
+      ntuple->SetBranchAddress("calorecodigis", &this->calorecodigis);
+    }
+    if (ntuple->GetBranch("calodigis")) {
+      ntuple->SetBranchAddress("calodigis", &this->calodigis);
+    }
+
   };
 
   void Update(bool debug = false) {
@@ -285,6 +304,11 @@ struct Event {
   std::vector<std::vector<mu2e::TrkStrawHitInfo>>* trkhits = nullptr;
   std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
   std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
+
+  std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
+  std::vector<mu2e::CaloHitInfo>* calohits = nullptr;
+  std::vector<mu2e::CaloRecoDigiInfo>* calorecodigis = nullptr;
+  std::vector<mu2e::CaloDigiInfo>* calodigis = nullptr;
 
   std::vector<mu2e::CrvHitInfoReco>* crvcoincs = nullptr;
   std::vector<mu2e::CrvHitInfoMC>* crvcoincsmc = nullptr;

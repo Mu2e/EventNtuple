@@ -426,6 +426,43 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_crvcoicsmcplane_kineticEnergy = new TH1F("h_crvcoincsmcplane_kineticEnergy", "", 200,0,200);
   TH1F* h_crvcoicsmcplane_dataSource = new TH1F("h_crvcoincsmcplane_dataSource", "", 100,0,100);
 
+  TH1F* h_caloclusters_diskID_ = new TH1F("h_caloclusters_diskID_", "", 2,0,2);
+  TH1F* h_caloclusters_time_ = new TH1F("h_caloclusters_time_", "", 200,0,2000);
+  TH1F* h_caloclusters_timeErr_ = new TH1F("h_caloclusters_timeErr_", "", 100,0,100);
+  TH1F* h_caloclusters_energyDep_ = new TH1F("h_caloclusters_energyDep_", "", 100,0,100);
+  TH1F* h_caloclusters_energyDepErr_ = new TH1F("h_caloclusters_energyDepErr_", "", 100,0,100);
+  TH1F* h_caloclusters_cog_x = new TH1F("h_caloclusters_cog_x", "", 100,-500,500);
+  TH1F* h_caloclusters_cog_y = new TH1F("h_caloclusters_cog_y", "", 100,-500,500);
+  TH1F* h_caloclusters_cog_z = new TH1F("h_caloclusters_cog_z", "", 100,-500,500);
+  TH1F* h_caloclusters_hits_ = new TH1F("h_caloclusters_hits_", "", 100,0,100);
+  TH1F* h_caloclusters_size_ = new TH1F("h_caloclusters_size_", "", 100,0,100);
+  TH1F* h_caloclusters_isSplit_ = new TH1F("h_caloclusters_isSplit_", "", 2,0,2);
+
+  TH1F* h_calohits_crystalId_ = new TH1F("h_calohits_crystalId_", "", 2,0,2);
+  TH1F* h_calohits_nSiPMs_ = new TH1F("h_calohits_nSiPMs_", "", 100,0,100);
+  TH1F* h_calohits_time_ = new TH1F("h_calohits_time_", "", 200,0,2000);
+  TH1F* h_calohits_timeErr_ = new TH1F("h_calohits_timeErr_", "", 100,0,100);
+  TH1F* h_calohits_eDep_ = new TH1F("h_calohits_eDep_", "", 100,0,100);
+  TH1F* h_calohits_eDepErr_ = new TH1F("h_calohits_eDepErr_", "", 100,0,100);
+  TH1F* h_calohits_recoDigis_ = new TH1F("h_calohits_recoDigis_", "", 100,0,100);
+  TH1F* h_calohits_clusterIdx_ = new TH1F("h_calohits_clusterIdx_", "", 100,0,100);
+
+  TH1F* h_calorecodigis_eDep_ = new TH1F("h_calorecodigis_eDep_", "", 100,0,100);
+  TH1F* h_calorecodigis_eDepErr_ = new TH1F("h_calorecodigis_eDepErr_", "", 100,0,100);
+  TH1F* h_calorecodigis_time_ = new TH1F("h_calorecodigis_time_", "", 200,0,2000);
+  TH1F* h_calorecodigis_timeErr_ = new TH1F("h_calorecodigis_timeErr_", "", 100,0,100);
+  TH1F* h_calorecodigis_chi2_ = new TH1F("h_calorecodigis_chi2_", "", 100,0,100);
+  TH1F* h_calorecodigis_ndf_ = new TH1F("h_calorecodigis_ndf_", "", 100,0,100);
+  TH1F* h_calorecodigis_pileUp_ = new TH1F("h_calorecodigis_pileUp_", "", 2,0,2);
+  TH1F* h_calorecodigis_caloDigiIdx_ = new TH1F("h_calorecodigis_caloDigiIdx_", "", 100,0,100);
+  TH1F* h_calorecodigis_caloHitIdx_ = new TH1F("h_calorecodigis_caloHitIdx_", "", 100,0,100);
+
+  TH1F* h_calodigis_SiPMID_ = new TH1F("h_calodigis_SiPMID_", "", 100,0,100);
+  TH1F* h_calodigis_t0_ = new TH1F("h_calodigis_t0_", "", 100,0,100);
+  TH1F* h_calodigis_waveform_ = new TH1F("h_calodigis_waveform_", "", 100,0,100);
+  TH1F* h_calodigis_peakpos_ = new TH1F("h_calodigis_peakpos_", "", 100,0,100);
+  TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
+
   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
     std::cout << "Event #" << i_event << std::endl;
     const auto& event = util.GetEvent(i_event);
@@ -949,8 +986,76 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_crvcoicsmcplane_dataSource->Fill(crvcoincmcplane.dataSource);
       }
     }
+
+
+    if (event.caloclusters != nullptr) {
+      std::cout << "Creating caloclusters histograms..." << std::endl;
+      for (const auto& calocluster : *(event.caloclusters)) {
+        h_caloclusters_diskID_->Fill(calocluster.diskID_);
+        h_caloclusters_time_->Fill(calocluster.time_);
+        h_caloclusters_timeErr_->Fill(calocluster.timeErr_);
+        h_caloclusters_energyDep_->Fill(calocluster.energyDep_);
+        h_caloclusters_energyDepErr_->Fill(calocluster.energyDepErr_);
+        h_caloclusters_cog_x->Fill(calocluster.cog_.x());
+        h_caloclusters_cog_y->Fill(calocluster.cog_.y());
+        h_caloclusters_cog_z->Fill(calocluster.cog_.z());
+        for (const auto& i_hit : calocluster.hits_) {
+          h_caloclusters_hits_->Fill(i_hit);
+        }
+        h_caloclusters_size_->Fill(calocluster.size_);
+        h_caloclusters_isSplit_->Fill(calocluster.isSplit_);
+      }
+    }
+
+    if (event.calohits != nullptr) {
+      std::cout << "Creating calohits histograms..." << std::endl;
+      for (const auto& calohit : *(event.calohits)) {
+
+        h_calohits_crystalId_->Fill(calohit.crystalId_);
+        h_calohits_nSiPMs_->Fill(calohit.nSiPMs_);
+        h_calohits_time_->Fill(calohit.time_);
+        h_calohits_timeErr_->Fill(calohit.timeErr_);
+        h_calohits_eDep_->Fill(calohit.eDep_);
+        h_calohits_eDepErr_->Fill(calohit.eDepErr_);
+        for (const auto& i_reco_digi : calohit.recoDigis_) {
+          h_calohits_recoDigis_->Fill(i_reco_digi);
+        }
+        h_calohits_clusterIdx_->Fill(calohit.clusterIdx_);
+      }
+    }
+
+    if (event.calorecodigis != nullptr) {
+      std::cout << "Creating calorecodigis histograms..." << std::endl;
+      for (const auto& calorecodigi : *(event.calorecodigis)) {
+        h_calorecodigis_eDep_->Fill(calorecodigi.eDep_);
+        h_calorecodigis_eDepErr_->Fill(calorecodigi.eDepErr_);
+        h_calorecodigis_time_->Fill(calorecodigi.time_);
+        h_calorecodigis_timeErr_->Fill(calorecodigi.timeErr_);
+        h_calorecodigis_chi2_->Fill(calorecodigi.chi2_);
+        h_calorecodigis_ndf_->Fill(calorecodigi.ndf_);
+        h_calorecodigis_pileUp_->Fill(calorecodigi.pileUp_);
+        h_calorecodigis_caloDigiIdx_->Fill(calorecodigi.caloDigiIdx_);
+        h_calorecodigis_caloHitIdx_->Fill(calorecodigi.caloHitIdx_);
+      }
+    }
+
+    if (event.calodigis != nullptr) {
+      std::cout << "Creating calodigis histograms..." << std::endl;
+      for (const auto& calodigi : *(event.calodigis)) {
+
+        h_calodigis_SiPMID_->Fill(calodigi.SiPMID_);
+        h_calodigis_t0_->Fill(calodigi.t0_);
+        for (const auto& i_waveform : calodigi.waveform_) {
+          h_calodigis_waveform_->Fill(i_waveform);
+        }
+        h_calodigis_peakpos_->Fill(calodigi.peakpos_);
+        h_calodigis_caloRecoDigiIdx_->Fill(calodigi.caloRecoDigiIdx_);
+      }
+    }
+
+
   }
-  
+
   file->Write();
   file->Close();
 }
