@@ -89,12 +89,21 @@ The ```CrvCoinc``` class contains paired reco and MC information about a single 
 
 Example: [PlotCRVPEsVsMCEDep.C](./examples/PlotCRVPEsVsMCEDep.C)
 
+
 ### ```MCParticle``` Class
 The ```MCParticle``` class contains information about a single SimParticle in the genealogy
 
 * single objects: ```mcsim```
 
 Example: [PlotMCParentPosZ.C](./examples/PlotMCParentPosZ.C)
+
+### The ```CaloCluster``` Class
+The ```CaloCluster``` class contains all information related to a single calorimeter cluster
+
+* single objects: ```calocluster```
+
+Example: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C)
+
 
 ### Branches not contained within a class
 Some branches are not contained in any of the above classes:
@@ -103,7 +112,7 @@ Some branches are not contained in any of the above classes:
 * ```crvdigis```
 * ```crvpulses``` and ```crvpulsesmc```
 * ```crvcoincsmcplane```
-* ```caloclusters```, ```calohits```, ```calorecodigis```, ```calodigis```
+* ```calohits```, ```calorecodigis```, ```calodigis```
 
 Reach out to the developers on the #analysis-tools Slack channel if you have a need to have these added somewhere.
 
