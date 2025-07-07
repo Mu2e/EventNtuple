@@ -15,19 +15,14 @@ physics :
   producers : {
     @table::Reconstruction.producers
     @table::EventNtuple.producers
-    MakeSS : @local::CommonMC.MakeSSDigi
   }
   RecoPath : [
     @sequence::Reconstruction.CaloReco,
-    @sequence::Reconstruction.TrkReco,
+    @sequence::Reconstruction.TrkHitReco,
+    @sequence::Reconstruction.DeReco,
     @sequence::Reconstruction.CrvReco,
-    TimeClusterFinderDe, HelixFinderDe,
-    CalTimePeakFinder, CalHelixFinderDe,
-    CalTimePeakFinderMu, CalHelixFinderDmu,
-    MHDeM,
-    KKDeM,
-    MergeKKDeMCalib,
-    MakeSS,
+    MergeKKDeCalib,
+    TrkQualDe,
     @sequence::Reconstruction.MCReco
   ]
   analyzers : {
@@ -35,8 +30,9 @@ physics :
       @table::EventNtupleMaker
       FitType : LoopHelix
       branches :  [
-        { input: "MergeKKDeMCalib"
+        { input: "MergeKKDeCalib"
           branch : "trk"
+          trkQualTag : "TrkQualDe"
           options : { fillMC : true fillHits : true  genealogyDepth : -1 }
         }
       ]
@@ -46,19 +42,21 @@ physics :
 }
 #include "Production/JobConfig/reco/epilog.fcl"
 #include "Production/Validation/database.fcl"
+#
+physics.end_paths : [ EndPath ]
+physics.trigger_paths : [ RecoPath ]
+
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
-# restrict reco to just DeM
-physics.producers.SelectReco.KalSeedCollections  : ["KKDeM"]
-physics.producers.SelectReco.HelixSeedCollections  : ["MHDeM"]
-physics.producers.KKDeM.ModuleSettings.HelixSeedCollections : [ "MHDeM" ]
+# restrict reco to just De
+physics.producers.SelectReco.KalSeedCollections  : ["KKDe"]
+physics.producers.KKDeM.ModuleSettings.HelixSeedCollections : [ "MHDe" ]
 physics.producers.KKDeM.ModuleSettings.ComboHitCollection : "makeSH"
 physics.producers.KKDeM.ModuleSettings.CaloClusterCollection : "CaloClusterMaker"
-physics.producers.compressRecoMCs.surfaceStepTags: [ "MakeSS" ]
-# turn off unnecessary extrapolation
-physics.producers.KKDeM.Extrapolation.Upstream : false
-physics.producers.KKDeM.Extrapolation.ToOPA : false
-physics.end_paths : [ EndPath ]
+# extrapolation
+physics.producers.KKDeM.Extrapolation.Upstream : true
+physics.producers.KKDeM.Extrapolation.ToOPA : true
 services.TimeTracker.printSummary: true
-services.TFileService.fileName: "nts.owner.EventNtupleDeMCalib.version.sequence.root"
+services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
