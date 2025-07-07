@@ -116,22 +116,10 @@ namespace mu2e {
 
   void InfoStructHelper::fillTrkSegInfo(const KalSeed& kseed, std::vector<std::vector<TrkSegInfo>>& all_tsis) {
     std::vector<TrkSegInfo> tsis;
-    double tmin(std::numeric_limits<float>::max());
-    double tmax(std::numeric_limits<float>::lowest());
-    size_t imin(0), imax(0);
     for(size_t ikinter = 0; ikinter < kseed.intersections().size(); ++ikinter){
       auto const& kinter = kseed.intersections()[ikinter];
-      // record earliest and latest intersections
-      if(kinter.time() < tmin){
-        tmin = kinter.time();
-        imin = ikinter;
-      }
-      if(kinter.time() > tmax){
-        tmax = kinter.time();
-        imax = ikinter;
-      }
       TrkSegInfo tsi;
-      tsi.mom = kinter.momentum3();
+      tsi.mom = kinter.momentum3(); // momentum before traversing any material
       tsi.pos = kinter.position3();
       tsi.time = kinter.time();
       tsi.momerr = kinter.momerr();
@@ -141,11 +129,6 @@ namespace mu2e {
       tsi.sindex = kinter.surfid_.index();
       tsi.dmom = kinter.dMom();
       tsis.push_back(tsi);
-    }
-    // now flag early and latest intersections
-    if(tsis.size() > 0){
-      tsis[imin].early = true;
-      tsis[imax].late = true;
     }
     std::sort(tsis.begin(),tsis.end(),[](const auto& a, const auto& b){return a.time < b.time;});
     all_tsis.push_back(tsis);
@@ -176,7 +159,7 @@ namespace mu2e {
     }
     all_lhis.push_back(lhis);
   }
- 
+
   void InfoStructHelper::fillCentralHelixInfo(const KalSeed& kseed, std::vector<std::vector<CentralHelixInfo>>& all_chis) {
     std::vector<CentralHelixInfo> chis;
     for(auto const& kinter : kseed.intersections()) {
@@ -221,7 +204,7 @@ namespace mu2e {
     }
     all_klis.push_back(klis);
  }
- 
+
  void InfoStructHelper::fillTrkQualInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
     MVAResultInfo temp_result;
     temp_result.result = mva._value;

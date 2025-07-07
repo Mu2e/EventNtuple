@@ -739,13 +739,13 @@ namespace mu2e {
 
                 if (_fillcalodigis){
                   const auto& digi = recodigi->caloDigiPtr();
-          
+
                   int digi_idx = _caloDIs.size();
                   _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
-    
+
                   //Update the recodigi
                   _caloRDIs.back().caloDigiIdx_ = digi_idx;
-    
+
                 }
               }
             }
@@ -773,13 +773,13 @@ namespace mu2e {
 
               if (_fillcalodigis){
                 const auto& digi = recodigi->caloDigiPtr();
-        
+
                 int digi_idx = _caloDIs.size();
                 _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
-  
+
                 //Update the recodigi
                 _caloRDIs.back().caloDigiIdx_ = digi_idx;
-  
+
               }
             }
           }
@@ -1011,7 +1011,7 @@ namespace mu2e {
           _infoMCStructHelper.fillAllSimInfos(kseedmc, primary, _allMCSimTIs.at(i_branch), branchConfig.options().genealogyDepth(), branchConfig.options().matchDepth());
 
           if(_conf.diag() > 1 || (_conf.fillhits() && branchConfig.options().fillhits())){
-            _infoMCStructHelper.fillHitInfoMCs(kseedmc, _allTSHIMCs.at(i_branch));
+            _infoMCStructHelper.fillHitInfoMCs(kseed,kseedmc, _allTSHIMCs.at(i_branch));
           }
           // fill extra MCStep info for this branch
           for(size_t ixt = 0; ixt < _extraMCStepTags.size(); ixt++){
