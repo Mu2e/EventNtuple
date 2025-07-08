@@ -139,7 +139,7 @@ MergeKKDeCalib : {
     tool_type : SimpleKalSeedSelector
     MinMomentum : 0.0 # MeV/c
     MaxMomentum : 300.0 #MeV/c
-    MinFitConsistency : 1e-10
+    MinFitConsistency : -1.0
     MinDeltaNHitFraction : 0.05 # Consider a 5% difference in active hit count to be 'significant', and call the track more hits 'better'.  Otherwise, use fit quality to determine 'better'
     MinActiveHits : 15 # Require a reasonable # of active hits
   }

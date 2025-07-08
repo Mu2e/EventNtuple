@@ -10,7 +10,7 @@ EN : {
   diagLevel : 2
   FillMCInfo : true
   FillTrkPIDInfo : false
-  FillHitInfo : true
+  FillHitInfo : false
   FillTriggerInfo : false
   SurfaceStepCollectionTag : "compressRecoMCs"
 }
@@ -24,28 +24,39 @@ source : { module_type : RootInput }
 services : @local::Services.Reco
 physics :
 {
+  producers: {
+    TrkQualReflecte : {
+      @table::TrkQual
+      KalSeedPtrCollection : Reflecte
+    }
+    TrkQualReflectmu : {
+      @table::TrkQual
+      KalSeedPtrCollection : Reflectmu
+    }
+  }
   filters : {
     Reflecte : {
       @table::TrkReco.SelectReflections
       UpstreamKalSeedCollection : "KKUe"
       DownstreamKalSeedCollection : "KKDe"
-      debugLevel : 1
+      debugLevel : 0
     }
     Reflectmu : {
       @table::TrkReco.SelectReflections
       UpstreamKalSeedCollection : "KKUmu"
       DownstreamKalSeedCollection : "KKDmu"
-      debugLevel : 1
+      debugLevel : 0
     }
   }
-  eTrig : [ Reflecte ]
-  muTrig : [ Reflectmu ]
+  eTrig : [ Reflecte, TrkQualReflecte ]
+  muTrig : [ Reflectmu, TrkQualReflectmu ]
   analyzers : {
     ENe : {
       @table::EN
       SelectEvents : [ "eTrig" ]
       branches : [
         { @table::ENBranch
+          trkQualTag : "TrkQualReflecte"
           input: "Reflecte"
         }
       ]
@@ -55,6 +66,7 @@ physics :
       SelectEvents : [ "muTrig" ]
       branches : [
         { @table::ENBranch
+          trkQualTag : "TrkQualReflectmu"
           input: "Reflectmu"
         }
       ]
