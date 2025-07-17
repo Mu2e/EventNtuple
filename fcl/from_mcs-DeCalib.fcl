@@ -12,23 +12,17 @@ physics :
     DeMFilter : {
     }
   }
-  TriggerPath : [ MergeKKDeCalib ]
-  analyzers : {
-    EventNtuple : {
-      @table::EventNtupleMaker
-      hasTracks : true
-      FitType : LoopHelix
-      branches :  [
-        { input: "MergeKKDeCalib"
-          branch : "trk"
-          options : { fillMC : true fillHits : true  genealogyDepth : -1 }
-        }
-      ]
-    }
+  filters : {
+    KSFDeCalib : @local::KSFDeCalib
   }
+  analyzers : {
+    EventNtuple : @local::ENDeCalib
+  }
+  TriggerPath : [ KSFDeCalib, MergeKKDeCalib, TrkQualDe ]
   EndPath : [EventNtuple]
 }
 physics.trigger_paths : [ TriggerPath ]
 physics.end_paths : [ EndPath ]
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"

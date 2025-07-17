@@ -17,29 +17,9 @@ physics :
     @table::EventNtuple.producers
   }
   filters : {
-    KSFDeCalib : {
-      module_type : KalSeedFilter
-      kalSeedCollections : ["KKDe" ]
-      noInfo : true # don't produce a TriggerInfo object
-      debugLevel : 0
-      KalSeedCuts : [ {
-        requireCaloCluster : false
-        minFitCons : -1.0
-        minNStrawHits : 15
-        minMomentum : 40.0
-        maxMomentum : 300.0
-        minTanDip : -20.0
-        maxTanDip : 20.0
-        maxChi2DOF : 1.0e6
-        maxMomErr : 1e6
-        minD0 : -800.0
-        maxD0 :  800.0
-        minNStereo : 3
-        minNPlanes : 8
-      } ]
-    }
+    KSFDeCalib : @local::KSFDeCalib
   }
-  RecoPath : [
+  TriggerPath : [
     @sequence::Reconstruction.CaloReco,
     @sequence::Reconstruction.TrkHitReco,
     @sequence::Reconstruction.DeReco,
@@ -50,18 +30,7 @@ physics :
     @sequence::Reconstruction.MCReco
   ]
   analyzers : {
-    EventNtuple : {
-      @table::EventNtupleMaker
-      FitType : LoopHelix
-      branches :  [
-        { input: "MergeKKDeCalib"
-          branch : "trk"
-          trkQualTag : "TrkQualDe"
-          options : { fillMC : true fillHits : true  genealogyDepth : -1 }
-        }
-      ]
-      SelectEvents : [ RecoPath ]
-    }
+    EventNtuple : @local::ENDeCalib
   }
   EndPath : [EventNtuple]
 }
@@ -69,7 +38,7 @@ physics :
 #include "Production/Validation/database.fcl"
 #
 physics.end_paths : [ EndPath ]
-physics.trigger_paths : [ RecoPath ]
+physics.trigger_paths : [ TriggerPath ]
 
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs

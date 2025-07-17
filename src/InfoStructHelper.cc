@@ -116,8 +116,7 @@ namespace mu2e {
 
   void InfoStructHelper::fillTrkSegInfo(const KalSeed& kseed, std::vector<std::vector<TrkSegInfo>>& all_tsis) {
     std::vector<TrkSegInfo> tsis;
-    for(size_t ikinter = 0; ikinter < kseed.intersections().size(); ++ikinter){
-      auto const& kinter = kseed.intersections()[ikinter];
+    for(auto const& kinter : kseed.intersections()) {
       TrkSegInfo tsi;
       tsi.mom = kinter.momentum3(); // momentum before traversing any material
       tsi.pos = kinter.position3();
@@ -130,7 +129,7 @@ namespace mu2e {
       tsi.dmom = kinter.dMom();
       tsis.push_back(tsi);
     }
-    std::sort(tsis.begin(),tsis.end(),[](const auto& a, const auto& b){return a.time < b.time;});
+//    std::sort(tsis.begin(),tsis.end(),[](const auto& a, const auto& b){return a.time < b.time;});
     all_tsis.push_back(tsis);
   }
 
