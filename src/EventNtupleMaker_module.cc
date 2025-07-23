@@ -800,6 +800,7 @@ namespace mu2e {
     }
 
     // calorimeter info
+    std::cout<<"branch "<<i_branch<<" track "<<i_kseedptr<<std::endl;
     _infoStructHelper.fillCaloHitInfo(kseed,  _allTCHIs.at(i_branch)); // fillCaloHitInfo handles whether there is a calo hit or not
     if (kseed.hasCaloCluster()) {
       _tcnt._ndec = 1; // only 1 possible calo hit at the moment FIXME: should work with the above
@@ -876,6 +877,7 @@ namespace mu2e {
         auto index = kseed.caloCluster().key();
         auto const& ccmcc = *_ccmcch;
         auto const& ccmc = ccmcc[index];
+        std::cout<<"filling trkcalomc "<<i_branch<<std::endl;
         _infoMCStructHelper.fillCaloClusterInfoMC(ccmc,_allMCTCHIs.at(i_branch));  // currently broken due to CaloMC changes.  This needs fixing in compression
       }
     }
