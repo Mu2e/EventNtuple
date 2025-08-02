@@ -254,7 +254,7 @@ namespace mu2e {
       ++trkinfo.nmat;
       if (i_straw->active()) {
         ++trkinfo.nmatactive;
-        trkinfo.radlen += i_straw->radLen();
+        trkinfo.radlen += i_straw->_radlen;
       }
     }
   }
@@ -350,16 +350,25 @@ namespace mu2e {
     for(const auto& i_straw : kseed.straws()) {
       TrkStrawMatInfo tminfo;
 
-      tminfo.plane = i_straw.straw().getPlane();
-      tminfo.panel = i_straw.straw().getPanel();
-      tminfo.layer = i_straw.straw().getLayer();
-      tminfo.straw = i_straw.straw().getStraw();
+      tminfo.plane = i_straw._straw.getPlane();
+      tminfo.panel = i_straw._straw.getPanel();
+      tminfo.layer = i_straw._straw.getLayer();
+      tminfo.straw = i_straw._straw.getStraw();
 
       tminfo.active = i_straw.active();
-      tminfo.dp = i_straw.pfrac();
-      tminfo.radlen = i_straw.radLen();
-      tminfo.doca = i_straw.doca();
-      tminfo.tlen = i_straw.trkLen();
+      tminfo.hashit = i_straw.hasHit();
+      tminfo.activehit = i_straw.activeHit();
+      tminfo.drifthit = i_straw.driftHit();
+      tminfo.dp = i_straw._dmom;
+      tminfo.radlen = i_straw._radlen;
+      tminfo.doca = i_straw._doca;
+      tminfo.dirdot = i_straw._dirdot;
+      tminfo.gaspath = i_straw._gaspath;
+      tminfo.wallpath = i_straw._wallpath;
+      tminfo.wirepath = i_straw._wirepath;
+      tminfo.udist = i_straw._udist;
+      tminfo.poca = i_straw._poca;
+      tminfo.pcalc = i_straw._pcalc;
 
       tminfos.push_back(tminfo);
     }
