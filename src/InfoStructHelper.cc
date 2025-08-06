@@ -6,6 +6,8 @@
 #include "Offline/RecoDataProducts/inc/TrkStrawHitSeed.hh"
 #include "KinKal/Trajectory/CentralHelix.hh"
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
 #include <cmath>
 #include <limits>
 
@@ -366,10 +368,14 @@ namespace mu2e {
       tminfo.gaspath = i_straw._gaspath;
       tminfo.wallpath = i_straw._wallpath;
       tminfo.wirepath = i_straw._wirepath;
-      tminfo.udist = i_straw._udist;
       tminfo.poca = i_straw._poca;
       tminfo.pcalc = i_straw._pcalc;
-
+      // translate the position to local 'U' coordinates. nominal geometry is good enough for this
+      GeomHandle<Tracker> nominalTracker_h;
+      auto const& tracker = *nominalTracker_h;
+      const Straw& straw = tracker.getStraw(i_straw._straw);
+      tminfo.upos = (i_straw._poca - XYZVectorF(straw.getMidPoint())).Dot(XYZVectorF(straw.wireDirection()));
+      tminfo.udist = fabs(tminfo.upos)-straw.halfLength();
       tminfos.push_back(tminfo);
     }
     all_tminfos.push_back(tminfos);

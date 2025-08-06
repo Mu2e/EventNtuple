@@ -20,6 +20,7 @@ namespace mu2e
     float gaspath = -1000.0;  // path through the straw gas
     float wallpath = -1000.0;  // path through the straw walls
     float wirepath = -1000.0;  // path through the straw wires
+    float upos = 0.0;  // distance of the POCA along the straw WRT the straw middle
     float udist = -1000.0;  // distance of the POCA along the straw past the end of the straw
     XYZVectorF poca; // point of closest approach
   };
