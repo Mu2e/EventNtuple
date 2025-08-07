@@ -17,7 +17,7 @@ This script will run all the supported fcl files over relevant datasets. All tes
 Before making any changes, create an EventNtuple file and run the validation script. This creates a new ROOT file with histograms created from the EventNtuple ntuple:
 
 ```
-mu2e -c EventNtuple/fcl/from_mcs_mockdata.fcl -S filelist.txt --TFileName nts.ntuple.before.root
+mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S filelist.txt --TFileName nts.ntuple.before.root
 
 root -l -b EventNtuple/validation/create_val_file_rooutil.C\(\"nts.ntuple.before.root\",\"val.ntuple.before.root\"\)
 ```

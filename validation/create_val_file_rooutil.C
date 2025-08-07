@@ -73,8 +73,6 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_trksegs_momerr = new TH1F("h_trksegs_momerr", "", 100,0,5);
   TH1F* h_trksegs_inbounds = new TH1F("h_trksegs_inbounds", "", 100,0,5);
   TH1F* h_trksegs_gap = new TH1F("h_trksegs_gap", "", 100,0,5);
-  TH1F* h_trksegs_early = new TH1F("h_trksegs_early", "", 100,0,5);
-  TH1F* h_trksegs_late = new TH1F("h_trksegs_late", "", 100,0,5);
   TH1F* h_trksegs_sid = new TH1F("h_trksegs_sid", "", 200,0,200);
   TH1F* h_trksegs_sindex = new TH1F("h_trksegs_sindex", "", 50,0,50);
 
@@ -339,16 +337,30 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_trkhitsmc_cpos_x = new TH1F("h_trkhitsmc_cpos_x", "", 100,-500,500);
   TH1F* h_trkhitsmc_cpos_y = new TH1F("h_trkhitsmc_cpos_y", "", 100,-500,500);
   TH1F* h_trkhitsmc_cpos_z = new TH1F("h_trkhitsmc_cpos_z", "", 100,-500,500);
+  TH1F* h_trkhitsmc_recohit = new TH1F("h_trkhitsmc_recohit", "", 100,0,100);
 
   TH1F* h_trkmats_active = new TH1F("h_trkmats_active", "", 100,0,100);
+  TH1F* h_trkmats_hashit = new TH1F("h_trkmats_hashit", "", 100,0,100);
+  TH1F* h_trkmats_activehit = new TH1F("h_trkmats_activehit", "", 100,0,100);
+  TH1F* h_trkmats_drifthit = new TH1F("h_trkmats_drifthit", "", 100,0,100);
   TH1F* h_trkmats_plane = new TH1F("h_trkmats_plane", "", 100,0,100);
   TH1F* h_trkmats_panel = new TH1F("h_trkmats_panel", "", 100,0,100);
   TH1F* h_trkmats_layer = new TH1F("h_trkmats_layer", "", 100,0,100);
   TH1F* h_trkmats_straw = new TH1F("h_trkmats_straw", "", 100,0,100);
+  TH1F* h_trkmats_pcalc = new TH1F("h_trkmats_pcalc", "", 100,0,100);
   TH1F* h_trkmats_doca = new TH1F("h_trkmats_doca", "", 100,-100,100);
-  TH1F* h_trkmats_tlen = new TH1F("h_trkmats_tlen", "", 200,0,2000);
   TH1F* h_trkmats_dp  = new TH1F("h_trkmats_dp", "", 100,-1,1);
   TH1F* h_trkmats_radlen = new TH1F("h_trkmats_radlen", "", 100,0,100);
+  TH1F* h_trkmats_dirdot = new TH1F("h_trkmats_dirdot", "", 100,0,100);
+  TH1F* h_trkmats_gaspath = new TH1F("h_trkmats_gaspath", "", 100,0,100);
+  TH1F* h_trkmats_wallpath = new TH1F("h_trkmats_wallpath", "", 100,0,100);
+  TH1F* h_trkmats_wirepath = new TH1F("h_trkmats_wirepath", "", 100,0,100);
+  TH1F* h_trkmats_upos = new TH1F("h_trkmats_upos", "", 100,0,100);
+  TH1F* h_trkmats_udist = new TH1F("h_trkmats_udist", "", 100,0,100);
+  TH1F* h_trkmats_poca_x = new TH1F("h_trkmats_poca_x", "", 200,-200,200);
+  TH1F* h_trkmats_poca_y = new TH1F("h_trkmats_poca_y", "", 200,-200,200);
+  TH1F* h_trkmats_poca_z = new TH1F("h_trkmats_poca_z", "", 200,-200,200);
+
 
   TH1F* h_hitcount_nsd = new TH1F("h_hitcount_nsd", "", 150,0,150);
   TH1F* h_hitcount_nesel = new TH1F("h_hitcount_nesel", "", 150,0,150);
@@ -496,8 +508,6 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_trksegs_momerr->Fill(trkseg.momerr);
         h_trksegs_inbounds->Fill(trkseg.inbounds);
         h_trksegs_gap->Fill(trkseg.gap);
-        h_trksegs_early->Fill(trkseg.early);
-        h_trksegs_late->Fill(trkseg.late);
         h_trksegs_sid->Fill(trkseg.sid);
         h_trksegs_sindex->Fill(trkseg.sindex);
       }
@@ -826,6 +836,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
           h_trkhitsmc_cpos_x->Fill(trkhitmc.cpos.x());
           h_trkhitsmc_cpos_y->Fill(trkhitmc.cpos.y());
           h_trkhitsmc_cpos_z->Fill(trkhitmc.cpos.z());
+          h_trkhitsmc_recohit->Fill(trkhitmc.recohit);
         }
       }
     }
@@ -835,14 +846,26 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       for (const auto& trkmats : *(event.trkmats)) {
         for (const auto& trkmat : trkmats) {
           h_trkmats_active->Fill(trkmat.active);
+          h_trkmats_hashit->Fill(trkmat.hashit);
+          h_trkmats_activehit->Fill(trkmat.activehit);
+          h_trkmats_drifthit->Fill(trkmat.drifthit);
           h_trkmats_plane->Fill(trkmat.plane);
           h_trkmats_panel->Fill(trkmat.panel);
           h_trkmats_layer->Fill(trkmat.layer);
           h_trkmats_straw->Fill(trkmat.straw);
+          h_trkmats_pcalc->Fill(trkmat.pcalc);
           h_trkmats_doca->Fill(trkmat.doca);
-          h_trkmats_tlen->Fill(trkmat.tlen);
           h_trkmats_dp->Fill(trkmat.dp);
           h_trkmats_radlen->Fill(trkmat.radlen);
+          h_trkmats_dirdot->Fill(trkmat.dirdot);
+          h_trkmats_gaspath->Fill(trkmat.gaspath);
+          h_trkmats_wallpath->Fill(trkmat.wallpath);
+          h_trkmats_wirepath->Fill(trkmat.wirepath);
+          h_trkmats_upos->Fill(trkmat.upos);
+          h_trkmats_udist->Fill(trkmat.udist);
+          h_trkmats_poca_x->Fill(trkmat.poca.x());
+          h_trkmats_poca_y->Fill(trkmat.poca.y());
+          h_trkmats_poca_z->Fill(trkmat.poca.z());
         }
       }
     }
