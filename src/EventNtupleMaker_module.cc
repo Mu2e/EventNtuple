@@ -69,6 +69,7 @@
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/EventWeightInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
@@ -147,6 +148,7 @@ namespace mu2e {
         fhicl::Sequence<fhicl::Table<BranchConfig> > branches{Name("branches"), Comment("All the branches we want to write")};
         // Additional (optional) tracking information
         fhicl::Atom<bool> fillhits{Name("FillHitInfo"),Comment("Global switch to turn on/off hit-level info"), false};
+        fhicl::Atom<bool> fillhitcalibs{Name("FillHitCalibInfo"), Comment("Switch to turn on filling of hit-level information for this set of tracks"), false};
         fhicl::Atom<std::string> fittype{Name("FitType"),Comment("Type of track Fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"),"Unknown"};
         fhicl::Atom<bool> helices{Name("FillHelixInfo"),false};
         // Calorimeter input
@@ -269,6 +271,7 @@ namespace mu2e {
 
       // hit level info branches
       std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfo>>> _allTSHIs;
+      std::map<BranchIndex, std::vector<std::vector<TrkStrawHitCalibInfo>>> _allTSHCIs;
       std::map<BranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
       std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
 
@@ -404,6 +407,7 @@ namespace mu2e {
       _allTPIs.push_back(tpi);
 
       _allTSHIs[i_branch] = std::vector<std::vector<TrkStrawHitInfo>>();
+      _allTSHCIs[i_branch] = std::vector<std::vector<TrkStrawHitCalibInfo>>();
       _allTSMIs[i_branch] = std::vector<std::vector<TrkStrawMatInfo>>();
       _allTSHIMCs[i_branch] = std::vector<std::vector<TrkStrawHitInfoMC>>();
 
@@ -480,6 +484,8 @@ namespace mu2e {
       // (for the time being diagLevel : 2 will still work, but I propose removing this at some point)
       if(_conf.diag() > 1 || (_conf.fillhits() && i_branchConfig.options().fillhits())){
         _ntuple->Branch((branch+"hits.").c_str(),&_allTSHIs.at(i_branch),_buffsize,_splitlevel);
+        if (_conf.fillhitcalibs())
+          _ntuple->Branch((branch+"hitcalibs.").c_str(),&_allTSHCIs.at(i_branch),_buffsize,_splitlevel);
         _ntuple->Branch((branch+"mats.").c_str(),&_allTSMIs.at(i_branch),_buffsize,_splitlevel);
       }
 
@@ -671,6 +677,7 @@ namespace mu2e {
       _allTCHIs.at(i_branch).clear();
 
       _allTSHIs.at(i_branch).clear();
+      _allTSHCIs.at(i_branch).clear();
       _allTSMIs.at(i_branch).clear();
       _allTSHIMCs.at(i_branch).clear();
 
@@ -954,7 +961,7 @@ namespace mu2e {
     if(_ftype == KinematicLine && kseed.kinematicLineFit())_infoStructHelper.fillKinematicLineInfo(kseed,_allKLIs.at(i_branch));
     BranchConfig branchConfig = _allBranches.at(i_branch);
     if(_conf.diag() > 1 || (_conf.fillhits() && branchConfig.options().fillhits())){ // want hit level info
-      _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_branch));
+      _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_branch), _allTSHCIs.at(i_branch), _conf.fillhitcalibs());
       _infoStructHelper.fillMatInfo(kseed, _allTSMIs.at(i_branch));
     }
 
