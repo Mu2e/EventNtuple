@@ -13,7 +13,8 @@ namespace mu2e
     bool drifthit = false;    // was the hit assocated using drift information
     int plane = -1, panel = -1, layer = -1, straw = -1; // StrawId fields of the straw
     int pcalc; // flag for how the path length was calculated
-    float doca = -1000.0;    // DOCA between the track fit and the wire
+    float doca = -1000.0;    // DOCA between the track fit and the straw axis
+    float docavar = -1000.0;    // DOCA variance
     float dp  = -1000.0;      // momentum (energy) loss induced by this straw's material, including both entry and exit wall and the gas
     float radlen = -1000.0;  // radiation length of this straw's material seen by the track (including angular effects)
     float dirdot = -1000.0;  // dot product between straw axis and track direciton
