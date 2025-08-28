@@ -11,7 +11,7 @@ From ```EventNtuple/``` directory:
 . ./validation/test_fcls.sh
 ```
 
-This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```
+This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```. If one reports ```FAIL```, you can find the exact command that failed in the ```test_fcls.log``` file in order to debug.
 
 ### Creating a Validation File
 Before making any changes, create an EventNtuple file and run the validation script. This creates a new ROOT file with histograms created from the EventNtuple ntuple:
