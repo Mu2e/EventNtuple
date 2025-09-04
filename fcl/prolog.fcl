@@ -124,7 +124,7 @@ MergeKKUmuP.KalSeedCollections : [ "KKUmuP" ]
 MergeKKLine          : @local::MergeKK
 MergeKKLine.KalSeedCollections : [ "KKLine" ]
 MergeKKOff          : @local::MergeKK
-MergeKKOff.KalSeedCollections : [ "KKOffSpill" ]
+MergeKKOff.KalSeedCollections : [ "KKCHmu" ]
 MergeKKAll          : @local::MergeKK
 MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP", # will go when all new datasets are added
   "KKDe", "KKUe", "KKDmu", "KKUmu" ] # these are the new APR outputs

@@ -1,5 +1,6 @@
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
 #include "EventNtuple/inc/EventInfo.hh"
 #include "EventNtuple/inc/EventInfoMC.hh"

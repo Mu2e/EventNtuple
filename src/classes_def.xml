@@ -5,6 +5,9 @@
   <class name="mu2e::TrkStrawHitInfo" />
   <class name="std::vector<mu2e::TrkStrawHitInfo>" />
   <class name="std::vector<std::vector<mu2e::TrkStrawHitInfo>>" />
+  <class name="mu2e::TrkStrawHitCalibInfo" />
+  <class name="std::vector<mu2e::TrkStrawHitCalibInfo>" />
+  <class name="std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>" />
   <class name="mu2e::TrkStrawMatInfo" />
   <class name="std::vector<mu2e::TrkStrawMatInfo>" />
   <class name="std::vector<std::vector<mu2e::TrkStrawMatInfo>>" />
