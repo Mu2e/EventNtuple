@@ -12,7 +12,7 @@ nthelp.whatis(['evtinfo.run', 'evtinfo.subrun', 'evtinfo.event']) # should only 
 
 print("Testing wildcard")
 print("=========")
-nthelp.whatis(["trk.*", "trksegs.*"])
+nthelp.whatis(["trk.*", "trksegs.*", "caloclusters.*"])
 
 print("Testing a few errors")
 print("=========")

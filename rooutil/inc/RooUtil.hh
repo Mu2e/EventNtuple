@@ -124,6 +124,11 @@ public:
     if(event->trkhitsmc) { output_ntuple->Branch("trkhitsmc", event->trkhitsmc); }
     if(event->trkmats) { output_ntuple->Branch("trkmats", event->trkmats); }
 
+    if(event->caloclusters) { output_ntuple->Branch("caloclusters", event->caloclusters); }
+    if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }
+    if(event->calorecodigis) { output_ntuple->Branch("calorecodigis", event->calorecodigis); }
+    if(event->calodigis) { output_ntuple->Branch("calodigis", event->calodigis); }
+
     if(event->crvcoincs) { output_ntuple->Branch("crvcoincs", event->crvcoincs); }
     if(event->crvcoincsmc) { output_ntuple->Branch("crvcoincsmc", event->crvcoincsmc); }
     if(event->crvdigis) { output_ntuple->Branch("crvdigis", event->crvdigis); }

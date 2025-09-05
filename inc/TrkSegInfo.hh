@@ -19,8 +19,6 @@ namespace mu2e
     float momerr = -1000;  // projected error on the scalar momentum
     bool inbounds = false; // was the intersection within the (literal) surface bounds?
     bool gap = false; // was the intersection in a piecewise trajectory gap?
-    bool early = false; // is this the earliest intersection for this track?
-    bool late = false; // is this the latest intersection for this track?
     int sid = SurfaceIdEnum::unknown; // SurfaceId of the intersected surface, see Offline/KinKalGeom/inc/SurfaceId.hh for definitions
     int sindex = 0; // index to the intersected surface (for multi-surface elements like StoppingTarget)
     void reset() { *this = TrkSegInfo(); }
