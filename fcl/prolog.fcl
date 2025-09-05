@@ -54,15 +54,15 @@ TrkPID : {
   module_type : TrackPID
   MaxDE : 5.0 # MeV
   DeltaTOffset : -1.15 # specific to MDC2018h
-  MVAConfig : { MVAWeights : "Offline/TrkDiag/data/TrkCaloHitPID.weights.xml"}
+  datFilename : "Offline/TrkDiag/data/TrackPID.dat"
 }
 # this module only makes sense for downstream electron fits
 TrkPIDDeM          : @local::TrkPID
-TrkPIDDeM.KalSeedCollection : "KKDeM"
+TrkPIDDeM.KalSeedPtrCollection : "MergeKKDeM"
 TrkPIDDeP          : @local::TrkPID
-TrkPIDDeP.KalSeedCollection : "KKDeP"
+TrkPIDDeP.KalSeedPtrCollection : "MergeKKDeP"
 TrkPIDDe          : @local::TrkPID
-TrkPIDDe.KalSeedCollection : "KKDe"
+TrkPIDDe.KalSeedPtrCollection : "MergeKKDe"
 TrkPIDProducers : {
   TrkPIDDeM : @local::TrkPIDDeM
   TrkPIDDeP : @local::TrkPIDDeP
@@ -96,8 +96,6 @@ genCountLogger: { module_type: GenEventCountReader }
 
 AllOpt : {
   fillMC : true
-  trkpid : "TrkPID"
-  fillTrkPID : true
   fillHits : true
   genealogyDepth : -1
   matchDepth : -1
@@ -171,6 +169,7 @@ DeM : { input : "MergeKKDeM"
   branch : "dem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTag : "TrkQualDeM"
+  trkPIDTag : "TrkPIDDeM"
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
@@ -220,6 +219,7 @@ De : { input : "MergeKKDe"
   branch : "de"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTag : "TrkQualDe"
+  trkPIDTag : "TrkPIDDe"
 }
 
 EventNtupleMaker : {
@@ -240,7 +240,6 @@ EventNtupleMaker : {
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
   CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
-  FillTrkPIDInfo : false
   FillHitInfo : true
   FillTriggerInfo : false
   TriggerProcessName : "Mix"
@@ -303,11 +302,11 @@ EventNtuple : {
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll ]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDDe ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDDe ]
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
