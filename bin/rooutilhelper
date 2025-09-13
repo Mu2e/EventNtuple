@@ -1,0 +1,23 @@
+#!/bin/python3
+
+import argparse
+from rooutilhelper import ruhelper
+
+# A main function so that this can be run on the command line
+def main():
+    parser = argparse.ArgumentParser(
+        prog='rooutilhelper',
+        description='A python utility class to get information about RooUtil',
+        epilog='For help, post to the #analysis-tools Slack channel')
+
+    parser.add_argument('--list-available-cuts', action='store_true', help="List all cuts already available in common_cuts.hh")
+
+    args = parser.parse_args()
+
+    ruh = ruhelper()
+    if (args.list_available_cuts):
+        ruh.list_available_cuts()
+
+
+if __name__ == "__main__":
+    main()

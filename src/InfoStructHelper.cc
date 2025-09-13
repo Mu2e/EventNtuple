@@ -6,6 +6,8 @@
 #include "Offline/RecoDataProducts/inc/TrkStrawHitSeed.hh"
 #include "KinKal/Trajectory/CentralHelix.hh"
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
+#include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/TrackerGeom/inc/Tracker.hh"
 #include <cmath>
 #include <limits>
 
@@ -116,22 +118,9 @@ namespace mu2e {
 
   void InfoStructHelper::fillTrkSegInfo(const KalSeed& kseed, std::vector<std::vector<TrkSegInfo>>& all_tsis) {
     std::vector<TrkSegInfo> tsis;
-    double tmin(std::numeric_limits<float>::max());
-    double tmax(std::numeric_limits<float>::lowest());
-    size_t imin(0), imax(0);
-    for(size_t ikinter = 0; ikinter < kseed.intersections().size(); ++ikinter){
-      auto const& kinter = kseed.intersections()[ikinter];
-      // record earliest and latest intersections
-      if(kinter.time() < tmin){
-        tmin = kinter.time();
-        imin = ikinter;
-      }
-      if(kinter.time() > tmax){
-        tmax = kinter.time();
-        imax = ikinter;
-      }
+    for(auto const& kinter : kseed.intersections()) {
       TrkSegInfo tsi;
-      tsi.mom = kinter.momentum3();
+      tsi.mom = kinter.momentum3(); // momentum before traversing any material
       tsi.pos = kinter.position3();
       tsi.time = kinter.time();
       tsi.momerr = kinter.momerr();
@@ -142,11 +131,7 @@ namespace mu2e {
       tsi.dmom = kinter.dMom();
       tsis.push_back(tsi);
     }
-    // now flag early and latest intersections
-    if(tsis.size() > 0){
-      tsis[imin].early = true;
-      tsis[imax].late = true;
-    }
+//    std::sort(tsis.begin(),tsis.end(),[](const auto& a, const auto& b){return a.time < b.time;});
     all_tsis.push_back(tsis);
   }
 
@@ -175,7 +160,7 @@ namespace mu2e {
     }
     all_lhis.push_back(lhis);
   }
- 
+
   void InfoStructHelper::fillCentralHelixInfo(const KalSeed& kseed, std::vector<std::vector<CentralHelixInfo>>& all_chis) {
     std::vector<CentralHelixInfo> chis;
     for(auto const& kinter : kseed.intersections()) {
@@ -220,7 +205,7 @@ namespace mu2e {
     }
     all_klis.push_back(klis);
  }
- 
+
  void InfoStructHelper::fillTrkQualInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
     MVAResultInfo temp_result;
     temp_result.result = mva._value;
@@ -271,7 +256,7 @@ namespace mu2e {
       ++trkinfo.nmat;
       if (i_straw->active()) {
         ++trkinfo.nmatactive;
-        trkinfo.radlen += i_straw->radLen();
+        trkinfo.radlen += i_straw->_radlen;
       }
     }
   }
@@ -367,23 +352,37 @@ namespace mu2e {
     for(const auto& i_straw : kseed.straws()) {
       TrkStrawMatInfo tminfo;
 
-      tminfo.plane = i_straw.straw().getPlane();
-      tminfo.panel = i_straw.straw().getPanel();
-      tminfo.layer = i_straw.straw().getLayer();
-      tminfo.straw = i_straw.straw().getStraw();
+      tminfo.plane = i_straw._straw.getPlane();
+      tminfo.panel = i_straw._straw.getPanel();
+      tminfo.layer = i_straw._straw.getLayer();
+      tminfo.straw = i_straw._straw.getStraw();
 
       tminfo.active = i_straw.active();
-      tminfo.dp = i_straw.pfrac();
-      tminfo.radlen = i_straw.radLen();
-      tminfo.doca = i_straw.doca();
-      tminfo.tlen = i_straw.trkLen();
-
+      tminfo.hashit = i_straw.hasHit();
+      tminfo.activehit = i_straw.activeHit();
+      tminfo.drifthit = i_straw.driftHit();
+      tminfo.dp = i_straw._dmom;
+      tminfo.radlen = i_straw._radlen;
+      tminfo.doca = i_straw._doca;
+      tminfo.docavar = i_straw._docavar;
+      tminfo.dirdot = i_straw._dirdot;
+      tminfo.gaspath = i_straw._gaspath;
+      tminfo.wallpath = i_straw._wallpath;
+      tminfo.wirepath = i_straw._wirepath;
+      tminfo.poca = i_straw._poca;
+      tminfo.pcalc = i_straw._pcalc;
+      // translate the position to local 'U' coordinates. nominal geometry is good enough for this
+      GeomHandle<Tracker> nominalTracker_h;
+      auto const& tracker = *nominalTracker_h;
+      const Straw& straw = tracker.getStraw(i_straw._straw);
+      tminfo.upos = (i_straw._poca - XYZVectorF(straw.getMidPoint())).Dot(XYZVectorF(straw.wireDirection()));
+      tminfo.udist = fabs(tminfo.upos)-straw.halfLength();
       tminfos.push_back(tminfo);
     }
     all_tminfos.push_back(tminfos);
   }
 
-  void InfoStructHelper::fillCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& all_tchinfos) {
+  void InfoStructHelper::fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& all_tchinfos) {
     TrkCaloHitInfo tchinfo;
     if (kseed.hasCaloCluster()) {
       auto const& tch = kseed.caloHit();
@@ -473,5 +472,55 @@ namespace mu2e {
       trkpidInfo._diskbrad[idisk] = sqrt(extpos.Perp2());
     }
   }
+
+  void InfoStructHelper::fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos) {
+    CaloClusterInfo clusterinfo;
+    clusterinfo.diskID_ = ccptr.diskID();
+    clusterinfo.time_ = ccptr.time();
+    clusterinfo.timeErr_ = ccptr.timeErr();
+    clusterinfo.energyDep_ = ccptr.energyDep();
+    clusterinfo.energyDepErr_ = ccptr.energyDepErr();
+    clusterinfo.cog_ = ccptr.cog3Vector();
+    clusterinfo.size_ = ccptr.size();
+    clusterinfo.isSplit_ = ccptr.isSplit();
+    clusterinfos.push_back(clusterinfo);
+  }
+
+  void InfoStructHelper::fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx) {
+    CaloHitInfo hitinfo;
+    hitinfo.crystalId_ = chptr.crystalID();
+    hitinfo.nSiPMs_ = chptr.nSiPMs();
+    hitinfo.time_ = chptr.time();
+    hitinfo.timeErr_ = chptr.timeErr();
+    hitinfo.eDep_ = chptr.energyDep();
+    hitinfo.eDepErr_ = chptr.energyDepErr();
+    hitinfo.clusterIdx_ = clusterIdx;
+    hitinfos.push_back(hitinfo);
+  }
+
+  void InfoStructHelper::fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx) {
+    CaloRecoDigiInfo recodigiinfo;
+    recodigiinfo.eDep_ = crdptr.energyDep();
+    recodigiinfo.eDepErr_ = crdptr.energyDepErr();
+    recodigiinfo.time_ = crdptr.time();
+    recodigiinfo.timeErr_ = crdptr.timeErr();
+    recodigiinfo.chi2_ = crdptr.chi2();
+    recodigiinfo.ndf_ = crdptr.ndf();
+    recodigiinfo.pileUp_ = crdptr.pileUp();
+    recodigiinfo.caloHitIdx_ = hitIdx;
+    recodigiinfos.push_back(recodigiinfo);
+  }
+
+  void InfoStructHelper::fillCaloDigiInfo(const CaloDigi& cdptr, std::vector<CaloDigiInfo>& digiinfos, int recodigiIdx) {
+    CaloDigiInfo digiinfo;
+    digiinfo.SiPMID_ = cdptr.SiPMID();
+    digiinfo.t0_ = cdptr.t0();
+    digiinfo.waveform_ = cdptr.waveform();
+    digiinfo.peakpos_ = cdptr.peakpos();
+    digiinfo.caloRecoDigiIdx_ = recodigiIdx;
+    digiinfos.push_back(digiinfo);
+  }
+
+
 
 }

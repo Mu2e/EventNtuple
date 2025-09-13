@@ -1,0 +1,34 @@
+#!/bin/python3
+
+import argparse
+import ROOT
+
+# A main function so that this can be run on the command line
+def main():
+    parser = argparse.ArgumentParser(
+        prog='checkVersion',
+        description='Check the version of EventNtuple file',
+        epilog='For help, post to the #analysis-tools Slack channel')
+
+    parser.add_argument('filenames', nargs='*', help="Files to check")
+    args = parser.parse_args()
+
+    foldername = "EventNtuple"
+    histname = "version"
+    for filename in args.filenames:
+        try:
+            f = ROOT.TFile(filename, "READ");
+            if (f.GetListOfKeys().Contains(foldername)):
+                folder = f.Get(foldername)
+                if (folder.GetListOfKeys().Contains("version")):
+                    h = f.Get("EventNtuple/version")
+                    print("{} contains EventNtuple v{:02.0f}_{:02.0f}_{:02.0f}".format(filename, h.GetBinContent(1), h.GetBinContent(2), h.GetBinContent(3)))
+                else:
+                    print("{} histogram does not exist in {} (it is either v06_02_00 or older)".format(histname, filename))
+            else:
+                print("{}/ folder does not exist in {}".format(foldername, filename))
+        except OSError:
+            print("{} threw an OSError (does it exist?)".format(filename))
+
+if __name__ == "__main__":
+    main()

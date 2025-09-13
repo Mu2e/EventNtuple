@@ -1,0 +1,91 @@
+# Minimal job to run TrkAna on selected reflections
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardServices.fcl"
+#include "Offline/TrkReco/fcl/prolog.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+BEGIN_PROLOG
+EN : {
+  @table::EventNtupleMaker
+  FitType : LoopHelix
+  diagLevel : 2
+  FillMCInfo : true
+  FillTrkPIDInfo : false
+  FillHitInfo : false
+  FillTriggerInfo : false
+  SurfaceStepCollectionTag : "compressRecoMCs"
+}
+ENBranch : {
+  branch : "trk"
+  options : { fillMC : true   genealogyDepth : -1 }
+}
+END_PROLOG
+process_name: ENeflect
+source : { module_type : RootInput }
+services : @local::Services.Reco
+physics :
+{
+  producers: {
+    TrkQualReflecte : {
+      @table::TrkQual
+      KalSeedPtrCollection : Reflecte
+    }
+    TrkQualReflectmu : {
+      @table::TrkQual
+      KalSeedPtrCollection : Reflectmu
+    }
+  }
+  filters : {
+    Reflecte : {
+      @table::TrkReco.SelectReflections
+      UpstreamKalSeedCollection : "KKUe"
+      DownstreamKalSeedCollection : "KKDe"
+      debugLevel : 0
+    }
+    Reflectmu : {
+      @table::TrkReco.SelectReflections
+      UpstreamKalSeedCollection : "KKUmu"
+      DownstreamKalSeedCollection : "KKDmu"
+      debugLevel : 0
+    }
+  }
+  eTrig : [ Reflecte, TrkQualReflecte ]
+  muTrig : [ Reflectmu, TrkQualReflectmu ]
+  analyzers : {
+    ENe : {
+      @table::EN
+      SelectEvents : [ "eTrig" ]
+      branches : [
+        { @table::ENBranch
+          trkQualTag : "TrkQualReflecte"
+          input: "Reflecte"
+        }
+      ]
+    }
+    ENmu : {
+      @table::EN
+      SelectEvents : [ "muTrig" ]
+      branches : [
+        { @table::ENBranch
+          trkQualTag : "TrkQualReflectmu"
+          input: "Reflectmu"
+        }
+      ]
+    }
+    printModule : {
+      module_type : PrintModule
+      PrintEvent : false
+      PrintSubRun : true
+      CosmicLivetimePrinter : {
+        verbose : 1
+      }
+    } # printModule
+  }
+  eEnd : [ "ENe" ]
+  muEnd : [ "ENmu" ]
+  CLPrint : [ "printModule" ]
+}
+
+physics.trigger_paths : [ "eTrig", "muTrig"]
+physics.end_paths : [ "eEnd", "muEnd", "CLPrint" ]
+services.TimeTracker.printSummary: true
+services.TFileService.fileName: "nts.owner.ENreflection.version.sequence.root"

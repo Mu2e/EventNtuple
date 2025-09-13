@@ -1,6 +1,6 @@
 # How to get help -- ```ntuplehelper```
 
-On this page, you will learn how to use the [```ntuplehelper```](../../utils/ntuplehelper.py) utility to get more information about what the different branches and leaves are.
+On this page, you will learn how to use the [```ntuplehelper```](../../utils/helper/ntuplehelper.py) utility to get more information about what the different branches and leaves are.
 
 ## Setting Up
 

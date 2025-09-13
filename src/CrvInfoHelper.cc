@@ -9,6 +9,7 @@
 #include "Offline/MCDataProducts/inc/CrvDigiMC.hh"
 #include "Offline/MCDataProducts/inc/CrvStep.hh"
 #include "Offline/MCDataProducts/inc/MCTrajectory.hh"
+#include "Offline/MCDataProducts/inc/MCRelationship.hh"
 #include "Offline/RecoDataProducts/inc/CrvCoincidenceCluster.hh"
 #include "Offline/RecoDataProducts/inc/CrvDigi.hh"
 #include "Offline/RecoDataProducts/inc/CrvRecoPulse.hh"
@@ -28,7 +29,8 @@ namespace mu2e
       art::Handle<MCTrajectoryCollection> const& mcTrajectories,
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
-      CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY) {
+      CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
+      art::Handle<PrimaryParticle> const& primary) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
 
@@ -158,13 +160,22 @@ namespace mu2e
     //locate points where the cosmic MC trajectories cross the xz plane of CRV-T
     if(mcTrajectories.isValid())
     {
+      auto bestprimarysp = primary->primarySimParticles().front();
       for(auto trajectoryIter=mcTrajectories->begin(); trajectoryIter!=mcTrajectories->end(); trajectoryIter++)
       {
         const art::Ptr<SimParticle> &trajectorySimParticle = trajectoryIter->first;
-        if(abs(trajectorySimParticle->pdgId())!=PDGCode::mu_minus) continue;
+
+        // We want to store the MC-truth information for the cosmic primary that crossed the plane
+        //
+        // Sometimes we have e.g. a neutron that undergoes a neutronInelasic process and "produces" a neutron
+        // that crosses the plane.In this case, the primary particle neutron and the "daughter" neutron
+        // are not the same SimParticle but here we still want to record the information of the "daughter" neutron
+        MCRelationship rel(trajectorySimParticle, bestprimarysp);
+        if(rel != MCRelationship::same && trajectorySimParticle->pdgId() != bestprimarysp->pdgId()) { continue; }
+
         const art::Ptr<SimParticle> &trajectoryPrimaryParticle = FindPrimaryParticle(trajectorySimParticle);
         GenId genId = trajectoryPrimaryParticle->genParticle()->generatorId();
-        if(genId==GenId::cosmicToy || genId==GenId::cosmicDYB || genId==GenId::cosmic || genId==GenId::cosmicCRY)
+        if(genId.isCosmic())
         {
           const std::vector<MCTrajectoryPoint> &points = trajectoryIter->second.points();
           if(points.size()<1) continue;

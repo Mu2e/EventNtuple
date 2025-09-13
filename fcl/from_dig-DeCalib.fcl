@@ -1,0 +1,51 @@
+# Minimal job to reconstructed downstream electrons from digis and create a tuple from the 'best' DeM in each event
+# Because this script runs parts of reconstruction you must provide database information. The validation default is
+# used by default, if you need to override #include this in another .fcl and override the DB specification
+# as this script is intended to support calibration detailed hit information is added
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardServices.fcl"
+#include "Production/JobConfig/recoMC/prolog.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+
+process_name: EventNtuple
+source : { module_type : RootInput }
+services : @local::Services.Reco
+physics :
+{
+  producers : {
+    @table::Reconstruction.producers
+    @table::EventNtuple.producers
+  }
+  filters : {
+    KSFDeCalib : @local::KSFDeCalib
+  }
+  TriggerPath : [
+    @sequence::Reconstruction.CaloReco,
+    @sequence::Reconstruction.TrkHitReco,
+    @sequence::Reconstruction.DeReco,
+    @sequence::Reconstruction.CrvReco,
+    KSFDeCalib,
+    MergeKKDeCalib,
+    TrkQualDe,
+    @sequence::Reconstruction.MCReco
+  ]
+  analyzers : {
+    EventNtuple : @local::ENDeCalib
+  }
+  EndPath : [EventNtuple]
+}
+#include "Production/JobConfig/reco/epilog.fcl"
+#include "Production/Validation/database.fcl"
+#
+physics.end_paths : [ EndPath ]
+physics.trigger_paths : [ TriggerPath ]
+
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
+# Override provenance of some objects since this job doesn't run CompressRecoMCs
+physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
+physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
+# restrict reco to just De
+physics.producers.SelectReco.KalSeedCollections  : ["KKDe"]
+# extrapolation
+services.TimeTracker.printSummary: true
+services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"

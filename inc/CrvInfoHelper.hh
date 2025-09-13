@@ -17,6 +17,7 @@
 #include "Offline/MCDataProducts/inc/SimParticle.hh"
 #include "Offline/MCDataProducts/inc/CrvCoincidenceClusterMC.hh"
 #include "Offline/MCDataProducts/inc/MCTrajectory.hh"
+#include "Offline/MCDataProducts/inc/PrimaryParticle.hh"
 #include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "art/Framework/Principal/Handle.h"
@@ -37,7 +38,8 @@ namespace mu2e
           art::Handle<MCTrajectoryCollection> const& mcTrajectories,
           CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
           CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
-          CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY);
+          CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
+          art::Handle<PrimaryParticle> const& primary);
 
       void FillCrvPulseInfoCollections(
           art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,

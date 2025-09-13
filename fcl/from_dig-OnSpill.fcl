@@ -1,0 +1,69 @@
+#
+#  Run TrkAna on the output of the trigger, including MC truth matching
+#
+#include "Offline/fcl/standardServices.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+process_name : TrkAnaTriggerMC
+services : @local::Services.Reco
+source : {
+  module_type : RootInput
+}
+
+physics : {
+  producers : @local::TTProducers
+  analyzers : {
+    # separate analyzers for each track trigger algorithm
+    # apr
+    EventNtupleTTMCApr : {
+      @table::EventNtupleMakerTTMC
+      branches : [ {
+        @table::TTMCBranch
+        input : "MergeTTApr"
+      } ]
+      KalSeedMCAssns: "TTAprKSFMC"
+      RecoCountTag : "TTAprKSFMC"
+      SelectEvents : [ "Digitize:apr_highP*"  ]
+    }
+    # tpr
+    EventNtupleTTMCTpr : {
+      @table::EventNtupleMakerTTMC
+      branches : [ {
+        @table::TTMCBranch
+        input : "MergeTTTpr"
+      } ]
+      KalSeedMCAssns: "TTTprDeKSFMC"
+      RecoCountTag : "TTTprDeKSFMC"
+      SelectEvents : [ "Digitize:tprDe_highP*"  ]
+    }
+    # cpr
+    EventNtupleTTMCCpr : {
+      @table::EventNtupleMakerTTMC
+      branches : [ {
+        @table::TTMCBranch
+        input : "MergeTTCpr"
+      } ]
+      KalSeedMCAssns: "TTCprDeKSFMC"
+      RecoCountTag : "TTCprDeKSFMC"
+      SelectEvents : [ "Digitize:cprDe_highP*"  ]
+    }
+    # mpr
+    EventNtupleTTMCMpr : {
+      @table::EventNtupleMakerTTMC
+      branches : [ {
+        @table::TTMCBranch
+        input : "MergeTTMpr"
+      } ]
+      KalSeedMCAssns: "TTMprDeKSFMC"
+      RecoCountTag : "TTMprDeKSFMC"
+      SelectEvents : [ "Digitize:mprDe_highP*"  ]
+   }
+
+  }
+  EndPath : [EventNtupleTTMCApr, EventNtupleTTMCTpr, EventNtupleTTMCCpr, EventNtupleTTMCMpr]
+  TrigPath : [ @sequence::TTProducersPath]
+}
+#physics.analyzers.TAapr.InfoMCStructHelper.SimParticleCollectionTag: "compressDetStepMCs"
+
+end_paths : [ EndPath ]
+physics.trigger_paths : [ "TrigPath" ]
+services.TFileService.fileName: "nts.owner.trkana-triggerMC.version.sequencer.root"

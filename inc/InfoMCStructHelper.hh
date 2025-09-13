@@ -70,7 +70,7 @@ namespace mu2e {
       void fillHitInfoMC(const KalSeedMC& kseedmc, TrkStrawHitInfoMC& tshinfomc, const TrkStrawHitMC& tshmc);
       void fillAllSimInfos(const KalSeedMC& kseedmc, const PrimaryParticle& primary, std::vector<std::vector<SimInfo>>& all_siminfos, int n_generations, int n_match);
       void fillVDInfo(KalSeed const& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<MCStepInfo>>& all_vdinfos);
-      void fillHitInfoMCs(const KalSeedMC& kseedmc, std::vector<std::vector<TrkStrawHitInfoMC>>& all_tshinfomcs);
+      void fillHitInfoMCs(const KalSeed& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<TrkStrawHitInfoMC>>& all_tshinfomcs);
       void fillCaloClusterInfoMC(CaloClusterMC const& ccmc, std::vector<CaloClusterInfoMC>& ccimc);
       void fillExtraMCStepInfos(KalSeedMC const& kseedmc, StepPointMCCollection const& mcsteps,
                                 std::vector<MCStepInfos>& mcsics, std::vector<MCStepSummaryInfo>& mcssis);

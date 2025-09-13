@@ -44,6 +44,14 @@
   <class name="mu2e::RecoQualInfo" />
   <class name="mu2e::MVAResultInfo" />
   <class name="std::vector<std::vector<mu2e::MVAResultInfo> >" />
+  <class name="mu2e::CaloClusterInfo" />
+  <class name="std::vector<mu2e::CaloClusterInfo>" />
+  <class name="mu2e::CaloHitInfo" />
+  <class name="std::vector<mu2e::CaloHitInfo>" />
+  <class name="mu2e::CaloRecoDigiInfo" />
+  <class name="std::vector<mu2e::CaloRecoDigiInfo>" />
+  <class name="mu2e::CaloDigiInfo" />
+  <class name="std::vector<mu2e::CaloDigiInfo>" />
   <class name="mu2e::CrvHitInfoReco" />
   <class name="std::vector<mu2e::CrvHitInfoReco>" />
   <class name="mu2e::CrvHitInfoMC" />

@@ -25,3 +25,4 @@ where ```tier``` is the data tier of the input dataset, ```type``` is the type o
 | from_mcs-OffSpill.fcl | off spill datasets | only contains ```CentralHelix``` tracks (i.e. field-on cosmics) |
 | from_dig-mockdata.fcl | mock datasets (digis) | runs reconstruction and creates EventNtuple in one job |
 | from_dig-DeMCalib.fcl | digitized primary or mixed datasets | also runs reconstruction, only writes one track per event |
+| from_rec-crv-vst.fcl | CRV VST Data | only contains ```evtinfo``` and ```crv*``` branches |

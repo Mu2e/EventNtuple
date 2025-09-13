@@ -3,6 +3,7 @@
 #include "Offline/CommonMC/fcl/prolog.fcl"
 #include "Offline/fcl/TrkCaloDt.fcl"
 
+#include "EventNtuple/fcl/prolog_crv_planes.fcl"
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
@@ -29,6 +30,8 @@ TrkQualUmuP          : @local::TrkQual
 TrkQualUmuP.KalSeedPtrCollection : "MergeKKUmuP"
 TrkQualAll          : @local::TrkQual
 TrkQualAll.KalSeedPtrCollection : "MergeKKAll"
+TrkQualDe           : @local::TrkQual
+TrkQualDe.KalSeedPtrCollection : "MergeKKDe"
 
 
 TrkQualProducers : {
@@ -41,9 +44,10 @@ TrkQualProducers : {
   TrkQualUmuM : @local::TrkQualUmuM
   TrkQualUmuP : @local::TrkQualUmuP
   TrkQualAll : @local::TrkQualAll
+  TrkQualDe : @local::TrkQualDe
 }
-TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQualUeP, TrkQualDmuP, TrkQualUmuM, TrkQualUmuP ]
 
+TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQualUeP, TrkQualDmuP, TrkQualUmuM, TrkQualUmuP ]
 
 # track PID module
 TrkPID : {
@@ -57,11 +61,36 @@ TrkPIDDeM          : @local::TrkPID
 TrkPIDDeM.KalSeedCollection : "KKDeM"
 TrkPIDDeP          : @local::TrkPID
 TrkPIDDeP.KalSeedCollection : "KKDeP"
+TrkPIDDe          : @local::TrkPID
+TrkPIDDe.KalSeedCollection : "KKDe"
 TrkPIDProducers : {
   TrkPIDDeM : @local::TrkPIDDeM
   TrkPIDDeP : @local::TrkPIDDeP
+  TrkPIDDe : @local::TrkPIDDe
 }
 TrkPIDProducersPath : [ TrkPIDDeM, TrkPIDDeP ]
+
+# trigger
+
+TTProducers : {
+  MergeTTApr : {
+    module_type : MergeKalSeeds
+    KalSeedCollections : ["TTAprKSF"]
+  }
+  MergeTTTpr : {
+    module_type : MergeKalSeeds
+    KalSeedCollections : ["TTKSF"]
+  }
+  MergeTTCpr : {
+    module_type : MergeKalSeeds
+    KalSeedCollections : ["TTCalSeedFit"]
+  }
+  MergeTTMpr : {
+    module_type : MergeKalSeeds
+    KalSeedCollections : ["TTMprKSF"]
+  }
+}
+TTProducersPath : [ MergeTTApr, MergeTTTpr, MergeTTCpr, MergeTTMpr ]
 
 genCountLogger: { module_type: GenEventCountReader }
 
@@ -97,19 +126,46 @@ MergeKKLine.KalSeedCollections : [ "KKLine" ]
 MergeKKOff          : @local::MergeKK
 MergeKKOff.KalSeedCollections : [ "KKOffSpill" ]
 MergeKKAll          : @local::MergeKK
-MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP" ]
-MergeKKDeMCalib : {
+MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP", # will go when all new datasets are added
+  "KKDe", "KKUe", "KKDmu", "KKUmu" ] # these are the new APR outputs
+MergeKKDe           : @local::MergeKK
+MergeKKDe.KalSeedCollections : [ "KKDe" ]
+
+
+MergeKKDeCalib : {
   @table::MergeKK
-  KalSeedCollections : ["KKDeM"]
+  KalSeedCollections : ["KKDe"]
   Selector : {
     tool_type : SimpleKalSeedSelector
-    MinMomentum : 70.0 # MeV/c
+    MinMomentum : 0.0 # MeV/c
     MaxMomentum : 300.0 #MeV/c
-    MinFitConsistency : 1e-10
+    MinFitConsistency : -1.0
     MinDeltaNHitFraction : 0.05 # Consider a 5% difference in active hit count to be 'significant', and call the track more hits 'better'.  Otherwise, use fit quality to determine 'better'
     MinActiveHits : 15 # Require a reasonable # of active hits
   }
-  SelectBest : true # use only the 'best' DeM in every event
+  SelectBest : true # use only the 'best' De in every event
+}
+# filter for DeCalib tracks
+  KSFDeCalib : {
+    module_type : KalSeedFilter
+    kalSeedCollections : ["KKDe" ]
+    noInfo : true # don't produce a TriggerInfo object
+    debugLevel : 0
+    KalSeedCuts : [ {
+      requireCaloCluster : false
+      minFitCons : -1.0
+      minNStrawHits : 15
+      minMomentum : 40.0
+      maxMomentum : 300.0
+      minTanDip : -20.0
+      maxTanDip : 20.0
+      maxChi2DOF : 1.0e6
+      maxMomErr : 1e6
+      minD0 : -800.0
+      maxD0 :  800.0
+      minNStereo : 3
+      minNPlanes : 8
+    } ]
 }
 
 MergeKKProducers : {
@@ -124,7 +180,8 @@ MergeKKProducers : {
   MergeKKLine : @local::MergeKKLine
   MergeKKOff : @local::MergeKKOff
   MergeKKAll : @local::MergeKKAll
-  MergeKKDeMCalib : @local::MergeKKAll
+  MergeKKDe : @local::MergeKKDe
+  MergeKKDeCalib : @local::MergeKKDeCalib
 }
 MergeKKProducersPath : [ MergeKKAll ]
 MergeKKNoFieldPath : [ MergeKKLine ]
@@ -177,29 +234,43 @@ All : { input : "MergeKKAll"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
 }
-DeMCalib : { input : "MergeKKDeMCalib"
+DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
   options : { fillMC : true fillHits : true  genealogyDepth : -1 matchDepth : -1 }
+}
+De : { input : "MergeKKDe"
+  branch : "de"
+  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTag : "TrkQualDe"
 }
 
 EventNtupleMaker : {
   module_type : EventNtupleMaker
   branches : [ @local::All ]
-  RecoCountTag : "SelectRecoMC"
+  RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
   PBTMCTag : "EWMProducer"
-  CrvCoincidencesTag : "SelectRecoMC:CrvCoincidenceClusterFinder"
+  CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
   CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
-  CrvRecoPulsesTag : "SelectRecoMC"
+  CrvRecoPulsesTag : "SelectReco"
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
+  CaloClustersTag : "CaloClusterMaker"
+  CaloHitsTag : "CaloHitMaker"
+  CaloRecoDigisTag : ""
+  CaloDigisTag : "SelectReco"
+  FillCaloClusters : true
+  FillCaloHits : true
+  FillCaloRecoDigis : false
+  FillCaloDigis : false
   CrvDigiMCsTag : "compressRecoMCs"
-  CrvDigisTag : "SelectRecoMC"
+  CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
-  CrvPlaneY : 2653
+  CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
+  FillTrkQual : true
   FillTrkPIDInfo : false
   FillHitInfo : true
   FillTriggerInfo : false
@@ -210,7 +281,7 @@ EventNtupleMaker : {
   FillCaloMC : true
   FillHelixInfo : false
   PrimaryParticleTag : "compressRecoMCs"
-  KalSeedMCAssns : "SelectRecoMC"
+  KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"
@@ -219,8 +290,34 @@ EventNtupleMaker : {
   }
 #  ExtraMCStepCollectionTags : [ "compressRecoMCs:protonabsorber", "compressRecoMCs:stoppingtarget" ]
   ExtraMCStepCollectionTags : []
-  SurfaceStepCollectionTag : "MakeSS"
+  SurfaceStepCollectionTag : "compressRecoMCs"
   FitType : LoopHelix
+}
+# instance for processing trigger (digitization) output from simulation
+EventNtupleMakerTTMC: {
+  @table::EventNtupleMaker
+  diagLevel : 2
+  FillCRVCoincs : false
+  FillCaloMC : false
+  FillTriggerInfo : true
+  FillTrkPIDInfo : false
+  FillHitInfo : true
+  PrimaryParticleTag: "compressDigiMCs"
+  MCTrajectoriesTag: "compressDigiMCs"
+  FitType : LoopHelix
+  TriggerProcessName : "Digitize"
+  SimParticlesTag : "compressDigiMCs"
+  ExtraMCStepCollectionTags: []
+  InfoMCStructHelper : {
+    MinGoodMomFraction : 0.9
+    MaxVDDt : 5 # ns
+    SimParticleCollectionTag : "compressDigiMCs"
+  }
+}
+
+TTMCBranch : {
+  branch : "trk"
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
 }
 
 EventNtuple : {
@@ -229,8 +326,6 @@ EventNtuple : {
     @table::TrkQualProducers
     @table::TrkPIDProducers
     @table::MergeKKProducers
-    # patch for SurfaceSteps in MDC2020
-    MakeSS : @local::CommonMC.MakeSSReco
   }
 
   analyzers : {
@@ -239,15 +334,29 @@ EventNtuple : {
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, MakeSS, TrkQualAll ]
-  PathNoMakeSS : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll ]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
-  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, MakeSS, @sequence::TrkQualProducersPath]
+  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
   PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll ]
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
+}
+
+# Instance of EventNtuple for DeCalib
+ENDeCalib : {
+  @table::EventNtupleMaker
+  hasTracks : true
+  FitType : LoopHelix
+  branches :  [
+    { input: "MergeKKDeCalib"
+      branch : "trk"
+      trkQualTag : "TrkQualDe"
+      options : { fillMC : true fillHits : true  genealogyDepth : -1 }
+    }
+  ]
+  SelectEvents : [ TriggerPath ]
 }
 
 END_PROLOG

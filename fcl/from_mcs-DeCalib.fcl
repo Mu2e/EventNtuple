@@ -1,0 +1,28 @@
+# Minimal job to run TrkAna on the 'best' downstream electrons. Runs on mcs files. This is intended for calibration, so it includes
+# hit information in the branch
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+
+process_name: DeCalib
+source : { module_type : RootInput }
+services : @local::Services.Reco
+physics :
+{
+  producers : {
+    @table::EventNtuple.producers
+    DeMFilter : {
+    }
+  }
+  filters : {
+    KSFDeCalib : @local::KSFDeCalib
+  }
+  analyzers : {
+    EventNtuple : @local::ENDeCalib
+  }
+  TriggerPath : [ KSFDeCalib, MergeKKDeCalib, TrkQualDe ]
+  EndPath : [EventNtuple]
+}
+physics.trigger_paths : [ TriggerPath ]
+physics.end_paths : [ EndPath ]
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
+services.TimeTracker.printSummary: true
+services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"

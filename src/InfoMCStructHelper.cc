@@ -116,16 +116,14 @@ namespace mu2e {
     // find the first segment momentum as reference
     double simmom = 1.0;
     if(kseedmc.simParticles().size()>0)
-      simmom = sqrt(kseedmc.simParticles().front()._mom.mag2());
+      simmom = kseedmc.simParticles().front()._mom.R();
     for(size_t i_digi = 0; i_digi < kseedmc._tshmcs.size(); ++i_digi) {
       const auto& tshmc = kseedmc._tshmcs.at(i_digi);
-
       if (kseedmc.simParticle(tshmc._spindex)._rel == MCRelationship::same) {
         ++trkinfomc.ndigi;
-        if(sqrt(tshmc.particleMomentum().mag2())/simmom > _mingood) {
+        if(tshmc.particleMomentum().R()/simmom > _mingood) {
           ++trkinfomc.ndigigood;
         }
-
         // easiest way to get MC ambiguity is through info object
         TrkStrawHitInfoMC tshinfomc;
         fillHitInfoMC(kseedmc,tshinfomc,tshmc);
@@ -141,7 +139,7 @@ namespace mu2e {
   }
 
   void InfoMCStructHelper::fillHitInfoMC(const KalSeedMC& kseedmc, TrkStrawHitInfoMC& tshinfomc, const TrkStrawHitMC& tshmc) {
-    const SimPartStub& simPart = kseedmc.simParticle(tshmc._spindex);
+    auto const& simPart = kseedmc.simParticle(tshmc._spindex);
     tshinfomc.pdg = simPart._pdg;
     tshinfomc.startCode = simPart._proc;
     tshinfomc.gen = simPart._gid.id();
@@ -152,7 +150,7 @@ namespace mu2e {
     tshinfomc.rdrift = tshmc._rdrift;
     tshinfomc.tprop = tshmc._tprop;
     tshinfomc.edep = tshmc._energySum;
-    tshinfomc.mom = std::sqrt(tshmc._mom.mag2());
+    tshinfomc.mom = tshmc._mom.R();
     tshinfomc.cpos  = tshmc._cpos;
     tshinfomc.len = tshmc._wireLen;
     tshinfomc.twdot = tshmc._wireDot;
@@ -179,6 +177,11 @@ namespace mu2e {
     if (n_match == -1 ) {
       n_match = std::numeric_limits<int>::max();
     }
+
+    //create vector of art Ptr to particles:
+    std::vector<art::Ptr<SimParticle> > allParts;
+
+    //loop over all sime particles in KalSeedMC
     for(int imatch = 0 ; imatch < std::min(n_match,static_cast<int>(kseedmc.simParticles().size())); ++imatch) {
       auto trkprimaryptr = kseedmc.simParticle(imatch).simParticle(_spcH);
       auto trkprimary = trkprimaryptr->originParticle();
@@ -186,6 +189,15 @@ namespace mu2e {
       auto current_sim_particle = trkprimary;
 
       for (int i_generation = 0; i_generation < n_generations; ++i_generation) {
+        bool isSame = false;
+        for(unsigned int ipart = 0; ipart < allParts.size() ; ipart++){
+          MCRelationship checkrel(current_sim_particle_ptr,allParts.at(ipart));
+          if(checkrel==MCRelationship::same) {
+              isSame = true;
+            }
+        }
+        if(!isSame) { allParts.push_back(current_sim_particle_ptr); }
+
         SimInfo sim_info;
         fillSimInfo(current_sim_particle, sim_info);
         sim_info.trkrel = MCRelationship(current_sim_particle_ptr, trkprimaryptr);
@@ -206,9 +218,16 @@ namespace mu2e {
           sim_info.nhits = kseedmc.simParticle(imatch)._nhits;
           sim_info.nactive = kseedmc.simParticle(imatch)._nactive;
         }
+        else { // don't set a rank for ancestor particles
+          sim_info.rank = -1;
+        }
         // record the index this object will have
         sim_info.index = siminfos.size();
-        siminfos.push_back(sim_info);
+
+        if(!isSame) {
+          siminfos.push_back(sim_info);
+        }
+
         if (current_sim_particle.parent().isNonnull()) {
           current_sim_particle_ptr = current_sim_particle.parent();
           current_sim_particle = current_sim_particle_ptr->originParticle();
@@ -217,6 +236,7 @@ namespace mu2e {
           break; // this particle doesn't have a parent
         }
       }
+
     }
 
     // Now add all the primary particles
@@ -257,7 +277,8 @@ namespace mu2e {
   void InfoMCStructHelper::fillSimInfo(const SimParticle& sp, SimInfo& siminfo) {
     GeomHandle<DetectorSystem> det;
     siminfo.valid = true;
-    if(sp.genParticle().isNonnull())siminfo.gen = sp.genParticle()->generatorId().id();
+    siminfo.id = sp.id().asInt();
+    if(sp.genParticle().isNonnull()) { siminfo.gen = sp.genParticle()->generatorId().id(); }
     siminfo.startCode = sp.creationCode();
     siminfo.stopCode = sp.stoppingCode();
     siminfo.pdg = sp.pdgId();
@@ -322,13 +343,16 @@ namespace mu2e {
     all_vdinfos.push_back(vdinfos);
   }
 
-  void InfoMCStructHelper::fillHitInfoMCs(const KalSeedMC& kseedmc, std::vector<std::vector<TrkStrawHitInfoMC>>& all_tshinfomcs) {
+  void InfoMCStructHelper::fillHitInfoMCs(const KalSeed& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<TrkStrawHitInfoMC>>& all_tshinfomcs) {
+    unsigned nrecohit = kseed.hits().size();
     std::vector<TrkStrawHitInfoMC> tshinfomcs;
-
-    for(const auto& i_tshmc : kseedmc._tshmcs) {
+    for(size_t i_tshmc = 0; i_tshmc < kseedmc._tshmcs.size(); ++i_tshmc){
+      auto const& tshmc = kseedmc._tshmcs[i_tshmc];
       TrkStrawHitInfoMC tshinfomc;
-      fillHitInfoMC(kseedmc, tshinfomc, i_tshmc);
+      fillHitInfoMC(kseedmc, tshinfomc, tshmc);
       tshinfomcs.push_back(tshinfomc);
+      // mcdigis beyond the kalseed reco hit list are from the MC primary
+      tshinfomcs.back().recohit = (i_tshmc < nrecohit);
     }
     all_tshinfomcs.push_back(tshinfomcs);
   }
@@ -405,7 +429,9 @@ namespace mu2e {
       //  std::cout << "Found matching surface step sid" << ss << " particle time " << simp->startGlobalTime() << std::endl;
         ssic.emplace_back(ss); // temporary
       }
+
     }
+    //    std::sort(ssic.begin(),ssic.end(),[](const auto& a, const auto& b){return a.time < b.time;});
   }
 
 }
