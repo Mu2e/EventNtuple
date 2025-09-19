@@ -270,6 +270,7 @@ EventNtupleMaker : {
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
   CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
+  FillTrkQual : true
   FillTrkPIDInfo : false
   FillHitInfo : true
   FillTriggerInfo : false

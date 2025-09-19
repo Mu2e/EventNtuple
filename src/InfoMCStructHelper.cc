@@ -431,7 +431,7 @@ namespace mu2e {
       }
 
     }
-    std::sort(ssic.begin(),ssic.end(),[](const auto& a, const auto& b){return a.time < b.time;});
+    //    std::sort(ssic.begin(),ssic.end(),[](const auto& a, const auto& b){return a.time < b.time;});
   }
 
 }

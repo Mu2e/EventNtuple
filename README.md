@@ -65,7 +65,7 @@ Instructions for tagging a new release:
 git fetch mu2e main
 git checkout --no-track -b vXX-YY-ZZ mu2e/main
 ```
-* update version number in ```src/EventNtupleMaker_module.cc``` and commit
+* update version number in histogram ```_hVersion``` in ```src/EventNtupleMaker_module.cc``` and commit
 * make sure EventNtuple runs following these [steps](validation/README.md#Validating-eventntuple-runs)
 * create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood

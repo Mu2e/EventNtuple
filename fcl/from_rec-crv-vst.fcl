@@ -1,8 +1,12 @@
 #include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
+source.inputCommands : [ "drop mu2e::DAQerrors_*_*_*" ]
+
 physics.analyzers.EventNtuple.FillCRVDigis : true
 physics.analyzers.EventNtuple.FillCRVPulses : true
 physics.analyzers.EventNtuple.branches : [ ] # no track branches
+physics.analyzers.EventNtuple.FillCaloClusters : false # no calorimeter
+physics.analyzers.EventNtuple.FillCaloHits : false # no calorimeter
 physics.analyzers.EventNtuple.RecoCountTag : ""
 physics.analyzers.EventNtuple.PBTTag : ""
 physics.analyzers.EventNtuple.hasCRV : true
