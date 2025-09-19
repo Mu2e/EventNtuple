@@ -53,14 +53,14 @@ bool tracker_entrance(TrackSegment& segment) { // track fit segment is at the tr
 
 bool tracker_middle(TrackSegment& segment) {  // track fit segment is at the middle of the tracker
   if (segment.trkseg != nullptr) {
-    if (segment.trkseg->sid==mu2e::SurfaceIdDetail::TT_Mid) { std::cout << "returning true1" << std::endl; return true; }
-    else { std::cout << "returning false1" << std::endl; return false; }
+    if (segment.trkseg->sid==mu2e::SurfaceIdDetail::TT_Mid) {  return true; }
+    else { return false; }
   }
   if (segment.trksegmc != nullptr) {
-    if (segment.trksegmc->sid==mu2e::SurfaceIdDetail::TT_Mid) { std::cout << "returning true2" << std::endl; return true; }
-    else { std::cout << "returning false2" << std::endl; return false; }
+    if (segment.trksegmc->sid==mu2e::SurfaceIdDetail::TT_Mid) {  return true; }
+    else {  return false; }
   }
-  else { std::cout << "returning false3" << std::endl; return false; }
+  else {  return false; }
 }
 
 bool tracker_exit(TrackSegment& segment) { // track fit segment is at the tracker exit
