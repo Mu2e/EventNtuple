@@ -21,7 +21,7 @@ namespace mu2e
     int ndouble = 0; // number of double-hit panels
     int ndactive = 0; // number of active double-hit panels
     int nplanes = 0; // number of planes hit
-    int npanels = 0;
+    int npanels = 0; // number of panels hit
     int planespan = 0; // number of planes between first and last plane
     int nnullambig = 0;  // number of hits without any left/right ambiguity assigned
     int nmat = 0; // number of materials (straws) assigned to the fit
