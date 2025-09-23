@@ -387,6 +387,7 @@ namespace mu2e {
       tminfo.dp = i_straw._dmom;
       tminfo.radlen = i_straw._radlen;
       tminfo.doca = i_straw._doca;
+      tminfo.docavar = i_straw._docavar;
       tminfo.dirdot = i_straw._dirdot;
       tminfo.gaspath = i_straw._gaspath;
       tminfo.wallpath = i_straw._wallpath;

@@ -1,7 +1,8 @@
-#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+#include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
 physics.analyzers.EventNtuple.branches : [ @local::Ext ]
 physics.analyzers.EventNtuple.FitType : KinematicLine
+physics.analyzers.EventNtuple.FillTrkQual : false
 
 services.GeometryService.inputFile: "Production/JobConfig/cosmic/geom_cosmic_extracted.txt"
