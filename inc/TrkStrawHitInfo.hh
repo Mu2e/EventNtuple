@@ -32,8 +32,10 @@ namespace mu2e
     float rdrift = 0, cdrift = 0, sderr = -1.0, uderr = -1.0, dvel = 0, lang = 0; // drift information
     float utresid = 0, utresidmvar = -1.0, utresidpvar = -1.0; // unbiased time residual and associated measurement and parameter variances
     float udresid = 0, udresidmvar = -1.0, udresidpvar = -1.0; // unbiased distance residual and associated measurement and parameter variances
+    float ulresid = 0, ulresidmvar = -1.0, ulresidpvar = -1.0; // unbiased longitudinal distance residual and associated measurement and parameter variances
     float rtresid = 0, rtresidmvar = -1.0, rtresidpvar = -1.0; // reference time residual and associated measurement and parameter variances
     float rdresid = 0, rdresidmvar = -1.0, rdresidpvar = -1.0; // reference distance residual and associated measurement and parameter variances
+    float rlresid = 0, rlresidmvar = -1.0, rlresidpvar = -1.0; // reference  longiudinal distance residual and associated measurement and parameter variances
     float wdot = 0; // cosine of the angle between the track and wire
     XYZVectorF poca; // POCA
     float uwirephi = 0; // cylindrical phi around wire of uPOCA

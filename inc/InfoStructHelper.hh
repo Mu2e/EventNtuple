@@ -24,6 +24,7 @@
 #include "EventNtuple/inc/CentralHelixInfo.hh"
 #include "EventNtuple/inc/KinematicLineInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/TrkPIDInfo.hh"
@@ -64,7 +65,7 @@ namespace mu2e {
     void fillCentralHelixInfo(const KalSeed& kseed, std::vector<std::vector<CentralHelixInfo>>& chis);
     void fillKinematicLineInfo(const KalSeed& kseed, std::vector<std::vector<KinematicLineInfo>>& klis);
     void fillTrkQualInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas);
-    void fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& tshinfos );
+    void fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& all_tshinfos, std::vector<std::vector<TrkStrawHitCalibInfo>>& all_tshcinfos, bool saveCalib );
     void fillMatInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawMatInfo>>& tminfos );
     void fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& tchinfo );
     void fillTrkPIDInfo(const TrkCaloHitPID& tchp, const KalSeed& kseed, TrkPIDInfo& trkpidInfo);
