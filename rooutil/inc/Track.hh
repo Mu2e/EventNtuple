@@ -169,6 +169,7 @@ struct Track {
   mu2e::TrkCaloHitInfo* trkcalohit = nullptr;
   std::vector<mu2e::SimInfo>* trkmcsim = nullptr;
   mu2e::MVAResultInfo* trkqual = nullptr;
+  mu2e::MVAResultInfo* trkqual_alt = nullptr; // TODO: is there a way to allow for more than two...
 };
 
 typedef std::function<bool(Track&)> TrackCut;
