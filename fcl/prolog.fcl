@@ -10,8 +10,8 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  version : 1
-  datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.dat"
+  version : 2
+  datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
 }
 TrkQualDeM           : @local::TrkQual
 TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
