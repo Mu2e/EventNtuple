@@ -55,7 +55,7 @@ void printCutflowTable(const std::vector<CutflowEntry>& entries) {
         
         std::string percent_prev_str;
         if (i > 0 && last_count > 0) {
-            double percent_change_prev = static_cast<double>(entry.passed_count - last_count) / last_count * 100.0;
+            double percent_change_prev = 100 - fabs(static_cast<double>(entry.passed_count - last_count) ) / last_count * 100.0;
             percent_prev_str = std::format("{:+.2f}%", percent_change_prev);
         } else {
             percent_prev_str = "N/A";
@@ -63,7 +63,7 @@ void printCutflowTable(const std::vector<CutflowEntry>& entries) {
         
         std::string percent_initial_str;
         if (initial_count > 0) {
-            double percent_change_initial = static_cast<double>(entry.passed_count - initial_count) / initial_count * 100.0;
+            double percent_change_initial = 100 - fabs(static_cast<double>(entry.passed_count - initial_count)) / initial_count * 100.0;
             percent_initial_str = std::format("{:+.2f}%", percent_change_initial);
         } else {
             percent_initial_str = "N/A";
