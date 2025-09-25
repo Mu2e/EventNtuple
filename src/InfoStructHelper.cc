@@ -229,7 +229,7 @@ namespace mu2e {
     all_mvas.push_back(temp_result);
  }
 
-  void InfoStructHelper::fillTrkPIDInfo(const kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
+  void InfoStructHelper::fillTrkPIDInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
     MVAResultInfo result_TrkPID;
     result_TrkPID.result = mva._value;
     result_TrkPID.valid = true;
