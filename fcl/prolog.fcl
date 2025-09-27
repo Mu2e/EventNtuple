@@ -140,11 +140,33 @@ MergeKKDeCalib : {
     tool_type : SimpleKalSeedSelector
     MinMomentum : 0.0 # MeV/c
     MaxMomentum : 300.0 #MeV/c
-    MinFitConsistency : 1e-10
+    MinFitConsistency : -1.0
     MinDeltaNHitFraction : 0.05 # Consider a 5% difference in active hit count to be 'significant', and call the track more hits 'better'.  Otherwise, use fit quality to determine 'better'
     MinActiveHits : 15 # Require a reasonable # of active hits
   }
   SelectBest : true # use only the 'best' De in every event
+}
+# filter for DeCalib tracks
+  KSFDeCalib : {
+    module_type : KalSeedFilter
+    kalSeedCollections : ["KKDe" ]
+    noInfo : true # don't produce a TriggerInfo object
+    debugLevel : 0
+    KalSeedCuts : [ {
+      requireCaloCluster : false
+      minFitCons : -1.0
+      minNStrawHits : 15
+      minMomentum : 40.0
+      maxMomentum : 300.0
+      minTanDip : -20.0
+      maxTanDip : 20.0
+      maxChi2DOF : 1.0e6
+      maxMomErr : 1e6
+      minD0 : -800.0
+      maxD0 :  800.0
+      minNStereo : 3
+      minNPlanes : 8
+    } ]
 }
 
 MergeKKProducers : {
@@ -239,6 +261,14 @@ EventNtupleMaker : {
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
+  CaloClustersTag : "CaloClusterMaker"
+  CaloHitsTag : "CaloHitMaker"
+  CaloRecoDigisTag : ""
+  CaloDigisTag : "SelectReco"
+  FillCaloClusters : true
+  FillCaloHits : true
+  FillCaloRecoDigis : false
+  FillCaloDigis : false
   CrvDigiMCsTag : "compressRecoMCs"
   CrvDigisTag : "SelectReco"
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
@@ -314,6 +344,21 @@ EventNtuple : {
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
+}
+
+# Instance of EventNtuple for DeCalib
+ENDeCalib : {
+  @table::EventNtupleMaker
+  hasTracks : true
+  FitType : LoopHelix
+  branches :  [
+    { input: "MergeKKDeCalib"
+      branch : "trk"
+      trkQualTag : "TrkQualDe"
+      options : { fillMC : true fillHits : true  genealogyDepth : -1 }
+    }
+  ]
+  SelectEvents : [ TriggerPath ]
 }
 
 END_PROLOG

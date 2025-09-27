@@ -31,6 +31,7 @@ namespace mu2e
     float strawdoca = -1000.0; // true transverse distance at POCA of the particle to the straw center
     float strawphi = -1000.0; // cylindrical phi around straw center of POCA
     XYZVectorF cpos; // threshold cluster position
+    bool recohit = true; // Is this MC info associated with a reco hit or not
   };
 }
 #endif

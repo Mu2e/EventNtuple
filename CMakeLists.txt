@@ -32,7 +32,7 @@ install_headers(SUBDIRNAME EventNtuple SUBDIRS rooutil/inc)
 
 
 install(DIRECTORY utils DESTINATION python)
-install(DIRECTORY tutorial doc example-analysis-scripts validation DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})
+install(DIRECTORY tutorial doc validation DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})
 
 install_source(SUBDIRS src)
 install_headers(NO_RELATIVE_SUBDIR SUBDIRS inc SUBDIRNAME EventNtuple)

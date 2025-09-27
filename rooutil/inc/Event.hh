@@ -13,6 +13,11 @@
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
 
+#include "EventNtuple/inc/CaloClusterInfo.hh"
+#include "EventNtuple/inc/CaloHitInfo.hh"
+#include "EventNtuple/inc/CaloRecoDigiInfo.hh"
+#include "EventNtuple/inc/CaloDigiInfo.hh"
+
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
 #include "EventNtuple/inc/CrvHitInfoMC.hh"
 #include "EventNtuple/inc/CrvWaveformInfo.hh"
@@ -31,6 +36,7 @@
 
 #include "EventNtuple/rooutil/inc/Track.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
+#include "EventNtuple/rooutil/inc/CaloCluster.hh"
 
 #include "TChain.h"
 
@@ -117,6 +123,20 @@ struct Event {
     if (ntuple->GetBranch("trkmats")) {
       ntuple->SetBranchAddress("trkmats", &this->trkmats);
     }
+
+    if (ntuple->GetBranch("caloclusters")) {
+      ntuple->SetBranchAddress("caloclusters", &this->caloclusters);
+    }
+    if (ntuple->GetBranch("calohits")) {
+      ntuple->SetBranchAddress("calohits", &this->calohits);
+    }
+    if (ntuple->GetBranch("calorecodigis")) {
+      ntuple->SetBranchAddress("calorecodigis", &this->calorecodigis);
+    }
+    if (ntuple->GetBranch("calodigis")) {
+      ntuple->SetBranchAddress("calodigis", &this->calodigis);
+    }
+
   };
 
   void Update(bool debug = false) {
@@ -181,6 +201,16 @@ struct Event {
       }
       crv_coincs.emplace_back(crv_coinc);
     }
+
+    if (caloclusters != nullptr) {
+      if (debug) { std::cout << "Event::Update(): Clearing previous CaloClusters... " << std::endl; }
+      calo_clusters.clear();
+      for (int i_cluster = 0; i_cluster < nCaloClusters(); ++i_cluster) {
+        if (debug) { std::cout << "Event::Update(): Creating CaloCluster " << i_cluster << "... " << std::endl; }
+        CaloCluster calo_cluster(&(caloclusters->at(i_cluster))); // passing the addresses of the underlying structs
+        calo_clusters.emplace_back(calo_cluster);
+      }
+    }
   }
 
   int nTracks() const {
@@ -191,6 +221,11 @@ struct Event {
     if (crvcoincs == nullptr) { return 0; }
     else { return crvcoincs->size(); }
   }
+  int nCaloClusters() const {
+    if (caloclusters == nullptr) { return 0; }
+    else { return caloclusters->size(); }
+  }
+
 
   Tracks GetTracks() { return tracks; }
   Tracks GetTracks(TrackCut cut, bool inplace = false) {
@@ -246,6 +281,38 @@ struct Event {
     return select_crv_coincs;
   }
 
+  CaloClusters GetCaloClusters() { return calo_clusters; }
+  CaloClusters GetCaloClusters(CaloClusterCut cut, bool inplace = false) {
+    if (!inplace) { // if we are not changing inplace, then just create a new vector to return
+      CaloClusters select_calo_clusters;
+      for (auto& calo_cluster : calo_clusters) {
+        if (cut(calo_cluster)) {
+          select_calo_clusters.emplace_back(calo_cluster);
+        }
+      }
+      return select_calo_clusters;
+    }
+    else {
+      auto newEnd = std::remove_if(calo_clusters.begin(), calo_clusters.end(), [cut](CaloCluster& calo_cluster) { return !cut(calo_cluster); });
+
+      std::vector<size_t> caloclusters_to_remove;
+      for (std::vector<CaloCluster>::iterator i_calo_cluster = newEnd; i_calo_cluster != calo_clusters.end(); ++i_calo_cluster) { // now need to remove from event
+        for (size_t i_calocluster = 0; i_calocluster < caloclusters->size(); ++i_calocluster) {
+          if (&(caloclusters->at(i_calocluster))  == i_calo_cluster->calocluster) {
+            caloclusters_to_remove.emplace_back(i_calocluster);
+            // flag i_calocluster for remoavel
+          }
+        }
+      }
+      for (int i_calocluster = caloclusters_to_remove.size()-1; i_calocluster >= 0; --i_calocluster) {
+        caloclusters->erase(caloclusters->begin()+caloclusters_to_remove[i_calocluster]);
+      }
+
+      calo_clusters.erase(newEnd, calo_clusters.end()); // remove only rearranges and returns the new end
+      return calo_clusters;
+    }
+  }
+
   int CountTracks() { return tracks.size(); }
   int CountTracks(TrackCut cut) {
     Tracks select_tracks = GetTracks(cut);
@@ -262,8 +329,16 @@ struct Event {
     return select_crv_coincs.size();
   }
 
+  int CountCaloClusters() { return calo_clusters.size(); }
+  int CountCaloClusters(CaloClusterCut cut) {
+    CaloClusters select_calo_clusters = GetCaloClusters(cut);
+    return select_calo_clusters.size();
+  }
+
+
   Tracks tracks;
   CrvCoincs crv_coincs;
+  CaloClusters calo_clusters;
 
   // Pointers to the data
   mu2e::EventInfo* evtinfo = nullptr;
@@ -285,6 +360,11 @@ struct Event {
   std::vector<std::vector<mu2e::TrkStrawHitInfo>>* trkhits = nullptr;
   std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
   std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
+
+  std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
+  std::vector<mu2e::CaloHitInfo>* calohits = nullptr;
+  std::vector<mu2e::CaloRecoDigiInfo>* calorecodigis = nullptr;
+  std::vector<mu2e::CaloDigiInfo>* calodigis = nullptr;
 
   std::vector<mu2e::CrvHitInfoReco>* crvcoincs = nullptr;
   std::vector<mu2e::CrvHitInfoMC>* crvcoincsmc = nullptr;

@@ -15,50 +15,37 @@ physics :
   producers : {
     @table::Reconstruction.producers
     @table::EventNtuple.producers
-    MakeSS : @local::CommonMC.MakeSSDigi
   }
-  RecoPath : [
+  filters : {
+    KSFDeCalib : @local::KSFDeCalib
+  }
+  TriggerPath : [
     @sequence::Reconstruction.CaloReco,
-    @sequence::Reconstruction.TrkReco,
+    @sequence::Reconstruction.TrkHitReco,
+    @sequence::Reconstruction.DeReco,
     @sequence::Reconstruction.CrvReco,
-    TimeClusterFinderDe, HelixFinderDe,
-    CalTimePeakFinder, CalHelixFinderDe,
-    CalTimePeakFinderMu, CalHelixFinderDmu,
-    MHDeM,
-    KKDeM,
-    MergeKKDeMCalib,
-    MakeSS,
+    KSFDeCalib,
+    MergeKKDeCalib,
+    TrkQualDe,
     @sequence::Reconstruction.MCReco
   ]
   analyzers : {
-    EventNtuple : {
-      @table::EventNtupleMaker
-      FitType : LoopHelix
-      branches :  [
-        { input: "MergeKKDeMCalib"
-          branch : "trk"
-          options : { fillMC : true fillHits : true  genealogyDepth : -1 }
-        }
-      ]
-    }
+    EventNtuple : @local::ENDeCalib
   }
   EndPath : [EventNtuple]
 }
 #include "Production/JobConfig/reco/epilog.fcl"
 #include "Production/Validation/database.fcl"
+#
+physics.end_paths : [ EndPath ]
+physics.trigger_paths : [ TriggerPath ]
+
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
-# restrict reco to just DeM
-physics.producers.SelectReco.KalSeedCollections  : ["KKDeM"]
-physics.producers.SelectReco.HelixSeedCollections  : ["MHDeM"]
-physics.producers.KKDeM.ModuleSettings.HelixSeedCollections : [ "MHDeM" ]
-physics.producers.KKDeM.ModuleSettings.ComboHitCollection : "makeSH"
-physics.producers.KKDeM.ModuleSettings.CaloClusterCollection : "CaloClusterMaker"
-physics.producers.compressRecoMCs.surfaceStepTags: [ "MakeSS" ]
-# turn off unnecessary extrapolation
-physics.producers.KKDeM.Extrapolation.Upstream : false
-physics.producers.KKDeM.Extrapolation.ToOPA : false
-physics.end_paths : [ EndPath ]
+# restrict reco to just De
+physics.producers.SelectReco.KalSeedCollections  : ["KKDe"]
+# extrapolation
 services.TimeTracker.printSummary: true
-services.TFileService.fileName: "nts.owner.EventNtupleDeMCalib.version.sequence.root"
+services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"

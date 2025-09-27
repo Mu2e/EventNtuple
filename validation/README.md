@@ -11,13 +11,13 @@ From ```EventNtuple/``` directory:
 . ./validation/test_fcls.sh
 ```
 
-This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```
+This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```. If one reports ```FAIL```, you can find the exact command that failed in the ```test_fcls.log``` file in order to debug.
 
 ### Creating a Validation File
 Before making any changes, create an EventNtuple file and run the validation script. This creates a new ROOT file with histograms created from the EventNtuple ntuple:
 
 ```
-mu2e -c EventNtuple/fcl/from_mcs_mockdata.fcl -S filelist.txt --TFileName nts.ntuple.before.root
+mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S filelist.txt --TFileName nts.ntuple.before.root
 
 root -l -b EventNtuple/validation/create_val_file_rooutil.C\(\"nts.ntuple.before.root\",\"val.ntuple.before.root\"\)
 ```
@@ -32,3 +32,41 @@ valCompare -p ntuple-validation-booklet.pdf -r val.ntuple.before.root val.ntuple
 Note that the ```before``` file is created before any changes, and the ```after``` file is created by ```test_fcls.sh```.
 
 We expect perfect matches between all histograms. However, in some rare instances, we may expect differences. If you see any non-perfect matches, then discuss with the EventNtuple L4.
+
+### Validating EventNtuple Builds (Spack/CMake)
+From a clean login do:
+
+```
+cd /to/a/new/working/area
+
+export MYSS=eventntuple
+export MYENV=prof
+
+mu2einit
+smack local $MYSS/$MYENV simjob
+
+cd $MYSS
+
+source ./setup-env.sh
+spack env activate $MYENV
+
+spack add event-ntuple@main
+spack develop event-ntuple@main
+
+spack concretize -f 2>&1 | tee c_$(date +%F-%H-%M-%S).log
+spack install       2>&1 | tee i_$(date +%F-%H-%M-%S).log
+
+... fix any errors and re-run install command ...
+
+... once fixed ...
+
+cd $MYENV/event-ntuple/
+git remote rename origin mu2e
+git remote add -f origin git@github.com:YourGitHubUserName/EventNtuple.git
+git checkout --no-track -b cmake-fix mu2e/main
+
+# git add, commit, and push as usual
+
+```
+
+Note: these are based on the instructions [here](https://mu2ewiki.fnal.gov/wiki/Spack#Local_Offline_build)
