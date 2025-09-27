@@ -52,7 +52,7 @@ TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQua
 # track PID module
 TrkPID : {
   module_type : TrackPID
-  MaxDE : 5.0 # MeV
+  MaxDE : 500.0 # MeV
   DeltaTOffset : -1.15 # specific to MDC2018h
   datFilename : "Offline/TrkDiag/data/TrackPID.dat"
 }
@@ -61,12 +61,15 @@ TrkPIDDeM          : @local::TrkPID
 TrkPIDDeM.KalSeedPtrCollection : "MergeKKDeM"
 TrkPIDDeP          : @local::TrkPID
 TrkPIDDeP.KalSeedPtrCollection : "MergeKKDeP"
-TrkPIDDe          : @local::TrkPID
+TrkPIDDe           : @local::TrkPID
 TrkPIDDe.KalSeedPtrCollection : "MergeKKDe"
+TrkPIDAll          : @local::TrkPID
+TrkPIDAll.KalSeedPtrCollection : "MergeKKAll"
 TrkPIDProducers : {
   TrkPIDDeM : @local::TrkPIDDeM
   TrkPIDDeP : @local::TrkPIDDeP
   TrkPIDDe : @local::TrkPIDDe
+  TrkPIDAll : @local::TrkPIDAll
 }
 TrkPIDProducersPath : [ TrkPIDDeM, TrkPIDDeP ]
 
@@ -210,6 +213,7 @@ All : { input : "MergeKKAll"
   branch : "trk"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTag : "TrkQualAll"
+  trkPIDTag : "TrkPIDAll"
 }
 DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
@@ -302,11 +306,11 @@ EventNtuple : {
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDDe ]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDAll ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDDe ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
