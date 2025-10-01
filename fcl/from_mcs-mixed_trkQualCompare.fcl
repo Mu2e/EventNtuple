@@ -11,10 +11,13 @@ physics.producers.TrkQualAllV11.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1
 physics.producers.TrkQualAllV2 : @local::TrkQualAll
 physics.producers.TrkQualAllV2.version : 2
 physics.producers.TrkQualAllV2.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
-physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
+physics.producers.TrkQualAllV2Conv : @local::TrkQualAll
+physics.producers.TrkQualAllV2Conv.version : 1
+physics.producers.TrkQualAllV2Conv.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat_conv"
+physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2, TrkQualAllV2Conv ]
 
 # Add it to the EventNtuple output
-physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAllV10", "TrkQualAllV11", "TrkQualAllV2" ]
+physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAllV10", "TrkQualAllV11", "TrkQualAllV2", "TrkQualAllV2Conv" ]
 
 # Removin hits
 physics.analyzers.EventNtuple.FillHitInfo : false
