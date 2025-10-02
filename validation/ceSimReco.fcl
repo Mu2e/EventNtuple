@@ -1,0 +1,8 @@
+//
+// In order to test the "trkhitcalibs" branch, we need to re-run the
+// reconstruction while saving the TrkStrawHitCalibs. Since we already
+// run ceSimReco.fcl for EventNtuple validation, we will do that here
+//
+#include "Production/Validation/ceSimReco.fcl"
+
+physics.producers.KKDe.KKFitSettings.SaveHitCalibInfo : true
