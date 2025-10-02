@@ -361,6 +361,34 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_trkmats_poca_y = new TH1F("h_trkmats_poca_y", "", 200,-200,200);
   TH1F* h_trkmats_poca_z = new TH1F("h_trkmats_poca_z", "", 200,-200,200);
 
+  TH1F* h_trkhitcalibs_dDdX_x = new TH1F("h_trkhitcalibs_dDdX_x", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdX_y = new TH1F("h_trkhitcalibs_dDdX_y", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdX_z = new TH1F("h_trkhitcalibs_dDdX_z", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_0 = new TH1F("h_trkhitcalibs_dDdPlane_0", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_1 = new TH1F("h_trkhitcalibs_dDdPlane_1", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_2 = new TH1F("h_trkhitcalibs_dDdPlane_2", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_3 = new TH1F("h_trkhitcalibs_dDdPlane_3", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_4 = new TH1F("h_trkhitcalibs_dDdPlane_4", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPlane_5 = new TH1F("h_trkhitcalibs_dDdPlane_5", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_0 = new TH1F("h_trkhitcalibs_dDdPanel_0", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_1 = new TH1F("h_trkhitcalibs_dDdPanel_1", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_2 = new TH1F("h_trkhitcalibs_dDdPanel_2", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_3 = new TH1F("h_trkhitcalibs_dDdPanel_3", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_4 = new TH1F("h_trkhitcalibs_dDdPanel_4", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdPanel_5 = new TH1F("h_trkhitcalibs_dDdPanel_5", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_0 = new TH1F("h_trkhitcalibs_dDdP_0", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_1 = new TH1F("h_trkhitcalibs_dDdP_1", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_2 = new TH1F("h_trkhitcalibs_dDdP_2", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_3 = new TH1F("h_trkhitcalibs_dDdP_3", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_4 = new TH1F("h_trkhitcalibs_dDdP_4", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dDdP_5 = new TH1F("h_trkhitcalibs_dDdP_5", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_0 = new TH1F("h_trkhitcalibs_dLdP_0", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_1 = new TH1F("h_trkhitcalibs_dLdP_1", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_2 = new TH1F("h_trkhitcalibs_dLdP_2", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_3 = new TH1F("h_trkhitcalibs_dLdP_3", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_4 = new TH1F("h_trkhitcalibs_dLdP_4", "", 100,0,10);
+  TH1F* h_trkhitcalibs_dLdP_5 = new TH1F("h_trkhitcalibs_dLdP_5", "", 100,0,10);
+
 
   TH1F* h_hitcount_nsd = new TH1F("h_hitcount_nsd", "", 150,0,150);
   TH1F* h_hitcount_nesel = new TH1F("h_hitcount_nesel", "", 150,0,150);
@@ -903,6 +931,41 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
           h_trkmats_poca_x->Fill(trkmat.poca.x());
           h_trkmats_poca_y->Fill(trkmat.poca.y());
           h_trkmats_poca_z->Fill(trkmat.poca.z());
+        }
+      }
+    }
+
+    if (event.trkhitcalibs != nullptr) { // might not have this branch
+      std::cout << "Creating trkhitcalibs histograms..." << std::endl;
+      for (const auto& trkhitcalibs : *(event.trkhitcalibs)) {
+        for (const auto& trkhitcalib : trkhitcalibs) {
+          h_trkhitcalibs_dDdX_x->Fill(trkhitcalib.dDdX.x());
+          h_trkhitcalibs_dDdX_y->Fill(trkhitcalib.dDdX.y());
+          h_trkhitcalibs_dDdX_z->Fill(trkhitcalib.dDdX.z());
+          h_trkhitcalibs_dDdPlane_0->Fill(trkhitcalib.dDdPlane[0]);
+          h_trkhitcalibs_dDdPlane_1->Fill(trkhitcalib.dDdPlane[1]);
+          h_trkhitcalibs_dDdPlane_2->Fill(trkhitcalib.dDdPlane[2]);
+          h_trkhitcalibs_dDdPlane_3->Fill(trkhitcalib.dDdPlane[3]);
+          h_trkhitcalibs_dDdPlane_4->Fill(trkhitcalib.dDdPlane[4]);
+          h_trkhitcalibs_dDdPlane_5->Fill(trkhitcalib.dDdPlane[5]);
+          h_trkhitcalibs_dDdPanel_0->Fill(trkhitcalib.dDdPanel[0]);
+          h_trkhitcalibs_dDdPanel_1->Fill(trkhitcalib.dDdPanel[1]);
+          h_trkhitcalibs_dDdPanel_2->Fill(trkhitcalib.dDdPanel[2]);
+          h_trkhitcalibs_dDdPanel_3->Fill(trkhitcalib.dDdPanel[3]);
+          h_trkhitcalibs_dDdPanel_4->Fill(trkhitcalib.dDdPanel[4]);
+          h_trkhitcalibs_dDdPanel_5->Fill(trkhitcalib.dDdPanel[5]);
+          h_trkhitcalibs_dDdP_0->Fill(trkhitcalib.dDdP[0]);
+          h_trkhitcalibs_dDdP_1->Fill(trkhitcalib.dDdP[1]);
+          h_trkhitcalibs_dDdP_2->Fill(trkhitcalib.dDdP[2]);
+          h_trkhitcalibs_dDdP_3->Fill(trkhitcalib.dDdP[3]);
+          h_trkhitcalibs_dDdP_4->Fill(trkhitcalib.dDdP[4]);
+          h_trkhitcalibs_dDdP_5->Fill(trkhitcalib.dDdP[5]);
+          h_trkhitcalibs_dLdP_0->Fill(trkhitcalib.dLdP[0]);
+          h_trkhitcalibs_dLdP_1->Fill(trkhitcalib.dLdP[1]);
+          h_trkhitcalibs_dLdP_2->Fill(trkhitcalib.dLdP[2]);
+          h_trkhitcalibs_dLdP_3->Fill(trkhitcalib.dLdP[3]);
+          h_trkhitcalibs_dLdP_4->Fill(trkhitcalib.dLdP[4]);
+          h_trkhitcalibs_dLdP_5->Fill(trkhitcalib.dLdP[5]);
         }
       }
     }

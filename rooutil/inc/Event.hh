@@ -31,6 +31,7 @@
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
 
@@ -122,6 +123,9 @@ struct Event {
     }
     if (ntuple->GetBranch("trkmats")) {
       ntuple->SetBranchAddress("trkmats", &this->trkmats);
+    }
+    if (ntuple->GetBranch("trkhitcalibs")) {
+      ntuple->SetBranchAddress("trkhitcalibs", &this->trkhitcalibs);
     }
 
     if (ntuple->GetBranch("caloclusters")) {
@@ -360,6 +364,7 @@ struct Event {
   std::vector<std::vector<mu2e::TrkStrawHitInfo>>* trkhits = nullptr;
   std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
   std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
+  std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>* trkhitcalibs = nullptr;
 
   std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
   std::vector<mu2e::CaloHitInfo>* calohits = nullptr;

@@ -123,6 +123,7 @@ public:
     if(event->trkhits) { output_ntuple->Branch("trkhits", event->trkhits); }
     if(event->trkhitsmc) { output_ntuple->Branch("trkhitsmc", event->trkhitsmc); }
     if(event->trkmats) { output_ntuple->Branch("trkmats", event->trkmats); }
+    if(event->trkhitcalibs) { output_ntuple->Branch("trkhitcalibs", event->trkhitcalibs); }
 
     if(event->caloclusters) { output_ntuple->Branch("caloclusters", event->caloclusters); }
     if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }
