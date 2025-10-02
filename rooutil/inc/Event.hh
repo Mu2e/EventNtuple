@@ -185,6 +185,10 @@ struct Event {
         if (debug) { std::cout << "Event::Update(): Adding trkmats to Track " << i_track << "... " << std::endl; }
         track.trkmats = &(trkmats->at(i_track));
       }
+      if (trkhitcalibs != nullptr) {
+        if (debug) { std::cout << "Event::Update(): Adding trkhitcalibs to Track " << i_track << "... " << std::endl; }
+        track.trkhitcalibs = &(trkhitcalibs->at(i_track));
+      }
       if (trkqual != nullptr) {
         if (debug) { std::cout << "Event::Update(): Adding trkqual to Track " << i_track << "... " << std::endl; }
         track.trkqual = &(trkqual->at(i_track));
@@ -267,6 +271,7 @@ struct Event {
         if (trkhits) { trkhits->erase(trkhits->begin()+trks_to_remove[i_trk]); }
         if (trkhitsmc) { trkhitsmc->erase(trkhitsmc->begin()+trks_to_remove[i_trk]); }
         if (trkmats) { trkmats->erase(trkmats->begin()+trks_to_remove[i_trk]); }
+        if (trkhitcalibs) { trkhitcalibs->erase(trkhitcalibs->begin()+trks_to_remove[i_trk]); }
       }
 
       tracks.erase(newEnd, tracks.end()); // remove only rearranges and returns the new end
