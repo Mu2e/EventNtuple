@@ -273,6 +273,7 @@ EventNtupleMaker : {
   FillTrkQual : true
   FillTrkPIDInfo : false
   FillHitInfo : true
+  FillHitCalibInfo : false
   FillTriggerInfo : false
   TriggerProcessName : "Mix"
   FillCRVCoincs : true
