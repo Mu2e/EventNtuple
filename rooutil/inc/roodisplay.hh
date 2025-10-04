@@ -1,3 +1,11 @@
+/*
+Utility to call event display from within a root macro
+
+to use:
+
+  launch_display("mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art", 15028,34,1201);
+*/
+
 #include <cstdlib> 
 #include <iostream>
 #include <string>
