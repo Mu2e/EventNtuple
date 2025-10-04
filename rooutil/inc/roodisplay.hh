@@ -1,22 +1,4 @@
 #include <cstdlib> 
-
-/*void launch_display(std::string dataset, unsigned int event, unsigned int subrun, unsigned int run){
-  std::cout<<"========== Launching Mu2e/EventDisplay ===============" << std::endl;
-  
-  std::cout<<" Extracting the data-set, please ensure data-sets are prestaged before running this command...."<<std::endl;
-  std::string command1 = "pickEvent -e -v " + dataset + " " +
-                          std::to_string(run) + "/" +
-                          std::to_string(subrun) + "/" +
-                          std::to_string(event);
-  std::system(command1.c_str());
-  
-  std::cout<<" Data-set has been extracted, now running display "<<std::endl;
-
-  std::string command2 = "mu2e -c EventDisplay/examples/nominal_example.fcl "+dataset+"_"+std::to_string(run)+"_"+std::to_string(subrun)+"_"+std::to_string(event)+".art";
-  std::system(command2.c_str());
-      
-}*/
-
 #include <iostream>
 #include <string>
 #include <stdexcept>
