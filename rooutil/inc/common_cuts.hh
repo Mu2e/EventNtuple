@@ -112,7 +112,7 @@ bool has_reco_step(TrackSegment& segment) { // track fit segment has an reco Sur
 
 //+ Track Cuts - Direction
 bool is_downstream(Track& track) { // reconstructed fit segment at tracker middle is going in +z direction
-  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && !has_mc_step(segment) && has_reco_step(segment); });
+  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && has_reco_step(segment); });
   if (tracker_middle_segments.size() > 1) {
     std::cout << "WARNING: " << tracker_middle_segments.size() << " track segments at tracker middle. Something might have gone wrong..." << std::endl;
     return false;
@@ -191,8 +191,8 @@ bool three_of_four_coinc(CrvCoinc& crv_coinc) { // CRV coincidence has exactly t
 }
 
 //+ Combined Track & CrvCoinc Cuts
-bool track_crv_coincidence(TrackSegment& segment, CrvCoinc& crv_coinc) { // time difference between track segment and crv_coinc is less than 250 ns
-  if ( segment.trkseg->time - crv_coinc.reco->time > 200 && segment.trkseg->time - crv_coinc.reco->time < 450) { return true; }
+bool track_crv_coincidence(TrackSegment& segment, CrvCoinc& crv_coinc) { 
+  if ( abs(segment.trkseg->time - crv_coinc.reco->time) > 200 ) { return true; }
   else { return false; }
 }
 
@@ -216,6 +216,13 @@ bool is_CeMinusEndpoint(MCParticle& particle) { // true of the MCParticle is CeM
 bool is_CeMinusLeadingLog(MCParticle& particle) { // true of the MCParticle is CeMinusLeadingLog
   return start_process(particle, mu2e::ProcessCode::mu2eCeMinusLeadingLog);
 }
+bool is_CePlusEndpoint(MCParticle& particle) { // true of the MCParticle is CePlusEndpoint
+  return start_process(particle, mu2e::ProcessCode::mu2eCePlusEndpoint);
+}
+bool is_CePlusLeadingLog(MCParticle& particle) { // true of the MCParticle is CePlusLeadingLog
+  return start_process(particle, mu2e::ProcessCode::mu2eCePlusLeadingLog);
+}
+
 bool is_DIO(MCParticle& particle) { // true of the MCParticle is DIO or mu2eDIOLeadingLof
   return (start_process(particle, mu2e::ProcessCode::mu2eMuonDecayAtRest) || start_process(particle, mu2e::ProcessCode::DIO));
 }
