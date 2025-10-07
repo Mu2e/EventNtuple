@@ -18,14 +18,23 @@ usage:
 
 #ifndef cutflow_hh_
 #define cutflow_hh_
+
+#include "TH1.h"
+
 #include <format>
 // Structure to hold cutflow data
 struct CutflowEntry {
+    /*
+    Flexible struct. Two field "cut_name" e.g t>600 ns and "passed_count" e.g. 1000 events
+    */
     std::string cut_name;
     long long passed_count;
 };
 
 void printCutflowTable(const std::vector<CutflowEntry>& entries) {
+    /*
+    Formulate cut flow into terminal table
+    */
     if (entries.empty()) {
         std::cout << "No cutflow data to display." << std::endl;
         return;
@@ -55,7 +64,7 @@ void printCutflowTable(const std::vector<CutflowEntry>& entries) {
         
         std::string percent_prev_str;
         if (i > 0 && last_count > 0) {
-            double percent_change_prev = static_cast<double>(entry.passed_count - last_count) / last_count * 100.0;
+            double percent_change_prev = 100 - fabs(static_cast<double>(entry.passed_count - last_count) ) / last_count * 100.0;
             percent_prev_str = std::format("{:+.2f}%", percent_change_prev);
         } else {
             percent_prev_str = "N/A";
@@ -63,7 +72,7 @@ void printCutflowTable(const std::vector<CutflowEntry>& entries) {
         
         std::string percent_initial_str;
         if (initial_count > 0) {
-            double percent_change_initial = static_cast<double>(entry.passed_count - initial_count) / initial_count * 100.0;
+            double percent_change_initial = 100 - fabs(static_cast<double>(entry.passed_count - initial_count)) / initial_count * 100.0;
             percent_initial_str = std::format("{:+.2f}%", percent_change_initial);
         } else {
             percent_initial_str = "N/A";
@@ -78,6 +87,27 @@ void printCutflowTable(const std::vector<CutflowEntry>& entries) {
         last_count = entry.passed_count;
     }
 }
+
+TH1F* MakeCutflowHist(std::vector<CutflowEntry> data){
+    /*
+    Provides a 1D histogram with labelled xaxis
+    */
+    int n_entries = data.size();
+    std::vector<double> x_vals, y_vals;
+
+    TH1F* h_cutflow = new TH1F("h_cutflow", "Event Cutflow;;Number of Events", n_entries, 0, n_entries);
+    h_cutflow->SetStats(0); 
+    
+    for (int i = 0; i < n_entries; ++i) {
+        h_cutflow->GetXaxis()->SetBinLabel(i + 1, data[i].cut_name.c_str());
+        h_cutflow->SetBinContent(i + 1, data[i].passed_count);
+    }
+    
+    h_cutflow->Draw("HIST B");
+    h_cutflow->SetFillColor(kBlue-7);
+    h_cutflow->SetLineColor(kBlack);
+    return h_cutflow;
+  }
 
 #endif
 
