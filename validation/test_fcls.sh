@@ -76,8 +76,8 @@ else
 fi
 
 echo -n "from_mcs-ceSimReco.fcl... "
-echo "mu2e -c Production/Validation/ceSimReco.fcl -n 10" >> ${log_file} 2>&1
-mu2e -c Production/Validation/ceSimReco.fcl -n 10 >> ${log_file} 2>&1
+echo "mu2e -c validation/ceSimReco.fcl -n 100" >> ${log_file} 2>&1
+mu2e -c validation/ceSimReco.fcl -n 100 >> ${log_file} 2>&1
 echo "mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --TFileName nts.ntuple.ceSimReco.root" >> ${log_file} 2>&1
 mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --TFileName nts.ntuple.ceSimReco.root >> ${log_file} 2>&1
 if [ $? == 0 ]; then

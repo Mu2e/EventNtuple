@@ -60,7 +60,7 @@ Because some vector-object branches in the EventNtuple should be paired and loop
 The ```Track``` class contains all information related to a single track
 
 * single objects: ```trk```, ```trkmc```, ```trkcalohit```, ```trkqual```
-* vectors: ```trksegs```, ```trksegmcs```, ```trksegpars_{lh,ch,kl}```, ```trkmcsim```, ```trkhits```, ```trkhitsmc```, ```trkmats```
+* vectors: ```trksegs```, ```trksegmcs```, ```trksegpars_{lh,ch,kl}```, ```trkmcsim```, ```trkhits```, ```trkhitsmc```, ```trkmats```, ```trkhitcalibs```
 
 Example: [PlotTrackNHits_RecoVsTrue.C](./examples/PlotTrackNHits_RecoVsTrue.C)
 
@@ -74,9 +74,9 @@ Note: that some TrackSegements contain only a ```trkseg``` or only a ```trksegmc
 Example: [PlotEntranceMomentumResolution.C](./examples/PlotEntranceMomentumResolution.C)
 
 ### ```TrackHit``` Class
-The ```TrackHit``` class contains paired reco and MC information about a single track hit.
+The ```TrackHit``` class contains paired reco and MC information about a single track hit and also the calib info (if available).
 
-* single objects: ```trkhit```, ```trkhitmc```
+* single objects: ```trkhit```, ```trkhitmc```, ```trkhitcalib```
 
 Note: In the EventNtuple, the branches are filled such that the first N hits in each correspond one-to-one with each other, and the remainining, unused MC hits complete the ```trkhitmc``` branch. The ```TrackHit``` class handles this for you.
 
@@ -224,7 +224,7 @@ If a new branch is added to the EventNtuple, then the following needs to be done
 
 1. In [Event.hh](inc/Event.hh) add the pointers at the bottom of the file
 2. In [Event.hh](inc/Event.hh) constructor, set the branch address
-  - make sure to test for existence if the branch may not exist (e.g. it is an MC branch)
+  - make sure to test that the branch exists
 3. In [Event.hh](inc/Event.hh) add the #include to the underlying object
 4. In [RooUtil.hh](inc/RooUtil.hh) add it to the ```CreateOutputEventNtuple()``` function
 5. Add to validation places:

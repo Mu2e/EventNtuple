@@ -2,6 +2,9 @@
 
 physics.analyzers.EventNtuple.branches : [ @local::De ]
 physics.analyzers.EventNtuple.branches[0].branch : "trk"
+physics.analyzers.EventNtuple.branches[0].options.fillHits : true
 physics.analyzers.EventNtuple.FillTriggerInfo : false
+physics.analyzers.EventNtuple.FillHitInfo : true
+physics.analyzers.EventNtuple.FillHitCalibInfo : true
 physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkPIDDe ]
 physics.EventNtupleEndPath : [ EventNtuple, genCountLogger ]

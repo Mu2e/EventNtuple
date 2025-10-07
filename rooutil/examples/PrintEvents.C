@@ -167,6 +167,16 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    // trkhitcalibs
+    if (event.trkhitcalibs != nullptr) { // might not have this branch
+      for (const auto& trkhitcalibs : *(event.trkhitcalibs)) {
+        std::cout << "New Track!" << std::endl;
+        for (const auto& hit : trkhitcalibs) {
+          std::cout << "trkhitcalibs: " << hit.dDdX << ", " << hit.dDdPlane[0] << ", " << hit.dDdPanel[0] << ", " << hit.dDdP[0] << ", " << hit.dLdP[0] << std::endl;
+        }
+      }
+    }
+
     // hitcount
     if (event.hitcount != nullptr) {
       auto hitcount = *(event.hitcount);

@@ -31,6 +31,7 @@
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
 
@@ -126,6 +127,9 @@ struct Event {
     if (ntuple->GetBranch("trkmats")) {
       ntuple->SetBranchAddress("trkmats", &this->trkmats);
     }
+    if (ntuple->GetBranch("trkhitcalibs")) {
+      ntuple->SetBranchAddress("trkhitcalibs", &this->trkhitcalibs);
+    }
 
     if (ntuple->GetBranch("caloclusters")) {
       ntuple->SetBranchAddress("caloclusters", &this->caloclusters);
@@ -183,6 +187,10 @@ struct Event {
       if (trkmats != nullptr) {
         if (debug) { std::cout << "Event::Update(): Adding trkmats to Track " << i_track << "... " << std::endl; }
         track.trkmats = &(trkmats->at(i_track));
+      }
+      if (trkhitcalibs != nullptr) {
+        if (debug) { std::cout << "Event::Update(): Adding trkhitcalibs to Track " << i_track << "... " << std::endl; }
+        track.trkhitcalibs = &(trkhitcalibs->at(i_track));
       }
       if (trkqual != nullptr) {
         if (debug) { std::cout << "Event::Update(): Adding trkqual to Track " << i_track << "... " << std::endl; }
@@ -271,6 +279,7 @@ struct Event {
         if (trkhits) { trkhits->erase(trkhits->begin()+trks_to_remove[i_trk]); }
         if (trkhitsmc) { trkhitsmc->erase(trkhitsmc->begin()+trks_to_remove[i_trk]); }
         if (trkmats) { trkmats->erase(trkmats->begin()+trks_to_remove[i_trk]); }
+        if (trkhitcalibs) { trkhitcalibs->erase(trkhitcalibs->begin()+trks_to_remove[i_trk]); }
       }
 
       tracks.erase(newEnd, tracks.end()); // remove only rearranges and returns the new end
@@ -369,6 +378,7 @@ struct Event {
   std::vector<std::vector<mu2e::TrkStrawHitInfo>>* trkhits = nullptr;
   std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
   std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
+  std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>* trkhitcalibs = nullptr;
 
   std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
   std::vector<mu2e::CaloHitInfo>* calohits = nullptr;

@@ -4,6 +4,7 @@
 #include <functional>
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
+#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 
 struct TrackHit {
   TrackHit() { }
@@ -11,6 +12,7 @@ struct TrackHit {
   // Pointers to the data
   mu2e::TrkStrawHitInfo* reco = nullptr;
   mu2e::TrkStrawHitInfoMC* mc = nullptr;
+  mu2e::TrkStrawHitCalibInfo* calib = nullptr;
 };
 
 typedef std::function<bool(TrackHit&)> TrackHitCut;
