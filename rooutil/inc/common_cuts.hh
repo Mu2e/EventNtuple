@@ -192,7 +192,7 @@ bool three_of_four_coinc(CrvCoinc& crv_coinc) { // CRV coincidence has exactly t
 
 //+ Combined Track & CrvCoinc Cuts
 bool track_crv_coincidence(TrackSegment& segment, CrvCoinc& crv_coinc) { 
-  if ( abs(segment.trkseg->time - crv_coinc.reco->time) > 150 ) { return true; }
+  if ( abs(segment.trkseg->time - crv_coinc.reco->time) < 150 ) { return true; }
   else { return false; }
 }
 
