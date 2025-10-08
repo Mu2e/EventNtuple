@@ -6,7 +6,7 @@
 log_file="test_fcls.log"
 rm ${log_file}
 
-mock_dataset="mcs.mu2e.ensembleMDS2bOnSpillTriggered.MDC2020az_best_v1_3.art"
+mock_dataset="mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art"
 primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art"
 mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
 extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
