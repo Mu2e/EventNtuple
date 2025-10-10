@@ -1,0 +1,59 @@
+#
+# Tuple comparison between different instances of 'the same' De tracks: could be
+# different processings, different particle hypos, regrown KalSeeds, ...
+# Both KalSeed collections are expected to be in the event, the 'primary'
+# will show up as the 1st track (index 0), 'secondary' as the 2nd (index 1)
+# Original Author: Dave Brown (LBNL) Sep. 2025
+#
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+#include "Offline/TrkReco/fcl/prolog.fcl"
+
+process_name: CompareDeTracks
+source : { module_type : RootInput }
+services : @local::Services.Reco
+physics :
+{
+  producers : {
+    TrkQualDe : @local::TrkQualDe
+  }
+  filters : {
+    KSFDeCalib : {
+      @table::KSFDeCalib
+    }
+    MergeKKDeCalib : {
+      module_type : SelectSameTrack
+      PrimaryKalSeedCollection : KKDe # Nominal collection; override if you like
+      SecondaryKalSeedCollection : @nil
+      MaxDeltaT : 5.0 # time (t0) difference to be 'the same' tracks
+      MaxDeltaP : 5.0 # momentum difference to be 'the same' tracks
+      MinHitFrac : 0.95 # fraction of active hits to be 'the same' tracks
+      ComparisonSurface : "TT_Mid"
+      ComparisonDirection : "downstream"
+      Selector : { # selection applied to both tracks
+        tool_type : SimpleKalSeedSelector
+        MinMomentum : 50.0 # MeV/c
+        MaxMomentum : 210.0 #MeV/c
+        MinFitConsistency : 0.0
+        MinDeltaNHitFraction : 0.0
+        MinActiveHits : 15
+      }
+      SelectBestPair : 0 # select highest-momentum match
+      debugLevel : 0
+    }
+  }
+  analyzers : {
+    EventNtuple : @local::ENDeCalib
+  }
+  TriggerPath : [ KSFDeCalib, MergeKKDeCalib, TrkQualDe ]
+  EndPath : [EventNtuple]
+}
+physics.trigger_paths : [ TriggerPath ]
+physics.end_paths : [ EndPath ]
+physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
+services.TimeTracker.printSummary: true
+services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
+physics.analyzers.EventNtuple.KalSeedMCAssns : @nil # module which created the MC truth matching (KalSeedMC). including both primary and 2ndary tracks.
+
