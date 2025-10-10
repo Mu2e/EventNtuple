@@ -356,7 +356,7 @@ namespace mu2e {
         TrkStrawHitCalibInfo tshcinfo;
         auto index = std::distance(kseed.hits().begin(), ihit);
         if (kseed.hitCalibInfos().size() == 0) {
-          throw cet::exception("EventNtuple") << "Trying to fill the trkhitcalib branch of EventNtuple but there are no TrkStrawHitCalibs in the KalSeed." << std::endl;
+          throw cet::exception("EventNtuple") << "Trying to fill the trkhitcalib branch of EventNtuple but there are no TrkStrawHitCalibs in the KalSeed. Either run on a reconstruction file with the correct data product or turn off this branch with physics.analyzers.EventNtuple.FillHitCalibInfo : false" << std::endl;
         }
         auto const& ical = kseed.hitCalibInfos()[index];
         tshcinfo.dDdX = ical._dDdX;

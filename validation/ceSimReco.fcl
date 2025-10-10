@@ -6,3 +6,4 @@
 #include "Production/Validation/ceSimReco.fcl"
 
 physics.producers.KKDe.KKFitSettings.SaveHitCalibInfo : true
+outputs.Output.fileName : "mcs.owner.val-ceSimRecoVal.dsconf.seq.art"

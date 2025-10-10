@@ -1,0 +1,5 @@
+#include "EventNtuple/fcl/from_mcs-ceSimReco.fcl"
+
+physics.analyzers.EventNtuple.branches[0].options.fillHits : true
+physics.analyzers.EventNtuple.FillHitInfo : true
+physics.analyzers.EventNtuple.FillHitCalibInfo : true
