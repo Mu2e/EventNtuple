@@ -99,6 +99,12 @@ struct Track {
         if (trkhitsmc != nullptr) {
           trkhit.mc = &(trkhitsmc->at(i_trkhit));
         }
+
+        // trkhitcalibs have 1:1 correspondance with reco hits
+        if (trkhitcalibs != nullptr) {
+          trkhit.calib = &(trkhitcalibs->at(i_trkhit));
+        }
+
         hits.emplace_back(trkhit);
       }
       if (trkhitsmc != nullptr) {
@@ -166,9 +172,11 @@ struct Track {
   std::vector<mu2e::TrkStrawHitInfo>* trkhits = nullptr;
   std::vector<mu2e::TrkStrawHitInfoMC>* trkhitsmc = nullptr;
   std::vector<mu2e::TrkStrawMatInfo>* trkmats = nullptr;
+  std::vector<mu2e::TrkStrawHitCalibInfo>* trkhitcalibs = nullptr;
   mu2e::TrkCaloHitInfo* trkcalohit = nullptr;
   std::vector<mu2e::SimInfo>* trkmcsim = nullptr;
   mu2e::MVAResultInfo* trkqual = nullptr;
+  mu2e::MVAResultInfo* trkqual_alt = nullptr; // TODO: is there a way to allow for more than two...
 };
 
 typedef std::function<bool(Track&)> TrackCut;

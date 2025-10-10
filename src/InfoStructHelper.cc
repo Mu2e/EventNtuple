@@ -246,6 +246,7 @@ namespace mu2e {
   void InfoStructHelper::fillTrkInfoHits(const KalSeed& kseed, TrkInfo& trkinfo) {
     static StrawHitFlag active(StrawHitFlag::active);
     std::set<unsigned> planes;
+    std::set<unsigned> panels;
     uint16_t minplane(0), maxplane(0);
     static StrawHitFlag allsel("EnergySelection:TimeSelection:RadiusSelection");
     static StrawHitFlag allrej("Background:Dead:Noisy");
@@ -255,6 +256,7 @@ namespace mu2e {
       if (ihit->strawHitState() > WireHitState::inactive){
         ++trkinfo.nactive;
         planes.insert(ihit->strawId().plane());
+        panels.insert(ihit->strawId().uniquePanel());
         minplane = std::min(minplane, ihit->strawId().plane());
         maxplane = std::max(maxplane, ihit->strawId().plane());
         if (ihit->strawHitState()==WireHitState::null) {
@@ -275,6 +277,7 @@ namespace mu2e {
         }
       }
       trkinfo.nplanes = planes.size();
+      trkinfo.npanels = panels.size();
       trkinfo.planespan = abs(maxplane-minplane);
     }
     trkinfo.avgedep /= trkinfo.nactive;
@@ -291,8 +294,9 @@ namespace mu2e {
     }
   }
 
-  void InfoStructHelper::fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& all_tshinfos ) {
+  void InfoStructHelper::fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& all_tshinfos, std::vector<std::vector<TrkStrawHitCalibInfo>>& all_tshcinfos, bool saveCalib ) {
     std::vector<TrkStrawHitInfo> tshinfos;
+    std::vector<TrkStrawHitCalibInfo> tshcinfos;
     // loop over hits
     static StrawHitFlag active(StrawHitFlag::active);
     for(std::vector<TrkStrawHitSeed>::const_iterator ihit=kseed.hits().begin(); ihit != kseed.hits().end(); ++ihit) {
@@ -345,12 +349,18 @@ namespace mu2e {
       tshinfo.udresid   = ihit->_udresid;
       tshinfo.udresidmvar   = ihit->_udresidmvar;
       tshinfo.udresidpvar   = ihit->_udresidpvar;
+      tshinfo.ulresid   = ihit->_ulresid;
+      tshinfo.ulresidmvar   = ihit->_ulresidmvar;
+      tshinfo.ulresidpvar   = ihit->_ulresidpvar;
       tshinfo.rtresid   = ihit->_rtresid;
       tshinfo.rtresidmvar   = ihit->_rtresidmvar;
       tshinfo.rtresidpvar   = ihit->_rtresidpvar;
       tshinfo.rdresid   = ihit->_rdresid;
       tshinfo.rdresidmvar   = ihit->_rdresidmvar;
       tshinfo.rdresidpvar   = ihit->_rdresidpvar;
+      tshinfo.rlresid   = ihit->_rlresid;
+      tshinfo.rlresidmvar   = ihit->_rlresidmvar;
+      tshinfo.rlresidpvar   = ihit->_rlresidpvar;
 
       tshinfo.wdot = ihit->_wdot;
       tshinfo.poca = ihit->_upoca;
@@ -371,8 +381,24 @@ namespace mu2e {
         }
       }
       tshinfos.push_back(tshinfo);
+
+      if (saveCalib){
+        TrkStrawHitCalibInfo tshcinfo;
+        auto index = std::distance(kseed.hits().begin(), ihit);
+        if (kseed.hitCalibInfos().size() == 0) {
+          throw cet::exception("EventNtuple") << "Trying to fill the trkhitcalib branch of EventNtuple but there are no TrkStrawHitCalibs in the KalSeed." << std::endl;
+        }
+        auto const& ical = kseed.hitCalibInfos()[index];
+        tshcinfo.dDdX = ical._dDdX;
+        tshcinfo.dDdPlane = ical._dDdPlaneAlign;
+        tshcinfo.dDdPanel = ical._dDdPanelAlign;
+        tshcinfo.dDdP = ical._dDdP;
+        tshcinfo.dLdP = ical._dLdP;
+        tshcinfos.push_back(tshcinfo);
+      }
     }
     all_tshinfos.push_back(tshinfos);
+    all_tshcinfos.push_back(tshcinfos);
   }
 
   void InfoStructHelper::fillMatInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawMatInfo>>& all_tminfos ) {

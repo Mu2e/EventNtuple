@@ -115,6 +115,7 @@ public:
     if(event->trkcalohit) { output_ntuple->Branch("trkcalohit", event->trkcalohit); }
     if(event->trkcalohitmc) { output_ntuple->Branch("trkcalohitmc", event->trkcalohitmc); }
     if(event->trkqual) { output_ntuple->Branch("trkqual", event->trkqual); }
+    if(event->trkqual_alt) { output_ntuple->Branch("trkqual_alt", event->trkqual_alt); }
     if(event->trksegs) { output_ntuple->Branch("trksegs", event->trksegs); }
     if(event->trksegsmc) { output_ntuple->Branch("trksegsmc", event->trksegsmc); }
     if(event->trksegpars_lh) { output_ntuple->Branch("trksegpars_lh", event->trksegpars_lh); }
@@ -123,6 +124,7 @@ public:
     if(event->trkhits) { output_ntuple->Branch("trkhits", event->trkhits); }
     if(event->trkhitsmc) { output_ntuple->Branch("trkhitsmc", event->trkhitsmc); }
     if(event->trkmats) { output_ntuple->Branch("trkmats", event->trkmats); }
+    if(event->trkhitcalibs) { output_ntuple->Branch("trkhitcalibs", event->trkhitcalibs); }
 
     if(event->caloclusters) { output_ntuple->Branch("caloclusters", event->caloclusters); }
     if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }

@@ -10,7 +10,7 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.dat"
+  datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
 }
 TrkQualDeM           : @local::TrkQual
 TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
@@ -125,7 +125,7 @@ MergeKKUmuP.KalSeedCollections : [ "KKUmuP" ]
 MergeKKLine          : @local::MergeKK
 MergeKKLine.KalSeedCollections : [ "KKLine" ]
 MergeKKOff          : @local::MergeKK
-MergeKKOff.KalSeedCollections : [ "KKOffSpill" ]
+MergeKKOff.KalSeedCollections : [ "KKCHmu" ]
 MergeKKAll          : @local::MergeKK
 MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP", # will go when all new datasets are added
   "KKDe", "KKUe", "KKDmu", "KKUmu" ] # these are the new APR outputs
@@ -193,59 +193,69 @@ MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKK
 DeM : { input : "MergeKKDeM"
   branch : "dem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : "TrkQualDeM"
-  trkPIDTag : "TrkPIDDeM"
+  trkQualTags : ["TrkQualDeM"]
+  trkPIDTag : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branch : "dmm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branch : "umm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branch : "dep"
   options : { fillMC : true   genealogyDepth : -1 }
+  trkQualTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branch : "uep"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branch : "dmp"
+  trkQualTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branch : "ump"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
+  trkQualTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
+  trkQualTags : [ ]
 }
 All : { input : "MergeKKAll"
   branch : "trk"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : "TrkQualAll"
-  trkPIDTag : "TrkPIDAll"
+  trkQualTag : ["TrkQualAll"]
+  trkPIDTag : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
   options : { fillMC : true fillHits : true  genealogyDepth : -1 matchDepth : -1 }
+  trkQualTags : [ ]
 }
 De : { input : "MergeKKDe"
   branch : "de"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : "TrkQualDe"
-  trkPIDTag : "TrkPIDDe"
+  trkQualTags : ["TrkQualDe"]
+  trkPIDTag : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
@@ -274,7 +284,10 @@ EventNtupleMaker : {
   CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
   CrvPlaneY : @local::crvPlaneY.CRV_T
   FillMCInfo : true
+  FillTrkQual : true
+  FillTrkPIDInfo : false
   FillHitInfo : true
+  FillHitCalibInfo : false
   FillTriggerInfo : false
   TriggerProcessName : "Mix"
   FillCRVCoincs : true
@@ -354,7 +367,7 @@ ENDeCalib : {
   branches :  [
     { input: "MergeKKDeCalib"
       branch : "trk"
-      trkQualTag : "TrkQualDe"
+      trkQualTags : ["TrkQualDe"]
       options : { fillMC : true fillHits : true  genealogyDepth : -1 }
     }
   ]

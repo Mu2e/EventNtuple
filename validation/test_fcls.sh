@@ -6,7 +6,7 @@
 log_file="test_fcls.log"
 rm ${log_file}
 
-mock_dataset="mcs.mu2e.ensembleMDS2bOnSpillTriggered.MDC2020az_best_v1_3.art"
+mock_dataset="mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art"
 primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art"
 mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
 extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
@@ -76,8 +76,8 @@ else
 fi
 
 echo -n "from_mcs-ceSimReco.fcl... "
-echo "mu2e -c Production/Validation/ceSimReco.fcl -n 10" >> ${log_file} 2>&1
-mu2e -c Production/Validation/ceSimReco.fcl -n 10 >> ${log_file} 2>&1
+echo "mu2e -c validation/ceSimReco.fcl -n 100" >> ${log_file} 2>&1
+mu2e -c validation/ceSimReco.fcl -n 100 >> ${log_file} 2>&1
 echo "mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --TFileName nts.ntuple.ceSimReco.root" >> ${log_file} 2>&1
 mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --TFileName nts.ntuple.ceSimReco.root >> ${log_file} 2>&1
 if [ $? == 0 ]; then

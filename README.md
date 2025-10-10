@@ -60,13 +60,30 @@ Validation scripts and instructions are [here](validation/README.md)
 ## Tagging a New Release
 Instructions for tagging a new release:
 
-* from your development area:
+* have a working area set up environment set up with a backing to the latest SimJob and a clone of EventNtuple (you might already have this)
 ```
-git fetch mu2e main
+cd /your/work/area
+muse backing SimJob MDCXXXXvv
+muse setup
+git clone git@github.com:YourGitHubUsername/EventNtuple.git
+cd EventNtuple/
+git remote add -f mu2e https://github.com/Mu2e/EventNtuple.git
+```
+
+* from your clone of the EventNtuple, fetch the latest version of the code from the main Mu2e repository and make a new branch:
+```
+git fetch --tags mu2e main
 git checkout --no-track -b vXX-YY-ZZ mu2e/main
 ```
 * update version number in histogram ```_hVersion``` in ```src/EventNtupleMaker_module.cc``` and commit
 * make sure EventNtuple runs following these [steps](validation/README.md#Validating-eventntuple-runs)
+* create a "before" ntuple with the previous release of EventNtuple. In a fresh login:
+```
+mu2einit
+muse setup EventNtuple vXX-YY-ZZ
+mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S ../EventNtupleDev_NewTag/filelists/mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art.list --TFileName nts.ntuple.before.root -n 100
+root -l -b ${MUSE_WORK_DIR}/EventNtuple/validation/create_val_file_rooutil.C\(\"nts.ntuple.before.root\",\"val.ntuple.before.root\"\)
+```
 * create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood
 * open PR with final changes and merge

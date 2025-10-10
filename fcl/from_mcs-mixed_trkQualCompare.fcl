@@ -1,0 +1,17 @@
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+
+# Add another TrackQuality module
+physics.producers.TrkQualAllV10 : @local::TrkQualAll
+physics.producers.TrkQualAllV10.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.dat"
+
+physics.producers.TrkQualAllV11 : @local::TrkQualAll
+physics.producers.TrkQualAllV11.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.1.dat"
+physics.producers.TrkQualAllV2 : @local::TrkQualAll
+physics.producers.TrkQualAllV2.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
+physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
+
+# Add it to the EventNtuple output
+physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAllV10", "TrkQualAllV11", "TrkQualAllV2" ]
+
+# Removin hits
+physics.analyzers.EventNtuple.FillHitInfo : false

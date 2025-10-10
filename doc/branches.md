@@ -59,6 +59,7 @@ The number of elements in the vector is found in the leaf trk.nhits.
 | trkhits |  Vector-of-vector branch |   information about the straw hits assigned to a track| [see TrkStrawHitInfo.hh](../inc/TrkStrawHitInfo.hh)
 | trkmats |  Vector-of-vector branch |   information on the straw materials used in the Kalman fit| [see TrkStrawMatInfo.hh](../inc/TrkStrawMatInfo.hh)
 | trkhitsmc |  Vector-of-vector branch |   MC-truth information of straw hits assigned to a track| [see TrkStrawHitInfoMC.hh](../inc/TrkStrawHitInfoMC.hh)
+| trkhitcalibs |  Vector-of-vector branch |   calib and alignment information about the straw hits assigned to a track| [see TrkStrawHitCalibInfo.hh](../inc/TrkStrawHitCalibInfo.hh)
 ## Monte Carlo Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).
@@ -73,7 +74,9 @@ The vector is sorted in reverse chronological order, such that the last element 
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.
-While each branch can be read independently, each element contains indexes to the other branches for parentage link.
+The branch is empty if there are no calo cluster during the event.
+
+While each branch can be read independently, i.e. all the hits of the event, each element contains indexes to the other branches for parentage link.
 The cluster element contains the vector 'hits_' containing the indexes of the hits branch belonging to this cluster.
 Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.
 Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
