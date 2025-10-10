@@ -194,68 +194,78 @@ DeM : { input : "MergeKKDeM"
   branch : "dem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDeM"]
-  trkPIDTag : ["TrkPIDDeM"]
+  trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branch : "dmm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branch : "umm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branch : "dep"
   options : { fillMC : true   genealogyDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branch : "uep"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branch : "dmp"
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branch : "ump"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branch : "trk"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
-  trkQualTag : ["TrkQualAll"]
-  trkPIDTag : ["TrkPIDAll"]
+  trkQualTags : ["TrkQualAll"]
+  trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
   options : { fillMC : true fillHits : true  genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branch : "de"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
-  trkPIDTag : ["TrkPIDDe"]
+  trkPIDTags : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
