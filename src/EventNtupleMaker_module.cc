@@ -120,7 +120,7 @@ namespace mu2e {
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
         fhicl::Atom<std::string> branch{Name("branch"), Comment("Name of output branch")};
         fhicl::Sequence<std::string> trkQualTags{Name("trkQualTags"), Comment("Input tags for MVAResultCollection to use for TrkQuals")};
-        fhicl::Sequence<std::string> trkPIDTag{Name("trkPIDTag"), Comment("Input tag for MVAResultCollection to use for TrkPID")};
+        fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
         fhicl::Table<BranchOptConfig> options{Name("options"), Comment("Optional arguments for a branch")};
       };
 
@@ -233,13 +233,13 @@ namespace mu2e {
       // quality branches (inputs)
 
       std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs; // outer vector is for each track type, inner vector is all RecoQuals
-      std::vector<art::Handle<MVAResultCollection> > _allTrkQualCHs;
-      std::vector<art::Handle<MVAResultCollection> > _allTrkPIDCHs;
+      std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkQualCHs;
+      std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkPIDCHs;
 
       // quality branches (outputs)
       std::vector<RecoQualInfo> _allRQIs;
-      std::map<BranchIndex, std::vector<MVAResultInfo>> _allTrkQualResults;
-      std::map<BranchIndex, std::vector<MVAResultInfo>> _allTrkPIDResults;
+      std::map<BranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkQualResults;
+      std::map<BranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkPIDResults;
 
       // trigger information
       unsigned _trigbits;
@@ -414,8 +414,11 @@ namespace mu2e {
       }
       _allTrkQualResults[i_branch] = trkQualResults;
 
-      MVAResultInfo tpr;
-      _allTrkPIDResults[i_branch] = std::vector<MVAResultInfo>();
+      std::vector<std::vector<MVAResultInfo>> trkPIDResults;
+      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
+        trkPIDResults.emplace_back(std::vector<MVAResultInfo>());
+      }
+      _allTrkPIDResults[i_branch] = trkPIDResults;
 
 
       if(_conf.extraMCStepTags(_extraMCStepTags)){
@@ -475,12 +478,13 @@ namespace mu2e {
         }
         _ntuple->Branch((branch+branchname+".").c_str(),&_allTrkQualResults.at(i_branch).at(i_trkQualTag),_buffsize,_splitlevel);
       }
-      for (size_t i_TrkPIDTag = 0; i_TrkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
+      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
         std::string branchname = "pid";
         if (i_trkPIDTag > 0) {
           branchname += std::to_string(i_trkPIDTag+1); // +1 so that the second trkpid will be "trkpid2"
         }
         _ntuple->Branch((branch+branchname+'.').c_str(),&_allTrkPIDResults.at(i_branch).at(i_trkPIDTag),_buffsize,_splitlevel);
+      }
       // optionally add hit-level branches
       // (for the time being diagLevel : 2 will still work, but I propose removing this at some point)
       if(_conf.diag() > 1 || (_conf.fillhits() && i_branchConfig.options().fillhits())){
@@ -630,11 +634,13 @@ namespace mu2e {
       _allRQCHs.push_back(selectedRQCHs);
 
       // TrkCaloHitPID
-      art::Handle<MVAResultCollection> trkPIDCollHandle;
-      if (i_branchConfig.trkPIDTag() != "") {
-        event.getByLabel(i_branchConfig.trkPIDTag(),trkPIDCollHandle);
+      std::vector<art::Handle<MVAResultCollection>> trkPIDCollHandles;
+      for (const auto& i_trkPIDTag : i_branchConfig.trkPIDTags()) {
+        art::Handle<MVAResultCollection> trkPIDCollHandle;
+        event.getByLabel(i_trkPIDTag,trkPIDCollHandle);
+        trkPIDCollHandles.push_back(trkPIDCollHandle);
       }
-      _allTrkPIDCHs.emplace_back(trkPIDCollHandle);
+      _allTrkPIDCHs.emplace_back(trkPIDCollHandles);
 
     }
 
@@ -1005,9 +1011,12 @@ namespace mu2e {
     _allRQIs.at(i_branch).setQuals(recoQuals);
     // TrkCaloHitPID
     
-    const auto& trkPIDHandle = _allTrkPIDCHs.at(i_branch);
-    if (trkPIDHandle.isValid()) { // might not have a valid handle
-      _infoStructHelper.fillTrkPIDInfo(kseed, trkPIDHandle->at(i_kseedptr) , _allTrkPIDResults.at(i_branch));
+    const auto& trkPIDHandles = _allTrkPIDCHs.at(i_branch);
+    for (size_t i_trkPIDHandle = 0; i_trkPIDHandle < trkPIDHandles.size(); ++i_trkPIDHandle) {
+      const auto& trkPIDHandle = trkPIDHandles.at(i_trkPIDHandle);
+      if (trkPIDHandle.isValid()) { // might not have a valid handle
+        _infoStructHelper.fillTrkPIDInfo(kseed, trkPIDHandle->at(i_kseedptr) , _allTrkPIDResults.at(i_branch).at(i_trkPIDHandle));
+      }
     }
 
     // fill MC info associated with this track
