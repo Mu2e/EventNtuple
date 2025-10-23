@@ -54,7 +54,7 @@ TrkPID : {
   module_type : TrackPID
   MaxDE : 500.0 # MeV
   DeltaTOffset : -1.15 # specific to MDC2018h
-  datFilename : "Offline/TrkDiag/data/TrackPID.dat"
+  datFilename : "Offline/TrkDiag/data/TrackPID_v1.dat"
 }
 # this module only makes sense for downstream electron fits
 TrkPIDDeM          : @local::TrkPID
