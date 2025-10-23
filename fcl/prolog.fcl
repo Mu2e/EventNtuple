@@ -52,21 +52,24 @@ TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQua
 # track PID module
 TrkPID : {
   module_type : TrackPID
-  MaxDE : 5.0 # MeV
+  MaxDE : 500.0 # MeV
   DeltaTOffset : -1.15 # specific to MDC2018h
-  MVAConfig : { MVAWeights : "Offline/TrkDiag/data/TrkCaloHitPID.weights.xml"}
+  datFilename : "Offline/TrkDiag/data/TrackPID_v1.dat"
 }
 # this module only makes sense for downstream electron fits
 TrkPIDDeM          : @local::TrkPID
-TrkPIDDeM.KalSeedCollection : "KKDeM"
+TrkPIDDeM.KalSeedPtrCollection : "MergeKKDeM"
 TrkPIDDeP          : @local::TrkPID
-TrkPIDDeP.KalSeedCollection : "KKDeP"
-TrkPIDDe          : @local::TrkPID
-TrkPIDDe.KalSeedCollection : "KKDe"
+TrkPIDDeP.KalSeedPtrCollection : "MergeKKDeP"
+TrkPIDDe           : @local::TrkPID
+TrkPIDDe.KalSeedPtrCollection : "MergeKKDe"
+TrkPIDAll          : @local::TrkPID
+TrkPIDAll.KalSeedPtrCollection : "MergeKKAll"
 TrkPIDProducers : {
   TrkPIDDeM : @local::TrkPIDDeM
   TrkPIDDeP : @local::TrkPIDDeP
   TrkPIDDe : @local::TrkPIDDe
+  TrkPIDAll : @local::TrkPIDAll
 }
 TrkPIDProducersPath : [ TrkPIDDeM, TrkPIDDeP ]
 
@@ -96,8 +99,6 @@ genCountLogger: { module_type: GenEventCountReader }
 
 AllOpt : {
   fillMC : true
-  trkpid : "TrkPID"
-  fillTrkPID : true
   fillHits : true
   genealogyDepth : -1
   matchDepth : -1
@@ -193,65 +194,78 @@ DeM : { input : "MergeKKDeM"
   branch : "dem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDeM"]
+  trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branch : "dmm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branch : "umm"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branch : "dep"
   options : { fillMC : true   genealogyDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branch : "uep"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branch : "dmp"
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branch : "ump"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branch : "trk"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branch : "trk"
   options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
+  trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
   options : { fillMC : true fillHits : true  genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branch : "de"
   options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
+  trkPIDTags : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
@@ -345,11 +359,11 @@ EventNtuple : {
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll ]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDAll ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
