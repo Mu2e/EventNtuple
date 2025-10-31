@@ -132,7 +132,7 @@ namespace mu2e {
 
         // General control and config
         fhicl::Atom<int> diag{Name("diagLevel"),1};
-        fhicl::Atom<int> debug{Name("debugLevel"),0};
+        fhicl::Atom<int> debug{Name("debugLevel"),5};
         fhicl::Atom<int> splitlevel{Name("splitlevel"),99};
         fhicl::Atom<int> buffsize{Name("buffsize"),32000};
         fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple"), false};
@@ -653,7 +653,9 @@ namespace mu2e {
 
     // trigger information
     if(_conf.filltrig()){
+      std::cout<<"filling trigger bits for event "<<event.id().event()<<std::endl;
       fillTriggerBits(event,process);
+      std::cout<<"finished filling trigger bits for event"<<event.id().event()<<std::endl;
     }
     // MC data
     if(_fillmc) { // get MC product collections
@@ -934,19 +936,21 @@ namespace mu2e {
     const art::TriggerResults* trigResults = trigResultsH.product();
     TriggerResultsNavigator tnav(trigResults);
     _trigbits = 0;
-    // setup the bin labels
-    unsigned ntrig(0);
-    unsigned npath = trigResults->size();
-    for(size_t ipath=0;ipath < npath; ++ipath){
-      if (tnav.getTrigPath(ipath).find(_conf.trigpathsuffix()) != std::string::npos) {
-        _tmap[ipath] = ntrig;
-        ntrig++;
-      }
+
+    for (unsigned i=0; i< tnav.getTrigPaths().size(); ++i) {
+      const std::string path = tnav.getTrigPathName(i);
+      // find branch with name
+      // fille branch with name with accepted 0/1
+      std::cout<<"name "<< path<<" accepted "<< tnav.accepted(path)<<std::endl;
+      _tmap[i] = tnav.accepted(path);
     }
+    
+    //std::cout<<" trigger results of size "<<trigResults->size()<<std::endl;
     for(size_t ipath=0;ipath < trigResults->size(); ++ipath){
       if(trigResults->accept(ipath)) {
         auto ifnd = _tmap.find(ipath);
         if(ifnd != _tmap.end()){
+          //--> never see this. because tmap is not filled
           unsigned itrig = ifnd->second;
           _trigbits |= 1 << itrig;
           if(_conf.debug() > 1) cout << "Trigger path " << tnav.getTrigPath(ipath) << " Trigger ID " << itrig << " returns " << trigResults->accept(ipath) << endl;
