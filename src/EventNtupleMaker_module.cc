@@ -130,8 +130,8 @@ namespace mu2e {
         using Comment=fhicl::Comment;
 
         // General control and config
-        fhicl::Atom<int> diag{Name("diagLevel"),0};
-        fhicl::Atom<int> debug{Name("debugLevel"),5};
+        fhicl::Atom<int> diag{Name("diagLevel"),1};
+        fhicl::Atom<int> debug{Name("debugLevel"),0};
         fhicl::Atom<int> splitlevel{Name("splitlevel"),99};
         fhicl::Atom<int> buffsize{Name("buffsize"),32000};
         fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple"), false};
@@ -332,7 +332,7 @@ namespace mu2e {
       bool firstEvent = true;
       // helper functions
       void fillEventInfo(const art::Event& event);
-      void fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent, TTree* &_ntuple);
+      void fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent);
       void resetTrackBranches();
       void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, BranchIndex i_branch, size_t i_kseedptr);
 
@@ -646,7 +646,7 @@ namespace mu2e {
 
     // trigger information
     if(_conf.filltrig()){
-      fillTriggerBranch(event, process, firstEvent, _ntuple);
+      fillTriggerBranch(event, process, firstEvent);
       firstEvent=false;
     }
     
@@ -926,7 +926,7 @@ namespace mu2e {
     _wtinfo.setWeights(weights);
   }
 
-  void EventNtupleMaker::fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent, TTree* &_ntuple) {
+  void EventNtupleMaker::fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent) {
     art::InputTag const tag{Form("TriggerResults::%s", process.c_str())};
     auto trigResultsH = event.getValidHandle<art::TriggerResults>(tag);
     const art::TriggerResults* trigResults = trigResultsH.product();
