@@ -286,7 +286,6 @@ namespace mu2e {
       art::Handle<CaloDigiCollection> _caloDigis;
       std::vector<CaloClusterInfo> _caloCIs;
       TrigInfo _triggerResults;
-      UChar_t _triggerArray[mu2e::TrigInfo::ntrig_]; 
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
@@ -935,15 +934,15 @@ namespace mu2e {
     if (firstEvent) { 
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
           const std::string name = tnav.getTrigPathName(i);
-          _ntuple->Branch(name.c_str(), &_triggerArray[i], _buffsize,_splitlevel);
+          _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
     }
 
     for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
         const std::string path = tnav.getTrigPathName(i);
         bool accepted = tnav.accepted(path);
-        _triggerResults.triggerResults[i] = accepted;
-        _triggerArray[i] = static_cast<UChar_t>(_triggerResults.triggerResults[i]);
+        //_triggerResults.triggerResults[i] = accepted;
+        _triggerResults._triggerArray[i] = static_cast<UChar_t>(accepted);
     }
 
 

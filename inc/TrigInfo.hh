@@ -11,16 +11,9 @@ namespace mu2e
 
     static const unsigned int ntrig_ = 30; 
 
-    std::vector<bool> triggerResults; 
-
-    TrigInfo() : triggerResults(ntrig_, false) {}
+    UChar_t _triggerArray[ntrig_];
     
     void reset() { *this = TrigInfo(); }
   };
 }
-
-    
-// array of s of max length n_trig
-// pass in strings from 
-// fill the branch later on in a loop
 #endif
