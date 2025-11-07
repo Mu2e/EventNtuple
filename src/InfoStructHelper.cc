@@ -6,7 +6,6 @@
 #include "Offline/RecoDataProducts/inc/TrkStrawHitSeed.hh"
 #include "KinKal/Trajectory/CentralHelix.hh"
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
-#include "Offline/Mu2eUtilities/inc/TriggerResultsNavigator.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include <cmath>
@@ -529,5 +528,4 @@ namespace mu2e {
     digiinfo.caloRecoDigiIdx_ = recodigiIdx;
     digiinfos.push_back(digiinfo);
   }
-
 }
