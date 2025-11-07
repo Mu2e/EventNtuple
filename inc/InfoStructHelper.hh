@@ -75,7 +75,6 @@ namespace mu2e {
     void fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1);
     void fillCaloRecoDigiInfo(const CaloRecoDigi& crdptr, std::vector<CaloRecoDigiInfo>& recodigiinfos, int hitIdx = -1);
     void fillCaloDigiInfo(const CaloDigi& cdptr, std::vector<CaloDigiInfo>& digiinfos, int recodigiIdx = -1);
-    void fillTriggerInfo(const art::TriggerResults* trigResults, TrigInfo& triginfo);
   };
 }
 

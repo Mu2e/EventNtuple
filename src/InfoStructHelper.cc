@@ -530,17 +530,4 @@ namespace mu2e {
     digiinfos.push_back(digiinfo);
   }
 
-  void InfoStructHelper::fillTriggerInfo(const art::TriggerResults* trigResults, TrigInfo& triginfo) {
-
-    TriggerResultsNavigator tnav(trigResults);
-
-    for (unsigned i=0; i< tnav.getTrigPaths().size(); ++i) {
-      const std::string path = tnav.getTrigPathName(i); //--> find this branch set to 1, all others are left false
-      //std::cout<<"name "<< path<<" accepted "<< tnav.accepted(path)<<std::endl;
-      triginfo.triggerResults[i] = tnav.accepted(path); 
-    }
-    
-  }
-
-
 }

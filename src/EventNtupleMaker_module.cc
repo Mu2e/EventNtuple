@@ -941,7 +941,9 @@ namespace mu2e {
 
     for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
         const std::string path = tnav.getTrigPathName(i);
-        _triggerArray[i] = static_cast<UChar_t>(tnav.accepted(path));
+        bool accepted = tnav.accepted(path);
+        _triggerResults.triggerResults[i] = accepted;
+        _triggerArray[i] = static_cast<UChar_t>(_triggerResults.triggerResults[i]);
     }
 
 
