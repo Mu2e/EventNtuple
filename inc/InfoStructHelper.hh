@@ -34,7 +34,6 @@
 #include "EventNtuple/inc/CaloHitInfo.hh"
 #include "EventNtuple/inc/CaloRecoDigiInfo.hh"
 #include "EventNtuple/inc/CaloDigiInfo.hh"
-#include "EventNtuple/inc/TrigInfo.hh"
 #include "art/Framework/Principal/Handle.h"
 #include <vector>
 #include <functional>
