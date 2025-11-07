@@ -33,3 +33,4 @@
 #include "EventNtuple/inc/CrvSummaryMC.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
+#include "EventNtuple/inc/TrigInfo.hh"

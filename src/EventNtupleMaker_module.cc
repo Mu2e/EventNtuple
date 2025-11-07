@@ -76,6 +76,7 @@
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/InfoStructHelper.hh"
 #include "EventNtuple/inc/CrvInfoHelper.hh"
+#include "EventNtuple/inc/TrigInfo.hh"
 #include "EventNtuple/inc/InfoMCStructHelper.hh"
 #include "Offline/RecoDataProducts/inc/RecoQual.hh"
 #include "Offline/RecoDataProducts/inc/MVAResult.hh"
@@ -129,7 +130,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
 
         // General control and config
-        fhicl::Atom<int> diag{Name("diagLevel"),1};
+        fhicl::Atom<int> diag{Name("diagLevel"),0};
         fhicl::Atom<int> debug{Name("debugLevel"),5};
         fhicl::Atom<int> splitlevel{Name("splitlevel"),99};
         fhicl::Atom<int> buffsize{Name("buffsize"),32000};
@@ -284,6 +285,8 @@ namespace mu2e {
       art::Handle<CaloRecoDigiCollection> _caloRecoDigis;
       art::Handle<CaloDigiCollection> _caloDigis;
       std::vector<CaloClusterInfo> _caloCIs;
+      TrigInfo _triggerResults;
+      UChar_t _triggerArray[mu2e::TrigInfo::ntrig_]; 
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
@@ -325,9 +328,11 @@ namespace mu2e {
       FType _ftype = Unknown;
       std::vector<std::string> fitNames = {"Unknown", "LoopHelix","CentralHelix","KinematicLine"};
 
+      // for trigger branch:
+      bool firstEvent = true;
       // helper functions
       void fillEventInfo(const art::Event& event);
-      void fillTriggerBits(const art::Event& event,std::string const& process);
+      void fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent, TTree* &_ntuple);
       void resetTrackBranches();
       void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, BranchIndex i_branch, size_t i_kseedptr);
 
@@ -523,11 +528,6 @@ namespace mu2e {
       }
     }
 
-    // trigger info.  Actual names should come from the BeginRun object FIXME
-    if(_conf.filltrig()) {
-      _ntuple->Branch("trigbits",&_trigbits,_buffsize,_splitlevel);
-    }
-
     // Calorimeter
     if (_fillcaloclusters){
       _ntuple->Branch("caloclusters.",&_caloCIs,_buffsize,_splitlevel);
@@ -646,10 +646,10 @@ namespace mu2e {
 
     // trigger information
     if(_conf.filltrig()){
-      std::cout<<"filling trigger bits for event "<<event.id().event()<<std::endl;
-      fillTriggerBits(event,process);
-      std::cout<<"finished filling trigger bits for event"<<event.id().event()<<std::endl;
+      fillTriggerBranch(event, process, firstEvent, _ntuple);
+      firstEvent=false;
     }
+    
     // MC data
     if(_fillmc) { // get MC product collections
       event.getByLabel(_conf.primaryParticleTag(),_pph);
@@ -926,42 +926,25 @@ namespace mu2e {
     _wtinfo.setWeights(weights);
   }
 
-  void EventNtupleMaker::fillTriggerBits(const art::Event& event,std::string const& process) {
-    //get the TriggerResult from the process that created the KalFinalFit downstream collection
+  void EventNtupleMaker::fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent, TTree* &_ntuple) {
     art::InputTag const tag{Form("TriggerResults::%s", process.c_str())};
     auto trigResultsH = event.getValidHandle<art::TriggerResults>(tag);
     const art::TriggerResults* trigResults = trigResultsH.product();
     TriggerResultsNavigator tnav(trigResults);
-    _trigbits = 0;
 
-    for (unsigned i=0; i< tnav.getTrigPaths().size(); ++i) {
-      const std::string path = tnav.getTrigPathName(i);
-      // find branch with name
-      // fille branch with name with accepted 0/1
-      std::cout<<"name "<< path<<" accepted "<< tnav.accepted(path)<<std::endl;
-      _tmap[i] = tnav.accepted(path);
-    }
-    
-    //std::cout<<" trigger results of size "<<trigResults->size()<<std::endl;
-    for(size_t ipath=0;ipath < trigResults->size(); ++ipath){
-      if(trigResults->accept(ipath)) {
-        auto ifnd = _tmap.find(ipath);
-        if(ifnd != _tmap.end()){
-          //--> never see this. because tmap is not filled
-          unsigned itrig = ifnd->second;
-          _trigbits |= 1 << itrig;
-          if(_conf.debug() > 1) cout << "Trigger path " << tnav.getTrigPath(ipath) << " Trigger ID " << itrig << " returns " << trigResults->accept(ipath) << endl;
-        }
+    if (firstEvent) { 
+      for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
+          const std::string name = tnav.getTrigPathName(i);
+          _ntuple->Branch(name.c_str(), &_triggerArray[i], _buffsize,_splitlevel);
       }
     }
-    if(_conf.debug() > 0){
-      cout << "Found TriggerResults for process " << process << " with " << trigResults->size() << " Lines"
-        << " trigger bits word " << _trigbits << endl;
-      if(_conf.debug() > 1){
-        TriggerResultsNavigator tnav(trigResults);
-        tnav.print();
-      }
+
+    for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
+        const std::string path = tnav.getTrigPathName(i);
+        _triggerArray[i] = static_cast<UChar_t>(tnav.accepted(path));
     }
+
+
   }
 
   void EventNtupleMaker::fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, BranchIndex i_branch, size_t i_kseedptr) {

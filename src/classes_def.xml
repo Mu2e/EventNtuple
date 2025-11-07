@@ -70,4 +70,6 @@
   <class name="mu2e::SurfaceStepInfo" />
   <class name="std::vector<mu2e::SurfaceStepInfo>" />
   <class name="std::vector<std::vector<mu2e::SurfaceStepInfo> >" />
+  <class name="mu2e::TrigInfo" />
+  <class name="std::vector<mu2e::TrigInfo>" />
 </lcgdict>

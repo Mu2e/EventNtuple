@@ -6,6 +6,7 @@
 #include "Offline/RecoDataProducts/inc/TrkStrawHitSeed.hh"
 #include "KinKal/Trajectory/CentralHelix.hh"
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
+#include "Offline/Mu2eUtilities/inc/TriggerResultsNavigator.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include <cmath>
@@ -529,6 +530,17 @@ namespace mu2e {
     digiinfos.push_back(digiinfo);
   }
 
+  void InfoStructHelper::fillTriggerInfo(const art::TriggerResults* trigResults, TrigInfo& triginfo) {
+
+    TriggerResultsNavigator tnav(trigResults);
+
+    for (unsigned i=0; i< tnav.getTrigPaths().size(); ++i) {
+      const std::string path = tnav.getTrigPathName(i); //--> find this branch set to 1, all others are left false
+      //std::cout<<"name "<< path<<" accepted "<< tnav.accepted(path)<<std::endl;
+      triginfo.triggerResults[i] = tnav.accepted(path); 
+    }
+    
+  }
 
 
 }
