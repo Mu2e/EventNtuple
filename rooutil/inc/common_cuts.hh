@@ -278,4 +278,9 @@ bool from_start_process(Track& track, mu2e::ProcessCode::enum_type proc) { // Tr
   else { return false; }
 }
 
+//+ Trigger Cut
+bool passes_trigger(Event& event, std::string trigname) { // true if the event passed the named trigger
+  const auto i_trig_element = event.trigNameMap[trigname];
+  return event.triginfo._triggerArray[i_trig_element];
+}
 #endif

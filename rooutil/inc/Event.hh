@@ -35,6 +35,8 @@
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
 
+#include "EventNtuple/inc/TrigInfo.hh"
+
 #include "EventNtuple/rooutil/inc/Track.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
@@ -43,7 +45,6 @@
 
 struct Event {
   Event(TChain* ntuple) {
-
     if (ntuple->GetBranch("evtinfo")) {
       ntuple->SetBranchAddress("evtinfo", &this->evtinfo);
     }
@@ -52,6 +53,16 @@ struct Event {
     }
     if (ntuple->GetBranch("crvsummary")) {
       ntuple->SetBranchAddress("crvsummary", &this->crvsummary);
+    }
+    const auto& branches = ntuple->GetListOfBranches();
+    int i_trig_branch = 0;
+    for (const auto& branch : *branches) {
+      std::string brname = branch->GetName();
+      if (brname.find("tpr") != std::string::npos) {
+        ntuple->SetBranchAddress(brname.c_str(), &this->triginfo._triggerArray[i_trig_branch]);
+        trigNameMap.insert({brname, i_trig_branch});
+        i_trig_branch++;
+      }
     }
 
     if (ntuple->GetBranch("trk")) {
@@ -363,6 +374,7 @@ struct Event {
   mu2e::HitCount* hitcount = nullptr;
   mu2e::CrvSummaryReco* crvsummary = nullptr;
   mu2e::CrvSummaryMC* crvsummarymc = nullptr;
+  mu2e::TrigInfo triginfo; // not a pointer because we give the address of array elements inside this
 
   std::vector<mu2e::TrkInfo>* trk = nullptr;
   std::vector<mu2e::TrkInfoMC>* trkmc = nullptr;
@@ -393,6 +405,9 @@ struct Event {
   std::vector<mu2e::CrvPlaneInfoMC>* crvcoincsmcplane = nullptr;
 
   std::vector<std::vector<mu2e::SimInfo>>* trkmcsim = nullptr;
+
+  // Need to keep track of trigger name to element in triginfo
+  std::map<std::string, unsigned int> trigNameMap;
 };
 
 #endif
