@@ -15,20 +15,35 @@ def main():
 
     foldername = "EventNtuple"
     histname = "version"
+    treename = "ntuple"
     for filename in args.filenames:
         try:
             f = ROOT.TFile(filename, "READ");
             if (f.GetListOfKeys().Contains(foldername)):
                 folder = f.Get(foldername)
-                if (folder.GetListOfKeys().Contains("version")):
-                    h = f.Get("EventNtuple/version")
+                # Check version number
+                if (folder.GetListOfKeys().Contains(histname)):
+                    h = f.Get(foldername+"/"+histname)
                     print("{} contains EventNtuple v{:02.0f}_{:02.0f}_{:02.0f}".format(filename, h.GetBinContent(1), h.GetBinContent(2), h.GetBinContent(3)))
                 else:
                     print("{} histogram does not exist in {} (it is either v06_02_00 or older)".format(histname, filename))
+
+                # Print triggers
+                if (folder.GetListOfKeys().Contains(treename)):
+                    t = f.Get(foldername+"/"+treename)
+                    print("\nIt contains the following trigger paths:")
+                    for br in t.GetListOfBranches():
+                        if "trig_" in br.GetName():
+                            print(f" - {br.GetName()}")
+                    print("For trigger definitions, please contact the Trigger group.")
+                else:
+                    print("{} tree does not exist in {}...".format(treename, filename))
             else:
                 print("{}/ folder does not exist in {}".format(foldername, filename))
         except OSError:
             print("{} threw an OSError (does it exist?)".format(filename))
+
+    print("\nFor any questions about EventNtuple, please contact the Analysis Tools group.")
 
 if __name__ == "__main__":
     main()
