@@ -58,7 +58,7 @@ struct Event {
     int i_trig_branch = 0;
     for (const auto& branch : *branches) {
       std::string brname = branch->GetName();
-      if (brname.find("tpr") != std::string::npos) {
+      if (brname.substr(0, 5) == "trig_") {
         ntuple->SetBranchAddress(brname.c_str(), &this->triginfo._triggerArray[i_trig_branch]);
         trigNameMap.insert({brname, i_trig_branch});
         i_trig_branch++;
