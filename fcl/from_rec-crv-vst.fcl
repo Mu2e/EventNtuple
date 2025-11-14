@@ -10,6 +10,7 @@ physics.analyzers.EventNtuple.FillCaloHits : false # no calorimeter
 physics.analyzers.EventNtuple.RecoCountTag : ""
 physics.analyzers.EventNtuple.PBTTag : ""
 physics.analyzers.EventNtuple.hasCRV : true
+physics.analyzers.EventNtuple.FillTriggerInfo : false
 
 physics.analyzers.EventNtuple.CrvDigisTag : "CrvDigi"
 physics.analyzers.EventNtuple.CrvCoincidencesTag: "CrvCoincidenceClusterFinder"
