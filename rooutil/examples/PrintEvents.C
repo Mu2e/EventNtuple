@@ -108,6 +108,13 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    // trkpid branch
+    if (event.trkpid != nullptr) {
+      for (const auto& trkpid : *(event.trkpid)) {
+        std::cout << "trkpid: " << trkpid.valid << ", " << trkpid.result << std::endl;
+      }
+    }
+
     // trksegpars_lh
     if (event.trksegpars_lh != nullptr) { // might not have this branch
       for (const auto& track : *(event.trksegpars_lh)) {
