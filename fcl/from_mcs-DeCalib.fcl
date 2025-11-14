@@ -3,8 +3,6 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
 process_name: DeCalib
-source : { module_type : RootInput }
-services : @local::Services.Reco
 physics :
 {
   producers : {

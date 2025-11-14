@@ -22,3 +22,5 @@ physics.trigger_paths : [ EventNtuplePath ]
 physics.end_paths : [ EventNtupleEndPath ]
 
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
+
+#include "Production/JobConfig/common/epilog.fcl"

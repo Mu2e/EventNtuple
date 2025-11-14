@@ -447,7 +447,7 @@ namespace mu2e {
     _ntuple=tfs->make<TTree>("ntuple","Mu2e Event Ntuple");
     _hVersion = tfs->make<TH1I>("version", "version number",3,0,3);
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
-    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 7);
+    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 8);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 0);
     // add event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
@@ -932,6 +932,9 @@ namespace mu2e {
     TriggerResultsNavigator tnav(trigResults);
 
     if (firstEvent) {
+      if (tnav.getTrigPaths().size() > TrigInfo::ntrig_) {
+        throw cet::exception("EventNtuple") << "More trigger paths in TriggerResultsNavigator than maximum allowed by TrigInfo::ntrig_. Increase TrigInfo::ntrig_ and rebuild\n";
+      }
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
           const std::string name = "trig_"+tnav.getTrigPathName(i);
           _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);

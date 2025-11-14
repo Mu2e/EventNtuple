@@ -379,6 +379,7 @@ ENDeCalib : {
     { input: "MergeKKDeCalib"
       branch : "trk"
       trkQualTags : ["TrkQualDe"]
+      trkPIDTags : ["TrkPIDDe"]
       options : { fillMC : true fillHits : true  genealogyDepth : -1 }
     }
   ]
