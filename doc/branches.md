@@ -98,6 +98,11 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincs |  Vector branch |   information about a cluster of CRV coincidence triplets| [see CrvHitInfoReco.hh](../inc/CrvHitInfoReco.hh)
 | crvcoincsmc |  Vector branch |   information about the MC track which most likely caused the CRV coincidence triplets| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
+## Trigger Branches
+
+Each element in these branch corresponds to a different Kalman fit hypotheses to reconstruct the track:
+
+Trigger branches are prefixed with ```trig_```. To find the names of the trigger branches run ```checkEventNtuple filename.root```
 ## Deprecated Branches
 
 These branches are remnants from trkana and are deprecated.
