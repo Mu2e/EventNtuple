@@ -113,8 +113,9 @@ Some branches are not contained in any of the above classes:
 * ```crvpulses``` and ```crvpulsesmc```
 * ```crvcoincsmcplane```
 * ```calohits```, ```calorecodigis```, ```calodigis```
+* ```trig_``` branches
 
-Reach out to the developers on the #analysis-tools Slack channel if you have a need to have these added somewhere.
+Reach out to the developers on the #analysis-tools Slack channel if you need to have these added somewhere.
 
 ## Accessing User-Friendly Classes
 The ```Event``` class provides access to ```Tracks``` and ```CrvCoincs```:
