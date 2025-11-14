@@ -143,7 +143,7 @@ public:
 
     if(event->trkmcsim) { output_ntuple->Branch("trkmcsim", event->trkmcsim); }
 
-    for (const auto pair : event->trigNameMap) {
+    for (const auto& pair : event->trigNameMap) {
       output_ntuple->Branch(pair.first.c_str(), &event->triginfo._triggerArray[pair.second]);
     }
 
