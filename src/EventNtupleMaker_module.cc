@@ -931,9 +931,9 @@ namespace mu2e {
     const art::TriggerResults* trigResults = trigResultsH.product();
     TriggerResultsNavigator tnav(trigResults);
 
-    if (firstEvent) { 
+    if (firstEvent) {
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-          const std::string name = tnav.getTrigPathName(i);
+          const std::string name = "trig_"+tnav.getTrigPathName(i);
           _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
     }
@@ -941,8 +941,7 @@ namespace mu2e {
     for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
         const std::string path = tnav.getTrigPathName(i);
         bool accepted = tnav.accepted(path);
-        //_triggerResults.triggerResults[i] = accepted;
-        _triggerResults._triggerArray[i] = static_cast<UChar_t>(accepted);
+        _triggerResults._triggerArray[i] = accepted;
     }
 
 

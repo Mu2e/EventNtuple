@@ -47,14 +47,16 @@ public:
 
   void SetVersionNumber(std::string filename) {
     TFile* file = new TFile(filename.c_str(), "READ");
-    TH1I* hVersion = (TH1I*) file->Get("EventNtuple/version");
-    if (!hVersion) {
+    TH1I* version = (TH1I*) file->Get("EventNtuple/version");
+    if (!version) {
       std::cout << "Warning: this EventNtuple file does not contain a version number. It is either v06_02_00 or older. This is just a warning..." << std::endl;
     }
     else {
-      majorVer = hVersion->GetBinContent(1);
-      minorVer = hVersion->GetBinContent(2);
-      patchVer = hVersion->GetBinContent(3);
+      hVersion = (TH1I*) version->Clone();
+      hVersion->SetDirectory(0);
+      int majorVer = hVersion->GetBinContent(1);
+      int minorVer = hVersion->GetBinContent(2);
+      int patchVer = hVersion->GetBinContent(3);
       std::cout << "EventNtuple v" << std::setw(2) << std::setfill('0') << majorVer << "_"
                 << std::setw(2) << std::setfill('0') << minorVer << "_"
                 << std::setw(2) << std::setfill('0') << patchVer << std::endl;
@@ -140,6 +142,12 @@ public:
 
     if(event->trkmcsim) { output_ntuple->Branch("trkmcsim", event->trkmcsim); }
 
+    for (const auto pair : event->trigNameMap) {
+      output_ntuple->Branch(pair.first.c_str(), &event->triginfo._triggerArray[pair.second]);
+    }
+
+    // Write out histograms from input to output
+    hVersion->Write();
   }
 
   void FillOutputEventNtuple() {
@@ -151,9 +159,7 @@ private:
   Event* event; // holds all the variables for SetBranchAddress
   bool debug;
 
-  int majorVer;
-  int minorVer;
-  int patchVer;
+  TH1I* hVersion;
 
   TTree* output_ntuple; // for output
 };

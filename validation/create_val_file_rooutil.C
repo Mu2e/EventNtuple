@@ -503,6 +503,13 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calodigis_peakpos_ = new TH1F("h_calodigis_peakpos_", "", 100,0,100);
   TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
 
+  TH1F* h_triginfo = new TH1F("h_triginfo", "", mu2e::TrigInfo::ntrig_,0,mu2e::TrigInfo::ntrig_);
+  // Grab the first event to name the bins
+  const auto& evt = util.GetEvent(0);
+  for (const auto pair : evt.trigNameMap) {
+    h_triginfo->GetXaxis()->SetBinLabel(pair.second+1, pair.first.c_str());
+  }
+
   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
     std::cout << "Event #" << i_event << std::endl;
     const auto& event = util.GetEvent(i_event);
@@ -1139,6 +1146,11 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       }
     }
 
+    // Creating triginfo histogram
+    std::cout << "Creating triginfo histogram" << std::endl;
+    for (int i_trig = 0; i_trig < mu2e::TrigInfo::ntrig_; ++i_trig) {
+      h_triginfo->AddBinContent(i_trig+1, event.triginfo._triggerArray[i_trig]);
+    }
 
   }
 

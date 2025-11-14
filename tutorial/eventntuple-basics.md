@@ -52,6 +52,13 @@ samListLocations -d --defname=nts.name.of.dataset.root > filelist.txt
 
 Check the contents of ```filelist.txt```. If it is empty, then pick another dataset. If you have authentication errors, then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
 
+### Checking the EventNtuple
+You can get some basic information about the EventNtuple, such as the version number using ```checkEventNtuple``` like so:
+
+```
+checkEventNtuple /path/to/nts.root
+```
+
 ### Printing the EventNtuple
 
 You can print the branches and leaves of the EventNtuple in ROOT or python. From your ```filelist.txt` pick a single file and use it in the following:

@@ -9,10 +9,10 @@ namespace mu2e
 {
   struct TrigInfo {
 
-    static const unsigned int ntrig_ = 30; 
+    static const unsigned int ntrig_ = 30;
 
-    UChar_t _triggerArray[ntrig_];
-    
+    bool _triggerArray[ntrig_];
+
     void reset() { *this = TrigInfo(); }
   };
 }

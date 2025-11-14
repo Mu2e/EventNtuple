@@ -231,6 +231,15 @@ class nthelper:
                 print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
 
         if not export_to_md:
+            print("\nTrigger Branches")
+            print("================")
+            print("Trigger branches are prefixed with \"trig_\". To find the names of the trigger branches run \"checkEventNtuple filename.root\"")
+        else:
+            print("## Trigger Branches\n")
+            print("Each element in these branch corresponds to a different Kalman fit hypotheses to reconstruct the track:\n")
+            print("Trigger branches are prefixed with ```trig_```. To find the names of the trigger branches run ```checkEventNtuple filename.root```")
+
+        if not export_to_md:
             print("\nDeprecated Branches")
             print("================")
         else:

@@ -249,5 +249,11 @@ void PrintEvents(std::string filename) {
         std::cout << "calodigi: " << calodigi.SiPMID_ << ", " << calodigi.t0_ << ", " << calodigi.peakpos_ << ", " << calodigi.caloRecoDigiIdx_ << std::endl;
       }
     }
+
+    // trigger branches
+    for (const auto pair : event.trigNameMap) {
+      std::cout << pair.first << ": " << event.triginfo._triggerArray[pair.second] << std::endl;
+    }
+
   }
 }
