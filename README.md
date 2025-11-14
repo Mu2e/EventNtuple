@@ -80,10 +80,11 @@ git checkout --no-track -b vXX-YY-ZZ mu2e/main
 ```
 * update version number in histogram ```_hVersion``` in ```src/EventNtupleMaker_module.cc``` and commit
 * make sure EventNtuple runs following these [steps](validation/README.md#Validating-eventntuple-runs)
+  * if any test fails, then you can look in ```test_fcls.log``` to see the error. You can also see the command to rerun and debug locally without having to re-run the whole ```test_fcls.sh``` script
 * create a "before" ntuple with the previous release of EventNtuple. In a fresh login:
 ```
 mu2einit
-muse setup EventNtuple vXX-YY-ZZ
+muse setup EventNtuple vXX_YY_ZZ
 mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S ../EventNtupleDev_NewTag/filelists/mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art.list --TFileName nts.ntuple.before.root -n 100
 root -l -b ${MUSE_WORK_DIR}/EventNtuple/validation/create_val_file_rooutil.C\(\"nts.ntuple.before.root\",\"val.ntuple.before.root\"\)
 ```
