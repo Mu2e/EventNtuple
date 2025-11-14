@@ -184,6 +184,11 @@ bool passes_trkqual(Track& track, double cut_val) { // true if trkqual > cut_val
   else { return false; }
 }
 
+bool passes_trkpid(Track& track, double cut_val) { // true if trkpid > cut_val
+  if (track.trkpid->result > cut_val) { return true; }
+  else { return false; }
+}
+
 //+ CrvCoinc Cuts
 bool three_of_four_coinc(CrvCoinc& crv_coinc) { // CRV coincidence has exactly three layers hit
   if (crv_coinc.reco->nLayers == 3) { return true; }

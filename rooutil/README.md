@@ -59,7 +59,7 @@ Because some vector-object branches in the EventNtuple should be paired and loop
 ### The ```Track``` Class
 The ```Track``` class contains all information related to a single track
 
-* single objects: ```trk```, ```trkmc```, ```trkcalohit```, ```trkqual```
+* single objects: ```trk```, ```trkmc```, ```trkcalohit```, ```trkqual```, ```trkpid```
 * vectors: ```trksegs```, ```trksegmcs```, ```trksegpars_{lh,ch,kl}```, ```trkmcsim```, ```trkhits```, ```trkhitsmc```, ```trkmats```, ```trkhitcalibs```
 
 Example: [PlotTrackNHits_RecoVsTrue.C](./examples/PlotTrackNHits_RecoVsTrue.C)

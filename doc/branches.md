@@ -35,6 +35,7 @@ If a Kalman fit fails or there are multiple downstream tracks to fit, the number
 | trkcalohit |  Vector branch |   the calorimeter cluster assigned to a track| [see TrkCaloHitInfo.hh](../inc/TrkCaloHitInfo.hh)
 | trkcalohitmc |  Vector branch |   MC-truth infromation for calorimeter clusters| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
 | trkqual |  Vector branch |   the output of a multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
+| trkpid |  Vector branch |   the output of a multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
 ## Track segments Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).

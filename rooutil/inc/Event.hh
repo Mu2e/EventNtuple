@@ -83,6 +83,9 @@ struct Event {
     if (ntuple->GetBranch("crvcoincs")) {
       ntuple->SetBranchAddress("crvcoincs", &this->crvcoincs);
     }
+    if (ntuple->GetBranch("trkpid")) {
+      ntuple->SetBranchAddress("trkpid", &this->trkpid);
+    }
 
     // Check if the MC branches exist
     if (ntuple->GetBranch("evtinfomc")) {
@@ -211,6 +214,10 @@ struct Event {
         if (debug) { std::cout << "Event::Update(): Adding trkqual_alt to Track " << i_track << "... " << std::endl; }
         track.trkqual_alt = &(trkqual_alt->at(i_track));
       }
+      if (trkpid != nullptr) {
+        if (debug) { std::cout << "Event::Update(): Adding trkpid to Track " << i_track << "... " << std::endl; }
+        track.trkpid = &(trkpid->at(i_track));
+      }
 
       if (debug) { std::cout << "Event::Update(): Updating Track " << i_track << "... " << std::endl; }
       track.Update(debug);
@@ -284,6 +291,7 @@ struct Event {
         if (trkcalohit) { trkcalohit->erase(trkcalohit->begin()+trks_to_remove[i_trk]); }
         if (trkqual) { trkqual->erase(trkqual->begin()+trks_to_remove[i_trk]); }
         if (trkqual_alt) { trkqual_alt->erase(trkqual_alt->begin()+trks_to_remove[i_trk]); }
+        if (trkpid) { trkpid->erase(trkpid->begin()+trks_to_remove[i_trk]); }
         if (trksegpars_lh) { trksegpars_lh->erase(trksegpars_lh->begin()+trks_to_remove[i_trk]); }
         if (trksegpars_ch) { trksegpars_ch->erase(trksegpars_ch->begin()+trks_to_remove[i_trk]); }
         if (trksegpars_kl) { trksegpars_kl->erase(trksegpars_kl->begin()+trks_to_remove[i_trk]); }
@@ -382,6 +390,7 @@ struct Event {
   std::vector<mu2e::CaloClusterInfoMC>* trkcalohitmc = nullptr;
   std::vector<mu2e::MVAResultInfo>* trkqual = nullptr;
   std::vector<mu2e::MVAResultInfo>* trkqual_alt = nullptr; // an optional trkqual branch to also use
+  std::vector<mu2e::MVAResultInfo>* trkpid = nullptr;
   std::vector<std::vector<mu2e::TrkSegInfo>>* trksegs = nullptr;
   std::vector<std::vector<mu2e::SurfaceStepInfo>>* trksegsmc = nullptr;
   std::vector<std::vector<mu2e::LoopHelixInfo>>* trksegpars_lh = nullptr;

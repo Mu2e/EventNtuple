@@ -118,6 +118,7 @@ public:
     if(event->trkcalohitmc) { output_ntuple->Branch("trkcalohitmc", event->trkcalohitmc); }
     if(event->trkqual) { output_ntuple->Branch("trkqual", event->trkqual); }
     if(event->trkqual_alt) { output_ntuple->Branch("trkqual_alt", event->trkqual_alt); }
+    if(event->trkpid) { output_ntuple->Branch("trkpid", event->trkpid); }
     if(event->trksegs) { output_ntuple->Branch("trksegs", event->trksegs); }
     if(event->trksegsmc) { output_ntuple->Branch("trksegsmc", event->trksegsmc); }
     if(event->trksegpars_lh) { output_ntuple->Branch("trksegpars_lh", event->trksegpars_lh); }
