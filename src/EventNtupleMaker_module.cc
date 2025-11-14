@@ -932,6 +932,9 @@ namespace mu2e {
     TriggerResultsNavigator tnav(trigResults);
 
     if (firstEvent) {
+      if (tnav.getTrigPaths().size() > TrigInfo::ntrig_) {
+        throw cet::exception("EventNtuple") << "More trigger paths in TriggerResultsNavigator than maximum allowed by TrigInfo::ntrig_. Increase TrigInfo::ntrig_ and rebuild\n";
+      }
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
           const std::string name = "trig_"+tnav.getTrigPathName(i);
           _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
