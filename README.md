@@ -3,7 +3,7 @@
 ## Table of Contents
 1. [Introduction](#Introduction)
 2. [Structure](#Structure)
-3. [How to get the version of EventNtuple](#How-to-get-the-version-of-EventNtuple)
+3. [How to Check the EventNtuple](#How-to-Check-the-EventNtuple)
 4. [How to Analyze an EventNtuple](#How-to-Analyze-an-EventNtuple)
 5. [How to Create an EventNtuple](#How-to-Create-an-EventNtuple)
 6. [Validation](#Validation)
@@ -24,12 +24,15 @@ A [list of branches is available](./doc/branches.md)
 
 The help understand what all the branches and leaves mean, we have an [```ntuplehelper```](doc/ntuplehelper.md) tool
 
-## How to get the version of EventNtuple that is in a file
-For versions of EventNtuple later than v6.3.0, we store the version number in the ROOT file. You can check the version number with the ```checkEventNtuple``` tool:
+## How to Check the EventNtuple
+You can get some basic information about the EventNtuple file useing ```checkEventNtuple``` like so:
 
 ```
 checkEventNtuple file1.root file2.root
 ```
+
+This will print the version number (for versions after v6.3.0) and the trigger branches in the file (for versions after v6.8.0)
+
 
 ## How to Analyze an EventNtuple
 To help with analyzing the EventNtuple given its complex structure, we have two sets of utilities:
