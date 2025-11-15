@@ -17,7 +17,7 @@ If you chose ROOT, do the following:
 ```
 cd /to/a/new/working/area/
 mu2einit
-muse setup Analysis
+muse setup AnalysisMDC2020
 ```
 
 If you chose python, do the following:
@@ -96,7 +96,7 @@ ntuplehelper branch.*
 
 * in python
 ```
-muse setup Analysis
+muse setup AnalysisMDC2020
 python
 >>> import ntuplehelper
 >>> nthelper = ntuplehelper.nthelper()

@@ -46,9 +46,10 @@ In case you need to create your own EventNtuple you can do the following from a 
 
 ```
 mu2einit
-muse setup EventNtuple
+muse setup [AnalysisMusing]
 mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S your-art-filelist.txt
 ```
+where ```[AnalysisMusing]``` is the musing relevant for your dataset. At the time of writing, this is either ```AnalysisMDC2020``` or ```AnalysisMDC2025```
 
 This will create a file called ```nts.owner.description.version.sequencer.root``` that contains the EventNtuple. The EventNtuple will then be in the ROOT file as ```EventNtuple/ntuple```.
 
@@ -84,10 +85,11 @@ git checkout --no-track -b vXX-YY-ZZ mu2e/main
 * create a "before" ntuple with the previous release of EventNtuple. In a fresh login:
 ```
 mu2einit
-muse setup EventNtuple vXX_YY_ZZ
+muse setup [AnalysisMusing and version]
 mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -S ../EventNtupleDev_NewTag/filelists/mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art.list --TFileName nts.ntuple.before.root -n 100
 root -l -b ${MUSE_WORK_DIR}/EventNtuple/validation/create_val_file_rooutil.C\(\"nts.ntuple.before.root\",\"val.ntuple.before.root\"\)
 ```
+  * you can get the ```AnalysisMusing``` and ```version``` from the [EventNtuple page on the wiki](https://mu2ewiki.fnal.gov/wiki/EventNtuple#Version_History_%26_Musings)
 * create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood
 * open PR with final changes and merge

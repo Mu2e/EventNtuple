@@ -6,14 +6,15 @@ On this page, you will learn how to use the [```ntuplehelper```](../../utils/hel
 
 You will need to be in either:
 
-* an EventNtuple environment, or
+* an Analysis environment:
 
 ```
 mu2einit
-muse setup EventNtuple
+muse setup [AnalysisMusing]
 ```
+where ```[AnalysisMusing]``` is the musing relevant for your dataset. At the time of writing, this is either ```AnalysisMDC2020``` or ```AnalysisMDC2025```.
 
-* have the EventNtuple repository checked out
+* or have the EventNtuple repository checked out
 
 ```
 git clone https://github.com/Mu2e/EventNtuple.git
