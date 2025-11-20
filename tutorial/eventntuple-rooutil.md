@@ -28,7 +28,7 @@ In this tutorial, you should set up your working area like so:
 ```
 cd /to/a/new/working/area/
 mu2einit
-muse setup Analysis
+muse setup AnalysisMDC2020
 ```
 
 
