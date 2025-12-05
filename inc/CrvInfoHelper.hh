@@ -21,6 +21,7 @@
 #include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "art/Framework/Principal/Handle.h"
+#include "Offline/DataProducts/inc/EventWindowMarker.hh"
 
 namespace mu2e
 {
@@ -44,6 +45,7 @@ namespace mu2e
       void FillCrvPulseInfoCollections(
           art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
           art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
+          art::Handle<EventWindowMarker> const& ewmh,
           CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo);
 
       void FillCrvDigiInfoCollections(
