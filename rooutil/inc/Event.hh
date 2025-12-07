@@ -2,6 +2,7 @@
 #define Event_hh_
 
 #include <algorithm>
+#include <cxxabi.h> // For abi::__cxa_demangle
 
 #include "EventNtuple/inc/EventInfo.hh"
 #include "EventNtuple/inc/EventInfoMC.hh"
@@ -45,15 +46,9 @@
 
 struct Event {
   Event(TChain* ntuple) {
-    if (ntuple->GetBranch("evtinfo")) {
-      ntuple->SetBranchAddress("evtinfo", &this->evtinfo);
-    }
-    if (ntuple->GetBranch("hitcount")) {
-      ntuple->SetBranchAddress("hitcount", &this->hitcount);
-    }
-    if (ntuple->GetBranch("crvsummary")) {
-      ntuple->SetBranchAddress("crvsummary", &this->crvsummary);
-    }
+    CheckForBranch(ntuple, "evtinfo", &this->evtinfo);
+    CheckForBranch(ntuple, "hitcount", &this->hitcount);
+    CheckForBranch(ntuple, "crvsummary", &this->crvsummary);
     const auto& branches = ntuple->GetListOfBranches();
     int i_trig_branch = 0;
     for (const auto& branch : *branches) {
@@ -65,100 +60,48 @@ struct Event {
       }
     }
 
-    if (ntuple->GetBranch("trk")) {
-      ntuple->SetBranchAddress("trk", &this->trk);
-    }
-    if (ntuple->GetBranch("trksegs")) {
-      ntuple->SetBranchAddress("trksegs", &this->trksegs);
-    }
-    if (ntuple->GetBranch("trkcalohit")) {
-      ntuple->SetBranchAddress("trkcalohit", &this->trkcalohit);
-    }
-    if (ntuple->GetBranch("trkqual")) {
-      ntuple->SetBranchAddress("trkqual", &this->trkqual);
-    }
-    if (ntuple->GetBranch("trkqual3")) { // TODO: un-hardcode those
-      ntuple->SetBranchAddress("trkqual3", &this->trkqual_alt);
-    }
-    if (ntuple->GetBranch("crvcoincs")) {
-      ntuple->SetBranchAddress("crvcoincs", &this->crvcoincs);
-    }
-    if (ntuple->GetBranch("trkpid")) {
-      ntuple->SetBranchAddress("trkpid", &this->trkpid);
-    }
+    CheckForBranch(ntuple, "trk", &this->trk);
+    CheckForBranch(ntuple, "trksegs", &this->trksegs);
+    CheckForBranch(ntuple, "trkcalohit", &this->trkcalohit);
+    CheckForBranch(ntuple, "trkqual", &this->trkqual);
+    CheckForBranch(ntuple, "trkqual3", &this->trkqual_alt); // TODO: un-hardcode those
+    CheckForBranch(ntuple, "crvcoincs", &this->crvcoincs);
+    CheckForBranch(ntuple, "trkpid", &this->trkpid);
 
     // Check if the MC branches exist
-    if (ntuple->GetBranch("evtinfomc")) {
-      ntuple->SetBranchAddress("evtinfomc", &this->evtinfomc);
-    }
-    if (ntuple->GetBranch("crvsummarymc")) {
-      ntuple->SetBranchAddress("crvsummarymc", &this->crvsummarymc);
-    }
-    if (ntuple->GetBranch("trkmc")) {
-      ntuple->SetBranchAddress("trkmc", &this->trkmc);
-    }
-    if (ntuple->GetBranch("trksegsmc")) {
-      ntuple->SetBranchAddress("trksegsmc", &this->trksegsmc);
-    }
-    if (ntuple->GetBranch("trksegpars_lh")) {
-      ntuple->SetBranchAddress("trksegpars_lh", &this->trksegpars_lh);
-    }
-    if (ntuple->GetBranch("trksegpars_ch")) {
-      ntuple->SetBranchAddress("trksegpars_ch", &this->trksegpars_ch);
-    }
-    if (ntuple->GetBranch("trksegpars_kl")) {
-      ntuple->SetBranchAddress("trksegpars_kl", &this->trksegpars_kl);
-    }
-    if (ntuple->GetBranch("trkcalohitmc")) {
-      ntuple->SetBranchAddress("trkcalohitmc", &this->trkcalohitmc);
-    }
-    if (ntuple->GetBranch("crvcoincsmc")) {
-      ntuple->SetBranchAddress("crvcoincsmc", &this->crvcoincsmc);
-    }
-    if (ntuple->GetBranch("crvdigis")) {
-      ntuple->SetBranchAddress("crvdigis", &this->crvdigis);
-    }
-    if (ntuple->GetBranch("crvpulses")) {
-      ntuple->SetBranchAddress("crvpulses", &this->crvpulses);
-    }
-    if (ntuple->GetBranch("crvpulsesmc")) {
-      ntuple->SetBranchAddress("crvpulsesmc", &this->crvpulsesmc);
-    }
-    if (ntuple->GetBranch("crvcoincsmcplane")) {
-      ntuple->SetBranchAddress("crvcoincsmcplane", &this->crvcoincsmcplane);
-    }
+    CheckForBranch(ntuple, "evtinfomc", &this->evtinfomc);
+    CheckForBranch(ntuple, "crvsummarymc", &this->crvsummarymc);
+    CheckForBranch(ntuple, "trkmc", &this->trkmc);
+    CheckForBranch(ntuple, "trksegsmc", &this->trksegsmc);
+    CheckForBranch(ntuple, "trksegpars_lh", &this->trksegpars_lh);
+    CheckForBranch(ntuple, "trksegpars_ch", &this->trksegpars_ch);
+    CheckForBranch(ntuple, "trksegpars_kl", &this->trksegpars_kl);
+    CheckForBranch(ntuple, "trkcalohitmc", &this->trkcalohitmc);
+    CheckForBranch(ntuple, "crvcoincsmc", &this->crvcoincsmc);
+    CheckForBranch(ntuple, "crvdigis", &this->crvdigis);
+    CheckForBranch(ntuple, "crvpulses", &this->crvpulses);
+    CheckForBranch(ntuple, "crvpulsesmc", &this->crvpulsesmc);
+    CheckForBranch(ntuple, "crvcoincsmcplane", &this->crvcoincsmcplane);
+    
+    CheckForBranch(ntuple, "trkmcsim", &this->trkmcsim);
+    CheckForBranch(ntuple, "trkhits", &this->trkhits);
+    CheckForBranch(ntuple, "trkhitsmc", &this->trkhitsmc);
+    CheckForBranch(ntuple, "trkmats", &this->trkmats);
+    CheckForBranch(ntuple, "trkhitcalibs", &this->trkhitcalibs);
 
+    CheckForBranch(ntuple, "caloclusters", &this->caloclusters);
+    CheckForBranch(ntuple, "calohits", &this->calohits);
+    CheckForBranch(ntuple, "calorecodigis", &this->calorecodigis);
+    CheckForBranch(ntuple, "calodigis", &this->calodigis);
 
-    if (ntuple->GetBranch("trkmcsim")) {
-      ntuple->SetBranchAddress("trkmcsim", &this->trkmcsim);
-    }
-    if (ntuple->GetBranch("trkhits")) {
-      ntuple->SetBranchAddress("trkhits", &this->trkhits);
-    }
-    if (ntuple->GetBranch("trkhitsmc")) {
-      ntuple->SetBranchAddress("trkhitsmc", &this->trkhitsmc);
-    }
-    if (ntuple->GetBranch("trkmats")) {
-      ntuple->SetBranchAddress("trkmats", &this->trkmats);
-    }
-    if (ntuple->GetBranch("trkhitcalibs")) {
-      ntuple->SetBranchAddress("trkhitcalibs", &this->trkhitcalibs);
-    }
+  }
 
-    if (ntuple->GetBranch("caloclusters")) {
-      ntuple->SetBranchAddress("caloclusters", &this->caloclusters);
-    }
-    if (ntuple->GetBranch("calohits")) {
-      ntuple->SetBranchAddress("calohits", &this->calohits);
-    }
-    if (ntuple->GetBranch("calorecodigis")) {
-      ntuple->SetBranchAddress("calorecodigis", &this->calorecodigis);
-    }
-    if (ntuple->GetBranch("calodigis")) {
-      ntuple->SetBranchAddress("calodigis", &this->calodigis);
-    }
-
-  };
+  // Check if a branch exists in the TChain, and optionally set its address
+  bool CheckForBranch(TChain* ntuple, const char* branch_name, void* address = nullptr) {
+    if(ntuple->GetBranch(branch_name) == nullptr || ntuple->GetBranchStatus(branch_name) == 0) return false;
+    if(address != nullptr) ntuple->SetBranchAddress(branch_name, address);
+    return true;
+  }
 
   void Update(bool debug = false) {
     if (debug) { std::cout << "Event::Update(): Clearing previous Tracks... " << std::endl; }
@@ -166,58 +109,19 @@ struct Event {
     for (int i_track = 0; i_track < nTracks(); ++i_track) {
       if (debug) { std::cout << "Event::Update(): Creating Track " << i_track << "... " << std::endl; }
       Track track(&(trk->at(i_track)), &(trksegs->at(i_track)), &(trkcalohit->at(i_track))); // passing the addresses of the underlying structs
-      if (trkmc != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkmc to Track " << i_track << "... " << std::endl; }
-        track.trkmc = &(trkmc->at(i_track));
-      }
-      if (trksegsmc != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trksegsmc to Track " << i_track << "... " << std::endl; }
-        track.trksegsmc = &(trksegsmc->at(i_track));
-      }
-      if (trksegpars_lh != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trksegpars_lh to Track " << i_track << "... " << std::endl; }
-        track.trksegpars_lh = &(trksegpars_lh->at(i_track));
-      }
-      if (trksegpars_ch != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trksegpars_ch to Track " << i_track << "... " << std::endl; }
-        track.trksegpars_ch = &(trksegpars_ch->at(i_track));
-      }
-      if (trksegpars_kl != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trksegpars_kl to Track " << i_track << "... " << std::endl; }
-        track.trksegpars_kl = &(trksegpars_kl->at(i_track));
-      }
-      if (trkmcsim != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkmcsim to Track " << i_track << "... (size = " << trkmcsim->at(i_track).size() << ")" << std::endl; }
-        track.trkmcsim = &(trkmcsim->at(i_track));
-      }
-      if (trkhits != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkhits to Track " << i_track << "... " << std::endl; }
-        track.trkhits = &(trkhits->at(i_track));
-      }
-      if (trkhitsmc != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkhitsmc to Track " << i_track << "... " << std::endl; }
-        track.trkhitsmc = &(trkhitsmc->at(i_track));
-      }
-      if (trkmats != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkmats to Track " << i_track << "... " << std::endl; }
-        track.trkmats = &(trkmats->at(i_track));
-      }
-      if (trkhitcalibs != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkhitcalibs to Track " << i_track << "... " << std::endl; }
-        track.trkhitcalibs = &(trkhitcalibs->at(i_track));
-      }
-      if (trkqual != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkqual to Track " << i_track << "... " << std::endl; }
-        track.trkqual = &(trkqual->at(i_track));
-      }
-      if (trkqual_alt != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkqual_alt to Track " << i_track << "... " << std::endl; }
-        track.trkqual_alt = &(trkqual_alt->at(i_track));
-      }
-      if (trkpid != nullptr) {
-        if (debug) { std::cout << "Event::Update(): Adding trkpid to Track " << i_track << "... " << std::endl; }
-        track.trkpid = &(trkpid->at(i_track));
-      }
+      UpdateObject(track.trkmc, trkmc, i_track, debug);
+      UpdateObject(track.trksegsmc, trksegsmc, i_track, debug);
+      UpdateObject(track.trksegpars_lh, trksegpars_lh, i_track, debug);
+      UpdateObject(track.trksegpars_ch, trksegpars_ch, i_track, debug);
+      UpdateObject(track.trksegpars_kl, trksegpars_kl, i_track, debug);
+      UpdateObject(track.trkmcsim, trkmcsim, i_track, debug);
+      UpdateObject(track.trkhits, trkhits, i_track, debug);
+      UpdateObject(track.trkhitsmc, trkhitsmc, i_track, debug);
+      UpdateObject(track.trkmats, trkmats, i_track, debug);
+      UpdateObject(track.trkhitcalibs, trkhitcalibs, i_track, debug);
+      UpdateObject(track.trkqual, trkqual, i_track, debug);
+      UpdateObject(track.trkqual_alt, trkqual_alt, i_track, debug);
+      UpdateObject(track.trkpid, trkpid, i_track, debug);
 
       if (debug) { std::cout << "Event::Update(): Updating Track " << i_track << "... " << std::endl; }
       track.Update(debug);
@@ -243,6 +147,18 @@ struct Event {
         CaloCluster calo_cluster(&(caloclusters->at(i_cluster))); // passing the addresses of the underlying structs
         calo_clusters.emplace_back(calo_cluster);
       }
+    }
+  }
+
+  template <typename T> void UpdateObject(T*& object, std::vector<T>* object_ptr, int index, bool debug = false) {
+    if (object_ptr != nullptr) {
+      if (debug) {
+        std::cout << "Event::Update(): Adding "
+                  << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Track " << index << "... " << std::endl;
+      }
+      object = &(object_ptr->at(index));
+    } else if(debug) {
+      std::cout << "Event::Update(): No " << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to add to Track " << index << std::endl;
     }
   }
 
