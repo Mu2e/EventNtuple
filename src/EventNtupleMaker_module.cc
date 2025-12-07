@@ -140,6 +140,7 @@ namespace mu2e {
         fhicl::Atom<art::InputTag> rctag{Name("RecoCountTag"), Comment("RecoCount"), art::InputTag()};
         fhicl::Atom<art::InputTag> PBITag{Name("PBITag"), Comment("Tag for ProtonBunchIntensity object") ,art::InputTag()};
         fhicl::Atom<art::InputTag> PBTTag{Name("PBTTag"), Comment("Tag for ProtonBunchTime object") ,art::InputTag()};
+        fhicl::Atom<art::InputTag> EWMTag{Name("EWMTag"), Comment("Tag for EventWindowMarker object") ,art::InputTag()};
         fhicl::Atom<bool> filltrig{Name("FillTriggerInfo"),false};
         fhicl::Atom<std::string> trigProcessName{Name("TriggerProcessName"), Comment("Process name for Trigger")};
         fhicl::Atom<std::string> trigpathsuffix{Name("TriggerPathSuffix"), "_trigger"}; // all trigger paths have this in the name
@@ -213,7 +214,8 @@ namespace mu2e {
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
-      art::InputTag _recoCountTag, _PBITag, _PBTTag, _PBTMCTag;
+      art::InputTag _recoCountTag, _PBITag, _PBTTag, _EWMTag, _PBTMCTag;
+      art::Handle<mu2e::EventWindowMarker> _ewmh;
       // track control
       bool _hastrks;
       bool _hascrv;
@@ -347,6 +349,7 @@ namespace mu2e {
     _recoCountTag(conf().rctag()),
     _PBITag(conf().PBITag()),
     _PBTTag(conf().PBTTag()),
+    _EWMTag(conf().EWMTag()),
     _PBTMCTag(conf().PBTMCTag()),
     _hastrks(conf().hastrks()),
     _hascrv(conf().hascrv()),
@@ -863,8 +866,8 @@ namespace mu2e {
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
                                            _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
       if(_fillcrvpulses){
-        _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs,
-                                              _crvpulses, _crvpulsesmc);
+        _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
+                                               _crvpulses, _crvpulsesmc);
       }
       if(_fillcrvdigis){
         _crvHelper.FillCrvDigiInfoCollections(_crvRecoPulses, _crvDigis,
@@ -904,6 +907,10 @@ namespace mu2e {
       auto PBT = *PBThandle;
       _einfo.pbtime = PBT.pbtime_;
       _einfo.pbterr = PBT.pbterr_;
+    }
+
+    if (_EWMTag != "") {
+      event.getByLabel(_EWMTag, _ewmh);
     }
 
     if (_fillmc) {

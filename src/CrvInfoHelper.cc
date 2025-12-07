@@ -211,6 +211,7 @@ namespace mu2e
   void CrvInfoHelper::FillCrvPulseInfoCollections (
       art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
+      art::Handle<EventWindowMarker> const& ewmh,
       CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo){
     GeomHandle<DetectorSystem> tdet;
 
@@ -248,7 +249,7 @@ namespace mu2e
       art::Ptr<SimParticle> mostLikelySimParticle;
       //for this reco pulse
       CrvMCHelper::GetInfoFromCrvRecoPulse(crvRecoPulse, crvDigiMCs, visibleEnergyDeposited,earliestHitTime, earliestHitPos, avgHitTime, avgHitPos,
-          mostLikelySimParticle);
+                                           mostLikelySimParticle, ewmh);
 
       bool hasMCInfo = (mostLikelySimParticle.isNonnull()?true:false); //MC
       if(hasMCInfo)

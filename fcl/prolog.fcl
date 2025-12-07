@@ -274,6 +274,7 @@ EventNtupleMaker : {
   RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
+  EWMTag : "EWMProducer"
   PBTMCTag : "EWMProducer"
   CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
   CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
