@@ -144,8 +144,8 @@ namespace rooutil {
 
       if(event->trkmcsim) { output_ntuple->Branch("trkmcsim", event->trkmcsim); }
 
-      for (const auto& pair : event->trigNameMap) {
-        output_ntuple->Branch(pair.first.c_str(), &event->triginfo._triggerArray[pair.second]);
+      for (const auto& pair : event->trigger.NameToIndexMap()) {
+        output_ntuple->Branch(("trig_" + pair.first).c_str(), &event->triginfo._triggerArray[pair.second]);
       }
 
       // Write out histograms from input to output

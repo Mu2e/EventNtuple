@@ -286,10 +286,9 @@ bool from_start_process(Track& track, mu2e::ProcessCode::enum_type proc) { // Tr
 
 //+ Trigger Cut
 bool passes_trigger(Event& event, std::string trigname) { // true if the event passed the named trigger
-  if (trigname.substr(0, 5) != "trig_") { // we need to add the prefix to get the correct element
-    trigname = "trig_" + trigname;
+  if (trigname.substr(0, 5) == "trig_") { // drop this prefix
+    trigname = trigname.substr(5);
   }
-  const auto i_trig_element = event.trigNameMap[trigname];
-  return event.triginfo._triggerArray[i_trig_element];
+  return event.trigger.Fired(trigname);
 }
 #endif

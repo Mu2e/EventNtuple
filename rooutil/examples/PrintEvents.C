@@ -259,8 +259,8 @@ void PrintEvents(std::string filename) {
     }
 
     // trigger branches
-    for (const auto& pair : event.trigNameMap) {
-      std::cout << pair.first << ": " << event.triginfo._triggerArray[pair.second] << std::endl;
+    for (const auto& pair : event.trigger.NameToIndexMap()) {
+      std::cout << pair.first << ": " << event.trigger.Fired(pair.second) << std::endl;
     }
 
   }
