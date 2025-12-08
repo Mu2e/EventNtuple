@@ -11,6 +11,7 @@
 #include "TEllipse.h"
 #include "TGaxis.h"
 
+using namespace rooutil;
 void PlotEntranceFitPars(std::string filename) {
 
   double xmin = -800;

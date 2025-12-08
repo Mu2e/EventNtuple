@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+using namespace rooutil;
 bool good_track(Track& track) {
   if (track.trk->fitcon > 1e-3) {
     return true;

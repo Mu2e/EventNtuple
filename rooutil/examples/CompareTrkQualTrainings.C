@@ -11,6 +11,8 @@
 #include "TLine.h"
 #include "TLatex.h"
 
+using namespace rooutil;
+
 void CompareTrkQualTrainings(std::string filename) {
 
   bool save_plots = false;

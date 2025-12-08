@@ -9,6 +9,7 @@
 #include "TH1F.h"
 #include "TLegend.h"
 
+using namespace rooutil;
 void PlotStoppingTargetFoilSegments(std::string filename) {
 
   // Create the histogram you want to fill
