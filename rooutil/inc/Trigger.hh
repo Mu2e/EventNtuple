@@ -40,9 +40,9 @@ namespace rooutil {
     }
 
     // Data accessors
-    const mu2e::TrigInfo*             TrigInfo      () { return _trig; }
-    const std::map<std::string, int>& NameToIndexMap() { return _nameToIndex; }
-    const std::map<int, std::string>& IndexToNameMap() { return _indexToName; }
+    const mu2e::TrigInfo*             TrigInfo      () const { return _trig; }
+    const std::map<std::string, int>& NameToIndexMap() const { return _nameToIndex; }
+    const std::map<int, std::string>& IndexToNameMap() const { return _indexToName; }
 
     // Pointer to the data
     const mu2e::TrigInfo* _trig = nullptr;
