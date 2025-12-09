@@ -39,6 +39,17 @@ namespace rooutil {
       return Fired(_nameToIndex.at(name));
     }
 
+    // Check if any trigger with this pattern string was fired
+    bool FiredByTag(const std::string pattern) const {
+      bool fired = false;
+      for(const auto& itr : NameToIndexMap()) {
+        const std::string name = itr.first;
+        if(name.find(pattern) != std::string::npos) fired |= Fired(itr.second);
+        if(fired) break;
+      }
+      return fired;
+    }
+
     // Data accessors
     const mu2e::TrigInfo*             TrigInfo      () const { return _trig; }
     const std::map<std::string, int>& NameToIndexMap() const { return _nameToIndex; }
