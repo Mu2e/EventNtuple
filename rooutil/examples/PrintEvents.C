@@ -6,6 +6,7 @@
 
 #include <iostream>
 
+using namespace rooutil;
 void PrintEvents(std::string filename) {
 
   RooUtil util(filename);

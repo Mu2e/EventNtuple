@@ -5,14 +5,15 @@
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 
-struct MCParticle {
-  MCParticle(mu2e::SimInfo* mcsim) : mcsim(mcsim) { }
+namespace rooutil {
+  struct MCParticle {
+    MCParticle(mu2e::SimInfo* mcsim) : mcsim(mcsim) { }
 
-  // Pointers to the data
-  mu2e::SimInfo* mcsim = nullptr;
-};
+    // Pointers to the data
+    mu2e::SimInfo* mcsim = nullptr;
+  };
 
-typedef std::function<bool(MCParticle&)> MCParticleCut;
-typedef std::vector<MCParticle> MCParticles;
-
+  typedef std::function<bool(MCParticle&)> MCParticleCut;
+  typedef std::vector<MCParticle> MCParticles;
+} // namespace rooutil
 #endif

@@ -8,6 +8,7 @@
 
 #include "TH1F.h"
 
+using namespace rooutil;
 void CreateNtuple(std::string filename) {
 
   // Set up RooUtil

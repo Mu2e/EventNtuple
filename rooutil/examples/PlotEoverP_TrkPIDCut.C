@@ -9,6 +9,7 @@
 #include "TH1F.h"
 #include "TCanvas.h"
 
+using namespace rooutil;
 void PlotEoverP_TrkPIDCut(std::string filename) {
 
   // Create the histogram you want to fill

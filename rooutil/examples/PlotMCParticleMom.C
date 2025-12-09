@@ -8,6 +8,7 @@
 
 #include "TH1F.h"
 
+using namespace rooutil;
 void PlotMCParticleMom(std::string filename) {
 
   // Create the histogram you want to fill

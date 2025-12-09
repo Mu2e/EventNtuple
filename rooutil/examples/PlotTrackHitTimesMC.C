@@ -10,6 +10,7 @@
 #include "TH2F.h"
 #include "TCanvas.h"
 
+using namespace rooutil;
 void PlotTrackHitTimesMC(std::string filename) {
 
   // Create the histogram you want to fill

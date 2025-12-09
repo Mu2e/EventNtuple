@@ -8,6 +8,7 @@
 
 #include "TH2F.h"
 
+using namespace rooutil;
 void PlotCRVPEsVsMCEDep(std::string filename) {
 
   // Create the histogram you want to fill

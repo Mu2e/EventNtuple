@@ -5,20 +5,21 @@
 #include "EventNtuple/inc/CaloClusterInfo.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
 
-struct CaloCluster {
-  CaloCluster(mu2e::CaloClusterInfo* calocluster)
-    : calocluster(calocluster) {
+namespace rooutil {
+  struct CaloCluster {
+    CaloCluster(mu2e::CaloClusterInfo* calocluster)
+      : calocluster(calocluster) {
 
-  }
+    }
 
-  void Update(bool debug = false) {
-  }
+    void Update(bool debug = false) {
+    }
 
-  // Pointers to the data
-  mu2e::CaloClusterInfo* calocluster = nullptr;
-};
+    // Pointers to the data
+    mu2e::CaloClusterInfo* calocluster = nullptr;
+  };
 
-typedef std::function<bool(CaloCluster&)> CaloClusterCut;
-typedef std::vector<CaloCluster> CaloClusters;
-
+  typedef std::function<bool(CaloCluster&)> CaloClusterCut;
+  typedef std::vector<CaloCluster> CaloClusters;
+} // namespace rooutil
 #endif

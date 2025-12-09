@@ -8,6 +8,7 @@
 
 #include "TH1F.h"
 
+using namespace rooutil;
 void CreateTrackNtuple(std::string filename) {
 
   // Create the TTree

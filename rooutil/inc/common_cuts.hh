@@ -15,6 +15,7 @@
 #include "EventNtuple/rooutil/inc/TrackSegment.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 
+using namespace rooutil;
 //+ Track Segment Cuts - Directions
 bool is_downstream(TrackSegment& segment) { // track fit segment is going in +z direction
   // the sign of p_z tells us whether this segment is going upstream or downstream
@@ -196,7 +197,7 @@ bool three_of_four_coinc(CrvCoinc& crv_coinc) { // CRV coincidence has exactly t
 }
 
 //+ Combined Track & CrvCoinc Cuts
-bool track_crv_coincidence(TrackSegment& segment, CrvCoinc& crv_coinc) { 
+bool track_crv_coincidence(TrackSegment& segment, CrvCoinc& crv_coinc) {
   if ( abs(segment.trkseg->time - crv_coinc.reco->time) < 150 ) { return true; }
   else { return false; }
 }

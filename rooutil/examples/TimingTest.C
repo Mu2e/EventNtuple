@@ -7,6 +7,7 @@ using namespace std::chrono;
 #include "EventNtuple/rooutil/inc/RooUtil.hh"
 #include "EventNtuple/rooutil/inc/common_cuts.hh"
 
+using namespace rooutil;
 void TimingTest(std::string filename, bool log_output = false) {
 
   auto start_time = system_clock::now();
