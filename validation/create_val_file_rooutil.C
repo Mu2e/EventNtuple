@@ -7,6 +7,7 @@
 // TODO: can add common_cuts.hh here
 
 #include "TH1F.h"
+using namespace rooutil;
 
 void create_val_file_rooutil(std::string filename, std::string outfilename) {
 
