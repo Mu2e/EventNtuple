@@ -41,6 +41,7 @@
 #include "EventNtuple/rooutil/inc/Track.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
+#include "EventNtuple/rooutil/inc/Trigger.hh"
 
 #include "TChain.h"
 
@@ -50,16 +51,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "evtinfo", &this->evtinfo);
       CheckForBranch(ntuple, "hitcount", &this->hitcount);
       CheckForBranch(ntuple, "crvsummary", &this->crvsummary);
-      const auto& branches = ntuple->GetListOfBranches();
-      int i_trig_branch = 0;
-      for (const auto& branch : *branches) {
-        std::string brname = branch->GetName();
-        if (brname.substr(0, 5) == "trig_") {
-          ntuple->SetBranchAddress(brname.c_str(), &this->triginfo._triggerArray[i_trig_branch]);
-          trigNameMap.insert({brname, i_trig_branch});
-          i_trig_branch++;
-        }
-      }
+      AddTriggerInfo(ntuple);
 
       CheckForBranch(ntuple, "trk", &this->trk);
       CheckForBranch(ntuple, "trksegs", &this->trksegs);
@@ -102,6 +94,24 @@ namespace rooutil {
       if(ntuple->GetBranch(branch_name) == nullptr || ntuple->GetBranchStatus(branch_name) == 0) return false;
       if(address != nullptr) ntuple->SetBranchAddress(branch_name, address);
       return true;
+    }
+
+    // Add trigger branches and store the path name information
+    void AddTriggerInfo(TChain* ntuple) {
+      trigger.SetTrigInfo(&triginfo); // pointer to the underlying trigger data read in event-by-event
+
+      // trigger branches are named "trig_<trigger path name>" --> look for these
+      const auto& branches = ntuple->GetListOfBranches();
+      int i_trig_branch = 0;
+      for (const auto& branch : *branches) {
+        std::string brname = branch->GetName();
+        if (brname.substr(0, 5) == "trig_") {
+          ntuple->SetBranchAddress(brname.c_str(), &this->triginfo._triggerArray[i_trig_branch]);
+          const std::string trigname = brname.substr(5); // name of the trigger path
+          trigger.AssignIndex(i_trig_branch, trigname); // map the array index to the path name
+          i_trig_branch++;
+        }
+      }
     }
 
     void Update(bool debug = false) {
@@ -300,6 +310,7 @@ namespace rooutil {
     mu2e::CrvSummaryReco* crvsummary = nullptr;
     mu2e::CrvSummaryMC* crvsummarymc = nullptr;
     mu2e::TrigInfo triginfo; // not a pointer because we give the address of array elements inside this
+    Trigger trigger; // contains additional trigger information
 
     std::vector<mu2e::TrkInfo>* trk = nullptr;
     std::vector<mu2e::TrkInfoMC>* trkmc = nullptr;
@@ -331,9 +342,6 @@ namespace rooutil {
     std::vector<mu2e::CrvPlaneInfoMC>* crvcoincsmcplane = nullptr;
 
     std::vector<std::vector<mu2e::SimInfo>>* trkmcsim = nullptr;
-
-    // Need to keep track of trigger name to element in triginfo
-    std::map<std::string, unsigned int> trigNameMap;
   };
 } // namespace rooutil
 #endif
