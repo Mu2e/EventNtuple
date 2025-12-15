@@ -507,7 +507,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_triginfo = new TH1F("h_triginfo", "", mu2e::TrigInfo::ntrig_,0,mu2e::TrigInfo::ntrig_);
   // Grab the first event to name the bins
   const auto& evt = util.GetEvent(0);
-  for (const auto pair : evt.trigNameMap) {
+  for (const auto pair : evt.trigger.NameToIndexMap()) {
     h_triginfo->GetXaxis()->SetBinLabel(pair.second+1, pair.first.c_str());
   }
 
