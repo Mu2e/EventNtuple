@@ -460,7 +460,7 @@ namespace mu2e {
     // hit counting branch
     _ntuple->Branch("hitcount",&_hcnt);
     // track counting branch
-    _ntuple->Branch("tcnt.ntrk",&_tcnt.ntrk);
+    _ntuple->Branch("tcnt",&_tcnt);
 
     // create all track branches
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
