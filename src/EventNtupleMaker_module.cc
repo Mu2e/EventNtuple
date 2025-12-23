@@ -459,12 +459,8 @@ namespace mu2e {
     }
     // hit counting branch
     _ntuple->Branch("hitcount",&_hcnt);
-    // track counting branches
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      BranchConfig i_branchConfig = _allBranches.at(i_branch);
-      std::string leafname = i_branchConfig.branch();
-      _ntuple->Branch(("tcnt.n"+leafname).c_str(),&_tcnt._counts[i_branch]);
-    }
+    // track counting branch
+    _ntuple->Branch("tcnt.ntrk",&_tcnt.ntrk);
 
     // create all track branches
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
@@ -660,9 +656,24 @@ namespace mu2e {
       event.getByLabel(_conf.mcTrajectoriesTag(),_mcTrajectories);
       if(_fillcalomc)event.getByLabel(_conf.caloClusterMCTag(),_ccmcch);
     }
-    // fill track counts
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      _tcnt._counts[i_branch] = (_allKSPCHs.at(i_branch))->size();
+
+    //
+    // fill track counts: count unique PDG hypotheses
+    //
+    std::map<int,int> pdgCounts;
+    for (BranchIndex i_branch = 0; i_branch < _allBranches.size() && i_branch < _allKSPCHs.size(); ++i_branch) {
+      const auto& kseedptr_coll_h = _allKSPCHs.at(i_branch);
+      // if (!kseedptr_coll_h.isValid()) continue;
+      const auto& kseedptr_coll = *kseedptr_coll_h;
+      for (size_t i_kseedptr = 0; i_kseedptr < kseedptr_coll.size(); ++i_kseedptr) {
+        const auto& kseedptr = kseedptr_coll[i_kseedptr];
+        pdgCounts[kseedptr->particle()]++;
+      }
+    }
+    // the number of tracks is the max count of any PDG hypothesis
+    _tcnt.ntrk = 0;
+    for (const auto& pair : pdgCounts) {
+      _tcnt.ntrk = std::max(_tcnt.ntrk, pair.second);
     }
 
     // find extra MCStep collections
@@ -978,7 +989,6 @@ namespace mu2e {
     // calorimeter info
     _infoStructHelper.fillTrkCaloHitInfo(kseed,  _allTCHIs.at(i_branch)); // fillTrkCaloHitInfo handles whether there is a calo hit or not
     if (kseed.hasCaloCluster()) {
-      _tcnt._ndec = 1; // only 1 possible calo hit at the moment FIXME: should work with the above
       // test
       if(_conf.debug()>0){
         auto const& tch = kseed.caloHit();
