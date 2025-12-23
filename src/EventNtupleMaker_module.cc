@@ -663,7 +663,6 @@ namespace mu2e {
     std::map<int,int> pdgCounts;
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size() && i_branch < _allKSPCHs.size(); ++i_branch) {
       const auto& kseedptr_coll_h = _allKSPCHs.at(i_branch);
-      // if (!kseedptr_coll_h.isValid()) continue;
       const auto& kseedptr_coll = *kseedptr_coll_h;
       for (size_t i_kseedptr = 0; i_kseedptr < kseedptr_coll.size(); ++i_kseedptr) {
         const auto& kseedptr = kseedptr_coll[i_kseedptr];
