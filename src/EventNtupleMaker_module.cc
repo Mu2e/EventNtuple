@@ -943,13 +943,13 @@ namespace mu2e {
         throw cet::exception("EventNtuple") << "More trigger paths in TriggerResultsNavigator than maximum allowed by TrigInfo::ntrig_. Increase TrigInfo::ntrig_ and rebuild\n";
       }
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-          const std::string name = "trig_"+tnav.getTrigPathName(i);
+          const std::string name = "trig_"+tnav.getTrigPathNameByIndex(i);
           _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
     }
 
     for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-        const std::string path = tnav.getTrigPathName(i);
+        const std::string path = tnav.getTrigPathNameByIndex(i);
         bool accepted = tnav.accepted(path);
         _triggerResults._triggerArray[i] = accepted;
     }
