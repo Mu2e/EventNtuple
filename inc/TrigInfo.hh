@@ -9,7 +9,7 @@ namespace mu2e
 {
   struct TrigInfo {
 
-    static const unsigned int ntrig_ = 35;
+    static const unsigned int ntrig_ = 500;
 
     bool _triggerArray[ntrig_];
 
