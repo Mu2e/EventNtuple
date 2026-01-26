@@ -64,7 +64,7 @@ Validation scripts and instructions are [here](validation/README.md)
 ## Tagging a New Release
 Instructions for tagging a new release:
 
-* have a working area set up environment set up with a backing to the latest SimJob and a clone of EventNtuple (you might already have this)
+* have a working area set up with a backing to the latest SimJob and a clone of EventNtuple (you might already have this)
 ```
 cd /your/work/area
 muse backing SimJob MDCXXXXvv
