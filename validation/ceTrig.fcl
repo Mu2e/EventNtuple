@@ -1,0 +1,57 @@
+//
+// In order to test the full trigger menu in the SimJob backing
+// re-run the trigger on the output of ceSimReco.fcl
+//
+// FIXME: try to replace this with up-to-date trigger fcls in Production
+// when we have newer SimJob musings
+//
+
+#include "Offline/fcl/standardServices.fcl"
+
+#include "mu2e-trig-config/core/trigProducers.fcl"
+#include "mu2e-trig-config/core/trigFilters.fcl"
+#include "mu2e-trig-config/core/trigRecoSequences.fcl"
+
+BEGIN_PROLOG
+# override the trigger digitization sequence (must be before trigSequences)
+TrigRecoSequences.artFragmentsGen : []
+END_PROLOG
+
+#include "mu2e-trig-config/core/trigSequences.fcl"
+
+#include "mu2e-trig-config/gen/trig_physMenuPSConfig_OnSpill.fcl"
+#include "mu2e-trig-config/gen/trig_physMenu_OnSpill.fcl"
+
+process_name : ceTrig
+
+source : { module_type : RootInput }
+
+services : @local::Services.Core
+
+physics.producers.KKDe.KKFitSettings.SaveHitCalibInfo : true
+
+physics: {
+  producers : {  @table::TrigProducers.producers }
+
+  filters : {  @table::TrigFilters.filters
+    @table::Trig_physMenuPSConfig
+  }
+
+  @table::TrigSequences
+
+  trigger_paths : [ @sequence::Trig_physMenu.trigger_paths ]
+
+  OutPath : [ Output ]
+  end_paths : [ OutPath ]
+}
+
+outputs : {
+  Output : { module_type : RootOutput
+    outputCommands : [ "keep *_*_*_*" ]
+    fileName : "mcs.owner.val-ceTrig.dsconf.seq.art"
+  }
+}
+
+#include "Production/Validation/database.fcl"
+
+services.scheduler.wantSummary : true

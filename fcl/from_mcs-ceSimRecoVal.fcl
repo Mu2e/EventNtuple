@@ -3,3 +3,5 @@
 physics.analyzers.EventNtuple.branches[0].options.fillHits : true
 physics.analyzers.EventNtuple.FillHitInfo : true
 physics.analyzers.EventNtuple.FillHitCalibInfo : true
+physics.analyzers.EventNtuple.FillTriggerInfo : true
+physics.analyzers.EventNtuple.TriggerProcessName : "ceTrig"
