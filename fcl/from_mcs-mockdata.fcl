@@ -22,5 +22,5 @@ physics.trigger_paths : [ EventNtuplePath ]
 physics.end_paths : [ EventNtupleEndPath ]
 
 #include "Production/JobConfig/common/epilog.fcl"
-services.TFileService.fileName: "nts.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3_06_08_00.sequencer.root"
+services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 
