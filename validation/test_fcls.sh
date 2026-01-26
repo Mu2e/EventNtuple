@@ -2,16 +2,36 @@
 # test_fcls.sh - runs fcl files to make sure that they complete successfully
 # Note: requires relevant filelists in a directory above this one
 #
+vMDC=$1
 
 log_file="test_fcls.log"
 rm ${log_file}
 
-mock_dataset="mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art"
-primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art"
-mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
-extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
-digi_dataset="dig.mu2e.DIOtail95OnSpillTriggered.MDC2020au_perfect_v1_3.art"
-crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
+mock_dataset=""
+primary_dataset=""
+mixed_dataset=""
+extracted_dataset=""
+digi_dataset=""
+crv_vst_dataset=""
+
+if [[ "$vMDC" == "MDC2020" ]]; then
+    echo "Testing MDC2020 datasets"
+    mock_dataset="mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art"
+    primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art"
+    mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
+    extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
+    digi_dataset="dig.mu2e.DIOtail95OnSpillTriggered.MDC2020au_perfect_v1_3.art"
+    crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
+elif [[ "$vMDC" == "MDC2025" ]]; then
+    echo "Testing MDC2025 datasets"
+    mock_dataset="mcs.mu2e.ensembleMDS3aOnSpillTriggered.MDC2025af_best_v1_3.art"
+    primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2025ae_best_v1_3.art"
+    mixed_dataset="" # mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
+    echo "No MDC2025 mixed datasets exist. Some tests will fail..."
+    extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art"
+    digi_dataset="dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art"
+    crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
+fi
 
 all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_vst_dataset )
 
@@ -89,8 +109,10 @@ fi
 echo -n "from_mcs-ceSimRecoVal.fcl... "
 echo "mu2e -c validation/ceSimReco.fcl -n 100" >> ${log_file} 2>&1
 mu2e -c validation/ceSimReco.fcl -n 100 >> ${log_file} 2>&1
-echo "mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root" >> ${log_file} 2>&1
-mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root >> ${log_file} 2>&1
+echo "mu2e -c validation/ceTrig.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceTrig.root" >> ${log_file} 2>&1
+mu2e -c validation/ceTrig.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root >> ${log_file} 2>&1
+echo "mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceTrig.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root" >> ${log_file} 2>&1
+mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceTrig.dsconf.seq.art --TFileName nts.ntuple.ceTrig.root >> ${log_file} 2>&1
 if [ $? == 0 ]; then
     echo "OK"
 else

@@ -8,7 +8,7 @@ We want to make sure that any changes we make to the code don't:
 From ```EventNtuple/``` directory:
 
 ```
-. ./validation/test_fcls.sh
+. ./validation/test_fcls.sh [MDC2020 or MDC2025]
 ```
 
 This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```. If one reports ```FAIL```, you can find the exact command that failed in the ```test_fcls.log``` file in order to debug.
