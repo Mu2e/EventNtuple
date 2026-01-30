@@ -10,7 +10,8 @@ class nthelper:
     trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkqual', 'trkpid']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
-    mc_branches = ['trkmcsim', 'mcsteps']
+    trk_mc_branches = [ 'trkmcsim' ]
+    general_mc_branches = [ 'mcsteps' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
     crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
     deprecated_branches = ['trkmcsci','trkmcssi']
@@ -171,16 +172,34 @@ class nthelper:
                 print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
 
         if not export_to_md:
-            print("\nMonte Carlo Branches")
+            print("\nTrk Monte Carlo Branches")
             print("================")
         else:
-            print("## Monte Carlo Branches\n")
+            print("## Trk Monte Carlo Branches\n")
             print("These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).\n")
             print("Within each Kalman fit element, there is a vector containing Monte Carlo truth information about the particle making the track and its parent particles.\n")
             print("The vector is sorted in reverse chronological order, such that the last element is the initial particle simulated in GEANT4, and each element before correspond to one of its daughter particles.\n")
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
-        for branch in self.mc_branches:
+        for branch in self.trk_mc_branches:
+            explanation = self.get_branch_explanation(branch)
+            struct = self.branch_struct_dict[branch]
+            struct_file = struct + ".hh";
+            if not export_to_md:
+                print(explanation)
+            else:
+                tokens=explanation.split(":")
+                print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
+
+        if not export_to_md:
+            print("\nGeneral Monte Carlo Branches")
+            print("================")
+        else:
+            print("## General Monte Carlo Branches\n")
+            print("These branches contain MC information in the event and are not required to be related to tracks")
+            print("| branch | structure | explanation | leaf information |")
+            print("|--------|-----------|-------------|------------------|")
+        for branch in self.general_mc_branches:
             explanation = self.get_branch_explanation(branch)
             struct = self.branch_struct_dict[branch]
             struct_file = struct + ".hh";
