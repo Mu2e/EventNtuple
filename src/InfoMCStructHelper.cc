@@ -409,6 +409,9 @@ namespace mu2e {
           mcsi.dp = mcstep.postMomentum().mag()- mcstep.momentum().mag();
           mcsi.mom = mcstep.momentum();
           mcsi.pos = spos;
+          mcsi.pdg = mcstep.simParticle()->pdgId();
+          mcsi.startCode = mcstep.simParticle()->creationCode();
+          mcsi.stopCode = mcstep.simParticle()->stoppingCode();
         }
       }
     }
@@ -438,7 +441,6 @@ namespace mu2e {
     GeomHandle<DetectorSystem> det;
     MCStepInfo mcstepinfo;
     for(auto const& mcstep : mcsteps) {
-      std::cout << mcstep << std::endl;
       mcstepinfo.reset();
       mcstepinfo.vid = mcstep.volumeId();
       mcstepinfo.time = mcstep.time();
