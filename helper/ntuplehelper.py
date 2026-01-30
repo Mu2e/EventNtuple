@@ -3,14 +3,14 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid']
+    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
     trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkqual', 'trkpid']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
-    mc_branches = ['trkmcsim']
+    mc_branches = ['trkmcsim', 'mcsteps']
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
     crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
     deprecated_branches = ['trkmcsci','trkmcssi']
@@ -58,7 +58,8 @@ class nthelper:
                            "trkqual" : "MVAResultInfo",
                            "trkpid" : "MVAResultInfo",
                            "helices" : "HelixInfo",
-                           "trksegsmc" : "SurfaceStepInfo"
+                           "trksegsmc" : "SurfaceStepInfo",
+                           "mcsteps" : "MCStepInfo"
                           }
 
     #
