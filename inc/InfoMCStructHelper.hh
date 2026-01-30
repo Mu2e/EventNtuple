@@ -75,7 +75,7 @@ namespace mu2e {
       void fillExtraMCStepInfos(KalSeedMC const& kseedmc, StepPointMCCollection const& mcsteps,
                                 std::vector<MCStepInfos>& mcsics, std::vector<MCStepSummaryInfo>& mcssis);
       void fillSurfaceStepInfos(KalSeedMC const& kseedmc, SurfaceStepCollection const& surfsteps,std::vector<SurfaceStepInfo>& ssic);
-
+      void fillStepPointMCInfo(StepPointMCCollection const& mcsteps, MCStepInfos& mcstepinfos);
   };
 }
 

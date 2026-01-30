@@ -20,6 +20,10 @@ namespace mu2e {
     XYZVectorF pos;  // particle position at the start of this step
     void reset() {*this = MCStepInfo(); }
     bool valid() { return vid>=0; }
+    int pdg = -1; // true PDG code
+    int startCode = -1; // creation process code
+    int stopCode = -1; // stop process code
+
   };
 
   using MCStepInfos = std::vector<MCStepInfo>;
