@@ -505,6 +505,25 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
 
   TH1F* h_triginfo = new TH1F("h_triginfo", "", mu2e::TrigInfo::ntrig_,0,mu2e::TrigInfo::ntrig_);
+
+  TH1F* h_mcsteps_virtualdetector_vid = new TH1F("h_mcsteps_virtualdetector_vid", "", 150,0,150);
+  TH1F* h_mcsteps_virtualdetector_sid = new TH1F("h_mcsteps_virtualdetector_sid", "", 100,0,100);
+  TH1F* h_mcsteps_virtualdetector_iinter = new TH1F("h_mcsteps_virtualdetector_iinter", "", 100,0,100);
+  TH1F* h_mcsteps_virtualdetector_time = new TH1F("h_mcsteps_virtualdetector_time", "", 100,0,2000);
+  TH1F* h_mcsteps_virtualdetector_de = new TH1F("h_mcsteps_virtualdetector_de", "", 100,0,200);
+  TH1F* h_mcsteps_virtualdetector_dp = new TH1F("h_mcsteps_virtualdetector_dp", "", 100,0,200);
+  TH1F* h_mcsteps_virtualdetector_early = new TH1F("h_mcsteps_virtualdetector_early", "", 2,0,2);
+  TH1F* h_mcsteps_virtualdetector_late = new TH1F("h_mcsteps_virtualdetector_late", "", 2,0,2);
+  TH1F* h_mcsteps_virtualdetector_mom_x = new TH1F("h_mcsteps_virtualdetector_mom_x", "", 100,-200,200);
+  TH1F* h_mcsteps_virtualdetector_mom_y = new TH1F("h_mcsteps_virtualdetector_mom_y", "", 100,-200,200);
+  TH1F* h_mcsteps_virtualdetector_mom_z = new TH1F("h_mcsteps_virtualdetector_mom_z", "", 320,-200,200);
+  TH1F* h_mcsteps_virtualdetector_pos_x = new TH1F("h_mcsteps_virtualdetector_pos_x", "", 100,-1000,1000);
+  TH1F* h_mcsteps_virtualdetector_pos_y = new TH1F("h_mcsteps_virtualdetector_pos_y", "", 100,-1000,1000);
+  TH1F* h_mcsteps_virtualdetector_pos_z = new TH1F("h_mcsteps_virtualdetector_pos_z", "", 320,-1600,1600);
+  TH1F* h_mcsteps_virtualdetector_pdg = new TH1F("h_mcsteps_virtualdetector_pdg", "", 100,0,100);
+  TH1F* h_mcsteps_virtualdetector_startCode = new TH1F("h_mcsteps_virtualdetector_startCode", "", 100,0,100);
+  TH1F* h_mcsteps_virtualdetector_stopCode = new TH1F("h_mcsteps_virtualdetector_stopCode", "", 100,0,100);
+
   // Grab the first event to name the bins
   const auto& evt = util.GetEvent(0);
   for (const auto pair : evt.trigger.NameToIndexMap()) {
@@ -1153,6 +1172,30 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       h_triginfo->AddBinContent(i_trig+1, event.triginfo._triggerArray[i_trig]);
     }
 
+    // Creating mcsteps_virtualdetector histogram
+    std::cout << "Creating mcsteps_virtualdetector histogram" << std::endl;
+    if (event.mcsteps_virtualdetector != nullptr) {
+      for (const auto& vdstep : *(event.mcsteps_virtualdetector)) {
+        h_mcsteps_virtualdetector_vid->Fill(mcsteps_virtualdetector.vid);
+        h_mcsteps_virtualdetector_sid->Fill(mcsteps_virtualdetector.sid);
+        h_mcsteps_virtualdetector_iinter->Fill(mcsteps_virtualdetector.iinter);
+        h_mcsteps_virtualdetector_time->Fill(mcsteps_virtualdetector.time);
+        h_mcsteps_virtualdetector_de->Fill(mcsteps_virtualdetector.de);
+        h_mcsteps_virtualdetector_dp->Fill(mcsteps_virtualdetector.dp);
+        h_mcsteps_virtualdetector_early->Fill(mcsteps_virtualdetector.early);
+        h_mcsteps_virtualdetector_late->Fill(mcsteps_virtualdetector.late);
+        h_mcsteps_virtualdetector_mom_x->Fill(mcsteps_virtualdetector.mom.x());
+        h_mcsteps_virtualdetector_mom_y->Fill(mcsteps_virtualdetector.mom.y());
+        h_mcsteps_virtualdetector_mom_z->Fill(mcsteps_virtualdetector.mom.z());
+        h_mcsteps_virtualdetector_pos_x->Fill(mcsteps_virtualdetector.pos.x());
+        h_mcsteps_virtualdetector_pos_y->Fill(mcsteps_virtualdetector.pos.y());
+        h_mcsteps_virtualdetector_pos_z->Fill(mcsteps_virtualdetector.pos.z());
+        h_mcsteps_virtualdetector_pdg->Fill(mcsteps_virtualdetector.pdg);
+        h_mcsteps_virtualdetector_startCode->Fill(mcsteps_virtualdetector.startCode);
+        h_mcsteps_virtualdetector_stopCode->Fill(mcsteps_virtualdetector.stopCode);
+
+      }
+    }
   }
 
   file->Write();

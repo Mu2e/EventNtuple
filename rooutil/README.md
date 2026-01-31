@@ -114,6 +114,7 @@ Some branches are not contained in any of the above classes:
 * ```crvcoincsmcplane```
 * ```calohits```, ```calorecodigis```, ```calodigis```
 * ```trig_``` branches
+* ```mcsteps_virtualdetector```
 
 Reach out to the developers on the #analysis-tools Slack channel if you need to have these added somewhere.
 
@@ -224,23 +225,22 @@ Beware: there are a lot of debug messages.
 If a new branch is added to the EventNtuple, then the following needs to be done to so that RooUtil can access the branch:
 
 1. In [Event.hh](inc/Event.hh) add the pointers at the bottom of the file
-2. In [Event.hh](inc/Event.hh) constructor, set the branch address
-  - make sure to test that the branch exists
-3. In [Event.hh](inc/Event.hh) add the #include to the underlying object
+2. In [Event.hh](inc/Event.hh) constructor, set the branch address using the ```CheckForBranch()``` function
+3. In [Event.hh](inc/Event.hh) add the #include to the underlying info struct
 4. In [RooUtil.hh](inc/RooUtil.hh) add it to the ```CreateOutputEventNtuple()``` function
 5. Add to validation places:
   - [PrintEvents.C](examples/PrintEvents.C): at least the first and last leaf in the struct
   - [create_val_file_rooutil.C](../../validation/create_val_file_rooutil.C)
      - copy contents of struct into place where histograms are defined
      - then copy and replace "type " with "TH1F* h_branchname_" (e.g. "float " with "TH1F* h_trkcalohit_")
-     - then copy in " = new TH1F("h_branchname_", "", 100,0,100); //"
+     - then copy in " = new TH1F("h_branchname_", "", 100,0,100); //" after the histogram name
      - delete line after "//"
      - add in leaf names to histname (and make separate x, y, z histograms for XYZVectorF leaves)
      - copy histogram lines into main loop
-     - search and replace "TH1F* " with ""
-     - search and replace " = new TH1F("h_" with "->Fill("
-     - search and replace "", "", 100,0,100);" with ");"
-     - search and replace "(branchname_" with "(branchname."
+     - search and replace ```TH1F* ``` (note space) with nothing
+     - search and replace ``` = new TH1F("h_``` with ```->Fill(```
+     - search and replace ```", "", 100,0,100);``` with ```);```
+     - search and replace ```(branchname_``` with ```(branchname.``` in the ```Fill()``` commands
      - update histogram ranges
 6. (Optional) If appropriate, add branches to other classes (e.g. Track.hh) and to ```Event::Update()```
    - be sure to test it with an example script

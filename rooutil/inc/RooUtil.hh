@@ -148,6 +148,8 @@ namespace rooutil {
         output_ntuple->Branch(("trig_" + pair.first).c_str(), &event->triginfo._triggerArray[pair.second]);
       }
 
+      if (event->mcsteps_virtualdetector) { output_ntuple->Branch("mcsteps_virtualdetector", event->mcsteps_virtualdetector); }
+
       // Write out histograms from input to output
       hVersion->Write();
     }

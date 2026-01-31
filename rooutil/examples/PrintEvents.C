@@ -263,5 +263,10 @@ void PrintEvents(std::string filename) {
       std::cout << pair.first << ": " << event.trigger.Fired(pair.second) << std::endl;
     }
 
+    // mcsteps_virtualdetector branch
+    if (event.mcsteps_virtualdetector != nullptr) {
+      for (const auto& vdstep : *(event.mcsteps_virtualdetector)) {
+        std::cout << "vdstep: " << vdstep.vid << ", " << vdstep.time << ", " << vdstep.mom << ", " << vdstep.pos << ", " << vdstep.pdg << ", " << vdstep.startCode << ", " << vdstep.stopCode << std::endl;
+      }
   }
 }
