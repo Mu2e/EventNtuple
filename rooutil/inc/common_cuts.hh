@@ -10,6 +10,7 @@
 #include "Offline/MCDataProducts/inc/ProcessCode.hh"
 #include "Offline/MCDataProducts/inc/GenId.hh"
 #include "Offline/MCDataProducts/inc/MCRelationship.hh"
+#include "Offline/DataProducts/inc/VirtualDetectorId.hh"
 
 #include "EventNtuple/rooutil/inc/Track.hh"
 #include "EventNtuple/rooutil/inc/TrackSegment.hh"
