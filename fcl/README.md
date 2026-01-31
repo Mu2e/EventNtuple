@@ -22,6 +22,7 @@ where ```tier``` is the data tier of the input dataset, ```type``` is the type o
 | from_mcs-mockdata_separateTrkBranches.fcl | mock datasets | example on how to separate the tracks into separate branches again|
 | from_mcs-mockdata_selectorExample.fcl | mock datasets | example on how to use a selector to select certain types of tracks before putting them into the EventNtuple |
 | from_mcs-mixed_trkQualCompare.fcl | reconstructed mixed (i.e. primary+background hits) datasets | shows how to output result of more than one TrkQual |
+| from_mcs-primary_addVDSteps.fcl | reconstructed primary (i.e. no background hits) datasets | shows how to add the branch for virtual detector steps |
 | from_mcs-DeMCalib.fcl | reconstructed primary or mixed datasets | only writes one track per event |
 | from_mcs-OffSpill.fcl | off spill datasets | only contains ```CentralHelix``` tracks (i.e. field-on cosmics) |
 | from_dig-mockdata.fcl | mock datasets (digis) | runs reconstruction and creates EventNtuple in one job |

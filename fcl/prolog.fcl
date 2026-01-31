@@ -319,7 +319,7 @@ EventNtupleMaker : {
   ExtraMCStepCollectionTags : []
   SurfaceStepCollectionTag : "compressRecoMCs"
   FitType : LoopHelix
-  StepPointMCTags : [ "compressRecoMCs:virtualdetector" ]
+  StepPointMCTags : [ ]
 }
 # instance for processing trigger (digitization) output from simulation
 EventNtupleMakerTTMC: {
