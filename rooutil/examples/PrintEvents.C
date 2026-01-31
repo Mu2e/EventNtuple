@@ -268,5 +268,6 @@ void PrintEvents(std::string filename) {
       for (const auto& vdstep : *(event.mcsteps_virtualdetector)) {
         std::cout << "vdstep: " << vdstep.vid << ", " << vdstep.time << ", " << vdstep.mom << ", " << vdstep.pos << ", " << vdstep.pdg << ", " << vdstep.startCode << ", " << vdstep.stopCode << std::endl;
       }
+    }
   }
 }
