@@ -62,8 +62,9 @@ mu2e -c EventNtuple/fcl/from_mcs-mockdata.fcl -s test-art-file.art -n 10
 
 8. Add to ```ntuplehelper```
    * instructions [here](./ntuplehelper.md#Adding-a-branch)
-9. Add to validation, RooUtil, and PyUtil
-   * [instructions to be completed... for the time being contact Andy and Sophie for this]
+9. Add to validation, RooUtil, and pyutils
+   * instructions for validation and RooUtil are [here](../rooutil/README.md#For-Developers). Contact Andy for more info if needed
+   * contact Sophie for pyutils
 10. Run validation
     * both [test_fcls.sh](../validation/README.md#Validating-EventNtuple-Runs), and
     * and [valCompare](../validation/README.md#Validating-EventNtuple-Contents) steps
