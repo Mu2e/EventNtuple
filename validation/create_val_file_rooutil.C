@@ -1176,23 +1176,23 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
     std::cout << "Creating mcsteps_virtualdetector histogram" << std::endl;
     if (event.mcsteps_virtualdetector != nullptr) {
       for (const auto& vdstep : *(event.mcsteps_virtualdetector)) {
-        h_mcsteps_virtualdetector_vid->Fill(mcsteps_virtualdetector.vid);
-        h_mcsteps_virtualdetector_sid->Fill(mcsteps_virtualdetector.sid);
-        h_mcsteps_virtualdetector_iinter->Fill(mcsteps_virtualdetector.iinter);
-        h_mcsteps_virtualdetector_time->Fill(mcsteps_virtualdetector.time);
-        h_mcsteps_virtualdetector_de->Fill(mcsteps_virtualdetector.de);
-        h_mcsteps_virtualdetector_dp->Fill(mcsteps_virtualdetector.dp);
-        h_mcsteps_virtualdetector_early->Fill(mcsteps_virtualdetector.early);
-        h_mcsteps_virtualdetector_late->Fill(mcsteps_virtualdetector.late);
-        h_mcsteps_virtualdetector_mom_x->Fill(mcsteps_virtualdetector.mom.x());
-        h_mcsteps_virtualdetector_mom_y->Fill(mcsteps_virtualdetector.mom.y());
-        h_mcsteps_virtualdetector_mom_z->Fill(mcsteps_virtualdetector.mom.z());
-        h_mcsteps_virtualdetector_pos_x->Fill(mcsteps_virtualdetector.pos.x());
-        h_mcsteps_virtualdetector_pos_y->Fill(mcsteps_virtualdetector.pos.y());
-        h_mcsteps_virtualdetector_pos_z->Fill(mcsteps_virtualdetector.pos.z());
-        h_mcsteps_virtualdetector_pdg->Fill(mcsteps_virtualdetector.pdg);
-        h_mcsteps_virtualdetector_startCode->Fill(mcsteps_virtualdetector.startCode);
-        h_mcsteps_virtualdetector_stopCode->Fill(mcsteps_virtualdetector.stopCode);
+        h_mcsteps_virtualdetector_vid->Fill(vdstep.vid);
+        h_mcsteps_virtualdetector_sid->Fill(vdstep.sid);
+        h_mcsteps_virtualdetector_iinter->Fill(vdstep.iinter);
+        h_mcsteps_virtualdetector_time->Fill(vdstep.time);
+        h_mcsteps_virtualdetector_de->Fill(vdstep.de);
+        h_mcsteps_virtualdetector_dp->Fill(vdstep.dp);
+        h_mcsteps_virtualdetector_early->Fill(vdstep.early);
+        h_mcsteps_virtualdetector_late->Fill(vdstep.late);
+        h_mcsteps_virtualdetector_mom_x->Fill(vdstep.mom.x());
+        h_mcsteps_virtualdetector_mom_y->Fill(vdstep.mom.y());
+        h_mcsteps_virtualdetector_mom_z->Fill(vdstep.mom.z());
+        h_mcsteps_virtualdetector_pos_x->Fill(vdstep.pos.x());
+        h_mcsteps_virtualdetector_pos_y->Fill(vdstep.pos.y());
+        h_mcsteps_virtualdetector_pos_z->Fill(vdstep.pos.z());
+        h_mcsteps_virtualdetector_pdg->Fill(vdstep.pdg);
+        h_mcsteps_virtualdetector_startCode->Fill(vdstep.startCode);
+        h_mcsteps_virtualdetector_stopCode->Fill(vdstep.stopCode);
 
       }
     }
