@@ -409,6 +409,9 @@ namespace mu2e {
           mcsi.dp = mcstep.postMomentum().mag()- mcstep.momentum().mag();
           mcsi.mom = mcstep.momentum();
           mcsi.pos = spos;
+          mcsi.pdg = mcstep.simParticle()->pdgId();
+          mcsi.startCode = mcstep.simParticle()->creationCode();
+          mcsi.stopCode = mcstep.simParticle()->stoppingCode();
         }
       }
     }
@@ -434,4 +437,22 @@ namespace mu2e {
     //    std::sort(ssic.begin(),ssic.end(),[](const auto& a, const auto& b){return a.time < b.time;});
   }
 
+  void InfoMCStructHelper::fillStepPointMCInfo(StepPointMCCollection const& mcsteps, MCStepInfos& mcstepinfos) {
+    GeomHandle<DetectorSystem> det;
+    MCStepInfo mcstepinfo;
+    for(auto const& mcstep : mcsteps) {
+      mcstepinfo.reset();
+      mcstepinfo.vid = mcstep.volumeId();
+      mcstepinfo.time = mcstep.time();
+      mcstepinfo.de = mcstep.totalEDep();
+      mcstepinfo.dp = mcstep.postMomentum().mag()- mcstep.momentum().mag();
+      mcstepinfo.mom = mcstep.momentum();
+      mcstepinfo.pos = XYZVectorF(det->toDetector(mcstep.position()));
+      const auto& simParticle = mcstep.simParticle();
+      mcstepinfo.pdg = simParticle->pdgId();
+      mcstepinfo.startCode = simParticle->creationCode();
+      mcstepinfo.stopCode = simParticle->stoppingCode();
+      mcstepinfos.emplace_back(mcstepinfo);
+    }
+  }
 }

@@ -14,12 +14,16 @@ namespace mu2e {
     float time = 0;  // time of this step WRT MC primary proton (ns)
     float de = 0; // energy deposit through this step (MeV)
     float dp = 0; // momentum magnitude change throw this step (MeV/c)
-    bool early = false;
-    bool late = false; // flag if this is the earliest or latest step
+    bool early = false; // flag if this is the earliest step
+    bool late = false; // flag if this is the latest step
     XYZVectorF mom; // particle momentum at the start of this step
     XYZVectorF pos;  // particle position at the start of this step
     void reset() {*this = MCStepInfo(); }
     bool valid() { return vid>=0; }
+    int pdg = -1; // true PDG code
+    int startCode = -1; // creation process code
+    int stopCode = -1; // stop process code
+
   };
 
   using MCStepInfos = std::vector<MCStepInfo>;

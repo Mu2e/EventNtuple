@@ -1,0 +1,3 @@
+#include "EventNtuple/fcl/from_mcs-primary.fcl"
+
+physics.analyzers.EventNtuple.StepPointMCTags : [ "compressRecoMCs:virtualdetector" ]

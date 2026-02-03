@@ -182,9 +182,10 @@ namespace mu2e {
         fhicl::Atom<art::InputTag> primaryParticleTag{Name("PrimaryParticleTag"), Comment("Tag for PrimaryParticle"), art::InputTag()};
         fhicl::Atom<art::InputTag> kalSeedMCTag{Name("KalSeedMCAssns"), Comment("Tag for KalSeedMCAssn"), art::InputTag()};
         // extra MC
-        fhicl::OptionalSequence<art::InputTag> extraMCStepTags{Name("ExtraMCStepCollectionTags"), Comment("Input tags for any other StepPointMCCollections you want written out")};
+        fhicl::OptionalSequence<art::InputTag> extraMCStepTags{Name("ExtraMCStepCollectionTags"), Comment("Input tags for any other StepPointMCCollections you want written out. This will only write out steps associated with the KalSeed")};
         // passive elements and Virtual Detector MC information
         fhicl::OptionalAtom<art::InputTag> SurfaceStepsTag{Name("SurfaceStepCollectionTag"), Comment("SurfaceStep Collection")};
+        fhicl::OptionalSequence<art::InputTag> stepPointMCTags{Name("StepPointMCTags"), Comment("Input tags for any other StepPointMCCollections you want written out. This will write out all steps in the collection")};
         // Calo MC
         fhicl::Atom<bool> fillCaloMC{ Name("FillCaloMC"),Comment("Fill CaloMC information"), true};
         fhicl::Atom<art::InputTag> caloClusterMCTag{Name("CaloClusterMCTag"), Comment("Tag for CaloClusterMCCollection") ,art::InputTag()};
@@ -249,7 +250,7 @@ namespace mu2e {
       std::map<size_t,unsigned> _tmap; // map between path and trigger ID.  ID should come from trigger itself FIXME!
       // MC truth (fcl parameters)
       bool _fillmc;
-      // MC truth inputs
+      // MC steps (associated with KalSeed)
       std::vector<art::InputTag> _extraMCStepTags;
       std::vector<art::Handle<StepPointMCCollection>> _extraMCStepCollections;
       std::map<BranchIndex, std::map<StepCollIndex, std::vector<MCStepInfos>>> _extraMCStepInfos;
@@ -258,6 +259,11 @@ namespace mu2e {
       art::InputTag _surfaceStepsTag;
       std::map<BranchIndex, std::vector<std::vector<SurfaceStepInfo>>> _surfaceStepInfos;
       art::Handle<SurfaceStepCollection> _surfaceStepsHandle;
+      // MC steps (all)
+      std::vector<art::InputTag> _stepPointMCTags;
+      std::vector<art::Handle<StepPointMCCollection>> _stepPointMCCollections;
+      std::map<StepCollIndex, MCStepInfos> _stepPointMCInfos;
+
       //
       art::Handle<PrimaryParticle> _pph;
       art::Handle<KalSeedMCAssns> _ksmcah;
@@ -441,6 +447,11 @@ namespace mu2e {
           _surfaceStepInfos[i_branch] = std::vector<std::vector<SurfaceStepInfo>>();
         }
       }
+      if(_conf.stepPointMCTags(_stepPointMCTags)){
+        for (StepCollIndex i_stepPointMCTag = 0; i_stepPointMCTag < _stepPointMCTags.size(); ++i_stepPointMCTag) {
+          _stepPointMCInfos[i_stepPointMCTag] = MCStepInfos();
+        }
+      }
     }
   }
 
@@ -566,6 +577,18 @@ namespace mu2e {
     }
     // helix info
     if(_conf.helices()) _ntuple->Branch("helices.",&_hinfos,_buffsize,_splitlevel);
+
+    // all MC information
+    if (_fillmc) {
+      if(_conf.stepPointMCTags(_stepPointMCTags)){
+        for(size_t icoll=0;icoll < _stepPointMCTags.size(); ++icoll) {
+          auto const& tag = _stepPointMCTags[icoll];
+          auto inst = tag.instance();
+          std::string branchname  = "mcsteps_" + inst + ".";
+          _ntuple->Branch(branchname.c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
+        }
+      }
+    }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
@@ -675,6 +698,16 @@ namespace mu2e {
     }
     event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
 
+    // find extra MCStep collections
+    _stepPointMCCollections.clear();
+    for(size_t icoll = 0; icoll < _stepPointMCTags.size(); icoll++){
+      auto const& tag = _stepPointMCTags[icoll];
+      art::Handle<StepPointMCCollection> mcstepch;
+      event.getByLabel(tag,mcstepch);
+      _stepPointMCCollections.push_back(mcstepch);
+    }
+
+
     // loop through all track types
     unsigned ntrks(0);
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
@@ -709,6 +742,10 @@ namespace mu2e {
         _extraMCStepSummaryInfos.at(i_branch).at(i_extraMCStepTag).clear();
       }
       _surfaceStepInfos.at(i_branch).clear();
+      for (StepCollIndex i_stepPointMCTag = 0; i_stepPointMCTag < _stepPointMCTags.size(); ++i_stepPointMCTag) {
+        _stepPointMCInfos.at(i_stepPointMCTag).clear();
+      }
+
 
       if(_fillcalomc) { _allMCTCHIs.at(i_branch).clear(); }
 
@@ -875,6 +912,17 @@ namespace mu2e {
       }
 
     }
+
+    // fill MC information unrelated to any reconstructed object
+    if (_fillmc) {
+      // fill MCStepCollection branch
+      for(size_t icoll = 0; icoll < _stepPointMCTags.size(); icoll++){
+        auto const& mcsteps = *_stepPointMCCollections[icoll];
+        auto& mcstepinfos = _stepPointMCInfos[icoll];
+        _infoMCStructHelper.fillStepPointMCInfo(mcsteps, mcstepinfos);
+      }
+    }
+
     // fill this row in the TTree
     bool fill = true; // default to fliling event
     if(_hastrks && ntrks == 0) { // if we require tracks (_hastrks) but we have none, don't write

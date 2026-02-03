@@ -2,6 +2,10 @@
 # test_fcls.sh - runs fcl files to make sure that they complete successfully
 # Note: requires relevant filelists in a directory above this one
 #
+if [ $# -ne 1 ]; then
+    echo "Usage: . ./validation/test_fcls.sh MDC202X"
+    return
+fi
 vMDC=$1
 
 log_file="test_fcls.log"
@@ -136,6 +140,16 @@ if [ $? == 0 ]; then
 else
     echo "FAIL"
 fi
+
+echo -n "from_mcs-primary_addVDSteps.fcl... "
+echo "mu2e -c fcl/from_mcs-primary_addVDSteps.fcl -S ../filelists/$primary_dataset.list --TFileName nts.ntuple.primaryVDSteps.root -n 100" >> ${log_file} 2>&1
+mu2e -c fcl/from_mcs-primary_addVDSteps.fcl -S ../filelists/$primary_dataset.list --TFileName nts.ntuple.primaryVDSteps.root -n 100 >> ${log_file} 2>&1
+if [ $? == 0 ]; then
+    echo "OK"
+else
+    echo "FAIL"
+fi
+
 
 echo -n "from_dig-mockdata.fcl... "
 echo "mu2e -c fcl/from_dig-mockdata.fcl -S ../filelists/${digi_dataset}.list --TFileName nts.ntuple.dig.root -n 100" >> ${log_file} 2>&1

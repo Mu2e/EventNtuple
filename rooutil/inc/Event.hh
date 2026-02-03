@@ -37,6 +37,7 @@
 #include "EventNtuple/inc/MVAResultInfo.hh"
 
 #include "EventNtuple/inc/TrigInfo.hh"
+#include "EventNtuple/inc/MCStepInfo.hh"
 
 #include "EventNtuple/rooutil/inc/Track.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
@@ -87,6 +88,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "calorecodigis", &this->calorecodigis);
       CheckForBranch(ntuple, "calodigis", &this->calodigis);
 
+      CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
     }
 
     // Check if a branch exists in the TChain, and optionally set its address
@@ -342,6 +344,7 @@ namespace rooutil {
     std::vector<mu2e::CrvPlaneInfoMC>* crvcoincsmcplane = nullptr;
 
     std::vector<std::vector<mu2e::SimInfo>>* trkmcsim = nullptr;
+    std::vector<mu2e::MCStepInfo>* mcsteps_virtualdetector = nullptr; // TODO: EventNtuple could have other mcsteps_* branches but for the time being just hardcode for the virtualdetector ones
   };
 } // namespace rooutil
 #endif
