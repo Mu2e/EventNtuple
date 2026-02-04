@@ -46,15 +46,7 @@
 #include "TTree.h"
 #include "TProfile.h"
 
-// BaBar includes
-#include "BTrk/BaBar/BaBar.hh"
-#include "BTrk/KalmanTrack/KalRep.hh"
-#include "BTrk/ProbTools/ChisqConsistency.hh"
-#include "BTrk/BbrGeom/BbrVectorErr.hh"
-#include "BTrk/TrkBase/TrkHelixUtils.hh"
 #include "Offline/Mu2eUtilities/inc/TriggerResultsNavigator.hh"
-// mu2e tracking
-#include "Offline/BTrkData/inc/TrkStrawHit.hh"
 // diagnostics
 #include "EventNtuple/inc/HitCount.hh"
 #include "EventNtuple/inc/TrkCount.hh"
@@ -674,7 +666,7 @@ namespace mu2e {
       fillTriggerBranch(event, process, firstEvent);
       firstEvent=false;
     }
-    
+
     // MC data
     if(_fillmc) { // get MC product collections
       event.getByLabel(_conf.primaryParticleTag(),_pph);
@@ -1055,7 +1047,7 @@ namespace mu2e {
     }
     _allRQIs.at(i_branch).setQuals(recoQuals);
     // TrkCaloHitPID
-    
+
     const auto& trkPIDHandles = _allTrkPIDCHs.at(i_branch);
     for (size_t i_trkPIDHandle = 0; i_trkPIDHandle < trkPIDHandles.size(); ++i_trkPIDHandle) {
       const auto& trkPIDHandle = trkPIDHandles.at(i_trkPIDHandle);

@@ -21,7 +21,6 @@
 #include "EventNtuple/inc/CrvHitInfoMC.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/MCDataProducts/inc/KalSeedMC.hh"
-#include "BTrk/BbrGeom/HepPoint.h"
 #include "Offline/MCDataProducts/inc/PrimaryParticle.hh"
 #include "Offline/MCDataProducts/inc/SurfaceStep.hh"
 #include "Offline/BFieldGeom/inc/BFieldManager.hh"
