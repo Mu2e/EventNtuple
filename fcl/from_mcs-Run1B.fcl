@@ -1,4 +1,5 @@
-#include "EventNtuple/fcl/from_mcs-extracted.fcl"
+#include "EventNtuple/fcl/from_mcs-extracted.fcl" # we start from mcs-extracted since Run-1B wants the straight line track fit
 
 physics.analyzers.EventNtuple.FillMCInfo : true
-physics.analyzers.EventNtuple.StepPointMCTags : [ "compressRecoMCs:virtualdetector" ]
+physics.analyzers.EventNtuple.StepPointMCTags : [ "compressRecoMCs:virtualdetector" ] # we add the mcsteps_virtualdetector branch
+services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry
