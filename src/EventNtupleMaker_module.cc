@@ -240,6 +240,7 @@ namespace mu2e {
       // trigger information
       unsigned _trigbits;
       std::map<size_t,unsigned> _tmap; // map between path and trigger ID.  ID should come from trigger itself FIXME!
+      TrigInfo _triggerResults;
       // MC truth (fcl parameters)
       bool _fillmc;
       // MC steps (associated with KalSeed)
@@ -268,6 +269,7 @@ namespace mu2e {
       bool _fillcalomc;
       art::Handle<CaloClusterMCCollection> _ccmcch;
       std::map<BranchIndex, std::vector<CaloClusterInfoMC>> _allMCTCHIs;
+      std::vector<CaloClusterInfoMC> _caloCIMCs; //All calo clusters independent from tracker match
 
       // hit level info branches
       std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfo>>> _allTSHIs;
@@ -285,7 +287,6 @@ namespace mu2e {
       art::Handle<CaloRecoDigiCollection> _caloRecoDigis;
       art::Handle<CaloDigiCollection> _caloDigis;
       std::vector<CaloClusterInfo> _caloCIs;
-      TrigInfo _triggerResults;
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
@@ -352,7 +353,7 @@ namespace mu2e {
     _hastrks(conf().hastrks()),
     _hascrv(conf().hascrv()),
     _fillmc(conf().fillmc()),
-   _fillcalomc(conf().fillCaloMC()),
+    _fillcalomc(conf().fillCaloMC()),
     // Calorimeter
     _fillcaloclusters(conf().fillCaloClusters()),
     _fillcalohits(conf().fillCaloHits()),
@@ -534,6 +535,9 @@ namespace mu2e {
     }
 
     // Calorimeter
+    if (_fillcalomc){
+      _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
+    }
     if (_fillcaloclusters){
       _ntuple->Branch("caloclusters.",&_caloCIs,_buffsize,_splitlevel);
     }
@@ -759,11 +763,20 @@ namespace mu2e {
 
     // Calorimeter
     // Clear lists for this event
+    if (_fillcalomc) { _caloCIMCs.clear(); }
     _caloCIs.clear();
     _caloHIs.clear();
     _caloRDIs.clear();
     _caloDIs.clear();
-    if(_fillcaloclusters){
+
+    if (_fillcalomc){
+      for (const auto& clustermc : *_ccmcch.product()){
+        _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
+      }
+    }
+
+    //Fill clusters, hits, recodigis, and digis with hierarchy. If this code block is deemed too bulky, I can move it into InfoStructHelper. -pgirotti
+    if (_fillcaloclusters){
 
       //Get the clusters
       event.getByLabel(_conf.caloClustersTag(),_caloClusters);
