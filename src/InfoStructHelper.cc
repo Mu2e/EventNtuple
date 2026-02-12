@@ -480,6 +480,25 @@ namespace mu2e {
     }
   }
 
+  void InfoStructHelper::fillTimeClusterInfo(TimeCluster const& tc, std::vector<EventNtupleTimeClusterInfo>& infos) {
+    EventNtupleTimeClusterInfo info;
+    info.nhits = tc.nhits();
+    info.nStrawHits = tc.nStrawHits();
+    info.t0 = tc.t0().t0();
+    info.posX = tc.position().x();
+    info.posY = tc.position().y();
+    info.posZ = tc.position().z();
+    if(tc.hasCaloCluster()) { // only defined if a calo cluster is associated with the time cluster
+      info.ecalo = tc.caloCluster()->energyDep();
+      info.tcalo = tc.caloCluster()->time();
+    }
+    infos.emplace_back(info);
+  }
+
+  void InfoStructHelper::fillTimeClusterInfo(art::Ptr<TimeCluster> const& ptr, std::vector<EventNtupleTimeClusterInfo>& infos) {
+    if(ptr.isNull()) return;
+    fillTimeClusterInfo(*ptr, infos);
+  }
 
   void InfoStructHelper::fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos) {
     CaloClusterInfo clusterinfo;

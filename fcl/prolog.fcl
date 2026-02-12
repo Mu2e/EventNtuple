@@ -282,6 +282,8 @@ EventNtupleMaker : {
   CrvStepsTag : "compressRecoMCs"
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
+  TimeClustersTag : "MHDe"
+  FillTimeClusters : false
   CaloClustersTag : "CaloClusterMaker"
   CaloHitsTag : "CaloHitMaker"
   CaloRecoDigisTag : ""
