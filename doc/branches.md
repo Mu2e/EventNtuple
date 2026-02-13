@@ -101,6 +101,18 @@ Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'c
 | calohits |  Vector branch |   calorimeter hits with indices of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
 | calorecodigis |  Vector branch |   calorimeter recodigis with index of raw digi and of parent hit| [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
 | calodigis |  Vector branch |   calorimeter raw digis with index of parent recodigi if any| [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
+## Calorimeter MC Branches
+
+The calorimeter mc clusters branch is a vector of MC clusters associated with the reconstructed clusters.
+The vector is aligned with the reconstructed clusters (same size & indexes).
+
+The calorimeter sim info branch is a vector of SimParticles belonging to any MC cluster.
+This branch is filled according to the MC clusters order, but no sim particles are repeated (if they belong to multiple clusters)
+The correct SimParticle can be retrieved from the MC cluster via the simid number
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| caloclustersmc |  Vector branch |   MC-truth infromation for calorimeter clusters| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
+| calosiminfo |  Vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
 ## CRV Branches
 
 These branches contain a vector where each element is a CRV hit that happened during the event.
