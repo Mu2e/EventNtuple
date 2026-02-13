@@ -362,14 +362,44 @@ namespace mu2e {
     auto const& edeps = ccmc.energyDeposits();
     ccimc.nsim = edeps.size();
     ccimc.etot = ccmc.totalEnergyDep();
-    if(ccmc.energyDeposits().size() > 0){
-      auto const& primary = edeps.front();
-      ccimc.eprimary = primary.energyDep();
-      ccimc.tavg = primary.time(); // this is unnecessary FIXMI
-      ccimc.tprimary = primary.time();
-      ccimc.prel = primary.rel();
+    ccimc.tavg = 0.;
+    if (ccimc.nsim > 0){
+      ccimc.eprimary = edeps.front().energyDep();
+      ccimc.tprimary = edeps.front().time();
+      ccimc.prel = edeps.front().rel();
+      for (auto const& edep : edeps){
+        ccimc.tavg += edep.time();
+        auto simid = edep.sim()->id().asInt();
+        ccimc.simParticleIds.push_back(simid);
+      }
+      ccimc.tavg /= ccimc.nsim;
     }
     ccimcs.push_back(ccimc);
+  }
+
+  void InfoMCStructHelper::fillCaloSimInfos(CaloClusterMC const& ccmc, std::vector<SimInfo>& csis) {
+    auto const& edeps = ccmc.energyDeposits();
+    for (auto const& edep : edeps){
+      int simid = edep.sim()->id().asInt();
+
+      //Search that we didn't insert this particle already
+      bool already_added = false;
+      for (auto const& info : csis){
+        if (info.id == simid){
+          already_added = true;
+          break;
+        }
+      }
+      //It's new
+      if (!already_added){
+        SimInfo siminfo;
+        fillSimInfo(edep.sim(), siminfo);
+        //Add the relationship with the first edep (the most energetic one)
+        siminfo.index = csis.size();
+        siminfo.calrel = MCRelationship(edep.sim(),edeps.front().sim());
+        csis.push_back(siminfo);
+      }
+    }
   }
 
   void InfoMCStructHelper::fillExtraMCStepInfos(KalSeedMC const& kseedmc, StepPointMCCollection const& mcsteps,
@@ -409,6 +439,7 @@ namespace mu2e {
           mcsi.dp = mcstep.postMomentum().mag()- mcstep.momentum().mag();
           mcsi.mom = mcstep.momentum();
           mcsi.pos = spos;
+          mcsi.simid = mcstep.simParticle()->id().asInt();
           mcsi.pdg = mcstep.simParticle()->pdgId();
           mcsi.startCode = mcstep.simParticle()->creationCode();
           mcsi.stopCode = mcstep.simParticle()->stoppingCode();
@@ -449,6 +480,7 @@ namespace mu2e {
       mcstepinfo.mom = mcstep.momentum();
       mcstepinfo.pos = XYZVectorF(det->toDetector(mcstep.position()));
       const auto& simParticle = mcstep.simParticle();
+      mcstepinfo.simid = simParticle->id().asInt();
       mcstepinfo.pdg = simParticle->pdgId();
       mcstepinfo.startCode = simParticle->creationCode();
       mcstepinfo.stopCode = simParticle->stoppingCode();

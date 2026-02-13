@@ -3,7 +3,7 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calosiminfo', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
@@ -14,6 +14,7 @@ class nthelper:
     general_mc_branches = [ 'mcsteps' ]
     basic_branches = [ 'timeclusters' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
+    calo_mc_branches = ['caloclustersmc', 'calosiminfo']
     crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
     deprecated_branches = ['trkmcsci','trkmcssi']
 
@@ -49,6 +50,8 @@ class nthelper:
                            'trkmcsci' : "MCStepInfo",
                            'trkmcssi' : "MCStepSummaryInfo",
                            'timeclusters' : "TimeClusterInfo",
+                           'caloclustersmc': "CaloClusterInfoMC",
+                           'calosiminfo' : "SimInfo",
                            'caloclusters' : "CaloClusterInfo",
                            'calohits' : "CaloHitInfo",
                            'calorecodigis' : "CaloRecoDigiInfo",
@@ -244,6 +247,28 @@ class nthelper:
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.calo_branches:
+            explanation = self.get_branch_explanation(branch)
+            struct = self.branch_struct_dict[branch]
+            struct_file = struct + ".hh";
+            if not export_to_md:
+                print(explanation)
+            else:
+                tokens=explanation.split(":")
+                print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
+
+        if not export_to_md:
+            print("\nCalorimeter MC Branches")
+            print("================")
+        else:
+            print("## Calorimeter MC Branches\n")
+            print("The calorimeter mc clusters branch is a vector of MC clusters associated with the reconstructed clusters.")
+            print("The vector is aligned with the reconstructed clusters (same size & indexes).\n")
+            print("The calorimeter sim info branch is a vector of SimParticles belonging to any MC cluster.")
+            print("This branch is filled according to the MC clusters order, but no sim particles are repeated (if they belong to multiple clusters)")
+            print("The correct SimParticle can be retrieved from the MC cluster via the simid number")
+            print("| branch | structure | explanation | leaf information |")
+            print("|--------|-----------|-------------|------------------|")
+        for branch in self.calo_mc_branches:
             explanation = self.get_branch_explanation(branch)
             struct = self.branch_struct_dict[branch]
             struct_file = struct + ".hh";
