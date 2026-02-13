@@ -237,9 +237,9 @@ void PrintEvents(std::string filename) {
                   << cluster.nhits << ", "
                   << cluster.nStrawHits << ", "
                   << cluster.t0 << ", "
-                  << cluster.posX << ", "
-                  << cluster.posY << ", "
-                  << cluster.posZ << ", "
+                  << cluster.pos.x() << ", "
+                  << cluster.pos.y() << ", "
+                  << cluster.pos.z() << ", "
                   << cluster.ecalo << ", "
                   << cluster.tcalo
                   << std::endl;
