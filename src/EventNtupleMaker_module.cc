@@ -455,7 +455,7 @@ namespace mu2e {
     _hVersion = tfs->make<TH1I>("version", "version number",3,0,3);
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 9);
-    _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 1);
+    _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
     // add event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
     if (_fillmc) {
@@ -996,13 +996,13 @@ namespace mu2e {
         throw cet::exception("EventNtuple") << "More trigger paths in TriggerResultsNavigator than maximum allowed by TrigInfo::ntrig_. Increase TrigInfo::ntrig_ and rebuild\n";
       }
       for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-          const std::string name = "trig_"+tnav.getTrigPathName(i);
+          const std::string name = "trig_"+tnav.getTrigPathNameByIndex(i);
           _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
     }
 
     for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-        const std::string path = tnav.getTrigPathName(i);
+        const std::string path = tnav.getTrigPathNameByIndex(i);
         bool accepted = tnav.accepted(path);
         _triggerResults._triggerArray[i] = accepted;
     }
