@@ -61,7 +61,7 @@ The number of elements in the vector is found in the leaf trk.nhits.
 | trkmats |  Vector-of-vector branch |   information on the straw materials used in the Kalman fit| [see TrkStrawMatInfo.hh](../inc/TrkStrawMatInfo.hh)
 | trkhitsmc |  Vector-of-vector branch |   MC-truth information of straw hits assigned to a track| [see TrkStrawHitInfoMC.hh](../inc/TrkStrawHitInfoMC.hh)
 | trkhitcalibs |  Vector-of-vector branch |   calib and alignment information about the straw hits assigned to a track| [see TrkStrawHitCalibInfo.hh](../inc/TrkStrawHitCalibInfo.hh)
-## Monte Carlo Branches
+## Trk Monte Carlo Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).
 
@@ -72,6 +72,20 @@ The vector is sorted in reverse chronological order, such that the last element 
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | trkmcsim |  Vector-of-vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
+## General Monte Carlo Branches
+
+These branches contain MC information in the event and are not required to be related to tracks
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| mcsteps |  Vector branch |   information about StepPointMCs| [see MCStepInfo.hh](../inc/MCStepInfo.hh)
+## Low-level reco Branches
+
+These branches are vectors of time clusters reconstructed in the event.
+The branch is empty if there are no time clusters during the event.
+
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| timeclusters |  Vector branch |   Information in a reconstructed time cluster| [see TimeClusterInfo.hh](../inc/TimeClusterInfo.hh)
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.

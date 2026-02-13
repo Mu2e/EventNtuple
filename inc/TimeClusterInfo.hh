@@ -11,9 +11,9 @@ namespace mu2e
     int nhits = 0; // N(combo hits)
     int nStrawHits = 0; //N(straw hits)
     float t0 = 0.; // T0 time
-    float posX = 0.f; // position
-    float posY = 0.f;
-    float posZ = 0.f;
+    float posX = 0.f; // position X
+    float posY = 0.f; // position Y
+    float posZ = 0.f; // position Z
     float ecalo = -1.f; // energy of the associated calo cluster
     float tcalo = 0.f; // time of the associated calo cluster
     void reset() { *this = EventNtupleTimeClusterInfo(); }
