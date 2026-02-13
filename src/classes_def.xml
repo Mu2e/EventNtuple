@@ -30,6 +30,8 @@
   <class name="std::vector<mu2e::CentralHelixInfo>" />
   <class name="std::vector<std::vector<mu2e::CentralHelixInfo>>" />
   <class name="std::vector<std::vector<mu2e::KinematicLineInfo>>" />
+  <class name="mu2e::EventNtupleTimeClusterInfo" />
+  <class name="std::vector<std::vector<mu2e::EventNtupleTimeClusterInfo>>" />
   <class name="mu2e::SimInfo" />
   <class name="std::vector<mu2e::SimInfo>" />
   <class name="std::vector<std::vector<mu2e::SimInfo>>" />

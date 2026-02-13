@@ -3,7 +3,7 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
@@ -12,6 +12,7 @@ class nthelper:
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
     trk_mc_branches = [ 'trkmcsim' ]
     general_mc_branches = [ 'mcsteps' ]
+    basic_branches = [ 'timeclusters' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
     crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
     deprecated_branches = ['trkmcsci','trkmcssi']
@@ -47,6 +48,7 @@ class nthelper:
                            'trkmats' : "TrkStrawMatInfo",
                            'trkmcsci' : "MCStepInfo",
                            'trkmcssi' : "MCStepSummaryInfo",
+                           'timeclusters' : "TimeClusterInfo",
                            'caloclusters' : "CaloClusterInfo",
                            'calohits' : "CaloHitInfo",
                            'calorecodigis' : "CaloRecoDigiInfo",
@@ -200,6 +202,25 @@ class nthelper:
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.general_mc_branches:
+            explanation = self.get_branch_explanation(branch)
+            struct = self.branch_struct_dict[branch]
+            struct_file = struct + ".hh";
+            if not export_to_md:
+                print(explanation)
+            else:
+                tokens=explanation.split(":")
+                print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
+
+        if not export_to_md:
+            print("\nLow-level reco Branches")
+            print("================")
+        else:
+            print("## Low-level reco Branches\n")
+            print("These branches are vectors of time clusters reconstructed in the event.")
+            print("The branch is empty if there are no time clusters during the event.\n")
+            print("| branch | structure | explanation | leaf information |")
+            print("|--------|-----------|-------------|------------------|")
+        for branch in self.basic_branches:
             explanation = self.get_branch_explanation(branch)
             struct = self.branch_struct_dict[branch]
             struct_file = struct + ".hh";

@@ -9,6 +9,7 @@
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 #include "Offline/RecoDataProducts/inc/RecoCount.hh"
 #include "Offline/RecoDataProducts/inc/HelixSeed.hh"
+#include "Offline/RecoDataProducts/inc/TimeCluster.hh"
 #include "Offline/RecoDataProducts/inc/CrvCoincidenceCluster.hh"
 #include "Offline/RecoDataProducts/inc/MVAResult.hh"
 #include "Offline/BFieldGeom/inc/BFieldManager.hh"
@@ -28,6 +29,7 @@
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/HelixInfo.hh"
+#include "EventNtuple/inc/TimeClusterInfo.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
 #include "EventNtuple/inc/CaloClusterInfo.hh"
@@ -69,6 +71,8 @@ namespace mu2e {
     void fillMatInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawMatInfo>>& tminfos );
     void fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& tchinfo );
     void fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos);
+    void fillTimeClusterInfo(TimeCluster const& tc, std::vector<EventNtupleTimeClusterInfo>& infos);
+    void fillTimeClusterInfo(art::Ptr<TimeCluster> const& ptr, std::vector<EventNtupleTimeClusterInfo>& infos);
 
     void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
     void fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1);

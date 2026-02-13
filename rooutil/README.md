@@ -97,6 +97,11 @@ The ```MCParticle``` class contains information about a single SimParticle in th
 
 Example: [PlotMCParentPosZ.C](./examples/PlotMCParentPosZ.C)
 
+### The ```EventNtupleTimeCluster``` Class
+The ```EventNtupleTimeCluster``` class contains all information related to a single time cluster
+
+* single objects: ```timecluster```
+
 ### The ```CaloCluster``` Class
 The ```CaloCluster``` class contains all information related to a single calorimeter cluster
 

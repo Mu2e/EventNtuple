@@ -467,6 +467,15 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_crvcoicsmcplane_kineticEnergy = new TH1F("h_crvcoincsmcplane_kineticEnergy", "", 200,0,200);
   TH1F* h_crvcoicsmcplane_dataSource = new TH1F("h_crvcoincsmcplane_dataSource", "", 100,0,100);
 
+  TH1* h_timeclusters_nhits      = new TH1F("h_timeclusters_nhits"     , "", 100,     0.,  200.);
+  TH1* h_timeclusters_nStrawHits = new TH1F("h_timeclusters_nStrawHits", "", 100,     0.,  200.);
+  TH1* h_timeclusters_t0         = new TH1F("h_timeclusters_t0"        , "", 100,     0., 2000.);
+  TH1* h_timeclusters_posX       = new TH1F("h_timeclusters_posX"      , "", 100, -1000., 1000.);
+  TH1* h_timeclusters_posY       = new TH1F("h_timeclusters_posY"      , "", 100, -1000., 1000.);
+  TH1* h_timeclusters_posZ       = new TH1F("h_timeclusters_posZ"      , "", 100, -5000., 5000.);
+  TH1* h_timeclusters_ecalo      = new TH1F("h_timeclusters_ecalo"     , "", 100,     0.,  200.);
+  TH1* h_timeclusters_tcalo      = new TH1F("h_timeclusters_tcalo"     , "", 100,     0., 2000.);
+
   TH1F* h_caloclusters_diskID_ = new TH1F("h_caloclusters_diskID_", "", 2,0,2);
   TH1F* h_caloclusters_time_ = new TH1F("h_caloclusters_time_", "", 200,0,2000);
   TH1F* h_caloclusters_timeErr_ = new TH1F("h_caloclusters_timeErr_", "", 100,0,100);
@@ -1100,6 +1109,19 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       }
     }
 
+    if (event.timeclusters != nullptr) {
+      std::cout << "Creating timeclusters histograms..." << std::endl;
+      for (const auto& cluster : *(event.timeclusters)) {
+        h_timeclusters_nhits     ->Fill(cluster.nhits     );
+        h_timeclusters_nStrawHits->Fill(cluster.nStrawHits);
+        h_timeclusters_t0        ->Fill(cluster.t0        );
+        h_timeclusters_posX      ->Fill(cluster.pos.x()   );
+        h_timeclusters_posY      ->Fill(cluster.pos.y()   );
+        h_timeclusters_posZ      ->Fill(cluster.pos.z()   );
+        h_timeclusters_ecalo     ->Fill(cluster.ecalo     );
+        h_timeclusters_tcalo     ->Fill(cluster.tcalo     );
+      }
+    }
 
     if (event.caloclusters != nullptr) {
       std::cout << "Creating caloclusters histograms..." << std::endl;

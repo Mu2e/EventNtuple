@@ -1,5 +1,5 @@
 //
-// CaloClusterInfo: calorimeter clusters with indeces of hits
+// CaloClusterInfo: calorimeter clusters with indices of hits
 //
 #ifndef CaloClusterInfo_HH
 #define CaloClusterInfo_HH

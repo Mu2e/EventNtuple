@@ -61,7 +61,7 @@ The number of elements in the vector is found in the leaf trk.nhits.
 | trkmats |  Vector-of-vector branch |   information on the straw materials used in the Kalman fit| [see TrkStrawMatInfo.hh](../inc/TrkStrawMatInfo.hh)
 | trkhitsmc |  Vector-of-vector branch |   MC-truth information of straw hits assigned to a track| [see TrkStrawHitInfoMC.hh](../inc/TrkStrawHitInfoMC.hh)
 | trkhitcalibs |  Vector-of-vector branch |   calib and alignment information about the straw hits assigned to a track| [see TrkStrawHitCalibInfo.hh](../inc/TrkStrawHitCalibInfo.hh)
-## Monte Carlo Branches
+## Trk Monte Carlo Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).
 
@@ -72,6 +72,20 @@ The vector is sorted in reverse chronological order, such that the last element 
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | trkmcsim |  Vector-of-vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
+## General Monte Carlo Branches
+
+These branches contain MC information in the event and are not required to be related to tracks
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| mcsteps |  Vector branch |   information about StepPointMCs| [see MCStepInfo.hh](../inc/MCStepInfo.hh)
+## Low-level reco Branches
+
+These branches are vectors of time clusters reconstructed in the event.
+The branch is empty if there are no time clusters during the event.
+
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| timeclusters |  Vector branch |   Information in a reconstructed time cluster| [see TimeClusterInfo.hh](../inc/TimeClusterInfo.hh)
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.
@@ -83,8 +97,8 @@ Similarly, each hit contains the indexes of its two recodigis (left and right ch
 Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
-| caloclusters |  Vector branch |   calorimeter clusters with indeces of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
-| calohits |  Vector branch |   calorimeter hits with indeces of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
+| caloclusters |  Vector branch |   calorimeter clusters with indices of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
+| calohits |  Vector branch |   calorimeter hits with indices of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
 | calorecodigis |  Vector branch |   calorimeter recodigis with index of raw digi and of parent hit| [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
 | calodigis |  Vector branch |   calorimeter raw digis with index of parent recodigi if any| [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
 ## CRV Branches

@@ -130,6 +130,8 @@ namespace rooutil {
       if(event->trkmats) { output_ntuple->Branch("trkmats", event->trkmats); }
       if(event->trkhitcalibs) { output_ntuple->Branch("trkhitcalibs", event->trkhitcalibs); }
 
+      if(event->timeclusters) { output_ntuple->Branch("timeclusters", event->timeclusters); }
+
       if(event->caloclusters) { output_ntuple->Branch("caloclusters", event->caloclusters); }
       if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }
       if(event->calorecodigis) { output_ntuple->Branch("calorecodigis", event->calorecodigis); }
