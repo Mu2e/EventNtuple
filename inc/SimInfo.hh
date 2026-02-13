@@ -29,6 +29,7 @@ namespace mu2e
     XYZVectorF endpos = XYZVectorF();  // end position of the SimParticle [mm, in detector coords]
     MCRelationship prirel = MCRelationship(); // relationship to the event primary particles
     MCRelationship trkrel = MCRelationship(); // relationship to the particle that created hits in the track
+    MCRelationship calrel = MCRelationship(); // relationship to the particle that deposited the most energy in the calo cluster
     void reset() { *this = SimInfo(); }
   };
 }
