@@ -66,6 +66,7 @@
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
 #include "EventNtuple/inc/HelixInfo.hh"
+#include "EventNtuple/inc/TimeClusterInfo.hh"
 #include "EventNtuple/inc/InfoStructHelper.hh"
 #include "EventNtuple/inc/CrvInfoHelper.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
@@ -143,6 +144,8 @@ namespace mu2e {
         fhicl::Atom<bool> fillhitcalibs{Name("FillHitCalibInfo"), Comment("Switch to turn on filling of hit-level information for this set of tracks"), false};
         fhicl::Atom<std::string> fittype{Name("FitType"),Comment("Type of track Fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"),"Unknown"};
         fhicl::Atom<bool> helices{Name("FillHelixInfo"),false};
+        fhicl::Atom<bool> fillTimeClusters{Name("FillTimeClusterInfo"),Comment("Global switch to turn on/off time cluster info"), false};
+        fhicl::Atom<art::InputTag> timeClustersTag{Name("TimeClustersTag"), Comment("Tag for time cluster collection"), art::InputTag()};
         // Calorimeter input
         fhicl::Atom<art::InputTag> caloClustersTag{Name("CaloClustersTag"), Comment("Tag for Calorimeter cluster collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> caloHitsTag{Name("CaloHitsTag"), Comment("Tag for Calorimeter hit collection"), art::InputTag()};
@@ -278,6 +281,11 @@ namespace mu2e {
       std::map<BranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
       std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
 
+      // time cluster branch
+      art::Handle<TimeClusterCollection> _tcsHandle;
+      std::vector<EventNtupleTimeClusterInfo> _tcIs;
+      bool _filltcs;
+
       // event weights
       std::vector<art::Handle<EventWeight> > _wtHandles;
       EventWeightInfo _wtinfo;
@@ -291,6 +299,7 @@ namespace mu2e {
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
+
       bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis, _fillcalodigis;
 
       // Calorimeter MC
@@ -360,6 +369,7 @@ namespace mu2e {
     _hascrv(conf().hascrv()),
     _fillmc(conf().fillmc()),
     _fillcalomc(conf().fillCaloMC()),
+    _filltcs(conf().fillTimeClusters()),
     // Calorimeter
     _fillcaloclusters(conf().fillCaloClusters()),
     _fillcalohits(conf().fillCaloHits()),
@@ -541,6 +551,11 @@ namespace mu2e {
           _ntuple->Branch((branch+"segsmc.").c_str(),&_surfaceStepInfos[i_branch],_buffsize,_splitlevel);
         }
       }
+    }
+
+    // Time clusters
+    if(_filltcs) {
+      _ntuple->Branch("timeclusters.",&_tcIs,_buffsize,_splitlevel);
     }
 
     // Calorimeter
@@ -774,6 +789,18 @@ namespace mu2e {
       }
     }
 
+    // Time clusters
+    if(_filltcs) {
+      _tcIs.clear();
+      //Get the clusters
+      event.getByLabel(_conf.timeClustersTag(),_tcsHandle);
+      if(_tcsHandle.isValid()) {
+        for(const auto& tc : *(_tcsHandle)) {
+          _infoStructHelper.fillTimeClusterInfo(tc, _tcIs);
+        }
+      }
+    }
+
     // Calorimeter
     // Clear lists for this event
     if (_fillcaloclustersmc) { _caloCIMCs.clear(); }
@@ -969,9 +996,11 @@ namespace mu2e {
     _einfo.subrun = event.subRun();
 
     if (_recoCountTag != "") {
-      auto recoCountHandle = event.getValidHandle<mu2e::RecoCount>(_recoCountTag);
-      auto recoCount = *recoCountHandle;
-      _infoStructHelper.fillHitCount(recoCount, _hcnt);
+      art::Handle<mu2e::RecoCount> recoCountHandle;
+      if(event.getByLabel(_recoCountTag, recoCountHandle)) {
+        auto recoCount = *recoCountHandle;
+        _infoStructHelper.fillHitCount(recoCount, _hcnt);
+      }
     }
 
     // currently no reco nproton estimate TODO

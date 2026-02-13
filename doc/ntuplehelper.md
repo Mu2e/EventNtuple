@@ -1,6 +1,6 @@
 # How to get help -- ```ntuplehelper```
 
-On this page, you will learn how to use the [```ntuplehelper```](../../utils/helper/ntuplehelper.py) utility to get more information about what the different branches and leaves are.
+On this page, you will learn how to use the [```ntuplehelper```](../helper/ntuplehelper.py) utility to get more information about what the different branches and leaves are.
 
 ## Setting Up
 
@@ -86,7 +86,7 @@ ntuplehelper --list-all-branches --export-to-md > doc/branches.md
 ```
 
 ### Adding a branch
-If you add a branch to EventNtuple, then make the following changes to ```utils/helper/ntuplehelper.py``` so that users can discover your new branch:
+If you add a branch to EventNtuple, then make the following changes to ```helper/ntuplehelper.py``` so that users can discover your new branch:
 * add the branch name to one of ```single_object_branches```, ```vector_object_branches```, or ```vector_vector_object_branches```
 * to ```branch_struct_dict``` add the branch name and the name of the InfoStruct
 

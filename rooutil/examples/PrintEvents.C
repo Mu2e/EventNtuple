@@ -230,6 +230,22 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    // timeclusters branch
+    if (event.timeclusters != nullptr) {
+      for (const auto& cluster : *(event.timeclusters)) {
+        std::cout << "timecluster: "
+                  << cluster.nhits << ", "
+                  << cluster.nStrawHits << ", "
+                  << cluster.t0 << ", "
+                  << cluster.pos.x() << ", "
+                  << cluster.pos.y() << ", "
+                  << cluster.pos.z() << ", "
+                  << cluster.ecalo << ", "
+                  << cluster.tcalo
+                  << std::endl;
+      }
+    }
+
     // caloclusters branch
     if (event.caloclusters != nullptr) {
       for (const auto& calocluster : *(event.caloclusters)) {
