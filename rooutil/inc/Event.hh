@@ -40,6 +40,7 @@
 #include "EventNtuple/inc/MCStepInfo.hh"
 
 #include "EventNtuple/rooutil/inc/Track.hh"
+#include "EventNtuple/rooutil/inc/TimeCluster.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
 #include "EventNtuple/rooutil/inc/Trigger.hh"
@@ -82,6 +83,8 @@ namespace rooutil {
       CheckForBranch(ntuple, "trkhitsmc", &this->trkhitsmc);
       CheckForBranch(ntuple, "trkmats", &this->trkmats);
       CheckForBranch(ntuple, "trkhitcalibs", &this->trkhitcalibs);
+
+      CheckForBranch(ntuple, "timeclusters", &this->timeclusters);
 
       CheckForBranch(ntuple, "caloclusters", &this->caloclusters);
       CheckForBranch(ntuple, "calohits", &this->calohits);
@@ -152,6 +155,16 @@ namespace rooutil {
         crv_coincs.emplace_back(crv_coinc);
       }
 
+      if (timeclusters != nullptr) {
+        if (debug) { std::cout << "Event::Update(): Clearing previous TimeClusters... " << std::endl; }
+        time_clusters.clear();
+        for (int i_cluster = 0; i_cluster < nTimeClusters(); ++i_cluster) {
+          if (debug) { std::cout << "Event::Update(): Creating TimeCluster " << i_cluster << "... " << std::endl; }
+          TimeCluster time_cluster(&(timeclusters->at(i_cluster))); // passing the addresses of the underlying structs
+          time_clusters.emplace_back(time_cluster);
+        }
+      }
+
       if (caloclusters != nullptr) {
         if (debug) { std::cout << "Event::Update(): Clearing previous CaloClusters... " << std::endl; }
         calo_clusters.clear();
@@ -182,6 +195,10 @@ namespace rooutil {
     int nCrvCoincs() const {
       if (crvcoincs == nullptr) { return 0; }
       else { return crvcoincs->size(); }
+    }
+    int nTimeClusters() const {
+      if (timeclusters == nullptr) { return 0; }
+      else { return timeclusters->size(); }
     }
     int nCaloClusters() const {
       if (caloclusters == nullptr) { return 0; }
@@ -246,6 +263,38 @@ namespace rooutil {
       return select_crv_coincs;
     }
 
+    TimeClusters GetTimeClusters() { return time_clusters; }
+    TimeClusters GetTimeClusters(TimeClusterCut cut, bool inplace = false) {
+      if (!inplace) { // if we are not changing inplace, then just create a new vector to return
+        TimeClusters select_time_clusters;
+        for (auto& time_cluster : time_clusters) {
+          if (cut(time_cluster)) {
+            select_time_clusters.emplace_back(time_cluster);
+          }
+        }
+        return select_time_clusters;
+      }
+      else {
+        auto newEnd = std::remove_if(time_clusters.begin(), time_clusters.end(), [cut](TimeCluster& time_cluster) { return !cut(time_cluster); });
+
+        std::vector<size_t> time_clusters_to_remove;
+        for (std::vector<TimeCluster>::iterator i_time_cluster = newEnd; i_time_cluster != time_clusters.end(); ++i_time_cluster) { // now need to remove from event
+          for (size_t i_cluster = 0; i_cluster < timeclusters->size(); ++i_cluster) {
+            if (&(timeclusters->at(i_cluster))  == i_time_cluster->timecluster) {
+              time_clusters_to_remove.emplace_back(i_cluster);
+              // flag i_cluster for remoavel
+            }
+          }
+        }
+        for (int i_cluster = time_clusters_to_remove.size()-1; i_cluster >= 0; --i_cluster) {
+          timeclusters->erase(timeclusters->begin()+time_clusters_to_remove[i_cluster]);
+        }
+
+        time_clusters.erase(newEnd, time_clusters.end()); // remove only rearranges and returns the new end
+        return time_clusters;
+      }
+    }
+
     CaloClusters GetCaloClusters() { return calo_clusters; }
     CaloClusters GetCaloClusters(CaloClusterCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
@@ -304,6 +353,7 @@ namespace rooutil {
     Tracks tracks;
     CrvCoincs crv_coincs;
     CaloClusters calo_clusters;
+    TimeClusters time_clusters;
 
     // Pointers to the data
     mu2e::EventInfo* evtinfo = nullptr;
@@ -330,6 +380,8 @@ namespace rooutil {
     std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
     std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
     std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>* trkhitcalibs = nullptr;
+
+    std::vector<mu2e::EventNtupleTimeClusterInfo>* timeclusters = nullptr;
 
     std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
     std::vector<mu2e::CaloHitInfo>* calohits = nullptr;

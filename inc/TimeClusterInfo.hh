@@ -5,15 +5,15 @@
 #ifndef EventNtuple_TimeClusterInfo_HH
 #define EventNtuple_TimeClusterInfo_HH
 
+#include "EventNtuple/inc/RootVectors.hh"
+
 namespace mu2e
 {
   struct EventNtupleTimeClusterInfo {
     int nhits = 0; // N(combo hits)
     int nStrawHits = 0; //N(straw hits)
     float t0 = 0.; // T0 time
-    float posX = 0.f; // position X
-    float posY = 0.f; // position Y
-    float posZ = 0.f; // position Z
+    XYZVectorF pos = XYZVectorF(0.f, 0.f, 0.f); // position (x, y, z) in mm, in the tracker system
     float ecalo = -1.f; // energy of the associated calo cluster
     float tcalo = 0.f; // time of the associated calo cluster
     void reset() { *this = EventNtupleTimeClusterInfo(); }

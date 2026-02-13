@@ -485,9 +485,7 @@ namespace mu2e {
     info.nhits = tc.nhits();
     info.nStrawHits = tc.nStrawHits();
     info.t0 = tc.t0().t0();
-    info.posX = tc.position().x();
-    info.posY = tc.position().y();
-    info.posZ = tc.position().z();
+    info.pos = tc.position();
     if(tc.hasCaloCluster()) { // only defined if a calo cluster is associated with the time cluster
       info.ecalo = tc.caloCluster()->energyDep();
       info.tcalo = tc.caloCluster()->time();

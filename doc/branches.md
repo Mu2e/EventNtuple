@@ -97,8 +97,8 @@ Similarly, each hit contains the indexes of its two recodigis (left and right ch
 Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
-| caloclusters |  Vector branch |   calorimeter clusters with indeces of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
-| calohits |  Vector branch |   calorimeter hits with indeces of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
+| caloclusters |  Vector branch |   calorimeter clusters with indices of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
+| calohits |  Vector branch |   calorimeter hits with indices of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
 | calorecodigis |  Vector branch |   calorimeter recodigis with index of raw digi and of parent hit| [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
 | calodigis |  Vector branch |   calorimeter raw digis with index of parent recodigi if any| [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
 ## CRV Branches

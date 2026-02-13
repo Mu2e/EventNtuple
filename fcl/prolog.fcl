@@ -283,7 +283,7 @@ EventNtupleMaker : {
   SimParticlesTag : "compressRecoMCs"
   MCTrajectoriesTag : "compressRecoMCs"
   TimeClustersTag : "MHDe"
-  FillTimeClusters : false
+  FillTimeClusterInfo : false
   CaloClustersTag : "CaloClusterMaker"
   CaloHitsTag : "CaloHitMaker"
   CaloRecoDigisTag : ""
