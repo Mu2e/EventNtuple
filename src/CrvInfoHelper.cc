@@ -30,7 +30,8 @@ namespace mu2e
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
       CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
-      art::Handle<PrimaryParticle> const& primary) {
+      art::Handle<PrimaryParticle> const& primary,
+      bool crvNoFitReco) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
 
@@ -39,28 +40,33 @@ namespace mu2e
     for(size_t i=0; i<nClusters; i++)
     {
       const CrvCoincidenceCluster &cluster = crvCoincidences->at(i);
-      const std::vector<art::Ptr<CrvRecoPulse> > coincRecoPulses_ = cluster.GetCrvRecoPulses(); // Get the reco pulses from the coincidence 
+      const std::vector<art::Ptr<CrvRecoPulse> > coincRecoPulses_ = cluster.GetCrvRecoPulses(); // Get the reco pulses from the coincidence
       // Initiliase PEs per layer
-      std::array<float, CRVId::nLayers> PEsPerLayer_ = {0.}; 
+      std::array<float, CRVId::nLayers> PEsPerLayer_ = {0.};
       // Initiliase PEs per layer per side
       std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer_ = {0.};
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
-        // Skip duplicate pulses (those with multiple peaks)
-        if(coincRecoPulses_.at(j)->GetRecoPulseFlags().test(CrvRecoPulseFlagEnums::duplicateNoFitPulse)) continue;
         // Get PEs associated with this reco pulse
-        float PEs = coincRecoPulses_.at(j)->GetPEsNoFit();
+        float PEs = coincRecoPulses_.at(j)->GetPEs();
+        if(crvNoFitReco)
+        {
+          // Skip duplicate pulses (those with multiple peaks)
+          if(coincRecoPulses_.at(j)->GetRecoPulseFlags().test(CrvRecoPulseFlagEnums::duplicateNoFitPulse)) continue;
+          // Get no-fit PEs associated with this reco pulse
+          PEs = coincRecoPulses_.at(j)->GetPEsNoFit();
+        }
         // Get layer number from the bar index associated with this reco pulse
-        const CRSScintillatorBarIndex &crvBarIndex = coincRecoPulses_.at(j)->GetScintillatorBarIndex(); 
+        const CRSScintillatorBarIndex &crvBarIndex = coincRecoPulses_.at(j)->GetScintillatorBarIndex();
         const CRSScintillatorBar &crvCounter = CRS->getBar(crvBarIndex);
         const CRSScintillatorBarId &crvCounterId = crvCounter.id();
         int layerNumber = crvCounterId.getLayerNumber();
-        // Get the side number 
+        // Get the side number
         // The negative side has SiPM indices 0 and 2, the postive side has indices 1 and 3.
         // zero/one index indicates negative/positive; negative/positive indicates direction wrt the axis in the coordinate system.
-        int side = coincRecoPulses_.at(j)->GetSiPMNumber() % CRVId::nSidesPerBar; 
+        int side = coincRecoPulses_.at(j)->GetSiPMNumber() % CRVId::nSidesPerBar;
         // Sum PEs for this coincidence, indexed by layer number
-        PEsPerLayer_[layerNumber] += PEs; 
+        PEsPerLayer_[layerNumber] += PEs;
         // Sum PEs for this coincidence, indexed by layer number and side number
         int layerSideIndex = layerNumber * CRVId::nSidesPerBar + side; // Indices for a flattened 2D matrix: layers (rows), sides (columns)
         sidePEsPerLayer_[layerSideIndex] += PEs;
@@ -212,7 +218,8 @@ namespace mu2e
       art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
       art::Handle<EventWindowMarker> const& ewmh,
-      CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo){
+      CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
+      bool crvNoFitReco){
     GeomHandle<DetectorSystem> tdet;
 
     if(!crvRecoPulses.isValid()) return;
@@ -237,7 +244,7 @@ namespace mu2e
       int SiPMId = sipm_map.find(barIndex.asInt()*CRVId::nChanPerBar + SiPM)->second;
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
       recoInfo.emplace_back(HitPos, barIndex.asInt(), sectorNumber, SiPMId,
-          crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
+          (crvNoFitReco?crvRecoPulse->GetPEsNoFit():crvRecoPulse->GetPEs()), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
           crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime());
 
       //MCtruth pulses information
@@ -277,7 +284,7 @@ namespace mu2e
 
   } //FillCrvPulseInfoCollections
 
-  // Fill digis struct 
+  // Fill digis struct
   void CrvInfoHelper::FillCrvDigiInfoCollections (
       art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiCollection> const& crvDigis,
