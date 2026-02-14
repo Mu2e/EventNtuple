@@ -40,13 +40,15 @@ namespace mu2e
           CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
           CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
           CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
-          art::Handle<PrimaryParticle> const& primary);
+          art::Handle<PrimaryParticle> const& primary,
+          bool crvNoFitReco);
 
       void FillCrvPulseInfoCollections(
           art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
           art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
           art::Handle<EventWindowMarker> const& ewmh,
-          CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo);
+          CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
+          bool crvNoFitReco);
 
       void FillCrvDigiInfoCollections(
           art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,

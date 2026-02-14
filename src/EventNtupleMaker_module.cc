@@ -167,6 +167,7 @@ namespace mu2e {
         fhicl::Atom<bool> fillcrvpulses{Name("FillCRVPulses"),Comment("Flag for turning on crvpulses(mc) branches"), false};
         fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
         // CRV -- other
+        fhicl::Atom<bool> crvNoFitReco{Name("CrvNoFitReco"),false};  //use the CRV no-fit option for the reco pulses
         fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),2751.485};  //y of center of the top layer of the CRV-T counters.  This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
         // MC truth
         fhicl::Atom<bool> fillmc{Name("FillMCInfo"),Comment("Global switch to turn on/off MC info"),true};
@@ -318,6 +319,7 @@ namespace mu2e {
       art::Handle<CrvStepCollection>                 _crvSteps;
       // CRV -- fhicl parameters
       bool _fillcrvcoincs, _fillcrvpulses, _fillcrvdigis;
+      bool _crvNoFitReco;
       double _crvPlaneY;  // needs to move to KinKalGeom FIXME
       // CRV (output)
       std::vector<CrvHitInfoReco> _crvcoincs;
@@ -382,6 +384,7 @@ namespace mu2e {
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
+    _crvNoFitReco(conf().crvNoFitReco()),
     _crvPlaneY(conf().crvPlaneY()),
     _infoMCStructHelper(conf().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
@@ -953,10 +956,10 @@ namespace mu2e {
       _crvHelper.FillCrvHitInfoCollections(
                                            _crvCoincidences, _crvCoincidenceMCs,
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
-                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
+                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph, _crvNoFitReco);
       if(_fillcrvpulses){
         _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
-                                               _crvpulses, _crvpulsesmc);
+                                               _crvpulses, _crvpulsesmc, _crvNoFitReco);
       }
       if(_fillcrvdigis){
         _crvHelper.FillCrvDigiInfoCollections(_crvRecoPulses, _crvDigis,
