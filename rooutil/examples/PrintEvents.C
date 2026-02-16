@@ -281,6 +281,12 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    if (event.calomcsim != nullptr) {
+      for (const auto& sim : *(event.calomcsim)) {
+        std::cout << "calomcsim: valid = " << sim.valid << ", nhits = " << sim.nhits << ", pdg = " << sim.pdg << ", p = " << sim.mom.R() << ", prirel = " << (int)sim.prirel.relationship() << ", trkrel = " << (int)sim.trkrel.relationship() << std::endl;
+      }
+    }
+
 
     // trigger branches
     for (const auto& pair : event.trigger.NameToIndexMap()) {

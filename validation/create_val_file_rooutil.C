@@ -520,6 +520,34 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_caloclustersmc_tprimary = new TH1F("h_caloclustersmc_tprimary", "", 200,0,2000);
   TH1F* h_caloclustersmc_prel = new TH1F("h_caloclustersmc_prel", "", 20,-10,10);
 
+  TH1F* h_calomcsim_valid = new TH1F("h_calomcsim_valid", "", 100,0,100);
+  TH1F* h_calomcsim_id = new TH1F("h_calomcsim_id", "", 100,0,100);
+  TH1F* h_calomcsim_nhits = new TH1F("h_calomcsim_nhits", "", 100,0,100);
+  TH1F* h_calomcsim_nactive = new TH1F("h_calomcsim_nactive", "", 100,0,100);
+  TH1F* h_calomcsim_rank = new TH1F("h_calomcsim_rank", "", 100,0,100);
+  TH1F* h_calomcsim_pdg = new TH1F("h_calomcsim_pdg", "", 200,-2500,2500);
+  TH1F* h_calomcsim_startCode = new TH1F("h_calomcsim_startCode", "", 200,0,200);
+  TH1F* h_calomcsim_stopCode = new TH1F("h_calomcsim_stopCode", "", 200,0,200);
+  TH1F* h_calomcsim_gen = new TH1F("h_calomcsim_gen", "", 100,0,100);
+  TH1F* h_calomcsim_time = new TH1F("h_calomcsim_time", "", 200,0,2000);
+  TH1F* h_calomcsim_index = new TH1F("h_calomcsim_index", "", 100,0,100);
+  TH1F* h_calomcsim_mom_x = new TH1F("h_calomcsim_mom_x", "", 100,-200,200);
+  TH1F* h_calomcsim_mom_y = new TH1F("h_calomcsim_mom_y", "", 100,-200,200);
+  TH1F* h_calomcsim_mom_z = new TH1F("h_calomcsim_mom_z", "", 100,-200,200);
+  TH1F* h_calomcsim_pos_x = new TH1F("h_calomcsim_pos_x", "", 100,-500,500);
+  TH1F* h_calomcsim_pos_y = new TH1F("h_calomcsim_pos_y", "", 100,-500,500);
+  TH1F* h_calomcsim_pos_z = new TH1F("h_calomcsim_pos_z", "", 100,-500,500);
+  TH1F* h_calomcsim_endmom_x = new TH1F("h_calomcsim_endmom_x", "", 100,-200,200);
+  TH1F* h_calomcsim_endmom_y = new TH1F("h_calomcsim_endmom_y", "", 100,-200,200);
+  TH1F* h_calomcsim_endmom_z = new TH1F("h_calomcsim_endmom_z", "", 100,-200,200);
+  TH1F* h_calomcsim_endpos_x = new TH1F("h_calomcsim_endpos_x", "", 100,-500,500);
+  TH1F* h_calomcsim_endpos_y = new TH1F("h_calomcsim_endpos_y", "", 100,-500,500);
+  TH1F* h_calomcsim_endpos_z = new TH1F("h_calomcsim_endpos_z", "", 100,-500,500);
+  TH1F* h_calomcsim_prirel_rel = new TH1F("h_calomcsim_prirel_rel", "", 20,-10,10);
+  TH1F* h_calomcsim_prirel_rem = new TH1F("h_calomcsim_prirel_rem", "", 10,0,10);
+  TH1F* h_calomcsim_trkrel_rel = new TH1F("h_calomcsim_trkrel_rel", "", 20,-10,10);
+  TH1F* h_calomcsim_trkrel_rem = new TH1F("h_calomcsim_trkrel_rem", "", 10,0,10);
+
   TH1F* h_mcsteps_virtualdetector_vid = new TH1F("h_mcsteps_virtualdetector_vid", "", 150,0,150);
   TH1F* h_mcsteps_virtualdetector_sid = new TH1F("h_mcsteps_virtualdetector_sid", "", 100,0,100);
   TH1F* h_mcsteps_virtualdetector_iinter = new TH1F("h_mcsteps_virtualdetector_iinter", "", 100,0,100);
@@ -1203,6 +1231,37 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       h_caloclustersmc_eprimary->Fill(caloclustersmc.eprimary);
       h_caloclustersmc_tprimary->Fill(caloclustersmc.tprimary);
       h_caloclustersmc_prel->Fill(caloclustersmc.prel.relationship());
+    }
+
+    std::cout << "Creating calomcsim histograms..." << std::endl;
+    for (const auto& calomcsim : *(event.calomcsim)) {
+      h_calomcsim_valid->Fill(calomcsim.valid);
+      h_calomcsim_id->Fill(calomcsim.id);
+      h_calomcsim_nhits->Fill(calomcsim.nhits);
+      h_calomcsim_nactive->Fill(calomcsim.nactive);
+      h_calomcsim_rank->Fill(calomcsim.rank);
+      h_calomcsim_pdg->Fill(calomcsim.pdg);
+      h_calomcsim_startCode->Fill(calomcsim.startCode);
+      h_calomcsim_stopCode->Fill(calomcsim.stopCode);
+      h_calomcsim_gen->Fill(calomcsim.gen);
+      h_calomcsim_time->Fill(calomcsim.time);
+      h_calomcsim_index->Fill(calomcsim.index);
+      h_calomcsim_mom_x->Fill(calomcsim.mom.x());
+      h_calomcsim_mom_y->Fill(calomcsim.mom.y());
+      h_calomcsim_mom_z->Fill(calomcsim.mom.z());
+      h_calomcsim_pos_x->Fill(calomcsim.pos.x());
+      h_calomcsim_pos_y->Fill(calomcsim.pos.y());
+      h_calomcsim_pos_z->Fill(calomcsim.pos.z());
+      h_calomcsim_endmom_x->Fill(calomcsim.endmom.x());
+      h_calomcsim_endmom_y->Fill(calomcsim.endmom.y());
+      h_calomcsim_endmom_z->Fill(calomcsim.endmom.z());
+      h_calomcsim_endpos_x->Fill(calomcsim.endpos.x());
+      h_calomcsim_endpos_y->Fill(calomcsim.endpos.y());
+      h_calomcsim_endpos_z->Fill(calomcsim.endpos.z());
+      h_calomcsim_prirel_rel->Fill(calomcsim.prirel.relationship());
+      h_calomcsim_prirel_rem->Fill(calomcsim.prirel.removal());
+      h_calomcsim_trkrel_rel->Fill(calomcsim.trkrel.relationship());
+      h_calomcsim_trkrel_rem->Fill(calomcsim.trkrel.removal());
     }
 
 

@@ -146,6 +146,7 @@ namespace rooutil {
       if(event->crvcoincsmcplane) { output_ntuple->Branch("crvcoincsmcplane", event->crvcoincsmcplane); }
 
       if(event->trkmcsim) { output_ntuple->Branch("trkmcsim", event->trkmcsim); }
+      if(event->calomcsim) { output_ntuple->Branch("calomcsim", event->calomcsim); }
 
       for (const auto& pair : event->trigger.NameToIndexMap()) {
         output_ntuple->Branch(("trig_" + pair.first).c_str(), &event->triginfo._triggerArray[pair.second]);

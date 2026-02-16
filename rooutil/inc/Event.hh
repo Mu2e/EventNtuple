@@ -91,6 +91,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "calorecodigis", &this->calorecodigis);
       CheckForBranch(ntuple, "calodigis", &this->calodigis);
       CheckForBranch(ntuple, "caloclustersmc", &this->caloclustersmc);
+      CheckForBranch(ntuple, "calomcsim", &this->calomcsim);
 
       CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
     }
@@ -399,6 +400,7 @@ namespace rooutil {
 
     std::vector<std::vector<mu2e::SimInfo>>* trkmcsim = nullptr;
     std::vector<mu2e::MCStepInfo>* mcsteps_virtualdetector = nullptr; // TODO: EventNtuple could have other mcsteps_* branches but for the time being just hardcode for the virtualdetector ones
+    std::vector<mu2e::SimInfo>* calomcsim = nullptr;
   };
 } // namespace rooutil
 #endif
