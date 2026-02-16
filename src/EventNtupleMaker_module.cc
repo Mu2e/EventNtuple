@@ -421,7 +421,7 @@ namespace mu2e {
       _allMCTIs[i_branch] = std::vector<TrkInfoMC>();
       _allMCSimTIs[i_branch] = std::vector<std::vector<SimInfo>>();
 
-      if(_fillcalomc){
+      if(_fillcalomc && _fillmc){
         _allMCTCHIs[i_branch] = std::vector<CaloClusterInfoMC>();
       }
 
@@ -572,11 +572,13 @@ namespace mu2e {
       _ntuple->Branch("calodigis.",&_caloDIs,_buffsize,_splitlevel);
     }
     // Calorimeter MC
-    if (_fillcaloclustersmc){
-      _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
-    }
-    if (_fillcalosiminfos){
-      _ntuple->Branch("calosiminfo.",&_caloSIMCs,_buffsize,_splitlevel);
+    if (_fillmc) {
+      if (_fillcaloclustersmc){
+        _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
+      }
+      if (_fillcalosiminfos){
+        _ntuple->Branch("calosiminfo.",&_caloSIMCs,_buffsize,_splitlevel);
+      }
     }
 
     // general CRV info
