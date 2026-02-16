@@ -6,4 +6,5 @@ physics.analyzers.EventNtuple.StepPointMCTags : [ "compressRecoMCs:virtualdetect
 physics.analyzers.EventNtuple.FillTimeClusterInfo : true
 physics.analyzers.EventNtuple.TimeClustersTag : "SimpleTimeCluster" # Store time clusters for straight line track finding
 physics.analyzers.EventNtuple.FillCaloClustersMC : true
+physics.analyzers.EventNtuple.FillSimInfos : true
 services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry

@@ -310,6 +310,7 @@ EventNtupleMaker : {
   FillCaloMC : true
   FillCaloClustersMC : false
   FillHelixInfo : false
+  FillCaloSimInfos : false
   PrimaryParticleTag : "compressRecoMCs"
   KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
