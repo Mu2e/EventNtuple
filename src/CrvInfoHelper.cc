@@ -30,8 +30,7 @@ namespace mu2e
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
       CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
-      art::Handle<PrimaryParticle> const& primary,
-      bool crvNoFitReco) {
+      art::Handle<PrimaryParticle> const& primary) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
 
@@ -49,13 +48,6 @@ namespace mu2e
       {
         // Get PEs associated with this reco pulse
         float PEs = coincRecoPulses_.at(j)->GetPEs();
-        if(crvNoFitReco)
-        {
-          // Skip duplicate pulses (those with multiple peaks)
-          if(coincRecoPulses_.at(j)->GetRecoPulseFlags().test(CrvRecoPulseFlagEnums::duplicateNoFitPulse)) continue;
-          // Get no-fit PEs associated with this reco pulse
-          PEs = coincRecoPulses_.at(j)->GetPEsNoFit();
-        }
         // Get layer number from the bar index associated with this reco pulse
         const CRSScintillatorBarIndex &crvBarIndex = coincRecoPulses_.at(j)->GetScintillatorBarIndex();
         const CRSScintillatorBar &crvCounter = CRS->getBar(crvBarIndex);
@@ -218,8 +210,7 @@ namespace mu2e
       art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
       art::Handle<EventWindowMarker> const& ewmh,
-      CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
-      bool crvNoFitReco){
+      CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo){
     GeomHandle<DetectorSystem> tdet;
 
     if(!crvRecoPulses.isValid()) return;
@@ -244,7 +235,7 @@ namespace mu2e
       int SiPMId = sipm_map.find(barIndex.asInt()*CRVId::nChanPerBar + SiPM)->second;
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
       recoInfo.emplace_back(HitPos, barIndex.asInt(), sectorNumber, SiPMId,
-          (crvNoFitReco?crvRecoPulse->GetPEsNoFit():crvRecoPulse->GetPEs()), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
+          crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
           crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime());
 
       //MCtruth pulses information
