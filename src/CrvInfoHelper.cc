@@ -40,9 +40,9 @@ namespace mu2e
     {
       const CrvCoincidenceCluster &cluster = crvCoincidences->at(i);
       const std::vector<art::Ptr<CrvRecoPulse> > coincRecoPulses_ = cluster.GetCrvRecoPulses(); // Get the reco pulses from the coincidence
-      // Initiliase PEs per layer
+      // Initialize PEs per layer
       std::array<float, CRVId::nLayers> PEsPerLayer_ = {0.};
-      // Initiliase PEs per layer per side
+      // Initialize PEs per layer per side
       std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer_ = {0.};
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
