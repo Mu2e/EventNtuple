@@ -136,6 +136,7 @@ namespace rooutil {
       if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }
       if(event->calorecodigis) { output_ntuple->Branch("calorecodigis", event->calorecodigis); }
       if(event->calodigis) { output_ntuple->Branch("calodigis", event->calodigis); }
+      if(event->caloclustersmc) { output_ntuple->Branch("caloclustersmc", event->caloclustersmc); }
 
       if(event->crvcoincs) { output_ntuple->Branch("crvcoincs", event->crvcoincs); }
       if(event->crvcoincsmc) { output_ntuple->Branch("crvcoincsmc", event->crvcoincsmc); }

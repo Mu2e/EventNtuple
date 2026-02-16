@@ -513,6 +513,13 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calodigis_peakpos_ = new TH1F("h_calodigis_peakpos_", "", 100,0,100);
   TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
 
+  TH1F* h_caloclustersmc_nsim = new TH1F("h_caloclustersmc_nsim", "", 100,0,100);
+  TH1F* h_caloclustersmc_etot = new TH1F("h_caloclustersmc_etot", "", 200,0,200);
+  TH1F* h_caloclustersmc_tavg = new TH1F("h_caloclustersmc_tavg", "", 200,0,2000);
+  TH1F* h_caloclustersmc_eprimary = new TH1F("h_caloclustersmc_eprimary", "", 200,0,200);
+  TH1F* h_caloclustersmc_tprimary = new TH1F("h_caloclustersmc_tprimary", "", 200,0,2000);
+  TH1F* h_caloclustersmc_prel = new TH1F("h_caloclustersmc_prel", "", 20,-10,10);
+
   TH1F* h_mcsteps_virtualdetector_vid = new TH1F("h_mcsteps_virtualdetector_vid", "", 150,0,150);
   TH1F* h_mcsteps_virtualdetector_sid = new TH1F("h_mcsteps_virtualdetector_sid", "", 100,0,100);
   TH1F* h_mcsteps_virtualdetector_iinter = new TH1F("h_mcsteps_virtualdetector_iinter", "", 100,0,100);
@@ -1187,6 +1194,17 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_calodigis_caloRecoDigiIdx_->Fill(calodigi.caloRecoDigiIdx_);
       }
     }
+
+    std::cout << "Creating caloclustersmc histograms..." << std::endl;
+    for (const auto& caloclustersmc : *(event.caloclustersmc)) {
+      h_caloclustersmc_nsim->Fill(caloclustersmc.nsim);
+      h_caloclustersmc_etot->Fill(caloclustersmc.etot);
+      h_caloclustersmc_tavg->Fill(caloclustersmc.tavg);
+      h_caloclustersmc_eprimary->Fill(caloclustersmc.eprimary);
+      h_caloclustersmc_tprimary->Fill(caloclustersmc.tprimary);
+      h_caloclustersmc_prel->Fill(caloclustersmc.prel.relationship());
+    }
+
 
     // Creating triginfo histogram
     std::cout << "Creating triginfo histogram" << std::endl;
