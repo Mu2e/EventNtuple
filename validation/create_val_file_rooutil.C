@@ -201,6 +201,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_trkmcsim_prirel_rem = new TH1F("h_trkmcsim_prirel_rem", "", 10,0,10);
   TH1F* h_trkmcsim_trkrel_rel = new TH1F("h_trkmcsim_trkrel_rel", "", 20,-10,10);
   TH1F* h_trkmcsim_trkrel_rem = new TH1F("h_trkmcsim_trkrel_rem", "", 10,0,10);
+  TH1F* h_trkmcsim_calrel_rel = new TH1F("h_trkmcsim_calrel_rel", "", 20,-10,10);
+  TH1F* h_trkmcsim_calrel_rem = new TH1F("h_trkmcsim_calrel_rem", "", 10,0,10);
 
   TH1F* h_trkqual_valid = new TH1F("h_trkqual_valid", "", 100,0,100);
   TH1F* h_trkqual_result = new TH1F("h_trkqual_result", "", 100,0,1);
@@ -547,6 +549,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calomcsim_prirel_rem = new TH1F("h_calomcsim_prirel_rem", "", 10,0,10);
   TH1F* h_calomcsim_trkrel_rel = new TH1F("h_calomcsim_trkrel_rel", "", 20,-10,10);
   TH1F* h_calomcsim_trkrel_rem = new TH1F("h_calomcsim_trkrel_rem", "", 10,0,10);
+  TH1F* h_calomcsim_calrel_rel = new TH1F("h_calomcsim_calrel_rel", "", 20,-10,10);
+  TH1F* h_calomcsim_calrel_rem = new TH1F("h_calomcsim_calrel_rem", "", 10,0,10);
 
   TH1F* h_mcsteps_virtualdetector_vid = new TH1F("h_mcsteps_virtualdetector_vid", "", 150,0,150);
   TH1F* h_mcsteps_virtualdetector_sid = new TH1F("h_mcsteps_virtualdetector_sid", "", 100,0,100);
@@ -562,6 +566,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_mcsteps_virtualdetector_pos_x = new TH1F("h_mcsteps_virtualdetector_pos_x", "", 100,-1000,1000);
   TH1F* h_mcsteps_virtualdetector_pos_y = new TH1F("h_mcsteps_virtualdetector_pos_y", "", 100,-1000,1000);
   TH1F* h_mcsteps_virtualdetector_pos_z = new TH1F("h_mcsteps_virtualdetector_pos_z", "", 320,-1600,1600);
+  TH1F* h_mcsteps_virtualdetector_simid = new TH1F("h_mcsteps_virtualdetector_simid", "", 100,0,100);
   TH1F* h_mcsteps_virtualdetector_pdg = new TH1F("h_mcsteps_virtualdetector_pdg", "", 100,0,100);
   TH1F* h_mcsteps_virtualdetector_startCode = new TH1F("h_mcsteps_virtualdetector_startCode", "", 100,0,100);
   TH1F* h_mcsteps_virtualdetector_stopCode = new TH1F("h_mcsteps_virtualdetector_stopCode", "", 100,0,100);
@@ -798,6 +803,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_trkmcsim_prirel_rem->Fill(trkmcsim.prirel.removal());
         h_trkmcsim_trkrel_rel->Fill(trkmcsim.trkrel.relationship());
         h_trkmcsim_trkrel_rem->Fill(trkmcsim.trkrel.removal());
+        h_trkmcsim_calrel_rel->Fill(trkmcsim.calrel.relationship());
+        h_trkmcsim_calrel_rem->Fill(trkmcsim.calrel.removal());
       }
     }
 
@@ -1262,6 +1269,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
       h_calomcsim_prirel_rem->Fill(calomcsim.prirel.removal());
       h_calomcsim_trkrel_rel->Fill(calomcsim.trkrel.relationship());
       h_calomcsim_trkrel_rem->Fill(calomcsim.trkrel.removal());
+      h_calomcsim_calrel_rel->Fill(calomcsim.calrel.relationship());
+      h_calomcsim_calrel_rem->Fill(calomcsim.calrel.removal());
     }
 
 
@@ -1289,6 +1298,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_mcsteps_virtualdetector_pos_x->Fill(vdstep.pos.x());
         h_mcsteps_virtualdetector_pos_y->Fill(vdstep.pos.y());
         h_mcsteps_virtualdetector_pos_z->Fill(vdstep.pos.z());
+        h_mcsteps_virtualdetector_simid->Fill(vdstep.simid);
         h_mcsteps_virtualdetector_pdg->Fill(vdstep.pdg);
         h_mcsteps_virtualdetector_startCode->Fill(vdstep.startCode);
         h_mcsteps_virtualdetector_stopCode->Fill(vdstep.stopCode);
