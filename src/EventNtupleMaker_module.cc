@@ -167,7 +167,7 @@ namespace mu2e {
         fhicl::Atom<bool> fillcrvpulses{Name("FillCRVPulses"),Comment("Flag for turning on crvpulses(mc) branches"), false};
         fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
         // CRV -- other
-        fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),2751.485};  //y of center of the top layer of the CRV-T counters.  This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
+        fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),Comment("y of center of the top layer of the CRV-T counters"), 2751.485};  //This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
         // MC truth
         fhicl::Atom<bool> fillmc{Name("FillMCInfo"),Comment("Global switch to turn on/off MC info"),true};
         fhicl::Table<InfoMCStructHelper::Config> infoMCStructHelper{Name("InfoMCStructHelper"), Comment("Configuration for the InfoMCStructHelper")};
