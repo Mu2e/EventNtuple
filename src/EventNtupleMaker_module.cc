@@ -577,7 +577,7 @@ namespace mu2e {
         _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
       }
       if (_fillcalosiminfos){
-        _ntuple->Branch("calosiminfo.",&_caloSIMCs,_buffsize,_splitlevel);
+        _ntuple->Branch("calomcsim.",&_caloSIMCs,_buffsize,_splitlevel);
       }
     }
 
