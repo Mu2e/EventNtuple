@@ -156,8 +156,9 @@ namespace mu2e
     }
 
     //locate points where the cosmic MC trajectories cross the xz plane of CRV-T
-    if(mcTrajectories.isValid())
+    if(mcTrajectories.isValid() && primary.isValid())
     {
+      if(primary->primarySimParticles().empty()) return;
       auto bestprimarysp = primary->primarySimParticles().front();
       for(auto trajectoryIter=mcTrajectories->begin(); trajectoryIter!=mcTrajectories->end(); trajectoryIter++)
       {
