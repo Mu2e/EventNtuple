@@ -136,6 +136,7 @@ namespace rooutil {
       if(event->calohits) { output_ntuple->Branch("calohits", event->calohits); }
       if(event->calorecodigis) { output_ntuple->Branch("calorecodigis", event->calorecodigis); }
       if(event->calodigis) { output_ntuple->Branch("calodigis", event->calodigis); }
+      if(event->caloclustersmc) { output_ntuple->Branch("caloclustersmc", event->caloclustersmc); }
 
       if(event->crvcoincs) { output_ntuple->Branch("crvcoincs", event->crvcoincs); }
       if(event->crvcoincsmc) { output_ntuple->Branch("crvcoincsmc", event->crvcoincsmc); }
@@ -145,6 +146,7 @@ namespace rooutil {
       if(event->crvcoincsmcplane) { output_ntuple->Branch("crvcoincsmcplane", event->crvcoincsmcplane); }
 
       if(event->trkmcsim) { output_ntuple->Branch("trkmcsim", event->trkmcsim); }
+      if(event->calomcsim) { output_ntuple->Branch("calomcsim", event->calomcsim); }
 
       for (const auto& pair : event->trigger.NameToIndexMap()) {
         output_ntuple->Branch(("trig_" + pair.first).c_str(), &event->triginfo._triggerArray[pair.second]);

@@ -118,6 +118,7 @@ Some branches are not contained in any of the above classes:
 * ```crvpulses``` and ```crvpulsesmc```
 * ```crvcoincsmcplane```
 * ```calohits```, ```calorecodigis```, ```calodigis```
+* ```caloclustersmc```, ```calomcsim```
 * ```trig_``` branches
 * ```mcsteps_virtualdetector```
 

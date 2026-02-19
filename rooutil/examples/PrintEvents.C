@@ -274,6 +274,20 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    // caloclustersmc branch
+    if (event.caloclustersmc != nullptr) {
+      for (const auto& caloclustermc : *(event.caloclustersmc)) {
+        std::cout << "caloclustermc: " << calocluster.nsim << ", " << calocluster.etot << ", " << calocluster.tavg << ", " << calocluster.eprimary << ", " << calocluster.tprimary << ", " << calocluster.prel.relationship() << std::endl;
+      }
+    }
+
+    if (event.calomcsim != nullptr) {
+      for (const auto& sim : *(event.calomcsim)) {
+        std::cout << "calomcsim: valid = " << sim.valid << ", nhits = " << sim.nhits << ", pdg = " << sim.pdg << ", p = " << sim.mom.R() << ", prirel = " << (int)sim.prirel.relationship() << ", trkrel = " << (int)sim.trkrel.relationship() << std::endl;
+      }
+    }
+
+
     // trigger branches
     for (const auto& pair : event.trigger.NameToIndexMap()) {
       std::cout << pair.first << ": " << event.trigger.Fired(pair.second) << std::endl;
