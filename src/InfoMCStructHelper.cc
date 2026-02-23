@@ -371,6 +371,7 @@ namespace mu2e {
         ccimc.tavg += edep.time();
         auto simid = edep.sim()->id().asInt();
         ccimc.simParticleIds.push_back(simid);
+        ccimc.simRels.push_back(MCRelationship(edep.sim(),edeps.front().sim()));
       }
       ccimc.tavg /= ccimc.nsim;
     }
@@ -394,9 +395,7 @@ namespace mu2e {
       if (!already_added){
         SimInfo siminfo;
         fillSimInfo(edep.sim(), siminfo);
-        //Add the relationship with the first edep (the most energetic one)
         siminfo.index = csis.size();
-        siminfo.calrel = MCRelationship(edep.sim(),edeps.front().sim());
         csis.push_back(siminfo);
       }
     }
