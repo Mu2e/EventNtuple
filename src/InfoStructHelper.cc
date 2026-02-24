@@ -8,6 +8,7 @@
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
 #include <cmath>
 #include <limits>
 
@@ -520,6 +521,10 @@ namespace mu2e {
     hitinfo.eDep_ = chptr.energyDep();
     hitinfo.eDepErr_ = chptr.energyDepErr();
     hitinfo.clusterIdx_ = clusterIdx;
+    auto& crystal = GeomHandle<Calorimeter>()->crystal(chptr.crystalID());
+    hitinfo.crystalPos_ = XYZVectorF(crystal.localPosition().getX(),
+                                     crystal.localPosition().getY(),
+                                     crystal.position().getZ()); //z to global position
     hitinfos.push_back(hitinfo);
   }
 
