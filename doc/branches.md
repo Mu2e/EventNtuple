@@ -95,6 +95,7 @@ While each branch can be read independently, i.e. all the hits of the event, eac
 The cluster element contains the vector 'hits_' containing the indexes of the hits branch belonging to this cluster.
 Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.
 Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
+Calo hits have the crystal (x,y,z) position saved. x,y are local to the disk, while z is global to Mu2e hall.
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | caloclusters |  Vector branch |   calorimeter clusters with indices of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
@@ -112,7 +113,7 @@ The correct SimParticle can be retrieved from the MC cluster via the simid numbe
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | caloclustersmc |  Vector branch |   MC-truth infromation for calorimeter clusters| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
-| calosiminfo |  Vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
+| calomcsim |  Vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
 ## CRV Branches
 
 These branches contain a vector where each element is a CRV hit that happened during the event.
