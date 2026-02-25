@@ -4,9 +4,8 @@
 #ifndef CaloHitInfo_HH
 #define CaloHitInfo_HH
 
-#include "CLHEP/Vector/ThreeVector.h"
-#include "CLHEP/Units/PhysicalConstants.h"
 #include <vector>
+#include "EventNtuple/inc/RootVectors.hh"
 
 namespace mu2e
 {
@@ -21,7 +20,9 @@ namespace mu2e
     std::vector<int>  recoDigis_;           // vector of branch indices of reco digis
     int               clusterIdx_;          // Cluster index
 
-    CaloHitInfo() : crystalId_(0), nSiPMs_(0), time_(0.0), timeErr_(0.0), eDep_(0.0), eDepErr_(0.0), recoDigis_(), clusterIdx_(-1) {}
+    XYZVectorF        crystalPos_;          // Crystal position
+
+    CaloHitInfo() : crystalId_(0), nSiPMs_(0), time_(0.0), timeErr_(0.0), eDep_(0.0), eDepErr_(0.0), recoDigis_(), clusterIdx_(-1), crystalPos_() {}
     void reset() { *this = CaloHitInfo(); }
   };
 }

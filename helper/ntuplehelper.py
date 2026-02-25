@@ -244,6 +244,7 @@ class nthelper:
             print("The cluster element contains the vector \'hits_\' containing the indexes of the hits branch belonging to this cluster.")
             print("Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.")
             print("Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have \'clusterIdx_\' = 3.")
+            print("Calo hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.")
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.calo_branches:
