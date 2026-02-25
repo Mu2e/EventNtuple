@@ -521,10 +521,9 @@ namespace mu2e {
     hitinfo.eDep_ = chptr.energyDep();
     hitinfo.eDepErr_ = chptr.energyDepErr();
     hitinfo.clusterIdx_ = clusterIdx;
-    auto& crystal = GeomHandle<Calorimeter>()->crystal(chptr.crystalID());
-    hitinfo.crystalPos_ = XYZVectorF(crystal.localPosition().getX(),
-                                     crystal.localPosition().getY(),
-                                     crystal.position().getZ()); //z to global position
+    auto cal = GeomHandle<Calorimeter>();
+    auto& crystal = cal->crystal(chptr.crystalID());
+    hitinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
     hitinfos.push_back(hitinfo);
   }
 
