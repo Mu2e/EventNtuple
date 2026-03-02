@@ -187,6 +187,25 @@ namespace rooutil {
             }
           }
 
+          // Because calomcsim branch contains all calorimeter mc particles and not just those associated with the cluster
+          // we need to loop through and add the correct ones to the CaloCluster class here
+          if (calomcsim != nullptr) {
+            for (auto& calosim_Id : calo_cluster.caloclustermc->simParticleIds) { // the SimParticle IDs
+              MCParticle mc_particle;
+
+              // Loop through the calomcsim and look for matching SimParticle IDs
+              // TODO: see if we can store simParticle_Idx in the caloclustersmc branch
+              for (auto& i_calomcsim : *calomcsim) {
+                if (i_calomcsim.id == calosim_Id) {
+                  mc_particle.mcsim = &(i_calomcsim); // passing the addresses of the underlying structs
+                  break;
+                }
+              }
+
+              calo_cluster.mc_particles.emplace_back(mc_particle);
+            }
+          }
+
           calo_clusters.emplace_back(calo_cluster);
         }
       }

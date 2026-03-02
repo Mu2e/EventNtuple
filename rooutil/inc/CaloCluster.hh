@@ -31,6 +31,20 @@ namespace rooutil {
     }
     CaloHits hits;
 
+    int nMCParticles() const { return mc_particles.size();  }
+    MCParticles GetMCParticles() { return mc_particles; }
+    MCParticles GetMCParticles(MCParticleCut cut) {
+      MCParticles select_mc_particles;
+      for (auto& mc_particle : mc_particles) {
+        if (cut(mc_particle)) {
+          select_mc_particles.emplace_back(mc_particle);
+        }
+      }
+      return select_mc_particles;
+    }
+    MCParticles mc_particles;
+
+
 
     // Pointers to the data
     mu2e::CaloClusterInfo* calocluster = nullptr;
