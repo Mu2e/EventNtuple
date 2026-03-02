@@ -215,11 +215,11 @@ namespace rooutil {
       if (object_ptr != nullptr) {
         if (debug) {
           std::cout << "Event::Update(): Adding "
-                    << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Track " << index << "... " << std::endl;
+                    << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Object " << index << "... " << std::endl;
         }
         object = &(object_ptr->at(index));
       } else if(debug) {
-        std::cout << "Event::Update(): No " << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to add to Track " << index << std::endl;
+        std::cout << "Event::Update(): No " << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to add to Object " << index << std::endl;
       }
     }
 
