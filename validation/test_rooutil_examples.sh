@@ -1,10 +1,12 @@
-filename="\"nts.ntuple.after.root\""
+filename="\"nts.owner.description.version.sequencer.root\""
 
 scripts=( "PrintEvents.C" "CreateNtuple.C" "CreateTrackNtuple.C" "PlotCRVPEs.C" "PlotCRVPEsVsMCEDep.C" "PlotEntranceFitPars.C" "PlotEntranceMomentum.C"
           "PlotEntranceMomentumCRVCut.C" "PlotEntranceMomentumResolution.C" "PlotEntranceMomentumResolution_TrkQualCut.C"
           "PlotMCParentPosZ.C" "PlotMCParticleMom.C" "PlotMuonPosZ.C" "PlotStoppingTargetFoilSegment.C" "PlotTrackNHits_RecoVsTrue.C"
           "PlotTrkCaloHitEnergy.C" "PrintEventsNoMC.C" "TrackCounting.C" "PlotTrackHitTimes.C" "PlotTrackHitTimesMC.C" "PlotStrawMaterials.C"
-          "PlotGenCosmicMom.C" "PlotCRVTotalPEs.C" "PlotEntranceMomentum_UpstreamDownstream.C" "PlotVDSteps.C" )
+          "PlotGenCosmicMom.C" "PlotCRVTotalPEs.C" "PlotEntranceMomentum_UpstreamDownstream.C" "PlotVDSteps.C" "PlotCaloClusterEnergy_RecoVsTrue.C"
+          "PlotCaloClusterAndHits.C" "PlotCaloCluster_SimParticles.C"
+         )
 
 for script in "${scripts[@]}"
 do

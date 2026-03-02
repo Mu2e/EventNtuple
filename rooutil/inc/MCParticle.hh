@@ -7,6 +7,7 @@
 
 namespace rooutil {
   struct MCParticle {
+    MCParticle() { }
     MCParticle(mu2e::SimInfo* mcsim) : mcsim(mcsim) { }
 
     // Pointers to the data

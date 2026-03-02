@@ -54,10 +54,13 @@ void PlotEntranceFitPars(std::string filename) {
       // Loop through the tracker entrance track segments
       for (auto& segment : trk_ent_segments) {
 
-        TEllipse* helix = new TEllipse(segment.trksegpars_lh->cx, segment.trksegpars_lh->cy, segment.trksegpars_lh->rad, segment.trksegpars_lh->rad);
-        helix->SetLineColor(kRed);
-        helix->SetFillStyle(0);
-        helix->Draw();
+        if (segment.trksegpars_lh != nullptr) {
+
+          TEllipse* helix = new TEllipse(segment.trksegpars_lh->cx, segment.trksegpars_lh->cy, segment.trksegpars_lh->rad, segment.trksegpars_lh->rad);
+          helix->SetLineColor(kRed);
+          helix->SetFillStyle(0);
+          helix->Draw();
+        }
       }
     }
   }

@@ -29,11 +29,9 @@ void PlotTrackHitTimes(std::string filename) {
     for (auto& track : e_minus_tracks) {
 
       // Get the track segments at the tracker entrance
-      auto trkhits = track.GetHits();
-
+      auto trkhits = track.GetHits(has_reco_hit);
       // Loop through the tracker entrance track segments
       for (auto& trkhit : trkhits) {
-
         // Fill the histogram
         hTrackHitTimes->Fill(trkhit.reco->ptoca);
       }

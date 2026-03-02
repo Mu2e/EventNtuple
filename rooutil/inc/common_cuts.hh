@@ -112,6 +112,20 @@ bool has_reco_step(TrackSegment& segment) { // track fit segment has an reco Sur
   else { return false; }
 }
 
+//+ Track Hit Cuts - Other
+bool has_mc_hit(TrackHit& hit) { // track has an MC-truth trkhit
+  if (hit.mc != nullptr) { return true; }
+  else { return false; }
+}
+bool has_reco_hit(TrackHit& hit) { // track has a reco trkhit
+  if (hit.reco != nullptr) { return true; }
+  else { return false; }
+}
+bool has_calib_hit(TrackHit& hit) { // track has a calib trkhit
+  if (hit.calib != nullptr) { return true; }
+  else { return false; }
+}
+
 //+ Track Cuts - Direction
 bool is_downstream(Track& track) { // reconstructed fit segment at tracker middle is going in +z direction
   auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && has_reco_step(segment); });
@@ -292,4 +306,15 @@ bool passes_trigger(Event& event, std::string trigname) { // true if the event p
   }
   return event.trigger.Fired(trigname);
 }
+
+//+ Calo Cluster Cuts
+bool has_mc_cluster(CaloCluster& cluster) { // CaloCluster has an MC-truth object
+  if (cluster.caloclustermc != nullptr) { return true; }
+  else { return false; }
+}
+bool has_reco_cluster(CaloCluster& cluster) { // CaloCluster has a reco object
+  if (cluster.calocluster != nullptr) { return true; }
+  else { return false; }
+}
+
 #endif
