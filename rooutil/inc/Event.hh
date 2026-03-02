@@ -44,6 +44,7 @@
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
 #include "EventNtuple/rooutil/inc/Trigger.hh"
+#include "EventNtuple/rooutil/inc/CaloHit.hh"
 
 #include "TChain.h"
 
@@ -173,7 +174,18 @@ namespace rooutil {
         for (int i_cluster = 0; i_cluster < nCaloClusters(); ++i_cluster) {
           if (debug) { std::cout << "Event::Update(): Creating CaloCluster " << i_cluster << "... " << std::endl; }
           CaloCluster calo_cluster(&(caloclusters->at(i_cluster))); // passing the addresses of the underlying structs
-          UpdateObject(calo_cluster.caloclustermc, caloclustersmc, i_cluster, debug);
+          UpdateObject(calo_cluster.caloclustermc, caloclustersmc, i_cluster, debug); // caloclustersmc has 1:1 element-wise matching with caloclusters branch
+
+          // Because calohits branch contains all calorimeter hits and not just those associated with the cluster
+          // we need to loop through and add the correct ones to the CaloCluster class here
+          if (calohits != nullptr) {
+            for (const auto& calohit_Idx : calo_cluster.calocluster->hits_) { // the indexes into the calohits branch
+              CaloHit calohit;
+              calohit.reco = &(calohits->at(calohit_Idx)); // passing the addresses of the underlying structs
+
+              calo_cluster.hits.emplace_back(calohit);
+            }
+          }
 
           calo_clusters.emplace_back(calo_cluster);
         }

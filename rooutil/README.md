@@ -106,8 +106,9 @@ The ```EventNtupleTimeCluster``` class contains all information related to a sin
 The ```CaloCluster``` class contains all information related to a single calorimeter cluster
 
 * single objects: ```calocluster```, ```caloclustermc```
+* vector objects: ```calohits```
 
-Example: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C)
+Examples: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C), [PlotCaloClusterEnergy_RecoVsTrue.C](./examples/PlotCaloClusterEnergy_RecoVsTrue.C), [PlotCaloClusterAndHits.C](./examples/PlotCaloClusterAndHits.C)
 
 
 ### Branches not contained within a class
@@ -117,7 +118,7 @@ Some branches are not contained in any of the above classes:
 * ```crvdigis```
 * ```crvpulses``` and ```crvpulsesmc```
 * ```crvcoincsmcplane```
-* ```calohits```, ```calorecodigis```, ```calodigis```
+* ```calorecodigis```, ```calodigis```
 * ```calomcsim```
 * ```trig_``` branches
 * ```mcsteps_virtualdetector```
