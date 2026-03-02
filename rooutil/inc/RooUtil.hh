@@ -12,7 +12,7 @@
 namespace rooutil {
   class RooUtil {
   public:
-    RooUtil(std::string filename, bool debug = false, std::string treename = "EventNtuple/ntuple") : debug(debug) {
+    RooUtil(std::string filename, bool debug = false, std::string treename = "EventNtuple/ntuple") : debug(debug), n_proc_events(0) {
       ntuple = new TChain(treename.c_str());
 
       // Check if the given filename contains .root at the end
@@ -20,6 +20,7 @@ namespace rooutil {
       if (filename.compare(filename.size() - root_suffix.size(), root_suffix.size(), root_suffix) == 0) {
         ntuple->Add(filename.c_str());
         SetVersionNumber(filename);
+        SetNProcessedEvents(filename);
       }
       else { //  assume its a file list
         std::ifstream filelist(filename);
@@ -34,6 +35,7 @@ namespace rooutil {
               SetVersionNumber(line);
               first_line = false;
             }
+            SetNProcessedEvents(line);
           }
           filelist.close();
         } else {
@@ -66,7 +68,21 @@ namespace rooutil {
       delete file;
     }
 
+    void SetNProcessedEvents(std::string filename) {
+      TFile* file = new TFile(filename.c_str(), "READ");
+      TH1I* hProcEvents = (TH1I*) file->Get("EventNtuple/n_proc_events");
+      if (!hProcEvents) {
+        std::cout << "Warning: this EventNtuple file does not contain the n_proc_events histogram. It is either v06_09_02 or older. This is just a warning..." << std::endl;
+      }
+      else {
+        n_proc_events += hProcEvents->GetBinContent(1);
+      }
+      file->Close();
+      delete file;
+    }
+
     int GetNEvents() { return ntuple->GetEntries(); }
+    int GetNProcEvents() { return n_proc_events; }
 
     Event& GetEvent(int i_event) {
       if (debug) { std::cout << "RooUtil::GetEvent(): Getting event " << i_event << std::endl; }
@@ -168,6 +184,7 @@ namespace rooutil {
     bool debug;
 
     TH1I* hVersion;
+    int n_proc_events;
 
     TTree* output_ntuple; // for output
   };

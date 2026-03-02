@@ -209,6 +209,7 @@ namespace mu2e {
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
+      TH1I* _hProcEvents;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -475,6 +476,7 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 9);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
+    _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
     // add event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
     if (_fillmc) {
@@ -988,6 +990,7 @@ namespace mu2e {
     if (fill) {
       _ntuple->Fill();
     }
+    _hProcEvents->Fill(0); // this is the number of events we have processed, which may be different to the number of events stored in the ntuple
   }
 
 
