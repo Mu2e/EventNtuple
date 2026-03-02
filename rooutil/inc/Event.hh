@@ -173,6 +173,8 @@ namespace rooutil {
         for (int i_cluster = 0; i_cluster < nCaloClusters(); ++i_cluster) {
           if (debug) { std::cout << "Event::Update(): Creating CaloCluster " << i_cluster << "... " << std::endl; }
           CaloCluster calo_cluster(&(caloclusters->at(i_cluster))); // passing the addresses of the underlying structs
+          UpdateObject(calo_cluster.caloclustermc, caloclustersmc, i_cluster, debug);
+
           calo_clusters.emplace_back(calo_cluster);
         }
       }

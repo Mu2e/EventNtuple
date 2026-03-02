@@ -4,6 +4,7 @@
 #include <functional>
 #include "EventNtuple/inc/CaloClusterInfo.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
+#include "EventNtuple/inc/CaloClusterInfoMC.hh"
 
 namespace rooutil {
   struct CaloCluster {
@@ -17,6 +18,7 @@ namespace rooutil {
 
     // Pointers to the data
     mu2e::CaloClusterInfo* calocluster = nullptr;
+    mu2e::CaloClusterInfoMC* caloclustermc = nullptr;
   };
 
   typedef std::function<bool(CaloCluster&)> CaloClusterCut;

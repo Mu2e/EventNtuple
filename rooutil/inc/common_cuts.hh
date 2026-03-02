@@ -292,4 +292,15 @@ bool passes_trigger(Event& event, std::string trigname) { // true if the event p
   }
   return event.trigger.Fired(trigname);
 }
+
+//+ Calo Cluster Cuts
+bool has_mc_cluster(CaloCluster& cluster) { // CaloCluster has an MC-truth object
+  if (cluster.caloclustermc != nullptr) { return true; }
+  else { return false; }
+}
+bool has_reco_cluster(CaloCluster& cluster) { // CaloCluster has a reco object
+  if (cluster.calocluster != nullptr) { return true; }
+  else { return false; }
+}
+
 #endif
