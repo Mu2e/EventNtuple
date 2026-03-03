@@ -16,7 +16,7 @@ primary_dataset=""
 mixed_dataset=""
 extracted_dataset=""
 digi_dataset=""
-crv_vst_dataset=""
+crv_vst_dataset="temp_crv_kpp"
 
 if [[ "$vMDC" == "MDC2020" ]]; then
     echo "Testing MDC2020 datasets"
@@ -25,7 +25,6 @@ if [[ "$vMDC" == "MDC2020" ]]; then
     mixed_dataset="mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
     extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art"
     digi_dataset="dig.mu2e.DIOtail95OnSpillTriggered.MDC2020au_perfect_v1_3.art"
-    crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
 elif [[ "$vMDC" == "MDC2025" ]]; then
     echo "Testing MDC2025 datasets"
     mock_dataset="mcs.mu2e.ensembleMDS3aOnSpillTriggered.MDC2025af_best_v1_3.art"
@@ -34,7 +33,6 @@ elif [[ "$vMDC" == "MDC2025" ]]; then
     echo "No MDC2025 mixed datasets exist. Some tests will fail..."
     extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art"
     digi_dataset="dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art"
-    crv_vst_dataset="rec.mu2e.CRV_wideband_cosmics.CRVWBA-000-000-000.art"
 fi
 
 all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_vst_dataset )
