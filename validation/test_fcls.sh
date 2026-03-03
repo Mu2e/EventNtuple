@@ -29,8 +29,7 @@ elif [[ "$vMDC" == "MDC2025" ]]; then
     echo "Testing MDC2025 datasets"
     mock_dataset="mcs.mu2e.ensembleMDS3aOnSpillTriggered.MDC2025af_best_v1_3.art"
     primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggered.MDC2025ae_best_v1_3.art"
-    mixed_dataset="" # mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art"
-    echo "No MDC2025 mixed datasets exist. Some tests will fail..."
+    mixed_dataset="mcs.mu2e.CeMLeadingLogMix1BBTriggered.MDC2025af_best_v1_1.art"
     extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art"
     digi_dataset="dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art"
 fi
