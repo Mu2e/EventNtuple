@@ -3,7 +3,7 @@
 # Note: requires relevant filelists in a directory above this one
 #
 if [ $# -ne 1 ]; then
-    echo "Usage: . ./validation/test_fcls.sh MDC202X"
+    echo "Usage: . ./validation/test_fcls.sh [MDC2020 / MDC2025 / Run1B]"
     return
 fi
 vMDC=$1
@@ -32,6 +32,19 @@ elif [[ "$vMDC" == "MDC2025" ]]; then
     mixed_dataset="mcs.mu2e.CeMLeadingLogMix1BBTriggered.MDC2025af_best_v1_1.art"
     extracted_dataset="mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art"
     digi_dataset="dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art"
+elif [[ "$vMDC" == "Run1B" ]]; then
+    echo "Testing Run1B datasets"
+    echo "No mock datasets for Run1B - some tests will fail..."
+    mock_dataset="" # "mcs.mu2e.ensembleMDS3aOnSpillTriggered.MDC2025af_best_v1_3.art"
+    primary_dataset="mcs.mu2e.CeEndpointOnSpillTriggerable-KL.Run1Baf_best_v1_4-000.art"
+    mixed_dataset="mcs.mu2e.CeEndpointMix1BB-KL.Run1Bah_best_v1_4-001.art"
+    echo "No extracted datasets for Run1B - some tests will fail..."
+    extracted_dataset="" # "mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art"
+    echo "No reco+ntuple fcl for Run1B - some tests will fail..."
+    digi_dataset="" # "dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art"
+else
+    echo "Unsupported option $vMDC"
+    return
 fi
 
 all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_vst_dataset )
