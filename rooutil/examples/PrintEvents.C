@@ -277,7 +277,7 @@ void PrintEvents(std::string filename) {
     // caloclustersmc branch
     if (event.caloclustersmc != nullptr) {
       for (const auto& caloclustermc : *(event.caloclustersmc)) {
-        std::cout << "caloclustermc: " << calocluster.nsim << ", " << calocluster.etot << ", " << calocluster.tavg << ", " << calocluster.eprimary << ", " << calocluster.tprimary << ", " << calocluster.prel.relationship() << std::endl;
+        std::cout << "caloclustermc: " << caloclustermc.nsim << ", " << caloclustermc.etot << ", " << caloclustermc.tavg << ", " << caloclustermc.eprimary << ", " << caloclustermc.tprimary << ", " << caloclustermc.prel.relationship() << std::endl;
       }
     }
 

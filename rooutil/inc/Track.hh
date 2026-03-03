@@ -103,6 +103,7 @@ namespace rooutil {
         if (debug) { std::cout << "Track::Update(): Updating trkhits..." << std::endl; }
         // Create the underlying TrackHits
         for (int i_trkhit = 0; i_trkhit < nHits(); ++i_trkhit) {
+          if (debug) { std::cout << "Track::Update(): trkhit " << i_trkhit+1 << " / " << nHits() << std::endl; }
           TrackHit trkhit;
           trkhit.reco = &(trkhits->at(i_trkhit)); // passing the addresses of the underlying structs
   
@@ -115,8 +116,9 @@ namespace rooutil {
           if (trkhitcalibs != nullptr) {
             trkhit.calib = &(trkhitcalibs->at(i_trkhit));
           }
-  
+
           hits.emplace_back(trkhit);
+          if (debug) { std::cout << "Track::Update(): emplaced back: hits.size() = " << hits.size() << std::endl; }
         }
         if (trkhitsmc != nullptr) {
           if (debug) { std::cout << "Track::Update(): Updating trkhitsmc..." << std::endl; }

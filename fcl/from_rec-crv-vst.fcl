@@ -7,9 +7,14 @@ physics.analyzers.EventNtuple.FillCaloClusters : false # no calorimeter
 physics.analyzers.EventNtuple.FillCaloHits : false # no calorimeter
 physics.analyzers.EventNtuple.RecoCountTag : ""
 physics.analyzers.EventNtuple.PBTTag : ""
-physics.analyzers.EventNtuple.hasCRV : true
+physics.analyzers.EventNtuple.hasCRV : false # true
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 
 physics.analyzers.EventNtuple.CrvDigisTag : "CrvDigi"
 physics.analyzers.EventNtuple.CrvCoincidencesTag: "CrvCoincidenceClusterFinder"
 physics.analyzers.EventNtuple.CrvRecoPulsesTag: "CrvRecoPulses"
+
+services.GeometryService.inputFile: "Offline/Mu2eG4/geom/geom_common_extracted.txt"
+
+physics.analyzers.EventNtuple.FillCaloClustersMC : false # no calorimeter
+physics.analyzers.EventNtuple.FillCaloSimInfos : false # no calorimeter

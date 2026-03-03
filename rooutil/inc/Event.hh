@@ -45,6 +45,7 @@
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
 #include "EventNtuple/rooutil/inc/Trigger.hh"
+#include "EventNtuple/rooutil/inc/CaloHit.hh"
 
 #include "TChain.h"
 
@@ -175,6 +176,38 @@ namespace rooutil {
         for (int i_cluster = 0; i_cluster < nCaloClusters(); ++i_cluster) {
           if (debug) { std::cout << "Event::Update(): Creating CaloCluster " << i_cluster << "... " << std::endl; }
           CaloCluster calo_cluster(&(caloclusters->at(i_cluster))); // passing the addresses of the underlying structs
+          UpdateObject(calo_cluster.caloclustermc, caloclustersmc, i_cluster, debug); // caloclustersmc has 1:1 element-wise matching with caloclusters branch
+
+          // Because calohits branch contains all calorimeter hits and not just those associated with the cluster
+          // we need to loop through and add the correct ones to the CaloCluster class here
+          if (calohits != nullptr) {
+            for (const auto& calohit_Idx : calo_cluster.calocluster->hits_) { // the indexes into the calohits branch
+              CaloHit calohit;
+              calohit.reco = &(calohits->at(calohit_Idx)); // passing the addresses of the underlying structs
+
+              calo_cluster.hits.emplace_back(calohit);
+            }
+          }
+
+          // Because calomcsim branch contains all calorimeter mc particles and not just those associated with the cluster
+          // we need to loop through and add the correct ones to the CaloCluster class here
+          if (calomcsim != nullptr) {
+            for (auto& calosim_Id : calo_cluster.caloclustermc->simParticleIds) { // the SimParticle IDs
+              MCParticle mc_particle;
+
+              // Loop through the calomcsim and look for matching SimParticle IDs
+              // TODO: see if we can store simParticle_Idx in the caloclustersmc branch
+              for (auto& i_calomcsim : *calomcsim) {
+                if (i_calomcsim.id == calosim_Id) {
+                  mc_particle.mcsim = &(i_calomcsim); // passing the addresses of the underlying structs
+                  break;
+                }
+              }
+
+              calo_cluster.mc_particles.emplace_back(mc_particle);
+            }
+          }
+
           calo_clusters.emplace_back(calo_cluster);
         }
       }
@@ -184,11 +217,11 @@ namespace rooutil {
       if (object_ptr != nullptr) {
         if (debug) {
           std::cout << "Event::Update(): Adding "
-                    << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Track " << index << "... " << std::endl;
+                    << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Object " << index << "... " << std::endl;
         }
         object = &(object_ptr->at(index));
       } else if(debug) {
-        std::cout << "Event::Update(): No " << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to add to Track " << index << std::endl;
+        std::cout << "Event::Update(): No " << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to add to Object " << index << std::endl;
       }
     }
 
@@ -299,7 +332,7 @@ namespace rooutil {
       }
     }
 
-    CaloClusters GetCaloClusters() { return calo_clusters; }
+    const CaloClusters& GetCaloClusters() { return calo_clusters; }
     CaloClusters GetCaloClusters(CaloClusterCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
         CaloClusters select_calo_clusters;
