@@ -8,6 +8,7 @@
 #include "Offline/MCDataProducts/inc/EventWeight.hh"
 #include "Offline/MCDataProducts/inc/KalSeedMC.hh"
 #include "Offline/MCDataProducts/inc/CaloClusterMC.hh"
+#include "Offline/MCDataProducts/inc/CaloHitMC.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
@@ -65,6 +66,7 @@
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
+#include "EventNtuple/inc/CaloHitInfoMC.hh"
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
 #include "EventNtuple/inc/InfoStructHelper.hh"
@@ -184,6 +186,7 @@ namespace mu2e {
         // Calo MC
         fhicl::Atom<bool> fillCaloMC{ Name("FillCaloMC"),Comment("Fill CaloMC information"), true};
         fhicl::Atom<bool> fillCaloClustersMC{ Name("FillCaloClustersMC"),Comment("Fill Calo Cluster MC information"), true};
+        fhicl::Atom<bool> fillCaloHitsMC{ Name("FillCaloHitsMC"),Comment("Fill Calo Hit MC information"), true};
         fhicl::Atom<bool> fillCaloSimInfos{ Name("FillCaloSimInfos"),Comment("Fill Sim particles information associated with calo clusters"), true};
         fhicl::Atom<art::InputTag> caloClusterMCTag{Name("CaloClusterMCTag"), Comment("Tag for CaloClusterMCCollection") ,art::InputTag()};
         // CRV MC
@@ -304,8 +307,9 @@ namespace mu2e {
 
       // Calorimeter MC
       std::vector<CaloClusterInfoMC> _caloCIMCs; //Independent from tracker
+      std::vector<CaloHitInfoMC> _caloHIMCs; //Independent from tracker
       std::vector<SimInfo> _caloSIMCs; //Sim particle infos associated with calo clusters
-      bool _fillcaloclustersmc, _fillcalosiminfos;
+      bool _fillcaloclustersmc, _fillcalohitsmc, _fillcalosiminfos;
 
       // CRV (inputs)
       std::map<BranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
@@ -377,6 +381,7 @@ namespace mu2e {
     _fillcalodigis(conf().fillCaloDigis()),
     // Calorimeter MC
     _fillcaloclustersmc(conf().fillCaloClustersMC()),
+    _fillcalohitsmc(conf().fillCaloHitsMC()),
     _fillcalosiminfos(conf().fillCaloSimInfos()),
     // CRV
     _fillcrvcoincs(conf().fillcrvcoincs()),
@@ -575,6 +580,9 @@ namespace mu2e {
     if (_fillmc) {
       if (_fillcaloclustersmc){
         _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
+      }
+      if (_fillcalohitsmc){
+        _ntuple->Branch("calohitsmc.",&_caloHIMCs,_buffsize,_splitlevel);
       }
       if (_fillcalosiminfos){
         _ntuple->Branch("calomcsim.",&_caloSIMCs,_buffsize,_splitlevel);
@@ -806,6 +814,7 @@ namespace mu2e {
     // Calorimeter
     // Clear lists for this event
     if (_fillcaloclustersmc) { _caloCIMCs.clear(); }
+    if (_fillcalohitsmc) { _caloHIMCs.clear(); }
     if (_fillcalosiminfos) { _caloSIMCs.clear(); }
     _caloCIs.clear();
     _caloHIs.clear();
@@ -814,7 +823,17 @@ namespace mu2e {
 
     if (_fillcaloclustersmc){
       for (const auto& clustermc : *_ccmcch.product()){
+        int cluster_idx = _caloCIMCs.size();
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
+      
+        if (_fillcalohitsmc){
+          for (const auto& hitmc : clustermc.caloHitMCs()){
+            int hit_idx = _caloHIMCs.size();
+            _infoMCStructHelper.fillCaloHitInfoMC(*hitmc,_caloHIMCs,cluster_idx);
+            //Update the cluster
+            _caloCIMCs.back().hits_.push_back(hit_idx);
+          }
+        }
       }
     }
 

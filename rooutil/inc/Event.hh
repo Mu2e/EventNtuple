@@ -13,6 +13,7 @@
 #include "EventNtuple/inc/TrkInfoMC.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
+#include "EventNtuple/inc/CaloHitInfoMC.hh"
 
 #include "EventNtuple/inc/CaloClusterInfo.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
@@ -91,6 +92,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "calorecodigis", &this->calorecodigis);
       CheckForBranch(ntuple, "calodigis", &this->calodigis);
       CheckForBranch(ntuple, "caloclustersmc", &this->caloclustersmc);
+      CheckForBranch(ntuple, "calohitsmc", &this->calohitsmc);
       CheckForBranch(ntuple, "calomcsim", &this->calomcsim);
 
       CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
@@ -390,6 +392,7 @@ namespace rooutil {
     std::vector<mu2e::CaloRecoDigiInfo>* calorecodigis = nullptr;
     std::vector<mu2e::CaloDigiInfo>* calodigis = nullptr;
     std::vector<mu2e::CaloClusterInfoMC>* caloclustersmc = nullptr;
+    std::vector<mu2e::CaloHitInfoMC>* calohitsmc = nullptr;
 
     std::vector<mu2e::CrvHitInfoReco>* crvcoincs = nullptr;
     std::vector<mu2e::CrvHitInfoMC>* crvcoincsmc = nullptr;
