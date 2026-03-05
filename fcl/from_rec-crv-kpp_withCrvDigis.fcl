@@ -1,0 +1,3 @@
+#include "EventNtuple/fcl/from_rec-crv-kpp.fcl"
+
+physics.analyzers.EventNtuple.FillCRVDigis : true
