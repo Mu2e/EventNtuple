@@ -317,4 +317,15 @@ bool has_reco_cluster(CaloCluster& cluster) { // CaloCluster has a reco object
   else { return false; }
 }
 
+//+ Calo Hit Cuts - Other
+bool has_mc_hit(CaloHit& hit) { // calo hit has MC truth info
+  if (hit.mc != nullptr) { return true; }
+  else { return false; }
+}
+bool has_reco_hit(CaloHit& hit) { // calo hit has reco info
+  if (hit.reco != nullptr) { return true; }
+  else { return false; }
+}
+
+
 #endif

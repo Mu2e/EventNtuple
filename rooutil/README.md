@@ -106,7 +106,7 @@ The ```EventNtupleTimeCluster``` class contains all information related to a sin
 The ```CaloCluster``` class contains all information related to a single calorimeter cluster
 
 * single objects: ```calocluster```, ```caloclustermc```
-* vector objects: ```calohits```, ```calomcsim```
+* vector objects: ```calohits```, ```calomcsim```, ```calohitsmc```
 
 Examples: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C), [PlotCaloClusterEnergy_RecoVsTrue.C](./examples/PlotCaloClusterEnergy_RecoVsTrue.C), [PlotCaloClusterAndHits.C](./examples/PlotCaloClusterAndHits.C), [PlotCaloCluster_SimParticles.C](./examples/PlotCaloCluster_SimParticles.C)
 
@@ -125,15 +125,21 @@ Some branches are not contained in any of the above classes:
 Reach out to the developers on the #analysis-tools Slack channel if you need to have these added somewhere.
 
 ## Accessing User-Friendly Classes
-The ```Event``` class provides access to ```Tracks``` and ```CrvCoincs```:
+The ```Event``` class provides access to ```Tracks```, ```CaloClusters``` and ```CrvCoincs```:
 
 * ```CountTracks()```: counts the number of tracks in the event
 * ```GetTracks()```: gets the tracks (passes you a copy)
+* ```CountCaloClusters()```: counts the number of calo clusters in the event
+* ```GetCaloClusters()```: gets the calo clusters (passes you a copy)
 * ```CountCrvCoincs()```: counts the number of CRV coincidences in the event
 * ```GetCrvCoincs()```: gets the CRV coincidences
 
 The ```Track``` class provides access to the ```TrackSegments```, the ```TrackHits```, and the ```MCParticles```:
 * ```GetSegments()```, ```CountSegments()```
+* ```GetHits()```, ```CountHits()```
+* ```GetMCParticles()```, ```CountMCParticles()```
+
+The ```CaloCluster``` class provides access to the ```CaloHits``` and the ```MCParticles```:
 * ```GetHits()```, ```CountHits()```
 * ```GetMCParticles()```, ```CountMCParticles()```
 

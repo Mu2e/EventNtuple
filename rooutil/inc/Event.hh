@@ -185,6 +185,10 @@ namespace rooutil {
               CaloHit calohit;
               calohit.reco = &(calohits->at(calohit_Idx)); // passing the addresses of the underlying structs
 
+              if (calohitsmc != nullptr) { // 1-to-1 matching of calohits and calohitsmc
+                calohit.mc = &(calohitsmc->at(calohit_Idx));
+              }
+
               calo_cluster.hits.emplace_back(calohit);
             }
           }

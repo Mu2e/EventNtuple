@@ -2,9 +2,8 @@
 #define CaloHit_hh_
 
 #include <functional>
-#include "EventNtuple/inc/TrkStrawHitInfo.hh"
-#include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
-#include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
+#include "EventNtuple/inc/CaloHitInfo.hh"
+#include "EventNtuple/inc/CaloHitInfoMC.hh"
 
 namespace rooutil {
   struct CaloHit {
@@ -12,6 +11,7 @@ namespace rooutil {
 
     // Pointers to the data
     mu2e::CaloHitInfo* reco = nullptr;
+    mu2e::CaloHitInfoMC* mc = nullptr;
   };
 
   typedef std::function<bool(CaloHit&)> CaloHitCut;
