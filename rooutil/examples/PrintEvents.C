@@ -287,6 +287,13 @@ void PrintEvents(std::string filename) {
       }
     }
 
+    // calohitsmc branch
+    if (event.calohitsmc != nullptr) {
+      for (const auto& calohitmc : *(event.calohitsmc)) {
+        std::cout << "calohitmc: " << calohitmc.nsim << ", " << calohitmc.eDep << ", " << calohitmc.eDepG4 << ", " << calohitmc.clusterIdx_ << std::endl;
+      }
+    }
+
 
     // trigger branches
     for (const auto& pair : event.trigger.NameToIndexMap()) {
