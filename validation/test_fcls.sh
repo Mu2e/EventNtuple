@@ -16,7 +16,7 @@ primary_dataset=""
 mixed_dataset=""
 extracted_dataset=""
 digi_dataset=""
-crv_vst_dataset="temp_crv_kpp"
+crv_kpp_dataset="temp_crv_kpp"
 
 if [[ "$vMDC" == "MDC2020" ]]; then
     echo "Testing MDC2020 datasets"
@@ -47,7 +47,7 @@ else
     return
 fi
 
-all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_vst_dataset )
+all_datasets=( $mock_dataset $primary_dataset $mixed_dataset $extracted_dataset $digi_dataset $crv_kpp_dataset )
 
 if [ ! -d ../filelists ]; then
      echo "Making directory ../filelists/"
@@ -188,9 +188,18 @@ else
     echo "FAIL" | tee -a ${log_file}
 fi
 
-echo -n "from_rec-crv-vst.fcl... "
-echo "mu2e -c fcl/from_rec-crv-vst.fcl -S ../filelists/${crv_vst_dataset}.list --TFileName nts.ntuple.crv-vst.root -n 100" >> ${log_file} 2>&1
-mu2e -c fcl/from_rec-crv-vst.fcl -S ../filelists/${crv_vst_dataset}.list --TFileName nts.ntuple.crv-vst.root -n 100 >> ${log_file} 2>&1
+echo -n "from_rec-crv-kpp.fcl... "
+echo "mu2e -c fcl/from_rec-crv-kpp.fcl -S ../filelists/${crv_kpp_dataset}.list --TFileName nts.ntuple.crv-kpp.root -n 100" >> ${log_file} 2>&1
+mu2e -c fcl/from_rec-crv-kpp.fcl -S ../filelists/${crv_kpp_dataset}.list --TFileName nts.ntuple.crv-kpp.root -n 100 >> ${log_file} 2>&1
+if [ $? == 0 ]; then
+    echo "OK" | tee -a ${log_file}
+else
+    echo "FAIL" | tee -a ${log_file}
+fi
+
+echo -n "from_rec-crv-kpp_withCrvDigis.fcl... "
+echo "mu2e -c fcl/from_rec-crv-kpp_withCrvDigis.fcl -S ../filelists/${crv_kpp_dataset}.list --TFileName nts.ntuple.crv-kpp_withCrvDigis.root -n 100" >> ${log_file} 2>&1
+mu2e -c fcl/from_rec-crv-kpp_withCrvDigis.fcl -S ../filelists/${crv_kpp_dataset}.list --TFileName nts.ntuple.crv-kpp_withCrvDigis.root -n 100 >> ${log_file} 2>&1
 if [ $? == 0 ]; then
     echo "OK" | tee -a ${log_file}
 else

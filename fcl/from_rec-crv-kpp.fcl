@@ -1,13 +1,15 @@
 #include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
-physics.analyzers.EventNtuple.FillCRVDigis : true
-physics.analyzers.EventNtuple.FillCRVPulses : false # true
+physics.analyzers.EventNtuple.FillCRVDigis : false
+physics.analyzers.EventNtuple.FillCRVPulses : false
 physics.analyzers.EventNtuple.branches : [ ] # no track branches
 physics.analyzers.EventNtuple.FillCaloClusters : false # no calorimeter
 physics.analyzers.EventNtuple.FillCaloHits : false # no calorimeter
+physics.analyzers.EventNtuple.FillCaloClustersMC : false # no calorimeter
+physics.analyzers.EventNtuple.FillCaloSimInfos : false # no calorimeter
 physics.analyzers.EventNtuple.RecoCountTag : ""
 physics.analyzers.EventNtuple.PBTTag : ""
-physics.analyzers.EventNtuple.hasCRV : false # true
+physics.analyzers.EventNtuple.hasCRV : false #false keeps events that have no CRV coincidences
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 
 physics.analyzers.EventNtuple.CrvDigisTag : "CrvDigi"
@@ -15,6 +17,3 @@ physics.analyzers.EventNtuple.CrvCoincidencesTag: "CrvCoincidenceClusterFinder"
 physics.analyzers.EventNtuple.CrvRecoPulsesTag: "CrvRecoPulses"
 
 services.GeometryService.inputFile: "Offline/Mu2eG4/geom/geom_common_extracted.txt"
-
-physics.analyzers.EventNtuple.FillCaloClustersMC : false # no calorimeter
-physics.analyzers.EventNtuple.FillCaloSimInfos : false # no calorimeter
