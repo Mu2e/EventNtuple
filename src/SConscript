@@ -65,7 +65,6 @@ helper.make_plugins( [
     'mu2e_GeneralUtilities',
     'mu2e_CRVReco',
     'mu2e_BFieldGeom',
-    'mu2e_TrkDiag',
     'mu2e_KinKalGeom',
     'KinKal_Geometry',
     'KinKal_Trajectory',
