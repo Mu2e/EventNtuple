@@ -309,6 +309,7 @@ EventNtupleMaker : {
   FillCRVDigis : false
   FillCaloMC : true
   FillCaloClustersMC : true
+  FillCaloHitsMC : true
   FillHelixInfo : false
   FillCaloSimInfos : true
   PrimaryParticleTag : "compressRecoMCs"

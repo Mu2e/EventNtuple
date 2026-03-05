@@ -9,12 +9,12 @@ namespace mu2e
   struct CaloHitInfoMC {
 
     int nsim; // # of sim particles associated with this hit
-    float eDep; // total deposited energy in the hit
-    float eDepG4; // total deposited energy in the hit
+    float eDep; // total (corrected) deposited energy in the hit
+    float eDepG4; // total G4 deposited energy in the hit
     float eprimary; // energy of the most energetic deposit
     float tprimary; // time of the most energetic deposit
     std::vector<float> eDeps; // list of deposited energies
-    std::vector<float> tDeps; // list of deposited energies
+    std::vector<float> tDeps; // list of times of energy deposits
     std::vector<float> momentumIns; // list of the momentum of the SimParticle when entering in the disk
     std::vector<int> simParticleIds; // list of simparticle ids
     std::vector<MCRelationship> simRels; // relationship to the particle that deposited the most energy in the calo Hit
