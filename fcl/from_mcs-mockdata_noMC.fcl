@@ -1,6 +1,9 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
 physics.analyzers.EventNtuple.FillMCInfo : false
+physics.analyzers.EventNtuple.FillCaloMC : false
+physics.analyzers.EventNtuple.FillCaloClustersMC : false
+physics.analyzers.EventNtuple.FillCaloSimInfos : false
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathNoMC ]
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPathNoMC ]
