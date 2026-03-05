@@ -377,7 +377,7 @@ namespace mu2e {
     }
     ccimcs.push_back(ccimc);
   }
-    float tprimary; // time of the most energetic deposit
+
   void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx = -1) {
     CaloHitInfoMC chimc;
     auto const& edeps = chmc.energyDeposits();
