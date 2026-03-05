@@ -377,6 +377,28 @@ namespace mu2e {
     }
     ccimcs.push_back(ccimc);
   }
+    float tprimary; // time of the most energetic deposit
+  void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx = -1) {
+    CaloHitInfoMC chimc;
+    auto const& edeps = chmc.energyDeposits();
+    chimc.nsim = edeps.size();
+    chimc.eDep = chmc.totalEnergyDep();
+    chimc.eDepG4 = chmc.totalEnergyDepG4();
+    chimc.clusterIdx_ = clusterIdx;
+    if (chimc.nsim > 0){
+      chimc.eprimary = edeps.front().energyDep();
+      chimc.tprimary = edeps.front().time();
+      for (auto const& edep : edeps){
+        auto simid = edep.sim()->id().asInt();
+        chimc.tDeps.push_back(edep.time());
+        chimc.eDeps.push_back(edep.energyDep());
+        chimc.momentumIns.push_back(edep.momentumIn());
+        chimc.simParticleIds.push_back(simid);
+        chimc.simRels.push_back(MCRelationship(edep.sim(),edeps.front().sim()));
+      }
+    }
+    chimcs.push_back(chimc);
+  }
 
   void InfoMCStructHelper::fillCaloSimInfos(CaloClusterMC const& ccmc, std::vector<SimInfo>& csis) {
     auto const& edeps = ccmc.energyDeposits();

@@ -22,6 +22,7 @@
 #include "EventNtuple/inc/RecoQualInfo.hh"
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
 #include "EventNtuple/inc/CaloClusterInfo.hh"
+#include "EventNtuple/inc/CaloHitInfoMC.hh"
 #include "EventNtuple/inc/CaloHitInfo.hh"
 #include "EventNtuple/inc/CaloRecoDigiInfo.hh"
 #include "EventNtuple/inc/CaloDigiInfo.hh"
