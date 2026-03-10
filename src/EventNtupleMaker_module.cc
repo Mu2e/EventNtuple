@@ -170,6 +170,8 @@ namespace mu2e {
         fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
         // CRV -- other
         fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),Comment("y of center of the top layer of the CRV-T counters"), 2751.485};  //This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
+        // CRV inference
+        fhicl::OptionalAtom<art::InputTag> crvInferenceTag{Name("CrvInferenceTag"), Comment("Tag for CrvInference associations (art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>)")};
         // MC truth
         fhicl::Atom<bool> fillmc{Name("FillMCInfo"),Comment("Global switch to turn on/off MC info"),true};
         fhicl::Table<InfoMCStructHelper::Config> infoMCStructHelper{Name("InfoMCStructHelper"), Comment("Configuration for the InfoMCStructHelper")};
@@ -324,6 +326,10 @@ namespace mu2e {
       // CRV -- fhicl parameters
       bool _fillcrvcoincs, _fillcrvpulses, _fillcrvdigis;
       double _crvPlaneY;  // needs to move to KinKalGeom FIXME
+      // CRV inference
+      bool _fillCrvInference;
+      art::InputTag _crvInferenceTag;
+      std::vector<std::vector<MVAResultInfo>> _crvInference;
       // CRV (output)
       std::vector<CrvHitInfoReco> _crvcoincs;
       std::map<BranchIndex, std::vector<CrvHitInfoReco>> _allBestCrvs; // there can be more than one of these per track type
@@ -389,6 +395,7 @@ namespace mu2e {
     _fillcrvpulses(conf().fillcrvpulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
     _crvPlaneY(conf().crvPlaneY()),
+    _fillCrvInference(conf().crvInferenceTag(_crvInferenceTag)),
     _infoMCStructHelper(conf().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
@@ -610,6 +617,10 @@ namespace mu2e {
           _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
         }
       }
+    }
+    // CRV cosmic inference
+    if(_fillCrvInference) {
+      _ntuple->Branch("crvcosmic.",&_crvInference,_buffsize,_splitlevel);
     }
     // helix info
     if(_conf.helices()) _ntuple->Branch("helices.",&_hinfos,_buffsize,_splitlevel);
@@ -986,6 +997,29 @@ namespace mu2e {
                                               _crvdigis);
       }
 
+    }
+
+    // fill CRV cosmic inference scores
+    if(_fillCrvInference) {
+      _crvInference.clear();
+      art::Handle<art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>> crvInfHandle;
+      event.getByLabel(_crvInferenceTag, crvInfHandle);
+      if(crvInfHandle.isValid()) {
+        // group scores by track
+        // downstream electron track has scores indexed by coincidence cluster
+        art::Ptr<KalSeed> thisKalSeed;
+        for(const auto& assn : *crvInfHandle) {
+          if(assn.first != thisKalSeed) {
+            _crvInference.emplace_back(); // new track
+            thisKalSeed = assn.first;
+          }
+          // Run the inference and get the result
+          MVAResultInfo info;
+          info.result = assn.data->_value;
+          info.valid = true; // valid if there is a score
+          _crvInference.back().push_back(info);
+        }
+      }
     }
 
     // fill MC information unrelated to any reconstructed object
