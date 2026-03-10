@@ -395,11 +395,11 @@ namespace mu2e {
     _fillcrvpulses(conf().fillcrvpulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
     _crvPlaneY(conf().crvPlaneY()),
-    _fillCrvInference(conf().crvInferenceTag(_crvInferenceTag)),
     _infoMCStructHelper(conf().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
+    _fillCrvInference = conf().crvInferenceTag(_crvInferenceTag);
 
     // decode fit type
     for(size_t ifit=0;ifit < fitNames.size();++ifit){
