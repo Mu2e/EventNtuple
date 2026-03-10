@@ -999,25 +999,35 @@ namespace mu2e {
 
     }
 
-    // fill CRV cosmic inference scores
+    // fill CRV cosmic inference scores (T x C structure aligned with trk branches)
     if(_fillCrvInference) {
       _crvInference.clear();
+      // Init associations from CrvInference module: KalSeed <-> CrvCoincidenceCluster with MVAResult data product
       art::Handle<art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>> crvInfHandle;
+      // grab the associations from the art::Event  
       event.getByLabel(_crvInferenceTag, crvInfHandle);
-      if(crvInfHandle.isValid()) {
-        // group scores by track
-        // downstream electron track has scores indexed by coincidence cluster
-        art::Ptr<KalSeed> thisKalSeed;
+      // build a map from KalSeed ptr to scores
+      std::map<art::Ptr<KalSeed>, std::vector<MVAResultInfo>> crvInfMap;
+      // Get the scores from the associations and fill the map
+      if(crvInfHandle.isValid()) { 
+        // loop through association
         for(const auto& assn : *crvInfHandle) {
-          if(assn.first != thisKalSeed) {
-            _crvInference.emplace_back(); // new track
-            thisKalSeed = assn.first;
-          }
-          // Run the inference and get the result
           MVAResultInfo info;
-          info.result = assn.data->_value;
-          info.valid = true; // valid if there is a score
-          _crvInference.back().push_back(info);
+          info.result = assn.data->_value; // the model score
+          info.valid = true; // true if assns is valid
+          crvInfMap[assn.first].push_back(info); 
+        }
+      }
+      // fill the branch
+      // iterate over all tracks to keep alignment with trk branches
+      // this means filling empty vectors for tracks with no coincidence 
+      const auto& kseedptr_coll = *_allKSPCHs.at(0);
+      for(size_t i = 0; i < kseedptr_coll.size(); ++i) {
+        auto it = crvInfMap.find(kseedptr_coll[i]);
+        if(it != crvInfMap.end()) {
+          _crvInference.push_back(it->second); // fill
+        } else {
+          _crvInference.emplace_back(); // empty vector for tracks with no CRV match
         }
       }
     }
