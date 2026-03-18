@@ -59,7 +59,14 @@ Note: Other fcl files are available. See table [here](fcl/README.md) to see if a
 Notes for developers contributing to EventNtuple are [here](doc/developers.md)
 
 ## Validation
-Validation scripts and instructions are [here](validation/README.md)
+For a quick validation, you can run:
+
+```
+. ./EventNtuple/validation/quick_test.sh
+```
+This will run Offline on a mock dataset, create the validation histograms, and then put a few of these validation histograms into a canvas.
+
+More validation scripts and validation instructions are [here](validation/README.md)
 
 ## Tagging a New Release
 Instructions for tagging a new release:
