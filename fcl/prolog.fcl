@@ -10,7 +10,9 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
+  datFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.dat"
+  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  debugLevel : 0
 }
 TrkQualDeM           : @local::TrkQual
 TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
@@ -54,7 +56,7 @@ TrkPID : {
   module_type : TrackPID
   MaxDE : 500.0 # MeV
   DeltaTOffset : -1.15 # specific to MDC2018h
-  datFilename : "Offline/TrkDiag/data/TrackPID_v1.dat"
+  datFilename : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
 }
 # this module only makes sense for downstream electron fits
 TrkPIDDeM          : @local::TrkPID
