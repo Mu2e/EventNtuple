@@ -1,18 +1,21 @@
 # Dask Distributed C++ Job Runner
 
-Run a C++ program across Dask workers with per-job config files.
+Compile and run a C++ program across Dask workers with per-job config files.
 
 ## Quick Start
 
 ```bash
-# Edit jobs.json: set your binary path, input files, and parameters
+# Edit jobs.json: set your source file, input files, and parameters
 vim jobs.json
 
 # Edit config_template.txt to match your program's config format
 vim config_template.txt
 
-# Run locally (uses all CPUs)
+# Compile and run locally (uses all CPUs)
 python run_jobs.py --manifest jobs.json
+
+# Skip recompilation on subsequent runs
+python run_jobs.py --manifest jobs.json --skip-compile
 
 # Run with 4 local workers
 python run_jobs.py --manifest jobs.json --n-workers 4
@@ -25,15 +28,18 @@ python run_jobs.py --manifest jobs.json --scheduler tcp://scheduler-host:8786
 
 | File                 | Description                                      |
 |----------------------|--------------------------------------------------|
-| `run_jobs.py`        | Main script — submits and collects C++ jobs      |
-| `jobs.json`          | Job manifest — defines binary, files, parameters |
+| `run_jobs.py`        | Main script — compiles, submits, and collects C++ jobs |
+| `jobs.json`          | Job manifest — source file, includes, files, parameters |
 | `config_template.txt`| Config template with `{placeholder}` fields      |
 
 ## Job Manifest (`jobs.json`)
 
 ```json
 {
-  "binary": "/path/to/my_cpp_program",
+  "source": "MyAnalysis.C",
+  "include_dirs": ["/path/to/extra/includes"],
+  "libraries": ["MyLib"],
+  "compile_flags": ["-O2"],
   "config_template": "config_template.txt",
   "output_dir": "./output",
   "timeout_seconds": 3600,
@@ -51,7 +57,11 @@ python run_jobs.py --manifest jobs.json --scheduler tcp://scheduler-host:8786
 ```
 
 **Fields:**
-- `binary` — path to the compiled C++ executable
+- `source` — path to the C++ source file (`.C`, `.cpp`, etc.), relative to manifest
+- `include_dirs` — *(optional)* extra `-I` include paths for compilation
+- `libraries` — *(optional)* extra `-l` libraries to link
+- `compile_flags` — *(optional)* additional compiler flags (e.g. `["-O2", "-std=c++17"]`)
+- `binary` — *(alternative to `source`)* path to a pre-compiled executable; skips compilation
 - `config_template` — path to the config template (relative to manifest)
 - `output_dir` — directory for program output (relative to manifest)
 - `timeout_seconds` — per-job timeout (default: 3600)
@@ -59,6 +69,19 @@ python run_jobs.py --manifest jobs.json --scheduler tcp://scheduler-host:8786
   - `id` — unique job identifier
   - `input_file` — input file path
   - `params` — dict of parameters (keys must match template placeholders)
+
+## Compilation
+
+When `source` is specified, the script compiles it before submitting jobs:
+
+```
+g++ -o ./work/MyAnalysis MyAnalysis.C $(root-config --cflags --libs) -I... -l...
+```
+
+- Compilation happens **once on the submitting machine**
+- The binary is placed in the work directory (`./work/` by default)
+- Use `--skip-compile` to reuse a previously compiled binary
+- If compilation fails, the full compiler output is printed and the script exits
 
 ## Config Template
 
@@ -79,14 +102,15 @@ cut_value   = {cut_value}
 ## CLI Options
 
 ```
-usage: run_jobs.py [-h] --manifest MANIFEST [--scheduler SCHEDULER]
-                   [--n-workers N_WORKERS] [--work-dir WORK_DIR]
-                   [--results-file RESULTS_FILE]
+usage: run_jobs.py [-h] --manifest MANIFEST [--skip-compile]
+                   [--scheduler SCHEDULER] [--n-workers N_WORKERS]
+                   [--work-dir WORK_DIR] [--results-file RESULTS_FILE]
 
   --manifest       Path to jobs.json (required)
+  --skip-compile   Skip compilation, reuse binary in work directory
   --scheduler      Dask scheduler address (e.g. tcp://host:8786)
   --n-workers      Workers for LocalCluster (default: all CPUs)
-  --work-dir       Directory for per-job configs (default: ./work)
+  --work-dir       Directory for configs and compiled binary (default: ./work)
   --results-file   Output results path (default: results.json)
 ```
 
@@ -110,11 +134,12 @@ After completion, `results.json` contains an array of result objects:
 ## How It Works
 
 1. Reads the job manifest and config template
-2. Starts a `LocalCluster` or connects to an existing scheduler
-3. For each job, submits a task to a Dask worker that:
+2. **Compiles** the C++ source with `g++` and `root-config` flags (unless `--skip-compile`)
+3. Starts a `LocalCluster` or connects to an existing scheduler
+4. For each job, submits a task to a Dask worker that:
    - Renders the config template with job-specific values
    - Writes the config to `<work_dir>/<job_id>.cfg`
-   - Runs the C++ binary via `subprocess.run` with the config path as argument
+   - Runs the compiled binary via `subprocess.run` with the config path as argument
    - Captures stdout, stderr, return code, and elapsed time
-4. Collects results as jobs complete and prints progress
-5. Writes `results.json` with all job outcomes
+5. Collects results as jobs complete and prints progress
+6. Writes `results.json` with all job outcomes

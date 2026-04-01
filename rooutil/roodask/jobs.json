@@ -1,5 +1,8 @@
 {
-  "binary": "/path/to/my_cpp_program",
+  "source": "PlotEntranceMomentum.C",
+  "include_dirs": [],
+  "libraries": [],
+  "compile_flags": [],
   "config_template": "config_template.txt",
   "output_dir": "./output",
   "timeout_seconds": 3600,
