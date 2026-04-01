@@ -383,8 +383,10 @@ def main() -> None:
         ):
             print(f"Binary is up to date, skipping compilation: {binary_path}")
         else:
-            if binary_path.exists():
-                print(f"Source is newer than binary, recompiling...")
+            if args.force_compile:
+                print("Forcing recompilation (--force-compile)")
+            elif binary_path.exists():
+                print("Source is newer than binary, recompiling...")
             print(f"Source: {source_path}")
             compile_source(
                 source=source_path,
@@ -406,7 +408,7 @@ def main() -> None:
           f"({fpj} files/job)")
     print(f"Binary:     {binary}")
     print(f"Output dir: {output_dir}")
-    print(f"Work dir:   {args.work_dir}")
+    print(f"Work dir:   {work_dir}")
     print()
 
     # ── Cluster setup ────────────────────────────────────────────────
