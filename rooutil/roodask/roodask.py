@@ -490,15 +490,19 @@ def main() -> None:
             if r["success"] and r.get("output_file")
         ]
         if output_files:
-            hadd_cmd = ["hadd", "-f", "-j", str(args.hadd_j), args.hadd] + output_files
-            print(f"\nMerging {len(output_files)} output files with hadd → {args.hadd}")
+            hadd_target = Path(args.hadd)
+            if not hadd_target.is_absolute():
+                hadd_target = output_dir / hadd_target
+            hadd_target = str(hadd_target.resolve())
+            hadd_cmd = ["hadd", "-f", "-j", str(args.hadd_j), hadd_target] + output_files
+            print(f"\nMerging {len(output_files)} output files with hadd → {hadd_target}")
             t0 = time.monotonic()
             hadd_result = subprocess.run(
                 hadd_cmd, capture_output=True, text=True,
             )
             elapsed = time.monotonic() - t0
             if hadd_result.returncode == 0:
-                print(f"hadd succeeded in {elapsed:.1f}s → {args.hadd}")
+                print(f"hadd succeeded in {elapsed:.1f}s → {hadd_target}")
                 for f in output_files:
                     try:
                         os.remove(f)
