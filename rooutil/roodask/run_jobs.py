@@ -195,9 +195,10 @@ def run_cpp_job(
             env=env,
         )
         elapsed = time.monotonic() - t0
+        ok = result.returncode == 0 and "Error" not in result.stderr
         return {
             "job_id": job_id,
-            "success": result.returncode == 0,
+            "success": ok,
             "returncode": result.returncode,
             "stdout": result.stdout,
             "stderr": result.stderr,
