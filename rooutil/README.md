@@ -238,6 +238,7 @@ In a ```jobs.json``` file:
 }
 ```
 * note that the ROOT macro needs to have two arguments: an input filename and an output filename
+* note that if you already have a compiled program, you can use the ```"binary"``` field instead of the ```"source"``` to run that instead
 
 3. Then you can run:
 ```
