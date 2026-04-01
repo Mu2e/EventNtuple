@@ -341,7 +341,14 @@ def main() -> None:
                       file=sys.stderr)
                 sys.exit(1)
             print(f"Skipping compilation, reusing: {binary_path}")
+        elif (
+            binary_path.exists()
+            and binary_path.stat().st_mtime >= source_path.stat().st_mtime
+        ):
+            print(f"Binary is up to date, skipping compilation: {binary_path}")
         else:
+            if binary_path.exists():
+                print(f"Source is newer than binary, recompiling...")
             print(f"Source: {source_path}")
             compile_source(
                 source=source_path,
