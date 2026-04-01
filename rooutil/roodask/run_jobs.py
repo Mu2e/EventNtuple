@@ -258,6 +258,11 @@ def parse_args() -> argparse.Namespace:
         help="Only process the first N files from the filelist (default: all)",
     )
     p.add_argument(
+        "--hadd", default=None, metavar="OUTPUT",
+        help="After all jobs finish, merge output ROOT files with hadd into "
+             "this file (e.g. merged.root). Only successful jobs are included.",
+    )
+    p.add_argument(
         "--skip-compile", action="store_true",
         help="Skip compilation and reuse a previously compiled binary "
              "in the work directory.",
@@ -453,6 +458,26 @@ def main() -> None:
 
     print(f"\nDone: {n_success} succeeded, {n_fail} failed")
     print(f"Results written to {results_path}")
+
+    # ── Optional hadd merge ──────────────────────────────────────────
+    if args.hadd and n_success > 0:
+        output_files = [
+            r["output_file"] for r in results
+            if r["success"] and r.get("output_file")
+        ]
+        if output_files:
+            hadd_cmd = ["hadd", "-f", args.hadd] + output_files
+            print(f"\nMerging {len(output_files)} output files with hadd → {args.hadd}")
+            t0 = time.monotonic()
+            hadd_result = subprocess.run(
+                hadd_cmd, capture_output=True, text=True,
+            )
+            elapsed = time.monotonic() - t0
+            if hadd_result.returncode == 0:
+                print(f"hadd succeeded in {elapsed:.1f}s → {args.hadd}")
+            else:
+                print(f"hadd FAILED (rc={hadd_result.returncode})", file=sys.stderr)
+                print(hadd_result.stderr, file=sys.stderr)
 
     client.close()
 
