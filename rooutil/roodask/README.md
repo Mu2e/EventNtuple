@@ -97,16 +97,18 @@ Blank lines are ignored.
 usage: run_jobs.py [-h] --manifest MANIFEST --filelist FILELIST
                    [--files-per-job N] [--skip-compile]
                    [--scheduler SCHEDULER] [--n-workers N_WORKERS]
-                   [--work-dir WORK_DIR] [--results-file RESULTS_FILE]
+                   [--threads-per-worker N] [--work-dir WORK_DIR]
+                   [--results-file RESULTS_FILE]
 
-  --manifest       Path to jobs.json (required)
-  --filelist       Path to text file with one input file per line (required)
-  --files-per-job  Number of input files per job (default: 1)
-  --skip-compile   Skip compilation, reuse binary in work directory
-  --scheduler      Dask scheduler address (e.g. tcp://host:8786)
-  --n-workers      Workers for LocalCluster (default: all CPUs)
-  --work-dir       Directory for filelists and compiled binary (default: ./work)
-  --results-file   Output results path (default: results.json)
+  --manifest             Path to jobs.json (required)
+  --filelist             Path to text file with one input file per line (required)
+  --files-per-job        Number of input files per job (default: 1)
+  --skip-compile         Skip compilation, reuse binary in work directory
+  --scheduler            Dask scheduler address (e.g. tcp://host:8786)
+  --n-workers            Workers for LocalCluster (default: all CPUs)
+  --threads-per-worker   Threads per Dask worker (default: 1)
+  --work-dir             Directory for filelists and compiled binary (default: ./work)
+  --results-file         Output results path (default: results.json)
 ```
 
 ## Results

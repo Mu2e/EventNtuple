@@ -268,6 +268,11 @@ def parse_args() -> argparse.Namespace:
              "Ignored when --scheduler is set.",
     )
     p.add_argument(
+        "--threads-per-worker", type=int, default=1,
+        help="Number of threads per Dask worker (default: 1). "
+             "Ignored when --scheduler is set.",
+    )
+    p.add_argument(
         "--work-dir", default="./work",
         help="Directory for per-job filelist files and compiled binary "
              "(default: ./work)",
@@ -367,8 +372,12 @@ def main() -> None:
         client = Client(args.scheduler)
     else:
         n_workers = args.n_workers or os.cpu_count()
-        print(f"Starting LocalCluster with {n_workers} workers")
-        cluster = LocalCluster(n_workers=n_workers, threads_per_worker=1)
+        print(f"Starting LocalCluster with {n_workers} workers, "
+              f"{args.threads_per_worker} threads/worker")
+        cluster = LocalCluster(
+            n_workers=n_workers,
+            threads_per_worker=args.threads_per_worker,
+        )
         client = Client(cluster)
 
     print(f"Dashboard: {client.dashboard_link}\n")
