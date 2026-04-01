@@ -88,7 +88,7 @@ def compile_source(
     work_dir.mkdir(parents=True, exist_ok=True)
     wrapper_path = work_dir / f"{func_name}_main.cpp"
     wrapper_path.write_text(
-        f'#include "{source.resolve()}"\n'
+        f'#include "{source.name}"\n'
         f"\n"
         f"int main(int argc, char* argv[]) {{\n"
         f'  if (argc < 3) {{ std::cerr << "Usage: " << argv[0] << " <input> <output>" << std::endl; return 1; }}\n'
@@ -274,6 +274,10 @@ def parse_args() -> argparse.Namespace:
              "in the work directory.",
     )
     p.add_argument(
+        "--force-compile", action="store_true",
+        help="Force recompilation even if the binary is up to date.",
+    )
+    p.add_argument(
         "--scheduler", default=None,
         help="Address of existing Dask scheduler (e.g. tcp://host:8786). "
              "If omitted, a LocalCluster is started.",
@@ -308,11 +312,14 @@ def main() -> None:
     with open(manifest_path) as f:
         manifest = expand_env_vars(json.load(f))
 
-    output_dir = str(manifest_path.parent / manifest.get("output_dir", "./output"))
+    # Resolve output_dir: absolute paths used as-is, relative paths from cwd
+    raw_output_dir = manifest.get("output_dir", "./output")
+    output_dir = str(Path(raw_output_dir).resolve())
     output_pattern = manifest.get("output_pattern", "output_{job_id}.root")
     timeout = manifest.get("timeout_seconds", 3600)
 
-    work_dir = Path(args.work_dir)
+    # Resolve work_dir: absolute paths used as-is, relative paths from cwd
+    work_dir = Path(args.work_dir).resolve()
     work_dir.mkdir(parents=True, exist_ok=True)
 
     # ── Read filelist ────────────────────────────────────────────────
@@ -370,7 +377,8 @@ def main() -> None:
                 sys.exit(1)
             print(f"Skipping compilation, reusing: {binary_path}")
         elif (
-            binary_path.exists()
+            not args.force_compile
+            and binary_path.exists()
             and binary_path.stat().st_mtime >= source_path.stat().st_mtime
         ):
             print(f"Binary is up to date, skipping compilation: {binary_path}")
