@@ -1,6 +1,6 @@
 {
   "source": "PlotEntranceMomentum.C",
-  "include_dirs": [],
+  "include_dirs": [ "${ROOT_INCLUDE_DIR}" ],
   "libraries": [],
   "compile_flags": [],
   "config_template": "config_template.txt",
