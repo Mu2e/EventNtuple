@@ -10,9 +10,10 @@
 7. [Common Cut Functions](#Common-Cut-Functions)
 8. [Combining Cut Function](#Combining-Cut-Functions)
 9. [Creating Ntuples From EventNtuple](#Creating-Ntuples-From-EventNtuple)
-10. [Speed Optimizations](#Speed-Optimizations)
-11. [Debugging](#Debugging)
-12. [For Developers](#For-Developers)
+10. [```roodask```](#roodask)
+11. [Speed Optimizations](#Speed-Optimizations)
+12. [Debugging](#Debugging)
+13. [For Developers](#For-Developers)
 
 ## Introduction
 
@@ -211,6 +212,40 @@ If you want to also remove tracks from the event, you should use ```SelectTracks
 
 ### Non event-based ntuples
 It's also possible to use RooUtil to create a new ntuple with a different structure (e.g. one entry per track). See an example in [CreateTrackNtuple.C](./examples/CreateTrackNtuple.C) for how this can be done
+
+## ```roodask```
+A python script ```roodask.py``` is available to run your ROOT macro in parallel using dask (see [its README](./roodask/README.md) for technical details) but broadly, you do:
+
+1. Set up environment
+
+```
+mu2einit
+muse setup AnalysisMusingMDC2025
+pyenv ana
+```
+
+2. Define your job:
+In a ```jobs.json``` file:
+```
+{
+  "source": "PlotEntranceMomentum.C",
+  "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
+  "libraries": [],
+  "compile_flags": [],
+  "output_dir": "./output",
+  "output_pattern": "{first_filestem}_{job_id}.hist.root",
+  "timeout_seconds": 3600
+}
+```
+
+3. Then you can run:
+```
+roodask --manifest jobs.json --filelist test.txt --n-workers 4 --threads-per-worker 1
+```
+
+Some useful features:
+* you can run over just a subset of files in your filelist with ```--max-files N```
+* you can add the ```--hadd merged.root``` option to create a single output ROOT file (you can also use ```--hadd-j N``` to use the multi-threading option to ```hadd```)
 
 ## Speed Optimizations
 By default, RooUtil will read all the branches for every entry. If you are finding that this is too slow, then you can explicity turn on only the branches that you will be reading. This can increase the speed by as much as a factor of 10.

@@ -67,7 +67,7 @@ python roodask.py --manifest jobs.json --filelist filelist.txt \
 - `compile_flags` — *(optional)* additional compiler flags (e.g. `["-O2"]`)
 - `binary` — *(alternative to `source`)* path to a pre-compiled executable;
   skips compilation entirely
-- `output_dir` — directory for output files (relative to manifest)
+- `output_dir` — directory for output files (relative paths resolve from cwd)
 - `output_pattern` — output filename pattern; available placeholders:
   - `{job_id}` — auto-generated job ID (e.g. `job_0000`)
   - `{first_filestem}` — filename of the first input file in the batch,
@@ -95,8 +95,10 @@ N files (useful for quick testing).
 When `source` is specified, the script:
 
 1. **Auto-generates a `main()` wrapper** (`work/<MacroName>_main.cpp`) that
-   `#include`s the macro and calls its entry-point function with
-   `argv[1]` (input filelist) and `argv[2]` (output file).
+   `#include`s the macro by filename (e.g. `#include "MyMacro.C"`) and
+   calls its entry-point function with `argv[1]` (input filelist) and
+   `argv[2]` (output file).  The macro's directory is added as an `-I`
+   include path so the `#include` resolves correctly.
 2. **Compiles** the wrapper with `g++` (or `$CXX` if set) and
    `root-config --cflags --libs`.
 
@@ -113,6 +115,7 @@ Additional compilation details:
   modification time against the binary and only recompiles when the source
   is newer.
 - Use `--skip-compile` to force skipping compilation regardless of timestamps.
+- Use `--force-compile` to force recompilation even if the binary is up to date.
 - The binary is placed in the work directory (`./work/` by default).
 
 ## File Batching
@@ -133,8 +136,9 @@ binary runs with the same library paths as the compilation environment.
 ## Merging with hadd
 
 Use `--hadd <output.root>` to merge all successful job outputs into a single
-ROOT file after all jobs complete.  The individual per-job output files are
-automatically deleted after a successful merge to save disk space.
+ROOT file after all jobs complete.  If a relative path is given, the merged
+file is placed in the output directory.  The individual per-job output files
+are automatically deleted after a successful merge to save disk space.
 
 Use `--hadd-j N` to control hadd parallelism (default: 1, set to 0 for all
 available cores).
@@ -160,7 +164,7 @@ Jobs are marked as **failed** if:
    - Runs `<binary> <filelist> <output_file>`
    - Captures stdout, stderr, return code, and elapsed time
 8. Collects results as jobs complete and prints progress
-9. Writes `results.json` with all job outcomes
+9. Writes `results.json` with all job outcomes (all paths are absolute)
 10. Optionally merges outputs with `hadd` and cleans up individual files
 
 ## CLI Options
@@ -169,7 +173,7 @@ Jobs are marked as **failed** if:
 usage: roodask.py [-h] --manifest MANIFEST --filelist FILELIST
                    [--files-per-job N] [--max-files N]
                    [--hadd OUTPUT] [--hadd-j N]
-                   [--skip-compile]
+                   [--skip-compile] [--force-compile]
                    [--scheduler SCHEDULER] [--n-workers N_WORKERS]
                    [--threads-per-worker N] [--work-dir WORK_DIR]
                    [--results-file RESULTS_FILE]
@@ -178,13 +182,16 @@ usage: roodask.py [-h] --manifest MANIFEST --filelist FILELIST
   --filelist             Path to text file with one input file per line (required)
   --files-per-job        Files per job (default: auto-distribute across workers)
   --max-files            Only process the first N files (default: all)
-  --hadd                 Merge output ROOT files into this file after completion
+  --hadd                 Merge output ROOT files into this file after completion;
+                         relative paths resolve into the output directory
   --hadd-j               Number of cores for hadd parallelism (default: 1)
   --skip-compile         Skip compilation, reuse binary in work directory
+  --force-compile        Force recompilation even if the binary is up to date
   --scheduler            Dask scheduler address (e.g. tcp://host:8786)
   --n-workers            Workers for LocalCluster (default: all CPUs)
   --threads-per-worker   Threads per Dask worker (default: 1)
-  --work-dir             Directory for filelists and compiled binary (default: ./work)
+  --work-dir             Directory for filelists and compiled binary (default: ./work,
+                         relative paths resolve from cwd)
   --results-file         Output results path (default: results.json)
 ```
 
@@ -201,7 +208,7 @@ After completion, `results.json` contains an array of result objects:
   "stderr": "...",
   "elapsed_seconds": 12.34,
   "n_files": 5,
-  "filelist": "./work/job_0000_filelist.txt",
-  "output_file": "./output/nts.ntuple.mock001_job_0000.hist.root"
+  "filelist": "/path/to/work/job_0000_filelist.txt",
+  "output_file": "/path/to/output/nts.ntuple.mock001_job_0000.hist.root"
 }
 ```

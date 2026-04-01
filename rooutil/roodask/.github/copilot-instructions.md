@@ -30,8 +30,10 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 ## Architecture Details
 
 ### Compilation (`compile_source()`)
-- Generates `work/<MacroName>_main.cpp` that `#include`s the macro and calls
-  its entry function (name = file stem) with `argv[1]` (filelist) and `argv[2]` (output).
+- Generates `work/<MacroName>_main.cpp` that `#include`s the macro by filename
+  (e.g. `#include "MyMacro.C"`) and calls its entry function (name = file stem)
+  with `argv[1]` (filelist) and `argv[2]` (output).  The macro's directory is
+  added as an `-I` path so the include resolves correctly.
 - Uses `$CXX` or `g++`, prints compiler version before building.
 - `root-config --cflags --libs` provides ROOT flags.
 - `LD_LIBRARY_PATH` entries are added as `-L` and `-Wl,-rpath` flags.
@@ -40,6 +42,15 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 - Macro's directory is auto-added as `-I` path.
 - `include_dirs` values are split on `:` (os.pathsep) for colon-separated env vars.
 - **Incremental:** only recompiles when source mtime > binary mtime.
+- **Force recompile:** `--force-compile` skips the mtime check and always recompiles.
+  Prints a distinct message ("Forcing recompilation (--force-compile)") vs the
+  timestamp-triggered message ("Source is newer than binary, recompiling...").
+
+### Path Resolution
+- `output_dir` from manifest: relative paths resolve from **cwd** (not manifest directory).
+- `--work-dir`: relative paths resolve from **cwd**.
+- `--hadd` target: relative paths resolve into the output directory.
+- All printed paths and paths in `results.json` are absolute.
 
 ### Job Execution (`run_cpp_job()`)
 - Each job receives a batch of input files, writes them to `work/<job_id>_filelist.txt`.
