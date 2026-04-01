@@ -253,6 +253,10 @@ def parse_args() -> argparse.Namespace:
         help="Number of input files per job (default: 1)",
     )
     p.add_argument(
+        "--max-files", type=int, default=None,
+        help="Only process the first N files from the filelist (default: all)",
+    )
+    p.add_argument(
         "--skip-compile", action="store_true",
         help="Skip compilation and reuse a previously compiled binary "
              "in the work directory.",
@@ -307,6 +311,10 @@ def main() -> None:
     if not all_files:
         print("ERROR: filelist is empty", file=sys.stderr)
         sys.exit(1)
+
+    if args.max_files is not None:
+        all_files = all_files[: args.max_files]
+        print(f"Using first {len(all_files)} files (--max-files {args.max_files})")
 
     # ── Batch files into jobs ────────────────────────────────────────
     n = args.files_per_job
