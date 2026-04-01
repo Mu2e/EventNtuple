@@ -12,7 +12,7 @@ ls /data/files/*.root > filelist.txt
 # Edit jobs.json: set your source file, includes, and output pattern
 vim jobs.json
 
-# Compile and run locally — 1 file per job, uses all CPUs
+# Compile and run locally — files distributed evenly across all CPUs
 python run_jobs.py --manifest jobs.json --filelist filelist.txt
 
 # 5 files per job, 4 workers
@@ -40,7 +40,7 @@ python run_jobs.py --manifest jobs.json --filelist filelist.txt \
 |------------------|------------------------------------------------------|
 | `run_jobs.py`    | Main script — compiles, batches, submits, collects   |
 | `jobs.json`      | Manifest — source file, includes, output pattern     |
-| `filelist.txt`   | Example filelist (one input file per line)            |
+| `filelist.txt`   | Input filelist (one ROOT file per line)              |
 
 ## Manifest (`jobs.json`)
 
@@ -51,17 +51,22 @@ python run_jobs.py --manifest jobs.json --filelist filelist.txt \
   "libraries": [],
   "compile_flags": [],
   "output_dir": "./output",
-  "output_pattern": "{first_filestem}.hist.root",
+  "output_pattern": "{first_filestem}_{job_id}.hist.root",
   "timeout_seconds": 3600
 }
 ```
 
 **Fields:**
-- `source` — path to the C++ ROOT macro (relative to manifest)
-- `include_dirs` — *(optional)* extra `-I` include paths for compilation
+- `source` — path to the C++ ROOT macro (relative to manifest).
+  The macro's entry-point function must match the filename stem
+  (e.g. `PlotEntranceMomentum.C` → `void PlotEntranceMomentum(...)`).
+- `include_dirs` — *(optional)* extra `-I` include paths for compilation.
+  Colon-separated values (like `${ROOT_INCLUDE_PATH}`) are automatically
+  split into individual `-I` flags.
 - `libraries` — *(optional)* extra `-l` libraries to link
 - `compile_flags` — *(optional)* additional compiler flags (e.g. `["-O2"]`)
-- `binary` — *(alternative to `source`)* path to a pre-compiled executable
+- `binary` — *(alternative to `source`)* path to a pre-compiled executable;
+  skips compilation entirely
 - `output_dir` — directory for output files (relative to manifest)
 - `output_pattern` — output filename pattern; available placeholders:
   - `{job_id}` — auto-generated job ID (e.g. `job_0000`)
@@ -82,18 +87,48 @@ A plain text file with one input file path per line:
 /data/run002/file_003.root
 ```
 
-Blank lines are ignored.
+Blank lines are ignored.  Use `--max-files N` to process only the first
+N files (useful for quick testing).
 
 ## Compilation
 
-When `source` is specified, the script auto-generates a `main()` wrapper
-and compiles it with `g++` and `root-config` flags.
+When `source` is specified, the script:
 
-- Compilation is **automatic**: the script compares the source file's
-  modification time against the binary and only recompiles when the
-  source is newer.
+1. **Auto-generates a `main()` wrapper** (`work/<MacroName>_main.cpp`) that
+   `#include`s the macro and calls its entry-point function with
+   `argv[1]` (input filelist) and `argv[2]` (output file).
+2. **Compiles** the wrapper with `g++` (or `$CXX` if set) and
+   `root-config --cflags --libs`.
+
+Additional compilation details:
+- The macro's own directory is automatically added as an `-I` include path.
+- `LD_LIBRARY_PATH` entries are added as `-L` and `-Wl,-rpath` flags so the
+  correct `libstdc++` and other shared libraries are found at link time.
+- `-Wl,--enable-new-dtags` converts RPATH to RUNPATH so `LD_LIBRARY_PATH`
+  takes priority at runtime (works around GCC embedding its own lib64 as
+  DT_RPATH).
+- `-ltbb` is added automatically (required by ROOT's libImt but not
+  included by `root-config`).
+- Compilation is **incremental**: the script compares the source file's
+  modification time against the binary and only recompiles when the source
+  is newer.
 - Use `--skip-compile` to force skipping compilation regardless of timestamps.
 - The binary is placed in the work directory (`./work/` by default).
+
+## File Batching
+
+Input files from the filelist are automatically split into jobs:
+
+- **`--files-per-job N`** — each job gets exactly N files.
+- **If omitted** — files are distributed evenly across the total number of
+  worker slots (`n_workers × threads_per_worker`), so each slot gets
+  roughly the same workload.
+
+## Environment Propagation
+
+The full environment (`PATH`, `LD_LIBRARY_PATH`, etc.) from the submitting
+shell is captured and passed to each worker subprocess, ensuring the compiled
+binary runs with the same library paths as the compilation environment.
 
 ## Merging with hadd
 
@@ -115,17 +150,18 @@ Jobs are marked as **failed** if:
 
 1. Reads the manifest and filelist
 2. Optionally truncates to `--max-files` files
-3. Splits input files into batches of `--files-per-job` files
+3. Splits input files into batches (by `--files-per-job` or evenly across workers)
 4. **Compiles** the C++ macro if the source is newer than the binary
    (unless `--skip-compile`)
 5. Starts a `LocalCluster` or connects to an existing scheduler
-6. For each batch/job, submits a task to a Dask worker that:
+6. Captures the current shell environment for worker subprocesses
+7. For each batch/job, submits a task to a Dask worker that:
    - Writes a per-job filelist (`work/<job_id>_filelist.txt`)
    - Runs `<binary> <filelist> <output_file>`
    - Captures stdout, stderr, return code, and elapsed time
-7. Collects results as jobs complete and prints progress
-8. Writes `results.json` with all job outcomes
-9. Optionally merges outputs with `hadd` and cleans up individual files
+8. Collects results as jobs complete and prints progress
+9. Writes `results.json` with all job outcomes
+10. Optionally merges outputs with `hadd` and cleans up individual files
 
 ## CLI Options
 
@@ -140,7 +176,7 @@ usage: run_jobs.py [-h] --manifest MANIFEST --filelist FILELIST
 
   --manifest             Path to jobs.json (required)
   --filelist             Path to text file with one input file per line (required)
-  --files-per-job        Number of input files per job (default: 1)
+  --files-per-job        Files per job (default: auto-distribute across workers)
   --max-files            Only process the first N files (default: all)
   --hadd                 Merge output ROOT files into this file after completion
   --hadd-j               Number of cores for hadd parallelism (default: 1)
@@ -166,6 +202,6 @@ After completion, `results.json` contains an array of result objects:
   "elapsed_seconds": 12.34,
   "n_files": 5,
   "filelist": "./work/job_0000_filelist.txt",
-  "output_file": "./output/nts.ntuple.mock001.hist.root"
+  "output_file": "./output/nts.ntuple.mock001_job_0000.hist.root"
 }
 ```
