@@ -1,5 +1,5 @@
 {
-  "source": "PlotEntranceMomentum.C",
+  "source": "EventNtuple/rooutil/examples/PlotEntranceMomentumResolution_roodask.C",
   "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
   "libraries": [],
   "compile_flags": [],

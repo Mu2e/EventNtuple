@@ -55,6 +55,7 @@ def compile_source(
     include_dirs: list[str] | None = None,
     libraries: list[str] | None = None,
     compile_flags: list[str] | None = None,
+    source_include_name: str | None = None,
 ) -> Path:
     """Compile a C++ ROOT macro into a standalone binary.
 
@@ -87,8 +88,11 @@ def compile_source(
     work_dir = output_binary.parent
     work_dir.mkdir(parents=True, exist_ok=True)
     wrapper_path = work_dir / f"{func_name}_main.cpp"
+    # The #include uses the name as specified in the manifest so the user
+    # can control whether it's a bare filename or a relative path.
+    include_name = source_include_name or source.name
     wrapper_path.write_text(
-        f'#include "{source.name}"\n'
+        f'#include "{include_name}"\n'
         f"\n"
         f"int main(int argc, char* argv[]) {{\n"
         f'  if (argc < 3) {{ std::cerr << "Usage: " << argv[0] << " <input> <output>" << std::endl; return 1; }}\n'
@@ -128,9 +132,6 @@ def compile_source(
 
     # ROOT's libImt requires TBB but root-config doesn't include it
     cmd_parts.append("-ltbb")
-
-    # Add the macro's directory as an include path
-    cmd_parts.append(f"-I{source.resolve().parent}")
 
     for d in (include_dirs or []):
         # Split colon-separated paths (e.g. "${SOME_PATH}" → "/a:/b:/c")
@@ -394,6 +395,7 @@ def main() -> None:
                 include_dirs=manifest.get("include_dirs"),
                 libraries=manifest.get("libraries"),
                 compile_flags=manifest.get("compile_flags"),
+                source_include_name=manifest["source"],
             )
         binary = str(binary_path)
     elif "binary" in manifest:

@@ -228,7 +228,7 @@ pyenv ana
 In a ```jobs.json``` file:
 ```
 {
-  "source": "PlotEntranceMomentum.C",
+  "source": "EventNtuple/rooutil/examples/PlotEntranceMomentum_roodask.C",
   "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
   "libraries": [],
   "compile_flags": [],
@@ -237,6 +237,7 @@ In a ```jobs.json``` file:
   "timeout_seconds": 3600
 }
 ```
+* note that the ROOT macro needs to have two arguments: an input filename and an output filename
 
 3. Then you can run:
 ```
