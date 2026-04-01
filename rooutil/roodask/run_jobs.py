@@ -250,8 +250,9 @@ def parse_args() -> argparse.Namespace:
         help="Path to a text file with one input file per line",
     )
     p.add_argument(
-        "--files-per-job", type=int, default=1,
-        help="Number of input files per job (default: 1)",
+        "--files-per-job", type=int, default=None,
+        help="Number of input files per job. If omitted, files are "
+             "distributed evenly across workers.",
     )
     p.add_argument(
         "--max-files", type=int, default=None,
@@ -327,9 +328,17 @@ def main() -> None:
         all_files = all_files[: args.max_files]
         print(f"Using first {len(all_files)} files (--max-files {args.max_files})")
 
+    import math
+
     # ── Batch files into jobs ────────────────────────────────────────
-    n = args.files_per_job
-    batches = [all_files[i:i + n] for i in range(0, len(all_files), n)]
+    n_workers = args.n_workers or os.cpu_count()
+    if args.files_per_job is not None:
+        fpj = args.files_per_job
+    else:
+        # Distribute files evenly across total worker threads
+        total_slots = n_workers * args.threads_per_worker
+        fpj = max(1, math.ceil(len(all_files) / total_slots))
+    batches = [all_files[i:i + fpj] for i in range(0, len(all_files), fpj)]
 
     jobs = []
     for idx, batch in enumerate(batches):
@@ -386,7 +395,7 @@ def main() -> None:
         sys.exit(1)
 
     print(f"\n{len(all_files)} input files → {len(jobs)} jobs "
-          f"({args.files_per_job} files/job)")
+          f"({fpj} files/job)")
     print(f"Binary:     {binary}")
     print(f"Output dir: {output_dir}")
     print(f"Work dir:   {args.work_dir}")
