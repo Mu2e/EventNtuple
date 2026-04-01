@@ -56,8 +56,10 @@ python run_jobs.py --manifest jobs.json --filelist filelist.txt \
 - `compile_flags` — *(optional)* additional compiler flags (e.g. `["-O2"]`)
 - `binary` — *(alternative to `source`)* path to a pre-compiled executable
 - `output_dir` — directory for output files (relative to manifest)
-- `output_pattern` — output filename pattern; `{job_id}` is replaced with
-  the auto-generated job ID (e.g. `job_0000`)
+- `output_pattern` — output filename pattern; available placeholders:
+  - `{job_id}` — auto-generated job ID (e.g. `job_0000`)
+  - `{first_filestem}` — filename of the first input file in the batch,
+    stripped of the `.root` extension (e.g. `nts.ntuple.mock001`)
 - `timeout_seconds` — per-job timeout (default: 3600)
 
 **Environment variables:** All string values support `${VAR}` syntax,

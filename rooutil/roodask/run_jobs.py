@@ -310,7 +310,14 @@ def main() -> None:
     jobs = []
     for idx, batch in enumerate(batches):
         job_id = f"job_{idx:04d}"
-        output_file = str(Path(output_dir) / output_pattern.format(job_id=job_id))
+        # {first_filestem} = stem of first input file up to (not including) ".root"
+        first_file = Path(batch[0])
+        first_filestem = first_file.name
+        while first_filestem.endswith(".root"):
+            first_filestem = first_filestem[: -len(".root")]
+        output_file = str(Path(output_dir) / output_pattern.format(
+            job_id=job_id, first_filestem=first_filestem,
+        ))
         jobs.append({
             "id": job_id,
             "files": batch,
