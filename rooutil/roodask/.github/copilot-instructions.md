@@ -1,11 +1,11 @@
-# Copilot Instructions — Dask Distributed C++ Job Runner
+# Copilot Instructions — roodask (Dask Distributed C++ Job Runner)
 
 ## Project Overview
 
 This is a Python + C++ project for distributing ROOT macro execution across
 Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 
-**Main script:** `run_jobs.py` — a single-file Python CLI tool that:
+**Main script:** `roodask.py` — a single-file Python CLI tool that:
 1. Reads a JSON manifest (`jobs.json`) defining the C++ source, include paths,
    libraries, and output pattern.
 2. Reads a filelist (text file, one ROOT file per line).
@@ -58,7 +58,7 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 
 ## Key Design Decisions
 
-1. **Single file script** — `run_jobs.py` is intentionally one file for easy copying/sharing.
+1. **Single file script** — `roodask.py` is intentionally one file for easy copying/sharing.
 2. **No config template needed** — the main() wrapper is auto-generated, not templated.
 3. **Binary invocation:** `<binary> <filelist> <output>` — the ROOT macro must accept
    these two arguments (a filelist path and an output file path).
@@ -78,7 +78,7 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 
 | File                    | Purpose                                              |
 |-------------------------|------------------------------------------------------|
-| `run_jobs.py`           | Main script (compilation, batching, execution, merge)|
+| `roodask.py`           | Main script (compilation, batching, execution, merge)|
 | `jobs.json`             | Manifest (source, includes, output pattern)          |
 | `filelist.txt`          | Input file paths (one per line)                      |
 | `PlotEntranceMomentum.C`| Example ROOT macro                                  |

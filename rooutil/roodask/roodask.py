@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_jobs.py — Dask Distributed C++ Job Runner
+roodask.py — Dask Distributed C++ Job Runner
 
 Compiles a C++ ROOT macro into a standalone binary, then distributes jobs
 across Dask workers.  Input files are read from a filelist and split into
@@ -8,16 +8,16 @@ batches of --files-per-job files each.
 
 Usage:
     # Compile and run locally (1 file per job, uses all CPUs)
-    python run_jobs.py --manifest jobs.json --filelist files.txt
+    python roodask.py --manifest jobs.json --filelist files.txt
 
     # 5 files per job, 4 workers
-    python run_jobs.py --manifest jobs.json --filelist files.txt --files-per-job 5 --n-workers 4
+    python roodask.py --manifest jobs.json --filelist files.txt --files-per-job 5 --n-workers 4
 
     # Skip compilation (reuse previously compiled binary)
-    python run_jobs.py --manifest jobs.json --filelist files.txt --skip-compile
+    python roodask.py --manifest jobs.json --filelist files.txt --skip-compile
 
     # Connect to an existing scheduler
-    python run_jobs.py --manifest jobs.json --filelist files.txt --scheduler tcp://host:8786
+    python roodask.py --manifest jobs.json --filelist files.txt --scheduler tcp://host:8786
 """
 
 from __future__ import annotations

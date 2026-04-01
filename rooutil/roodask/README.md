@@ -1,4 +1,4 @@
-# Dask Distributed C++ Job Runner
+# roodask — Dask Distributed C++ Job Runner
 
 Compile and run a C++ ROOT macro across Dask workers.  Input files are
 read from a filelist and automatically batched into jobs.
@@ -13,24 +13,24 @@ ls /data/files/*.root > filelist.txt
 vim jobs.json
 
 # Compile and run locally — files distributed evenly across all CPUs
-python run_jobs.py --manifest jobs.json --filelist filelist.txt
+python roodask.py --manifest jobs.json --filelist filelist.txt
 
 # 5 files per job, 4 workers
-python run_jobs.py --manifest jobs.json --filelist filelist.txt \
+python roodask.py --manifest jobs.json --filelist filelist.txt \
     --files-per-job 5 --n-workers 4
 
 # Only process the first 10 files (useful for testing)
-python run_jobs.py --manifest jobs.json --filelist filelist.txt --max-files 10
+python roodask.py --manifest jobs.json --filelist filelist.txt --max-files 10
 
 # Skip recompilation on subsequent runs
-python run_jobs.py --manifest jobs.json --filelist filelist.txt --skip-compile
+python roodask.py --manifest jobs.json --filelist filelist.txt --skip-compile
 
 # Merge all output files with hadd after completion
-python run_jobs.py --manifest jobs.json --filelist filelist.txt \
+python roodask.py --manifest jobs.json --filelist filelist.txt \
     --hadd merged.root --hadd-j 4
 
 # Connect to an existing Dask scheduler
-python run_jobs.py --manifest jobs.json --filelist filelist.txt \
+python roodask.py --manifest jobs.json --filelist filelist.txt \
     --scheduler tcp://scheduler-host:8786
 ```
 
@@ -38,7 +38,7 @@ python run_jobs.py --manifest jobs.json --filelist filelist.txt \
 
 | File             | Description                                          |
 |------------------|------------------------------------------------------|
-| `run_jobs.py`    | Main script — compiles, batches, submits, collects   |
+| `roodask.py`    | Main script — compiles, batches, submits, collects   |
 | `jobs.json`      | Manifest — source file, includes, output pattern     |
 | `filelist.txt`   | Input filelist (one ROOT file per line)              |
 
@@ -166,7 +166,7 @@ Jobs are marked as **failed** if:
 ## CLI Options
 
 ```
-usage: run_jobs.py [-h] --manifest MANIFEST --filelist FILELIST
+usage: roodask.py [-h] --manifest MANIFEST --filelist FILELIST
                    [--files-per-job N] [--max-files N]
                    [--hadd OUTPUT] [--hadd-j N]
                    [--skip-compile]
