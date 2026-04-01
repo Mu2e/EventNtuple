@@ -1,35 +1,9 @@
 {
   "source": "PlotEntranceMomentum.C",
-  "include_dirs": [ "${ROOT_INCLUDE_DIR}" ],
+  "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
   "libraries": [],
   "compile_flags": [],
-  "config_template": "config_template.txt",
   "output_dir": "./output",
-  "timeout_seconds": 3600,
-  "jobs": [
-    {
-      "id": "job_001",
-      "input_file": "/path/to/data/file_001.root",
-      "params": {
-        "n_events": 10000,
-        "cut_value": 0.5
-      }
-    },
-    {
-      "id": "job_002",
-      "input_file": "/path/to/data/file_002.root",
-      "params": {
-        "n_events": 20000,
-        "cut_value": 0.8
-      }
-    },
-    {
-      "id": "job_003",
-      "input_file": "/path/to/data/file_003.root",
-      "params": {
-        "n_events": 15000,
-        "cut_value": 0.3
-      }
-    }
-  ]
+  "output_pattern": "output_{job_id}.root",
+  "timeout_seconds": 3600
 }

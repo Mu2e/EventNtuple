@@ -9,10 +9,11 @@
 #include "TH1F.h"
 
 using namespace rooutil;
-void PlotEntranceMomentum(std::string filename) {
+void PlotEntranceMomentum(std::string filename, std::string outfilename) {
 
   // Create the histogram you want to fill
   TH1F* hRecoMom = new TH1F("hRecoMom", "Reconstructed Momentum at Tracker Entrance", 50,95,110);
+  hRecoMom->SetDirectory(0);
 
   // Set up RooUtil
   RooUtil util(filename);
@@ -42,7 +43,6 @@ void PlotEntranceMomentum(std::string filename) {
 
   // Draw the histogram
   //  hRecoMom->Draw("HIST E");
-  std::string outfilename = "ana." + filename;
   TFile* outfile = new TFile(outfilename.c_str(), "RECREATE");
   hRecoMom->Write();
   outfile->Close();
