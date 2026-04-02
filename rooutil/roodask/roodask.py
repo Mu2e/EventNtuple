@@ -168,8 +168,14 @@ def run_cpp_job(
     work_dir: str,
     timeout: int,
     env: dict | None = None,
+    binary_args: list[str] | None = None,
 ) -> dict:
-    """Run a single C++ job: write batch filelist, execute binary, capture output."""
+    """Run a single C++ job: write batch filelist, execute binary, capture output.
+
+    If binary_args is provided, each element is formatted with {filelist}
+    and {output} placeholders replaced by the actual paths.  If binary_args
+    is None, the default invocation is: binary <filelist> <output>.
+    """
 
     job_id = job["id"]
     files = job["files"]
@@ -185,11 +191,17 @@ def run_cpp_job(
     filelist_path = work_path / f"{job_id}_filelist.txt"
     filelist_path.write_text("\n".join(files) + "\n")
 
-    # Run the binary: binary <filelist> <output>
+    # Build command: substitute placeholders in args or use default convention
+    if binary_args is not None:
+        subs = {"filelist": str(filelist_path), "output": output_file}
+        cmd = [binary] + [a.format(**subs) for a in binary_args]
+    else:
+        cmd = [binary, str(filelist_path), output_file]
+
     t0 = time.monotonic()
     try:
         result = subprocess.run(
-            [binary, str(filelist_path), output_file],
+            cmd,
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -406,6 +418,11 @@ def main() -> None:
               file=sys.stderr)
         sys.exit(1)
 
+    # ── Resolve binary args ─────────────────────────────────────────
+    binary_args = manifest.get("args")  # list of strings with {filelist}/{output}
+    if binary_args is not None:
+        print(f"Args:       {' '.join(binary_args)}")
+
     print(f"\n{len(all_files)} input files → {len(jobs)} jobs "
           f"({fpj} files/job)")
     print(f"Binary:     {binary}")
@@ -443,6 +460,7 @@ def main() -> None:
             work_dir=args.work_dir,
             timeout=timeout,
             env=run_env,
+            binary_args=binary_args,
             key=f"job-{job['id']}",
         )
         futures[fut] = job["id"]

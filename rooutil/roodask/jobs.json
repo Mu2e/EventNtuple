@@ -1,5 +1,6 @@
 {
-  "source": "EventNtuple/rooutil/examples/PlotEntranceMomentumResolution_roodask.C",
+  "binary": "RooCount",
+  "args": ["{filelist}", "{output}", "MDS3a"],
   "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
   "libraries": [],
   "compile_flags": [],
