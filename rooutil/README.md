@@ -224,8 +224,8 @@ muse setup AnalysisMusingMDC2025
 pyenv ana
 ```
 
-2. Define your job:
-In a ```jobs.json``` file:
+2. Define your job in a manifest file:
+In a ```manifest.json``` file:
 ```
 {
   "source": "EventNtuple/rooutil/examples/PlotEntranceMomentum_roodask.C",
@@ -237,6 +237,7 @@ In a ```jobs.json``` file:
   "timeout_seconds": 3600
 }
 ```
+* see example manifest files for [ROOT macros](./roodask/macro_manifest.json) and [binary programs](./roodask/refana_manifest.json)
 * note that the ROOT macro needs to have two arguments: an input filename and an output filename
 * note that if you already have a compiled program, you can use the ```"binary"``` field instead of the ```"source"``` to run that instead
 
