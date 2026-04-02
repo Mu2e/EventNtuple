@@ -256,7 +256,7 @@ This will run the RooCount RefAna:
 This will produce a single output file (```output/merged.root```) as well as run the ```RooCountAna``` program on the merged output
 
 ### Additional Information:
-* There is a dedicated [README](./roodask/README.md) for technical details but broadly, you do:
+* There is a dedicated [README](./roodask/README.md) for technical details
 * There is a ```--scheduler``` option that will be important when we get things up and running on EAF
 
 
