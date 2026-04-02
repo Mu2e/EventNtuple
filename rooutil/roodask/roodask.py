@@ -379,7 +379,7 @@ def main() -> None:
 
     # ── Resolve binary (compile or pre-compiled) ─────────────────────
     if "source" in manifest:
-        source_path = (manifest_path.parent / manifest["source"]).resolve()
+        source_path = Path(manifest["source"]).resolve()
         binary_name = source_path.stem
         binary_path = (work_dir / binary_name).resolve()
 
