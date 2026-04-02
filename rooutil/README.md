@@ -214,41 +214,51 @@ If you want to also remove tracks from the event, you should use ```SelectTracks
 It's also possible to use RooUtil to create a new ntuple with a different structure (e.g. one entry per track). See an example in [CreateTrackNtuple.C](./examples/CreateTrackNtuple.C) for how this can be done
 
 ## ```roodask```
-A python script ```roodask.py``` is available to run your ROOT macro in parallel using dask (see [its README](./roodask/README.md) for technical details) but broadly, you do:
+```roodask``` allows you to run a RooUtil-based macro or program in parallel over multiple files using dask. Here we present two examples: running a ROOT macro from the examples folder and running the RooCount reference analysis.
 
-1. Set up environment
+### Setting Up
 
+We need to set up the environment and get a filelist:
 ```
+cd /to/your/work/area/
 mu2einit
 muse setup AnalysisMusingMDC2025
 pyenv ana
+
+mkdir filelists
+metacat query files from mu2e:nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root | mdh print-url -l disk -s path - > filelists/nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root.list
 ```
 
-2. Define your job in a manifest file:
-In a ```manifest.json``` file:
-```
-{
-  "source": "EventNtuple/rooutil/examples/PlotEntranceMomentum_roodask.C",
-  "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
-  "libraries": [],
-  "compile_flags": [],
-  "output_dir": "./output",
-  "output_pattern": "{first_filestem}_{job_id}.hist.root",
-  "timeout_seconds": 3600
-}
-```
-* see example manifest files for [ROOT macros](./roodask/macro_manifest.json) and [binary programs](./roodask/refana_manifest.json)
-* note that the ROOT macro needs to have two arguments: an input filename and an output filename
-* note that if you already have a compiled program, you can use the ```"binary"``` field instead of the ```"source"``` to run that instead
+You will also need to write a "manifest" JSON file. We will use the following examples:
+* for running a ROOT macro use [this manifest file](./roodask/macro_manifest.json)
+* for running a program use [this manifest file](./roodask/refana_manifest.json)
 
-3. Then you can run:
+### Example 1: Running a ROOT Macro
+
+This will run the example macro: PlotEntranceMomentumResolution_roodask.C
+
 ```
-roodask --manifest jobs.json --filelist test.txt --n-workers 4 --threads-per-worker 1
+roodask --manifest EventNtuple/rooutil/roodask/macro_manifest.json --filelist filelists/nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root.list --n-workers 2 --threads-per-worker 1 --max-files=3
 ```
 
-Some useful features:
-* you can run over just a subset of files in your filelist with ```--max-files N```
-* you can add the ```--hadd merged.root``` option to create a single output ROOT file (you can also use ```--hadd-j N``` to use the multi-threading option to ```hadd```)
+This will produce an ```output/``` directory with an output file per job
+* you can add the ```--hadd merged.root``` option if you want an hadded output (if you want to run ```hadd``` with multi-threading add ```--hadd-j``` option
+* you can run a program on the hadded file with the ```--post-hadd``` option (see Example 2 for a concrete example)
+
+### Example 2: Running a Program
+
+This will run the RooCount RefAna: 
+
+```
+ roodask --manifest EventNtuple/rooutil/roodask/refana_manifest.json --filelist filelist.txt --n-workers 2 --threads-per-worker 1 --max-files=3 --hadd merged.root --post-hadd 'RooCountAna {merged} MDS3a'
+```
+
+This will produce a single output file (```output/merged.root```) as well as run the ```RooCountAna``` program on the merged output
+
+### Additional Information:
+* There is a dedicated [README](./roodask/README.md) for technical details but broadly, you do:
+* There is a ```--scheduler``` option that will be important when we get things up and running on EAF
+
 
 ## Speed Optimizations
 By default, RooUtil will read all the branches for every entry. If you are finding that this is too slow, then you can explicity turn on only the branches that you will be reading. This can increase the speed by as much as a factor of 10.
