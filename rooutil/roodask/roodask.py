@@ -282,6 +282,12 @@ def parse_args() -> argparse.Namespace:
              "0 means use all available cores. Only used with --hadd.",
     )
     p.add_argument(
+        "--post-hadd", default=None, metavar="CMD",
+        help="Command to run on the merged file after hadd completes. "
+             "Use {merged} as a placeholder for the merged file path. "
+             "Example: 'my_plotter {merged} --style fancy'",
+    )
+    p.add_argument(
         "--skip-compile", action="store_true",
         help="Skip compilation and reuse a previously compiled binary "
              "in the work directory.",
@@ -532,6 +538,26 @@ def main() -> None:
             else:
                 print(f"hadd FAILED (rc={hadd_result.returncode})", file=sys.stderr)
                 print(hadd_result.stderr, file=sys.stderr)
+
+            # ── Optional post-hadd command ───────────────────────────────
+            if args.post_hadd and hadd_result.returncode == 0:
+                post_cmd = args.post_hadd.format(merged=hadd_target)
+                print(f"\nRunning post-hadd command: {post_cmd}")
+                t0 = time.monotonic()
+                post_result = subprocess.run(
+                    post_cmd, shell=True, capture_output=True, text=True,
+                    env=dict(os.environ),
+                )
+                elapsed = time.monotonic() - t0
+                if post_result.returncode == 0:
+                    print(f"Post-hadd command succeeded in {elapsed:.1f}s")
+                    if post_result.stdout.strip():
+                        print(post_result.stdout.strip())
+                else:
+                    print(f"Post-hadd command FAILED (rc={post_result.returncode})",
+                          file=sys.stderr)
+                    if post_result.stderr.strip():
+                        print(post_result.stderr.strip(), file=sys.stderr)
 
     client.close()
 

@@ -16,6 +16,7 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
    filelist and output path.
 6. Collects results (stdout, stderr, returncode, timing) into `results.json`.
 7. Optionally merges output ROOT files with `hadd`.
+8. Optionally runs a post-hadd command on the merged file (`--post-hadd`).
 
 ## Environment
 
@@ -88,7 +89,7 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 - **Adding a new CLI flag:** Edit `parse_args()`, then use `args.<flag>` in `main()`.
 - **Changing the binary interface:** Edit the wrapper template in `compile_source()`
   (the `wrapper_path.write_text(...)` block) and update `run_cpp_job()` subprocess call.
-- **Adding post-processing:** Add after the hadd section in `main()`, before `client.close()`.
+- **Adding post-processing:** Add after the post-hadd section in `main()`, before `client.close()`.
 - **Supporting a new manifest field:** Add to `jobs.json`, access via `manifest.get("field")`.
 
 ## Files

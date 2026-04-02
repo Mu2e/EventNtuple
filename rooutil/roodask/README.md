@@ -160,6 +160,20 @@ are automatically deleted after a successful merge to save disk space.
 Use `--hadd-j N` to control hadd parallelism (default: 1, set to 0 for all
 available cores).
 
+## Post-Merge Command
+
+Use `--post-hadd CMD` to run a command on the merged file after a successful
+hadd.  The `{merged}` placeholder is replaced with the full path to the
+merged file.
+
+```bash
+python roodask.py --manifest jobs.json --filelist filelist.txt \
+    --hadd merged.root --post-hadd 'my_plotter {merged} --style fancy'
+```
+
+The command runs via the shell, so pipes and other shell features are
+supported.  It only executes if hadd succeeds.
+
 ## Error Detection
 
 Jobs are marked as **failed** if:
@@ -184,13 +198,14 @@ Jobs are marked as **failed** if:
 8. Collects results as jobs complete and prints progress
 9. Writes `results.json` with all job outcomes (all paths are absolute)
 10. Optionally merges outputs with `hadd` and cleans up individual files
+11. Optionally runs a post-hadd command on the merged file
 
 ## CLI Options
 
 ```
 usage: roodask.py [-h] --manifest MANIFEST --filelist FILELIST
                    [--files-per-job N] [--max-files N]
-                   [--hadd OUTPUT] [--hadd-j N]
+                   [--hadd OUTPUT] [--hadd-j N] [--post-hadd CMD]
                    [--skip-compile] [--force-compile]
                    [--scheduler SCHEDULER] [--n-workers N_WORKERS]
                    [--threads-per-worker N] [--work-dir WORK_DIR]
@@ -203,6 +218,8 @@ usage: roodask.py [-h] --manifest MANIFEST --filelist FILELIST
   --hadd                 Merge output ROOT files into this file after completion;
                          relative paths resolve into the output directory
   --hadd-j               Number of cores for hadd parallelism (default: 1)
+  --post-hadd            Command to run on the merged file after hadd succeeds;
+                         use {merged} as a placeholder for the merged file path
   --skip-compile         Skip compilation, reuse binary in work directory
   --force-compile        Force recompilation even if the binary is up to date
   --scheduler            Dask scheduler address (e.g. tcp://host:8786)
