@@ -44,6 +44,7 @@ python roodask.py --manifest jobs.json --filelist filelist.txt \
 
 ## Manifest (`jobs.json`)
 
+**Source example** (compile a ROOT macro):
 ```json
 {
   "source": "PlotEntranceMomentum.C",
@@ -56,10 +57,23 @@ python roodask.py --manifest jobs.json --filelist filelist.txt \
 }
 ```
 
+**Binary example** (run a pre-compiled program with custom args):
+```json
+{
+  "binary": "RooCount",
+  "args": ["{filelist}", "{output}", "MDS3a"],
+  "output_dir": "./output",
+  "output_pattern": "{first_filestem}_{job_id}.hist.root",
+  "timeout_seconds": 3600
+}
+```
+
 **Fields:**
-- `source` — path to the C++ ROOT macro (relative to manifest).
+- `source` — path to the C++ ROOT macro (relative paths resolve from cwd).
   The macro's entry-point function must match the filename stem
   (e.g. `PlotEntranceMomentum.C` → `void PlotEntranceMomentum(...)`).
+  The `#include` in the generated wrapper uses this exact string, so ensure
+  the macro is findable via your `include_dirs`.
 - `include_dirs` — *(optional)* extra `-I` include paths for compilation.
   Colon-separated values (like `${ROOT_INCLUDE_PATH}`) are automatically
   split into individual `-I` flags.
@@ -67,6 +81,10 @@ python roodask.py --manifest jobs.json --filelist filelist.txt \
 - `compile_flags` — *(optional)* additional compiler flags (e.g. `["-O2"]`)
 - `binary` — *(alternative to `source`)* path to a pre-compiled executable;
   skips compilation entirely
+- `args` — *(optional)* list of command-line arguments passed to the binary.
+  Supports `{filelist}` and `{output}` placeholders which are replaced per job
+  with the actual filelist and output file paths.  If omitted, the default
+  invocation is `<binary> <filelist> <output>`.
 - `output_dir` — directory for output files (relative paths resolve from cwd)
 - `output_pattern` — output filename pattern; available placeholders:
   - `{job_id}` — auto-generated job ID (e.g. `job_0000`)
@@ -95,15 +113,14 @@ N files (useful for quick testing).
 When `source` is specified, the script:
 
 1. **Auto-generates a `main()` wrapper** (`work/<MacroName>_main.cpp`) that
-   `#include`s the macro by filename (e.g. `#include "MyMacro.C"`) and
-   calls its entry-point function with `argv[1]` (input filelist) and
-   `argv[2]` (output file).  The macro's directory is added as an `-I`
-   include path so the `#include` resolves correctly.
+   `#include`s the macro using the exact name from the manifest (e.g.
+   `#include "PlotEntranceMomentum.C"`) and calls its entry-point function
+   with `argv[1]` (input filelist) and `argv[2]` (output file).  Ensure the
+   macro is findable via `include_dirs`.
 2. **Compiles** the wrapper with `g++` (or `$CXX` if set) and
    `root-config --cflags --libs`.
 
 Additional compilation details:
-- The macro's own directory is automatically added as an `-I` include path.
 - `LD_LIBRARY_PATH` entries are added as `-L` and `-Wl,-rpath` flags so the
   correct `libstdc++` and other shared libraries are found at link time.
 - `-Wl,--enable-new-dtags` converts RPATH to RUNPATH so `LD_LIBRARY_PATH`
@@ -161,7 +178,8 @@ Jobs are marked as **failed** if:
 6. Captures the current shell environment for worker subprocesses
 7. For each batch/job, submits a task to a Dask worker that:
    - Writes a per-job filelist (`work/<job_id>_filelist.txt`)
-   - Runs `<binary> <filelist> <output_file>`
+   - Runs `<binary> [args...] <filelist> <output_file>` (args from manifest,
+     with `{filelist}` and `{output}` placeholders substituted)
    - Captures stdout, stderr, return code, and elapsed time
 8. Collects results as jobs complete and prints progress
 9. Writes `results.json` with all job outcomes (all paths are absolute)

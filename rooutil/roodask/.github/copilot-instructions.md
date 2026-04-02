@@ -30,16 +30,16 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 ## Architecture Details
 
 ### Compilation (`compile_source()`)
-- Generates `work/<MacroName>_main.cpp` that `#include`s the macro by filename
-  (e.g. `#include "MyMacro.C"`) and calls its entry function (name = file stem)
-  with `argv[1]` (filelist) and `argv[2]` (output).  The macro's directory is
-  added as an `-I` path so the include resolves correctly.
+- Generates `work/<MacroName>_main.cpp` that `#include`s the macro using the
+  exact name from the manifest `"source"` field and calls its entry function
+  (name = file stem) with `argv[1]` (filelist) and `argv[2]` (output).
+  The macro must be findable via `include_dirs`.
+- `source` path resolves from **cwd** (not manifest directory).
 - Uses `$CXX` or `g++`, prints compiler version before building.
 - `root-config --cflags --libs` provides ROOT flags.
 - `LD_LIBRARY_PATH` entries are added as `-L` and `-Wl,-rpath` flags.
 - `-Wl,--enable-new-dtags` ensures RUNPATH (not RPATH) so `LD_LIBRARY_PATH` wins at runtime.
 - `-ltbb` is added (required by ROOT's libImt, not in `root-config --libs`).
-- Macro's directory is auto-added as `-I` path.
 - `include_dirs` values are split on `:` (os.pathsep) for colon-separated env vars.
 - **Incremental:** only recompiles when source mtime > binary mtime.
 - **Force recompile:** `--force-compile` skips the mtime check and always recompiles.
@@ -47,6 +47,7 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
   timestamp-triggered message ("Source is newer than binary, recompiling...").
 
 ### Path Resolution
+- `source` from manifest: relative paths resolve from **cwd** (not manifest directory).
 - `output_dir` from manifest: relative paths resolve from **cwd** (not manifest directory).
 - `--work-dir`: relative paths resolve from **cwd**.
 - `--hadd` target: relative paths resolve into the output directory.
@@ -54,13 +55,17 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 
 ### Job Execution (`run_cpp_job()`)
 - Each job receives a batch of input files, writes them to `work/<job_id>_filelist.txt`.
-- Runs: `<binary> <filelist_path> <output_file>`
+- If manifest has `"args"`, builds command as `<binary> [args...]` with `{filelist}` and
+  `{output}` placeholders substituted per job.
+- If no `"args"`, defaults to: `<binary> <filelist_path> <output_file>`
 - The submitting shell's full environment is captured and passed to workers via `env=`.
 - Success = returncode 0 AND no "Error" in stderr (catches ROOT silent failures).
 
 ### Manifest (`jobs.json`)
 - All string values undergo `${VAR}` expansion via `os.path.expandvars()` at load time.
 - `output_pattern` supports `{job_id}` and `{first_filestem}` placeholders.
+- `"args"` field: list of strings with `{filelist}` and `{output}` placeholders,
+  allowing the user to control the full command-line argument order.
 - `config_template` field was removed — the script generates the wrapper automatically.
 
 ### File Batching
@@ -71,8 +76,9 @@ Dask workers on a shared filesystem (Mu2e experiment at Fermilab).
 
 1. **Single file script** — `roodask.py` is intentionally one file for easy copying/sharing.
 2. **No config template needed** — the main() wrapper is auto-generated, not templated.
-3. **Binary invocation:** `<binary> <filelist> <output>` — the ROOT macro must accept
-   these two arguments (a filelist path and an output file path).
+3. **Binary invocation:** Default is `<binary> <filelist> <output>`. If `"args"` is set
+   in the manifest, the user controls the full argument list with `{filelist}` and
+   `{output}` placeholders (e.g. `["--input", "{filelist}", "--out", "{output}", "flag"]`).
 4. **Shared filesystem assumed** — workers read/write the same paths as the submitter.
 5. **Environment propagation** — `os.environ` is serialized and passed to each worker
    subprocess to ensure consistent library resolution.
