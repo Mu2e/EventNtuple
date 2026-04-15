@@ -400,6 +400,62 @@ namespace mu2e {
     chimcs.push_back(chimc);
   }
 
+  void InfoMCStructHelper::fillCaloDigiMCInfo(CaloShowerSim const& shower, std::vector<CaloDigiMCInfo>& calodigimcs) {
+    CaloDigiMCInfo calodigimc;
+    auto const& steps = shower.caloShowerSteps();
+    calodigimc.nsim = steps.size();
+    calodigimc.energyCorr_ = shower.energyDep();
+    calodigimc.timeCorr_ = shower.time();
+    calodigimc.eDepG4 = shower.energyDepG4();
+    calodigimc.eDep = shower.energyDep();
+    calodigimc.eprimary = 0.0;
+    calodigimc.tprimary = 0.0;
+    calodigimc.crystalID_ = shower.crystalID();
+    
+    if (calodigimc.nsim > 0 && steps.front()){
+      calodigimc.eprimary = steps.front()->energyDepG4();
+      calodigimc.tprimary = steps.front()->time();
+      
+      for (auto const& step : steps){
+        if (step && step->simParticle()){
+          auto simid = step->simParticle()->id().asInt();
+          calodigimc.tDeps.push_back(step->time());
+          calodigimc.eDeps.push_back(step->energyDepG4());
+          calodigimc.momentumIns.push_back(step->momentumIn());
+          calodigimc.simParticleIds.push_back(simid);
+          calodigimc.simRels.push_back(MCRelationship(step->simParticle(),steps.front()->simParticle()));
+        }
+      }
+    }
+    calodigimcs.push_back(calodigimc);
+  }
+
+  void InfoMCStructHelper::fillCaloDigiSimInfos(CaloShowerSim const& shower, std::vector<SimInfo>& cdsis) {
+    auto const& steps = shower.caloShowerSteps();
+    for (auto const& step : steps){
+      if (step && step->simParticle()){
+        auto simParticlePtr = step->simParticle();
+        int simid = simParticlePtr->id().asInt();
+
+        // Search that we didn't insert this particle already
+        bool already_added = false;
+        for (auto const& info : cdsis){
+          if (info.id == simid){
+            already_added = true;
+            break;
+          }
+        }
+        // It's new
+        if (!already_added){
+          SimInfo siminfo;
+          fillSimInfo(simParticlePtr, siminfo);
+          siminfo.index = cdsis.size();
+          cdsis.push_back(siminfo);
+        }
+      }
+    }
+  }
+
   void InfoMCStructHelper::fillCaloSimInfos(CaloClusterMC const& ccmc, std::vector<SimInfo>& csis) {
     auto const& edeps = ccmc.energyDeposits();
     for (auto const& edep : edeps){

@@ -81,6 +81,8 @@
 #include "EventNtuple/inc/MCStepInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
+#include "EventNtuple/inc/CaloDigiMCInfo.hh"
+#include "Offline/MCDataProducts/inc/CaloShowerSim.hh"
 
 // C++ includes.
 #include <iostream>
@@ -153,11 +155,13 @@ namespace mu2e {
         fhicl::Atom<art::InputTag> caloHitsTag{Name("CaloHitsTag"), Comment("Tag for Calorimeter hit collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> caloRecoDigisTag{Name("CaloRecoDigisTag"), Comment("Tag for Calorimeter recodigi collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> caloDigisTag{Name("CaloDigisTag"), Comment("Tag for Calorimeter digi collection"), art::InputTag()};
+        fhicl::Atom<art::InputTag> caloShowerSimTag{Name("CaloShowerSimTag"), Comment("Tag for Calorimeter shower sim collection"), art::InputTag()};
         // Calorimeter flags
         fhicl::Atom<bool> fillCaloClusters{Name("FillCaloClusters"),Comment("Flag for turning on Calo Clusters branch"), true};
         fhicl::Atom<bool> fillCaloHits{Name("FillCaloHits"),Comment("Flag for turning on Calo Hits branch"), false};
         fhicl::Atom<bool> fillCaloRecoDigis{Name("FillCaloRecoDigis"),Comment("Flag for turning on Calo RecoDigis branch"), false};
         fhicl::Atom<bool> fillCaloDigis{Name("FillCaloDigis"),Comment("Flag for turning on Calo Digis branch"), false};
+        fhicl::Atom<bool> fillCaloDigisMC{Name("FillCaloDigisMC"),Comment("Flag for turning on Calo Digis MC branch"), false};
         // CRV -- input tags
         fhicl::Atom<art::InputTag> crvCoincidencesTag{Name("CrvCoincidencesTag"), Comment("Tag for CrvCoincidenceCluster Collection"), art::InputTag()};
         fhicl::Atom<art::InputTag> crvRecoPulsesTag{Name("CrvRecoPulsesTag"), Comment("Tag for CrvRecopPulse Collection"), art::InputTag()};
@@ -188,6 +192,7 @@ namespace mu2e {
         fhicl::Atom<bool> fillCaloClustersMC{ Name("FillCaloClustersMC"),Comment("Fill Calo Cluster MC information"), true};
         fhicl::Atom<bool> fillCaloHitsMC{ Name("FillCaloHitsMC"),Comment("Fill Calo Hit MC information"), true};
         fhicl::Atom<bool> fillCaloSimInfos{ Name("FillCaloSimInfos"),Comment("Fill Sim particles information associated with calo clusters"), true};
+        fhicl::Atom<bool> fillCaloDigiSimInfos{ Name("FillCaloDigiSimInfos"),Comment("Fill Sim particles information associated with calo digis"), true};
         fhicl::Atom<art::InputTag> caloClusterMCTag{Name("CaloClusterMCTag"), Comment("Tag for CaloClusterMCCollection") ,art::InputTag()};
         // CRV MC
         fhicl::Atom<art::InputTag> crvCoincidenceMCsTag{Name("CrvCoincidenceMCsTag"), Comment("Tag for CrvCoincidenceClusterMC Collection"), art::InputTag()};
@@ -299,18 +304,21 @@ namespace mu2e {
       art::Handle<CaloHitCollection> _caloHits;
       art::Handle<CaloRecoDigiCollection> _caloRecoDigis;
       art::Handle<CaloDigiCollection> _caloDigis;
+      art::Handle<CaloShowerSimCollection> _caloShowerSim;
       std::vector<CaloClusterInfo> _caloCIs;
       std::vector<CaloHitInfo> _caloHIs;
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
+      std::vector<CaloDigiMCInfo> _caloDigiMCIs;
 
-      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis, _fillcalodigis;
+      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis, _fillcalodigis, _fillcalodigismc;
 
       // Calorimeter MC
       std::vector<CaloClusterInfoMC> _caloCIMCs; //Independent from tracker
       std::vector<CaloHitInfoMC> _caloHIMCs; //Independent from tracker
       std::vector<SimInfo> _caloSIMCs; //Sim particle infos associated with calo clusters
-      bool _fillcaloclustersmc, _fillcalohitsmc, _fillcalosiminfos;
+      std::vector<SimInfo> _caloDigiSIMCs; //Sim particle infos associated with calo digis
+      bool _fillcaloclustersmc, _fillcalohitsmc, _fillcalosiminfos, _fillcalodigisiminfos;
 
       // CRV (inputs)
       std::map<BranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
@@ -380,10 +388,12 @@ namespace mu2e {
     _fillcalohits(conf().fillCaloHits()),
     _fillcalorecodigis(conf().fillCaloRecoDigis()),
     _fillcalodigis(conf().fillCaloDigis()),
+    _fillcalodigismc(conf().fillCaloDigisMC()),
     // Calorimeter MC
     _fillcaloclustersmc(conf().fillCaloClustersMC()),
     _fillcalohitsmc(conf().fillCaloHitsMC()),
     _fillcalosiminfos(conf().fillCaloSimInfos()),
+    _fillcalodigisiminfos(conf().fillCaloDigiSimInfos()),
     // CRV
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
@@ -393,7 +403,6 @@ namespace mu2e {
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
-
     // decode fit type
     for(size_t ifit=0;ifit < fitNames.size();++ifit){
       auto const& fname = fitNames[ifit];
@@ -402,12 +411,11 @@ namespace mu2e {
         break;
       }
     }
-
+    
     // Put all the branch configurations together
     for(const auto& branch_cfg : _conf.branches()){
       _allBranches.push_back(branch_cfg);
     }
-
     // Create all the info structs
     for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
       auto i_branchConfig = _allBranches.at(i_branch);
@@ -430,7 +438,7 @@ namespace mu2e {
       if(_fillcalomc && _fillmc){
         _allMCTCHIs[i_branch] = std::vector<CaloClusterInfoMC>();
       }
-
+      std::cout << "[EventNtupleMaker Constructor] Finished creating track info structs for branch " << i_branchConfig.branch() << "." << std::endl;
       RecoQualInfo rqi;
       _allRQIs.push_back(rqi);
 
@@ -438,20 +446,20 @@ namespace mu2e {
       _allTSHCIs[i_branch] = std::vector<std::vector<TrkStrawHitCalibInfo>>();
       _allTSMIs[i_branch] = std::vector<std::vector<TrkStrawMatInfo>>();
       _allTSHIMCs[i_branch] = std::vector<std::vector<TrkStrawHitInfoMC>>();
-
+      std::cout << "[EventNtupleMaker Constructor] Finished creating track straw hit info structs for branch " << i_branchConfig.branch() << "." << std::endl;
       std::vector<std::vector<MVAResultInfo>> trkQualResults;
       for (size_t i_trkQualTag = 0; i_trkQualTag < i_branchConfig.trkQualTags().size(); ++i_trkQualTag) {
         trkQualResults.emplace_back(std::vector<MVAResultInfo>());
       }
       _allTrkQualResults[i_branch] = trkQualResults;
-
+      std::cout << "[EventNtupleMaker Constructor] Finished creating track quality info structs for branch " << i_branchConfig.branch() << "." << std::endl;
       std::vector<std::vector<MVAResultInfo>> trkPIDResults;
       for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
         trkPIDResults.emplace_back(std::vector<MVAResultInfo>());
       }
       _allTrkPIDResults[i_branch] = trkPIDResults;
 
-
+      std::cout << "[EventNtupleMaker Constructor] Finished creating track PID info structs for branch " << i_branchConfig.branch() << "." << std::endl;
       if(_conf.extraMCStepTags(_extraMCStepTags)){
         for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
           for (StepCollIndex i_extraMCStepTag = 0; i_extraMCStepTag < _extraMCStepTags.size(); ++i_extraMCStepTag) {
@@ -471,6 +479,12 @@ namespace mu2e {
         }
       }
     }
+    
+    // Diagnostic: print configuration flags for calorimeter MC info
+    std::cout << "[EventNtupleMaker Constructor] Calorimeter configuration:" << std::endl;
+    std::cout << "  fillCaloDigisMC=" << _fillcalodigismc << std::endl;
+    std::cout << "  fillCaloDigiSimInfos=" << _fillcalodigisiminfos << std::endl;
+    std::cout << "  caloShowerSimTag=" << conf().caloShowerSimTag() << std::endl;
   }
 
   void EventNtupleMaker::beginJob( ){
@@ -577,6 +591,12 @@ namespace mu2e {
     }
     if (_fillcalodigis){
       _ntuple->Branch("calodigis.",&_caloDIs,_buffsize,_splitlevel);
+    }
+    if (_fillcalodigismc){
+      _ntuple->Branch("calodigismc.",&_caloDigiMCIs,_buffsize,_splitlevel);
+    }
+    if (_fillcalodigisiminfos){
+      _ntuple->Branch("calodigisim.",&_caloDigiSIMCs,_buffsize,_splitlevel);
     }
     // Calorimeter MC
     if (_fillmc) {
@@ -818,10 +838,17 @@ namespace mu2e {
     if (_fillcaloclustersmc) { _caloCIMCs.clear(); }
     if (_fillcalohitsmc) { _caloHIMCs.clear(); }
     if (_fillcalosiminfos) { _caloSIMCs.clear(); }
+    if (_fillcalodigisiminfos) { _caloDigiSIMCs.clear(); }
+    if (_fillcalodigismc) { _caloDigiMCIs.clear(); }
     _caloCIs.clear();
     _caloHIs.clear();
     _caloRDIs.clear();
     _caloDIs.clear();
+
+    // Retrieve CaloShowerSim collection for both caloDigisMC and caloDigiSimInfos branches
+    if (_fillcalodigismc || _fillcalodigisiminfos) {
+      event.getByLabel(_conf.caloShowerSimTag(),_caloShowerSim);
+    }
 
     if (_fillcaloclustersmc){
       for (const auto& clustermc : *_ccmcch.product()){
@@ -842,6 +869,14 @@ namespace mu2e {
     if (_fillcalosiminfos){
       for (const auto& clustermc : *_ccmcch.product()){
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
+      }
+    }
+    std::cout<< "[EventNtupleMaker::analyze] fillCaloDigiSimInfos=" << _fillcalodigisiminfos << " caloShowerSim.isValid()=" << _caloShowerSim.isValid() << std::endl;
+    if (_fillcalodigisiminfos){
+      if (_caloShowerSim.isValid()){
+        for (const auto& showerSim : *_caloShowerSim.product()){
+          _infoMCStructHelper.fillCaloDigiSimInfos(showerSim,_caloDigiSIMCs);
+        }
       }
     }
 
@@ -949,6 +984,20 @@ namespace mu2e {
               _infoStructHelper.fillCaloDigiInfo(digi,_caloDIs);
             }
           }
+        }
+      }
+
+      // Fill CaloDigisMC branch
+      if (_fillcalodigismc){
+        std::cout << "[EventNtupleMaker] Attempting to fill caloDigisMC branch" << std::endl;
+        if (_caloShowerSim.isValid()){
+          std::cout << "[EventNtupleMaker] CaloShowerSim collection found with " << _caloShowerSim->size() << " entries" << std::endl;
+          for (const auto& showerSim : *_caloShowerSim.product()){
+            _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
+          }
+          std::cout << "[EventNtupleMaker] Filled caloDigisMC with " << _caloDigiMCIs.size() << " entries" << std::endl;
+        } else {
+          std::cout << "[EventNtupleMaker] WARNING: CaloShowerSim collection NOT found!" << std::endl;
         }
       }
 

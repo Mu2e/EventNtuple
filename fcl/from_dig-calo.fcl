@@ -1,0 +1,57 @@
+#include "Offline/fcl/minimalMessageService.fcl"
+#include "Offline/fcl/standardProducers.fcl"
+#include "Offline/fcl/standardServices.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+
+process_name : EventNtuple
+
+source : { module_type : RootInput }
+
+services : {
+  @table::Services.Reco
+}
+
+physics : {
+  analyzers : {
+    @table::EventNtuple.analyzers
+  }
+
+  e1 : [ EventNtuple ]
+}
+
+physics.trigger_paths : [ ]
+physics.end_paths : [ e1 ]
+
+#Tags to fill PBI information
+#physics.analyzers.EventNtuple.PBTTag : "EWMProducer"
+#physics.analyzers.EventNtuple.PBTMCTag : "EWMProducer"
+physics.analyzers.EventNtuple.RecoCountTag : ""
+physics.analyzers.EventNtuple.PBTTag : ""
+physics.analyzers.EventNtuple.PBTMCTag : ""
+physics.analyzers.EventNtuple.SimParticlesTag : "CaloShowerStepMaker"
+#Turn off tracker and other branches
+physics.analyzers.EventNtuple.branches : [ ]
+physics.analyzers.EventNtuple.FillTrkQual : false
+physics.analyzers.EventNtuple.FillTriggerInfo : false
+physics.analyzers.EventNtuple.FillHitInfo : false
+physics.analyzers.EventNtuple.FillCRVCoincs : false
+
+#Toggle calo branches
+physics.analyzers.EventNtuple.FillCaloClusters : false
+physics.analyzers.EventNtuple.FillCaloHits : false
+physics.analyzers.EventNtuple.FillCaloRecoDigis : false
+physics.analyzers.EventNtuple.FillCaloDigis : true
+
+physics.analyzers.EventNtuple.CaloShowerSimTag : "CaloShowerROMaker"
+physics.analyzers.EventNtuple.CaloDigisTag : "CaloDigiMaker"
+
+#Toggle calo MC branches
+physics.analyzers.EventNtuple.FillMCInfo : false
+physics.analyzers.EventNtuple.FillCaloMC : true
+physics.analyzers.EventNtuple.FillCaloClustersMC : false
+physics.analyzers.EventNtuple.FillCaloHitsMC : false
+physics.analyzers.EventNtuple.FillCaloSimInfos : false
+physics.analyzers.EventNtuple.FillCaloDigiSimInfos : true
+physics.analyzers.EventNtuple.FillCaloDigisMC : true
+
+services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
