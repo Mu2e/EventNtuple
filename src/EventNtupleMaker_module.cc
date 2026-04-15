@@ -438,7 +438,7 @@ namespace mu2e {
       if(_fillcalomc && _fillmc){
         _allMCTCHIs[i_branch] = std::vector<CaloClusterInfoMC>();
       }
-      std::cout << "[EventNtupleMaker Constructor] Finished creating track info structs for branch " << i_branchConfig.branch() << "." << std::endl;
+     
       RecoQualInfo rqi;
       _allRQIs.push_back(rqi);
 
@@ -446,20 +446,19 @@ namespace mu2e {
       _allTSHCIs[i_branch] = std::vector<std::vector<TrkStrawHitCalibInfo>>();
       _allTSMIs[i_branch] = std::vector<std::vector<TrkStrawMatInfo>>();
       _allTSHIMCs[i_branch] = std::vector<std::vector<TrkStrawHitInfoMC>>();
-      std::cout << "[EventNtupleMaker Constructor] Finished creating track straw hit info structs for branch " << i_branchConfig.branch() << "." << std::endl;
+
       std::vector<std::vector<MVAResultInfo>> trkQualResults;
       for (size_t i_trkQualTag = 0; i_trkQualTag < i_branchConfig.trkQualTags().size(); ++i_trkQualTag) {
         trkQualResults.emplace_back(std::vector<MVAResultInfo>());
       }
       _allTrkQualResults[i_branch] = trkQualResults;
-      std::cout << "[EventNtupleMaker Constructor] Finished creating track quality info structs for branch " << i_branchConfig.branch() << "." << std::endl;
+
       std::vector<std::vector<MVAResultInfo>> trkPIDResults;
       for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
         trkPIDResults.emplace_back(std::vector<MVAResultInfo>());
       }
       _allTrkPIDResults[i_branch] = trkPIDResults;
 
-      std::cout << "[EventNtupleMaker Constructor] Finished creating track PID info structs for branch " << i_branchConfig.branch() << "." << std::endl;
       if(_conf.extraMCStepTags(_extraMCStepTags)){
         for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
           for (StepCollIndex i_extraMCStepTag = 0; i_extraMCStepTag < _extraMCStepTags.size(); ++i_extraMCStepTag) {
