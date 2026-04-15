@@ -479,12 +479,6 @@ namespace mu2e {
         }
       }
     }
-    
-    // Diagnostic: print configuration flags for calorimeter MC info
-    std::cout << "[EventNtupleMaker Constructor] Calorimeter configuration:" << std::endl;
-    std::cout << "  fillCaloDigisMC=" << _fillcalodigismc << std::endl;
-    std::cout << "  fillCaloDigiSimInfos=" << _fillcalodigisiminfos << std::endl;
-    std::cout << "  caloShowerSimTag=" << conf().caloShowerSimTag() << std::endl;
   }
 
   void EventNtupleMaker::beginJob( ){
@@ -871,7 +865,6 @@ namespace mu2e {
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
       }
     }
-    std::cout<< "[EventNtupleMaker::analyze] fillCaloDigiSimInfos=" << _fillcalodigisiminfos << " caloShowerSim.isValid()=" << _caloShowerSim.isValid() << std::endl;
     if (_fillcalodigisiminfos){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
@@ -989,15 +982,10 @@ namespace mu2e {
 
       // Fill CaloDigisMC branch
       if (_fillcalodigismc){
-        std::cout << "[EventNtupleMaker] Attempting to fill caloDigisMC branch" << std::endl;
         if (_caloShowerSim.isValid()){
-          std::cout << "[EventNtupleMaker] CaloShowerSim collection found with " << _caloShowerSim->size() << " entries" << std::endl;
           for (const auto& showerSim : *_caloShowerSim.product()){
             _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
           }
-          std::cout << "[EventNtupleMaker] Filled caloDigisMC with " << _caloDigiMCIs.size() << " entries" << std::endl;
-        } else {
-          std::cout << "[EventNtupleMaker] WARNING: CaloShowerSim collection NOT found!" << std::endl;
         }
       }
 
