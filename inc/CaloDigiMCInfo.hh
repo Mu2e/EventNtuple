@@ -23,10 +23,13 @@ namespace mu2e
     std::vector<MCRelationship> simRels;// relationship to the particle that deposited the most energy in the calo digi
     int caloHitIdx_;                    // CaloHit index
     int crystalID_;                     // Crystal ID from CaloShowerSim
+    int diskID_;           // Offline disk ID number
     float energyCorr_;                  // corrected energy from CaloShowerSim
     float timeCorr_;                    // corrected time from CaloShowerSim
+    float posX_;                        // Crystal x position in detector frame
+    float posY_;                        // Crystal y position in detector frame
 
-    CaloDigiMCInfo() : nsim(0), eDep(0.0), eDepG4(0.0), eprimary(0.0), tprimary(0.0), caloHitIdx_(-1), crystalID_(-1), energyCorr_(0.0), timeCorr_(0.0) {}
+    CaloDigiMCInfo() : nsim(0), eDep(0.0), eDepG4(0.0), eprimary(0.0), tprimary(0.0), caloHitIdx_(-1), crystalID_(-1), energyCorr_(0.0), timeCorr_(0.0), posX_(0.0), posY_(0.0) {}
 
     void reset() { *this = CaloDigiMCInfo(); }
   };

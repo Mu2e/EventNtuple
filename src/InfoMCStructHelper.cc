@@ -17,6 +17,8 @@
 #include "Offline/GlobalConstantsService/inc/PhysicsParams.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Crystal.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Event.h"
@@ -411,6 +413,17 @@ namespace mu2e {
     calodigimc.eprimary = 0.0;
     calodigimc.tprimary = 0.0;
     calodigimc.crystalID_ = shower.crystalID();
+    
+    // Get crystal position from geometry
+
+    mu2e::Calorimeter const &cal = *(mu2e::GeomHandle<mu2e::Calorimeter>());
+    GeomHandle<DetectorSystem> det;
+    Crystal const &crystal = cal.crystal(calodigimc.crystalID_);
+    CLHEP::Hep3Vector position = crystal.position();
+    CLHEP::Hep3Vector pos_detector = det->toDetector(position);
+    calodigimc.posX_ = pos_detector.x();
+    calodigimc.posY_ = pos_detector.y();
+    calodigimc.diskID_ = crystal.diskID();
     
     if (calodigimc.nsim > 0 && steps.front()){
       calodigimc.eprimary = steps.front()->energyDepG4();
