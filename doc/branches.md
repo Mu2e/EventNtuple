@@ -89,7 +89,6 @@ The branch is empty if there are no time clusters during the event.
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that occurred during the event.
-The branch is empty if there are no calorimeter clusters during the event.
 
 Each branch can be read independently, but elements contain indexes to other branches to maintain parentage links:
 - Each cluster contains a vector `hits_` with indices of hits in this cluster
