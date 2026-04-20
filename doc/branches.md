@@ -96,7 +96,7 @@ Each branch can be read independently, but elements contain indexes to other bra
 - Each recodi contains index of its raw digi (`caloDigiIdx_`) and parent hit index (`caloHitIdx_`)
 - Each raw digi contains index of parent recodi if any (`caloRecoDigiIdx_`)
 
-**Hierarchy:** clusters ← hits ← recodigis ← digis
+**Hierarchy:** digis --> recodigis --> hits --> clusters
 
 Example: cluster 3 has `hits_ = {12, 13, 14, 15}`. Each of those hits will have `clusterIdx_ = 3`.
 Calorimeter hits store crystal position in (x,y,z) with frame origin at tracker center.
@@ -117,7 +117,8 @@ The vector is aligned with `caloclusters` (same size & indices), with each eleme
 
 **Particle Information:**
 The `calomcsim` branch contains all unique SimParticles that contributed to calorimeter clusters across the entire event.
-Each MC particle is indexed via the `simParticleIds` field in the MC cluster/hit.
+This branch can be populated from either the `caloclusters` branch or by tracing MC truth back through the `calodigis` branch (both paths contain the necessary SimParticle information).
+Each MC particle is indexed via the `simParticleIds` field in the MC cluster/hit or digi.
 
 | branch | structure | explanation | key fields | leaf information |
 |--------|-----------|-------------|-----------|------------------|
