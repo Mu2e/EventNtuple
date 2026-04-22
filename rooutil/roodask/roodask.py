@@ -518,7 +518,7 @@ def main() -> None:
         if output_files:
             hadd_target = Path(args.hadd)
             if not hadd_target.is_absolute():
-                hadd_target = output_dir / hadd_target
+                hadd_target = Path(output_dir) / hadd_target
             hadd_target = str(hadd_target.resolve())
             hadd_cmd = ["hadd", "-f", "-j", str(args.hadd_j), hadd_target] + output_files
             print(f"\nMerging {len(output_files)} output files with hadd → {hadd_target}")
