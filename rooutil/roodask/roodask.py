@@ -325,6 +325,9 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.skip_compile and args.force_compile:
+        print("ERROR: --skip-compile and --force-compile are mutually exclusive", file=sys.stderr)
+        sys.exit(1)
 
     # ── Load manifest ────────────────────────────────────────────────
     manifest_path = Path(args.manifest).resolve()
