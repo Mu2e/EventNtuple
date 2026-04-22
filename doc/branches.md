@@ -138,9 +138,21 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
 ## Trigger Branches
 
-Each element in these branch corresponds to a different Kalman fit hypotheses to reconstruct the track:
+Trigger branches store trigger decision information for each event and track hypothesis. Each trigger branch corresponds to a different trigger path or decision criterion.
 
-Trigger branches are prefixed with ```trig_```. To find the names of the trigger branches run ```checkEventNtuple filename.root```
+Trigger branches are named with the prefix `trig_` followed by the trigger name. The structure of trigger branches is a single object per event containing an array of boolean decision bits, one for each trigger name.
+
+**TrigInfo Structure:**
+- **`_triggerArray[ntrig_]`**: A boolean array with up to 500 trigger decision bits, where `ntrig_ = 500`
+- Each element is a boolean that indicates whether the trigger passed (true) or failed (false) for that event
+- The index corresponds to a specific trigger path or decision algorithm
+
+To discover the names and meanings of all trigger branches available in your file, run:
+```
+checkEventNtuple filename.root
+```
+
+This will display the mapping of indices to trigger names, allowing you to correctly interpret the trigger array. For more details about the trigger structure, see [TrigInfo.hh](../inc/TrigInfo.hh).
 ## Deprecated Branches
 
 These branches are remnants from trkana and are deprecated.
