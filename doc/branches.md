@@ -109,20 +109,24 @@ Calorimeter hits store crystal position in (x,y,z) with frame origin at tracker 
 | calodigis |  Vector branch |   raw calorimeter digis with waveform data and parent recodi index| `SiPMID_`, `diskID_`, `t0_` (first sample time), `waveform_`, `peakpos_` (peak index), `posX_`, `posY_`, `caloRecoDigiIdx_` | [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
 ## Calorimeter MC Branches
 
-The calorimeter MC branches provide MC-truth information aligned with reconstructed clusters and hits.
+The calorimeter MC branches provide MC-truth information at different levels of the calorimeter reconstruction hierarchy.
 
-**Cluster MC Information:**
-The `caloclustersmc` branch is a vector of MC clusters associated with reconstructed clusters.
-The vector is aligned with `caloclusters` (same size & indices), with each element corresponding to true particles depositing energy.
+**Alignment with Reconstruction Branches:**
+MC information branches are aligned with their corresponding reco branches:
+- `caloclustersmc` ← aligned with `caloclusters` (same size & indices)
+- `calohitsmc` ← aligned with `calohits` (same size & indices)
+- `calodigismc` ← aligned with `calodigis` (same size & indices; raw digi MC truth) (also: `calorecodigis` too)
+- `calodigisim` ← unique SimParticles from raw digis
+- `calomcsim` ← unique SimParticles from MC clusters
 
-**Particle Information:**
-The `calomcsim` branch contains all unique SimParticles that contributed to calorimeter clusters across the entire event.
-This branch can be populated from either the `caloclusters` branch or by tracing MC truth back through the `calodigis` branch (both paths contain the necessary SimParticle information).
-Each MC particle is indexed via the `simParticleIds` field in the MC cluster/hit or digi.
+Each MC element contains `simParticleIds` to index into the corresponding `*mcsim` branch for genealogy information.
 
 | branch | structure | explanation | key fields | leaf information |
 |--------|-----------|-------------|-----------|------------------|
 | caloclustersmc |  Vector branch |   MC-truth information for calorimeter clusters (aligned with caloclusters)| `nsim` (# of sim particles), `etot` (total true energy), `tavg` (avg time), `eprimary` (primary particle energy), `tprimary` (primary time), `simParticleIds`, `simRels` (MCRelationship), `hits_`, `prel` (primary to event primary relationship) | [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
+| calohitsmc |  Vector branch |   MC-truth information for calorimeter hits (aligned with calohits)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `caloClusterIdx_`, etc. | [see CaloHitInfoMC.hh](../inc/CaloHitInfoMC.hh)
+| calodigismc |  Vector branch |   MC-truth information for raw calorimeter digis (aligned with calodigis)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `caloHitIdx_`, `crystalID_`, `diskID_`, `energyCorr_`, `timeCorr_`, `posX_`, `posY_` | [see CaloDigiMCInfo.hh](../inc/CaloDigiMCInfo.hh)
+| calodigisim |  Vector branch |   unique SimParticles in all raw digis (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
 | calomcsim |  Vector branch |   unique SimParticles in all MC clusters (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
 ## CRV Branches
 
