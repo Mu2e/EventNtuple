@@ -463,7 +463,7 @@ def main() -> None:
             run_cpp_job,
             job=job,
             binary=binary,
-            work_dir=args.work_dir,
+            work_dir=str(work_dir),
             timeout=timeout,
             env=run_env,
             binary_args=binary_args,
