@@ -30,6 +30,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+import math
 
 from dask.distributed import Client, LocalCluster, as_completed
 
@@ -356,8 +357,6 @@ def main() -> None:
     if args.max_files is not None:
         all_files = all_files[: args.max_files]
         print(f"Using first {len(all_files)} files (--max-files {args.max_files})")
-
-    import math
 
     # ── Batch files into jobs ────────────────────────────────────────
     n_workers = args.n_workers or os.cpu_count()
