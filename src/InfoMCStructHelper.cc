@@ -17,6 +17,8 @@
 #include "Offline/GlobalConstantsService/inc/PhysicsParams.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
+#include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Crystal.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Event.h"
@@ -398,6 +400,73 @@ namespace mu2e {
       }
     }
     chimcs.push_back(chimc);
+  }
+
+  void InfoMCStructHelper::fillCaloDigiMCInfo(CaloShowerSim const& shower, std::vector<CaloDigiMCInfo>& calodigimcs) {
+    CaloDigiMCInfo calodigimc;
+    auto const& steps = shower.caloShowerSteps();
+    calodigimc.nsim = steps.size();
+    calodigimc.energyCorr_ = shower.energyDep();
+    calodigimc.timeCorr_ = shower.time();
+    calodigimc.eDepG4 = shower.energyDepG4();
+    calodigimc.eDep = shower.energyDep();
+    calodigimc.eprimary = 0.0;
+    calodigimc.tprimary = 0.0;
+    calodigimc.crystalID_ = shower.crystalID();
+    
+    // Get crystal position from geometry
+
+    mu2e::Calorimeter const &cal = *(mu2e::GeomHandle<mu2e::Calorimeter>());
+    GeomHandle<DetectorSystem> det;
+    Crystal const &crystal = cal.crystal(calodigimc.crystalID_);
+    CLHEP::Hep3Vector position = crystal.position();
+    CLHEP::Hep3Vector pos_detector = det->toDetector(position);
+    calodigimc.posX_ = pos_detector.x();
+    calodigimc.posY_ = pos_detector.y();
+    calodigimc.diskID_ = crystal.diskID();
+    
+    if (calodigimc.nsim > 0 && steps.front()){
+      calodigimc.eprimary = steps.front()->energyDepG4();
+      calodigimc.tprimary = steps.front()->time();
+      
+      for (auto const& step : steps){
+        if (step && step->simParticle()){
+          auto simid = step->simParticle()->id().asInt();
+          calodigimc.tDeps.push_back(step->time());
+          calodigimc.eDeps.push_back(step->energyDepG4());
+          calodigimc.momentumIns.push_back(step->momentumIn());
+          calodigimc.simParticleIds.push_back(simid);
+          calodigimc.simRels.push_back(MCRelationship(step->simParticle(),steps.front()->simParticle()));
+        }
+      }
+    }
+    calodigimcs.push_back(calodigimc);
+  }
+
+  void InfoMCStructHelper::fillCaloDigiSimInfos(CaloShowerSim const& shower, std::vector<SimInfo>& cdsis) {
+    auto const& steps = shower.caloShowerSteps();
+    for (auto const& step : steps){
+      if (step && step->simParticle()){
+        auto simParticlePtr = step->simParticle();
+        int simid = simParticlePtr->id().asInt();
+
+        // Search that we didn't insert this particle already
+        bool already_added = false;
+        for (auto const& info : cdsis){
+          if (info.id == simid){
+            already_added = true;
+            break;
+          }
+        }
+        // It's new
+        if (!already_added){
+          SimInfo siminfo;
+          fillSimInfo(simParticlePtr, siminfo);
+          siminfo.index = cdsis.size();
+          cdsis.push_back(siminfo);
+        }
+      }
+    }
   }
 
   void InfoMCStructHelper::fillCaloSimInfos(CaloClusterMC const& ccmc, std::vector<SimInfo>& csis) {
