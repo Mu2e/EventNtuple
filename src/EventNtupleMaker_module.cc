@@ -174,6 +174,8 @@ namespace mu2e {
         fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
         // CRV -- other
         fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),Comment("y of center of the top layer of the CRV-T counters"), 2751.485};  //This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
+        // CRV inference
+        fhicl::OptionalAtom<art::InputTag> crvInferenceTag{Name("CrvInferenceTag"), Comment("Tag for CrvInference associations (art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>)")};
         // MC truth
         fhicl::Atom<bool> fillmc{Name("FillMCInfo"),Comment("Global switch to turn on/off MC info"),true};
         fhicl::Table<InfoMCStructHelper::Config> infoMCStructHelper{Name("InfoMCStructHelper"), Comment("Configuration for the InfoMCStructHelper")};
@@ -332,6 +334,10 @@ namespace mu2e {
       // CRV -- fhicl parameters
       bool _fillcrvcoincs, _fillcrvpulses, _fillcrvdigis;
       double _crvPlaneY;  // needs to move to KinKalGeom FIXME
+      // CRV inference
+      bool _fillCrvInference;
+      art::InputTag _crvInferenceTag;
+      std::vector<std::vector<MVAResultInfo>> _crvInference;
       // CRV (output)
       std::vector<CrvHitInfoReco> _crvcoincs;
       std::map<BranchIndex, std::vector<CrvHitInfoReco>> _allBestCrvs; // there can be more than one of these per track type
@@ -403,6 +409,8 @@ namespace mu2e {
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
+    _fillCrvInference = conf().crvInferenceTag(_crvInferenceTag);
+
     // decode fit type
     for(size_t ifit=0;ifit < fitNames.size();++ifit){
       auto const& fname = fitNames[ifit];
@@ -623,6 +631,10 @@ namespace mu2e {
           _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
         }
       }
+    }
+    // CRV cosmic inference
+    if(_fillCrvInference) {
+      _ntuple->Branch("crvcosmic.",&_crvInference,_buffsize,_splitlevel);
     }
     // helix info
     if(_conf.helices()) _ntuple->Branch("helices.",&_hinfos,_buffsize,_splitlevel);
@@ -1022,6 +1034,39 @@ namespace mu2e {
                                               _crvdigis);
       }
 
+    }
+
+    // fill CRV cosmic inference scores (T x C structure aligned with trk branches)
+    if(_fillCrvInference) {
+      _crvInference.clear();
+      // Init associations from CrvInference module: KalSeed <-> CrvCoincidenceCluster with MVAResult data product
+      art::Handle<art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>> crvInfHandle;
+      // grab the associations from the art::Event  
+      event.getByLabel(_crvInferenceTag, crvInfHandle);
+      // build a map from KalSeed ptr to scores
+      std::map<art::Ptr<KalSeed>, std::vector<MVAResultInfo>> crvInfMap;
+      // Get the scores from the associations and fill the map
+      if(crvInfHandle.isValid()) { 
+        // loop through association
+        for(const auto& assn : *crvInfHandle) {
+          MVAResultInfo info;
+          info.result = assn.data->_value; // the model score
+          info.valid = true; // true if assns is valid
+          crvInfMap[assn.first].push_back(info); 
+        }
+      }
+      // fill the branch
+      // iterate over all tracks to keep alignment with trk branches
+      // this means filling empty vectors for tracks with no coincidence 
+      const auto& kseedptr_coll = *_allKSPCHs.at(0);
+      for(size_t i = 0; i < kseedptr_coll.size(); ++i) {
+        auto it = crvInfMap.find(kseedptr_coll[i]);
+        if(it != crvInfMap.end()) {
+          _crvInference.push_back(it->second); // fill
+        } else {
+          _crvInference.emplace_back(); // empty vector for tracks with no CRV match
+        }
+      }
     }
 
     // fill MC information unrelated to any reconstructed object
