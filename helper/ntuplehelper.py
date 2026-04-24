@@ -3,7 +3,7 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calomcsim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
@@ -14,8 +14,8 @@ class nthelper:
     general_mc_branches = [ 'mcsteps' ]
     basic_branches = [ 'timeclusters' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
-    calo_mc_branches = ['caloclustersmc', 'calomcsim']
-    crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
+    calo_mc_branches = ['caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim']
+    crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane','crvpulses','crvdigis','crvpulsesmc']
     deprecated_branches = ['trkmcsci','trkmcssi']
 
     track_types_dict = { 'kl' : "kinematic line fit (i.e. straight-line fit)",
@@ -51,7 +51,11 @@ class nthelper:
                            'trkmcssi' : "MCStepSummaryInfo",
                            'timeclusters' : "TimeClusterInfo",
                            'caloclustersmc': "CaloClusterInfoMC",
+                           'calohitmc' : "CaloHitInfoMC",
+                           'calohitsmc' : "CaloHitInfoMC",
+                           'calodigismc' : "CaloDigiMCInfo",
                            'calomcsim' : "SimInfo",
+                           'calodigisim' : "SimInfo",
                            'caloclusters' : "CaloClusterInfo",
                            'calohits' : "CaloHitInfo",
                            'calorecodigis' : "CaloRecoDigiInfo",
@@ -65,7 +69,10 @@ class nthelper:
                            "trkpid" : "MVAResultInfo",
                            "helices" : "HelixInfo",
                            "trksegsmc" : "SurfaceStepInfo",
-                           "mcsteps" : "MCStepInfo"
+                           "mcsteps" : "MCStepInfo",
+                           "crvpulses" : "CrvPulseInfoReco",
+                           "crvdigis" : "CrvWaveformInfo",
+                           "crvpulsesmc" : "CrvPulseInfoReco"
                           }
 
     #

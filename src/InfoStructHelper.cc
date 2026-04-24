@@ -7,8 +7,10 @@
 #include "KinKal/Trajectory/CentralHelix.hh"
 #include "Offline/Mu2eKinKal/inc/WireHitState.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/DetectorSystem.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
+#include "Offline/CalorimeterGeom/inc/Crystal.hh"
 #include <cmath>
 #include <limits>
 
@@ -547,6 +549,18 @@ namespace mu2e {
     digiinfo.waveform_ = cdptr.waveform();
     digiinfo.peakpos_ = cdptr.peakpos();
     digiinfo.caloRecoDigiIdx_ = recodigiIdx;
+    
+    // Get crystal position from geometry
+    int cryID = digiinfo.SiPMID_ / 2;
+    mu2e::Calorimeter const &cal = *(mu2e::GeomHandle<mu2e::Calorimeter>());
+    GeomHandle<DetectorSystem> det;
+    Crystal const &crystal = cal.crystal(cryID);
+    CLHEP::Hep3Vector position = crystal.position();
+    CLHEP::Hep3Vector pos_detector = det->toDetector(position);
+    digiinfo.posX_ = pos_detector.x();
+    digiinfo.posY_ = pos_detector.y();
+    digiinfo.diskID_ = crystal.diskID();
+    
     digiinfos.push_back(digiinfo);
   }
 

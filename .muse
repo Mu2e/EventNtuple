@@ -3,4 +3,5 @@ ROOT_LIBRARY_PATH
 
 PYTHONPATH utils
 PYTHONPATH helper
+PYTHONPATH rooutil/roodask/
 PATH bin

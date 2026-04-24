@@ -10,9 +10,10 @@
 7. [Common Cut Functions](#Common-Cut-Functions)
 8. [Combining Cut Function](#Combining-Cut-Functions)
 9. [Creating Ntuples From EventNtuple](#Creating-Ntuples-From-EventNtuple)
-10. [Speed Optimizations](#Speed-Optimizations)
-11. [Debugging](#Debugging)
-12. [For Developers](#For-Developers)
+10. [```roodask```](#roodask)
+11. [Speed Optimizations](#Speed-Optimizations)
+12. [Debugging](#Debugging)
+13. [For Developers](#For-Developers)
 
 ## Introduction
 
@@ -211,6 +212,53 @@ If you want to also remove tracks from the event, you should use ```SelectTracks
 
 ### Non event-based ntuples
 It's also possible to use RooUtil to create a new ntuple with a different structure (e.g. one entry per track). See an example in [CreateTrackNtuple.C](./examples/CreateTrackNtuple.C) for how this can be done
+
+## ```roodask```
+```roodask``` allows you to run a RooUtil-based macro or program in parallel over multiple files using dask. Here we present two examples: running a ROOT macro from the examples folder and running the RooCount reference analysis.
+
+### Setting Up
+
+We need to set up the environment and get a filelist:
+```
+cd /to/your/work/area/
+mu2einit
+muse setup AnalysisMusingMDC2025
+pyenv ana
+
+mkdir filelists
+metacat query files from mu2e:nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root | mdh print-url -l disk -s path - > filelists/nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root.list
+```
+
+You will also need to write a "manifest" JSON file. We will use the following examples:
+* for running a ROOT macro use [this manifest file](./roodask/macro_manifest.json)
+* for running a program use [this manifest file](./roodask/refana_manifest.json)
+
+### Example 1: Running a ROOT Macro
+
+This will run the example macro: PlotEntranceMomentumResolution_roodask.C
+
+```
+roodask --manifest EventNtuple/rooutil/roodask/macro_manifest.json --filelist filelists/nts.mu2e.ensembleMDS3aMix1BBTriggered.MDC2025-001.root.list --n-workers 2 --threads-per-worker 1 --max-files=3
+```
+
+This will produce an ```output/``` directory with an output file per job
+* you can add the ```--hadd merged.root``` option if you want an hadded output (if you want to run ```hadd``` with multi-threading add ```--hadd-j``` option
+* you can run a program on the hadded file with the ```--post-hadd``` option (see Example 2 for a concrete example)
+
+### Example 2: Running a Program
+
+This will run the RooCount RefAna: 
+
+```
+ roodask --manifest EventNtuple/rooutil/roodask/refana_manifest.json --filelist filelist.txt --n-workers 2 --threads-per-worker 1 --max-files=3 --hadd merged.root --post-hadd 'RooCountAna {merged} MDS3a'
+```
+
+This will produce a single output file (```output/merged.root```) as well as run the ```RooCountAna``` program on the merged output
+
+### Additional Information:
+* There is a dedicated [README](./roodask/README.md) for technical details
+* There is a ```--scheduler``` option that will be important when we get things up and running on EAF
+
 
 ## Speed Optimizations
 By default, RooUtil will read all the branches for every entry. If you are finding that this is too slow, then you can explicity turn on only the branches that you will be reading. This can increase the speed by as much as a factor of 10.
