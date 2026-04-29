@@ -539,6 +539,7 @@ namespace mu2e {
     recodigiinfo.ndf_ = crdptr.ndf();
     recodigiinfo.pileUp_ = crdptr.pileUp();
     recodigiinfo.caloHitIdx_ = hitIdx;
+    recodigiinfo.SiPMID_ = crdptr.SiPMID();
     recodigiinfos.push_back(recodigiinfo);
   }
 
@@ -552,15 +553,11 @@ namespace mu2e {
     
     // Get crystal position from geometry
     int cryID = digiinfo.SiPMID_ / 2;
-    mu2e::Calorimeter const &cal = *(mu2e::GeomHandle<mu2e::Calorimeter>());
-    GeomHandle<DetectorSystem> det;
-    Crystal const &crystal = cal.crystal(cryID);
-    CLHEP::Hep3Vector position = crystal.position();
-    CLHEP::Hep3Vector pos_detector = det->toDetector(position);
-    digiinfo.posX_ = pos_detector.x();
-    digiinfo.posY_ = pos_detector.y();
+    auto cal = GeomHandle<Calorimeter>();
+    auto& crystal = cal->crystal(cryID);
+    digiinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
     digiinfo.diskID_ = crystal.diskID();
-    
+    digiinfo.peakval_ = cdptr.waveform()[cdptr.peakpos()];
     digiinfos.push_back(digiinfo);
   }
 
