@@ -854,24 +854,36 @@ namespace mu2e {
     if (_fillcalodigis) { _caloDIs.clear(); }
 
     // Fill Calo MC
-    if (_fillcalohitsmc){
-      for (const auto& hitmc : *_chmcch.product()){
-        _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
-      }
-    }
 
     // Retrieve CaloShowerSim collection for both caloDigisMC and caloDigiSimInfos branches
     if (_fillcalodigismc || _fillcalodigisiminfos) {
       event.getByLabel(_conf.caloShowerSimTag(),_caloShowerSim);
     }
 
+    // Fill Calo MC Digis branch
+    if (_fillcalodigismc){
+      if (_caloShowerSim.isValid()){
+        for (const auto& showerSim : *_caloShowerSim.product()){
+          _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
+        }
+      }
+    }
+
+    // Fill Calo MC Hits branch
+    if (_fillcalohitsmc){
+      for (const auto& hitmc : *_chmcch.product()){
+        _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
+      }
+    }
+
+    // Fill Calo MC Clusters branch
     if (_fillcaloclustersmc){
       for (const auto& clustermc : *_ccmcch.product()){
 
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
 
         //Find and link the existing hits
-        if (_fillcalohitsmc){ //TODO FIX this segm dumps
+        if (_fillcalohitsmc){
           for (const auto& hitmc : clustermc.caloHitMCs()){
             for (uint hitIdx=0; hitIdx < _caloHIMCs.size(); hitIdx++){
               
@@ -895,6 +907,7 @@ namespace mu2e {
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
       }
     }
+    
     if (_fillcalodigisiminfos){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
@@ -993,125 +1006,6 @@ namespace mu2e {
       }
     }
 
-/*
-    //Fill clusters, hits, recodigis, and digis with hierarchy. If this code block is deemed too bulky, I can move it into InfoStructHelper. -pgirotti
-    if (_fillcaloclusters){
-
-      //Get the clusters
-      event.getByLabel(_conf.caloClustersTag(),_caloClusters);
-      for (const auto& cluster : *_caloClusters.product()){
-
-        int cluster_idx = _caloCIs.size();
-        _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs);
-
-        if (_fillcalohits){
-          for (const auto& hit : cluster.caloHitsPtrVector()){
-
-            int hit_idx = _caloHIs.size();
-            _infoStructHelper.fillCaloHitInfo(*hit,_caloHIs,cluster_idx);
-
-            //Update the cluster
-            _caloCIs.back().hits_.push_back(hit_idx);
-
-            if (_fillcalorecodigis){
-              for (const auto& recodigi : hit->recoCaloDigis()){
-
-                int recodigi_idx = _caloRDIs.size();
-                _infoStructHelper.fillCaloRecoDigiInfo(*recodigi,_caloRDIs,hit_idx);
-
-                //Update the hit
-                _caloHIs.back().recoDigis_.push_back(recodigi_idx);
-
-                if (_fillcalodigis){
-                  const auto& digi = recodigi->caloDigiPtr();
-
-                  int digi_idx = _caloDIs.size();
-                  _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
-
-                  //Update the recodigi
-                  _caloRDIs.back().caloDigiIdx_ = digi_idx;
-
-                }
-              }
-            }
-          }
-        }
-      }
-    } else { //No clusters
-
-      if (_fillcalohits){
-        //Get the hits
-        event.getByLabel(_conf.caloHitsTag(),_caloHits);
-        for (const auto& hit : *_caloHits.product()){
-
-          int hit_idx = _caloHIs.size();
-          _infoStructHelper.fillCaloHitInfo(hit,_caloHIs);
-
-          if (_fillcalorecodigis){
-            for (const auto& recodigi : hit.recoCaloDigis()){
-
-              int recodigi_idx = _caloRDIs.size();
-              _infoStructHelper.fillCaloRecoDigiInfo(*recodigi,_caloRDIs,hit_idx);
-
-              //Update the hit
-              _caloHIs.back().recoDigis_.push_back(recodigi_idx);
-
-              if (_fillcalodigis){
-                const auto& digi = recodigi->caloDigiPtr();
-
-                int digi_idx = _caloDIs.size();
-                _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
-
-                //Update the recodigi
-                _caloRDIs.back().caloDigiIdx_ = digi_idx;
-
-              }
-            }
-          }
-        }
-      } else { //No hits
-
-        if (_fillcalorecodigis){
-          //Get the recodigis
-          event.getByLabel(_conf.caloRecoDigisTag(),_caloRecoDigis);
-          for (const auto& recodigi : *_caloRecoDigis.product()){
-
-            int recodigi_idx = _caloRDIs.size();
-            _infoStructHelper.fillCaloRecoDigiInfo(recodigi,_caloRDIs);
-
-            if (_fillcalodigis){
-              const auto& digi = recodigi.caloDigiPtr();
-              int digi_idx = _caloDIs.size();
-              _infoStructHelper.fillCaloDigiInfo(*digi,_caloDIs,recodigi_idx);
-
-              //Update the recodigi
-              _caloRDIs.back().caloDigiIdx_ = digi_idx;
-
-            }
-          }
-        } else { //No recodigis
-
-          if (_fillcalodigis){
-            //Get the digis
-            event.getByLabel(_conf.caloDigisTag(),_caloDigis);
-            for (const auto& digi : *_caloDigis.product()){
-              _infoStructHelper.fillCaloDigiInfo(digi,_caloDIs);
-            }
-          }
-        }
-      }
-
-      // Fill CaloDigisMC branch
-      if (_fillcalodigismc){
-        if (_caloShowerSim.isValid()){
-          for (const auto& showerSim : *_caloShowerSim.product()){
-            _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
-          }
-        }
-      }
-
-    }
-*/
 
     // TODO we want MC information when we don't have a track
     // fill general CRV info
