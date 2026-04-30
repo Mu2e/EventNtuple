@@ -11,6 +11,7 @@
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/CalorimeterGeom/inc/Calorimeter.hh"
 #include "Offline/CalorimeterGeom/inc/Crystal.hh"
+#include "Offline/DataProducts/inc/CaloConst.hh"
 #include <cmath>
 #include <limits>
 
@@ -523,9 +524,13 @@ namespace mu2e {
     hitinfo.eDep_ = chptr.energyDep();
     hitinfo.eDepErr_ = chptr.energyDepErr();
     hitinfo.clusterIdx_ = clusterIdx;
-    auto cal = GeomHandle<Calorimeter>();
-    auto& crystal = cal->crystal(chptr.crystalID());
-    hitinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
+
+    // Get crystal position from geometry
+    if (hitinfo.crystalId_ < CaloConst::_nCrystal){
+      auto cal = GeomHandle<Calorimeter>();
+      auto& crystal = cal->crystal(hitinfo.crystalId_);
+      hitinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
+    }
     hitinfos.push_back(hitinfo);
   }
 
@@ -552,11 +557,13 @@ namespace mu2e {
     digiinfo.caloRecoDigiIdx_ = recodigiIdx;
     
     // Get crystal position from geometry
-    int cryID = digiinfo.SiPMID_ / 2;
-    auto cal = GeomHandle<Calorimeter>();
-    auto& crystal = cal->crystal(cryID);
-    digiinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
-    digiinfo.diskID_ = crystal.diskID();
+    if (digiinfo.SiPMID_ < CaloConst::_nCrystalChannel){
+      int cryID = digiinfo.SiPMID_ / 2;
+      auto cal = GeomHandle<Calorimeter>();
+      auto& crystal = cal->crystal(cryID);
+      digiinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
+      digiinfo.diskID_ = crystal.diskID();
+    }
     digiinfo.peakval_ = cdptr.waveform()[cdptr.peakpos()];
     digiinfos.push_back(digiinfo);
   }
