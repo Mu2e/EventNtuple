@@ -7,6 +7,7 @@
 namespace mu2e
 {
   struct CaloClusterInfoMC {
+    int nhits; // number of hitmc associated with this cluster
     int nsim; // # of sim particles associated with this cluster
     float etot; // total true energy from all particles in this cluster
     float tavg; // average time over all particles

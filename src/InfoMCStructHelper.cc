@@ -362,6 +362,7 @@ namespace mu2e {
   void InfoMCStructHelper::fillCaloClusterInfoMC(CaloClusterMC const& ccmc, std::vector<CaloClusterInfoMC>& ccimcs) {
     CaloClusterInfoMC ccimc;
     auto const& edeps = ccmc.energyDeposits();
+    ccimc.nhits = ccmc.caloHitMCs().size();
     ccimc.nsim = edeps.size();
     ccimc.etot = ccmc.totalEnergyDep();
     ccimc.tavg = 0.;
@@ -380,9 +381,10 @@ namespace mu2e {
     ccimcs.push_back(ccimc);
   }
 
-  void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx = -1) {
+  void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx) {
     CaloHitInfoMC chimc;
     auto const& edeps = chmc.energyDeposits();
+    chimc.crystalID_ = chmc.crystalID();
     chimc.nsim = edeps.size();
     chimc.eDep = chmc.totalEnergyDep();
     chimc.eDepG4 = chmc.totalEnergyDepG4();
