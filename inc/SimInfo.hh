@@ -29,6 +29,7 @@ namespace mu2e
     XYZVectorF endpos = XYZVectorF();  // end position of the SimParticle [mm, in detector coords]
     MCRelationship prirel = MCRelationship(); // relationship to the event primary particles
     MCRelationship trkrel = MCRelationship(); // relationship to the particle that created hits in the track
+    std::vector<int> ancestorSimIds; // full parent chain: [parentId, grandparentId, ..., rootId]
     void reset() { *this = SimInfo(); }
   };
 }
