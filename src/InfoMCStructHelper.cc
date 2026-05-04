@@ -487,6 +487,12 @@ namespace mu2e {
         SimInfo siminfo;
         fillSimInfo(edep.sim(), siminfo);
         siminfo.index = csis.size();
+        // Walk the Geant4 parent chain and store all ancestor SimParticle IDs
+        auto currentPtr = edep.sim();
+        while (currentPtr->hasParent()) {
+          currentPtr = currentPtr->parent();
+          siminfo.ancestorSimIds.push_back(currentPtr->id().asInt());
+        }
         csis.push_back(siminfo);
       }
     }
