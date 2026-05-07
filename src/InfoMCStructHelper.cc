@@ -289,6 +289,15 @@ namespace mu2e {
     siminfo.pos = XYZVectorF(det->toDetector(sp.startPosition()));
     siminfo.endpos = XYZVectorF(det->toDetector(sp.endPosition()));
     siminfo.endmom = XYZVectorF(sp.endMomentum());
+    // Walk the Geant4 parent chain and store every ancestor's SimParticle id
+    // (immediate parent first, root last). Populated here so every SimInfo
+    // collection (trkmcsim, calomcsim, primary list) exposes the same
+    // ancestorSimIds branch consistently.
+    auto p = sp.parent();
+    while (p.isNonnull()) {
+      siminfo.ancestorSimIds.push_back(p->id().asInt());
+      p = p->parent();
+    }
   }
 
   void InfoMCStructHelper::fillVDInfo(const KalSeed& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<MCStepInfo>>& all_vdinfos) {
@@ -487,12 +496,6 @@ namespace mu2e {
         SimInfo siminfo;
         fillSimInfo(edep.sim(), siminfo);
         siminfo.index = csis.size();
-        // Walk the Geant4 parent chain and store all ancestor SimParticle IDs
-        auto currentPtr = edep.sim();
-        while (currentPtr->hasParent()) {
-          currentPtr = currentPtr->parent();
-          siminfo.ancestorSimIds.push_back(currentPtr->id().asInt());
-        }
         csis.push_back(siminfo);
       }
     }
