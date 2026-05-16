@@ -22,7 +22,6 @@ mainlib = helper.make_mainlib ( [
     'art_Utilities',
     'mu2e_GlobalConstantsService',
     'mu2e_GeometryService',
-    'mu2e_KinKalGeom',
     'mu2e_Mu2eUtilities',
     'mu2e_GeneralUtilities',
     'mu2e_BFieldGeom',
@@ -36,7 +35,8 @@ mainlib = helper.make_mainlib ( [
     'mu2e_CRVReco',
     'KinKal_Geometry',
     'KinKal_Trajectory',
-    'KinKal_General'
+    'KinKal_General',
+    'cetlib'
     ] )
 
 # Fixme: split into link lists for each module.
@@ -49,13 +49,6 @@ helper.make_plugins( [
     'art_Persistency_Provenance',
     'art_root_io_TFileService',
     'art_root_io_tfile_support',
-    'cetlib',
-    'cetlib_except',
-    'fhiclcpp',
-    'fhiclcpp_types',
-    'tbb',
-    'canvas',
-    rootlibs,
     'boost_filesystem',
     'mu2e_DataProducts',
     'mu2e_MCDataProducts',
@@ -67,7 +60,14 @@ helper.make_plugins( [
     'mu2e_KinKalGeom',
     'KinKal_Geometry',
     'KinKal_Trajectory',
-    'KinKal_General'
+    'KinKal_General',
+    'cetlib',
+    'cetlib_except',
+    'fhiclcpp',
+    'fhiclcpp_types',
+    'tbb',
+    'canvas',
+    rootlibs
     ] )
 
 helper.make_dict_and_map( [
