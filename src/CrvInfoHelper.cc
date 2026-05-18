@@ -44,15 +44,21 @@ namespace mu2e
       std::array<float, CRVId::nLayers> PEsPerLayer_ = {0.};
       // Initialize PEs per layer per side
       std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer_ = {0.};
+      // Convert doubles to floats in side times
+      std::array<float,CRVId::nSidesPerBar> sideTimes_ = {static_cast<float>(cluster.GetSideTimes()[0]), static_cast<float>(cluster.GetSideTimes()[1])};
+      // Initiatlize RecoPulse vector
+      CrvPulseInfoRecoCollection  recoPulses;  //this is the reco vector which will be stored in the main TTree
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
         // Get PEs associated with this reco pulse
         float PEs = coincRecoPulses_.at(j)->GetPEs();
         // Get layer number from the bar index associated with this reco pulse
         const CRSScintillatorBarIndex &crvBarIndex = coincRecoPulses_.at(j)->GetScintillatorBarIndex();
-        const CRSScintillatorBar &crvCounter = CRS->getBar(crvBarIndex);
-        const CRSScintillatorBarId &crvCounterId = crvCounter.id();
-        int layerNumber = crvCounterId.getLayerNumber();
+        int sectorNumber  = -1;
+        int moduleNumber  = -1;
+        int layerNumber   = -1;
+        int counterNumber = -1;
+        CrvHelper::GetCrvCounterInfo(CRS, crvBarIndex, sectorNumber, moduleNumber, layerNumber, counterNumber);
         // Get the side number
         // The negative side has SiPM indices 0 and 2, the postive side has indices 1 and 3.
         // zero/one index indicates negative/positive; negative/positive indicates direction wrt the axis in the coordinate system.
@@ -62,19 +68,31 @@ namespace mu2e
         // Sum PEs for this coincidence, indexed by layer number and side number
         int layerSideIndex = layerNumber * CRVId::nSidesPerBar + side; // Indices for a flattened 2D matrix: layers (rows), sides (columns)
         sidePEsPerLayer_[layerSideIndex] += PEs;
+
+        // Fill recoPulses
+        const auto &recoPulse = coincRecoPulses_.at(j);
+        CLHEP::Hep3Vector hitPos = CrvHelper::GetCrvCounterPos(CRS, crvBarIndex);
+        recoPulses.emplace_back(tdet->toDetector(hitPos), crvBarIndex.asInt(), sectorNumber, recoPulse->GetSiPMNumber(),
+          recoPulse->GetPEs(), recoPulse->GetPEsPulseHeight(), recoPulse->GetPulseHeight(),
+          recoPulse->GetPulseBeta(), recoPulse->GetPulseFitChi2(), recoPulse->GetPulseTime());
       }
 
       //fill the Reco collection
       recoInfo.emplace_back(
           cluster.GetCrvSectorType(),
+          cluster.HitPosAndTimeCalculated(),
           tdet->toDetector(cluster.GetAvgHitPos()),
           cluster.GetStartTime(), cluster.GetEndTime(), cluster.GetAvgHitTime(),
           cluster.GetPEs(),
           PEsPerLayer_, // PEsPerLayer array is not a member of the mu2e::CrvCoincidenceCluster class
           sidePEsPerLayer_, // ""
+          cluster.GetSideHits(),
+          cluster.GetSidePEs(),
+          sideTimes_,
           cluster.GetCrvRecoPulses().size(),
           cluster.GetLayers().size(),
-          cluster.GetSlope());
+          cluster.GetSlope(),
+          recoPulses);
     }
 
     if(!crvRecoPulses.isValid()) return;
