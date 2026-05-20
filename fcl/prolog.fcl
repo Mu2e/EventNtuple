@@ -286,7 +286,7 @@ EventNtupleMaker : {
   FillTimeClusterInfo : false
   CaloClustersTag : "CaloClusterMaker"
   CaloHitsTag : "CaloHitMaker"
-  CaloRecoDigisTag : ""
+  CaloRecoDigisTag : "CaloRecoDigiMaker"
   CaloDigisTag : "SelectReco"
   FillCaloClusters : true
   FillCaloHits : true
@@ -315,6 +315,7 @@ EventNtupleMaker : {
   PrimaryParticleTag : "compressRecoMCs"
   KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
+  CaloHitMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"
     MinGoodMomFraction : 0.9

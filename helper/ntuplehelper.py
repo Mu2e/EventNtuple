@@ -246,12 +246,11 @@ class nthelper:
         else:
             print("## Calorimeter Branches\n")
             print("These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.")
-            print("The branch is empty if there are no calo cluster during the event.\n")
             print("While each branch can be read independently, i.e. all the hits of the event, each element contains indexes to the other branches for parentage link.")
             print("The cluster element contains the vector \'hits_\' containing the indexes of the hits branch belonging to this cluster.")
             print("Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.")
             print("Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have \'clusterIdx_\' = 3.")
-            print("Calo hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.")
+            print("Calo digis and hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.")
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.calo_branches:
