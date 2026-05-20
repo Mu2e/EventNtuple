@@ -419,7 +419,7 @@ namespace mu2e {
         break;
       }
     }
-    
+
     // Put all the branch configurations together
     for(const auto& branch_cfg : _conf.branches()){
       _allBranches.push_back(branch_cfg);
@@ -446,7 +446,7 @@ namespace mu2e {
       if(_fillcalomc && _fillmc){
         _allMCTCHIs[i_branch] = std::vector<CaloClusterInfoMC>();
       }
-     
+
       RecoQualInfo rqi;
       _allRQIs.push_back(rqi);
 
@@ -614,23 +614,20 @@ namespace mu2e {
 
     // general CRV info
     if(_fillcrvcoincs) {
-      // coincidence branches should be here FIXME
       _ntuple->Branch("crvsummary",&_crvsummary,_buffsize,_splitlevel);
       _ntuple->Branch("crvcoincs.",&_crvcoincs,_buffsize,_splitlevel);
-      if(_fillcrvpulses) {
-        _ntuple->Branch("crvpulses.",&_crvpulses,_buffsize,_splitlevel);
-      }
-      if(_fillcrvdigis) {
-        _ntuple->Branch("crvdigis.",&_crvdigis,_buffsize,_splitlevel);
-      }
       if(_fillmc){
         _ntuple->Branch("crvsummarymc",&_crvsummarymc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmc.",&_crvcoincsmc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmcplane.",&_crvcoincsmcplane,_buffsize,_splitlevel);
-        if(_fillcrvpulses) {
-          _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
-        }
       }
+    }
+    if(_fillcrvpulses) {
+      _ntuple->Branch("crvpulses.",&_crvpulses,_buffsize,_splitlevel);
+      if(_fillmc) _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
+    }
+    if(_fillcrvdigis) {
+      _ntuple->Branch("crvdigis.",&_crvdigis,_buffsize,_splitlevel);
     }
     // CRV cosmic inference
     if(_fillCrvInference) {
@@ -859,7 +856,7 @@ namespace mu2e {
       for (const auto& clustermc : *_ccmcch.product()){
         int cluster_idx = _caloCIMCs.size();
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
-      
+
         if (_fillcalohitsmc){
           for (const auto& hitmc : clustermc.caloHitMCs()){
             int hit_idx = _caloHIMCs.size();
@@ -1002,38 +999,33 @@ namespace mu2e {
 
     }
 
-    // TODO we want MC information when we don't have a track
-    // fill general CRV info
+    // fill CRV info
     if(_fillcrvcoincs){
-      // clear vectors
       _crvcoincs.clear();
       _crvcoincsmc.clear();
       _crvcoincsmcplane.clear();
-      _crvpulses.clear();
-      _crvdigis.clear();
-      _crvpulsesmc.clear();
 
       event.getByLabel(_conf.crvCoincidencesTag(),_crvCoincidences);
       event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
       event.getByLabel(_conf.crvStepsTag(),_crvSteps);
-      event.getByLabel(_conf.crvDigisTag(),_crvDigis);
-      if(_fillmc){
-        event.getByLabel(_conf.crvCoincidenceMCsTag(),_crvCoincidenceMCs);
-        event.getByLabel(_conf.crvDigiMCsTag(),_crvDigiMCs);
-      }
+      if(_fillmc) event.getByLabel(_conf.crvCoincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
                                            _crvCoincidences, _crvCoincidenceMCs,
                                            _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
                                            _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
-      if(_fillcrvpulses){
-        _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
-                                               _crvpulses, _crvpulsesmc);
-      }
-      if(_fillcrvdigis){
-        _crvHelper.FillCrvDigiInfoCollections(_crvRecoPulses, _crvDigis,
-                                              _crvdigis);
-      }
-
+    }
+    if(_fillcrvpulses){
+      _crvpulses.clear();
+      _crvpulsesmc.clear();
+      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
+      if(_fillmc) event.getByLabel(_conf.crvDigiMCsTag(),_crvDigiMCs);
+      _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
+                                             _crvpulses, _crvpulsesmc);
+    }
+    if(_fillcrvdigis){
+      _crvdigis.clear();
+      event.getByLabel(_conf.crvDigisTag(),_crvDigis);
+      _crvHelper.FillCrvDigiInfoCollections(_crvDigis,_crvdigis);
     }
 
     // fill CRV cosmic inference scores (T x C structure aligned with trk branches)
@@ -1041,23 +1033,23 @@ namespace mu2e {
       _crvInference.clear();
       // Init associations from CrvInference module: KalSeed <-> CrvCoincidenceCluster with MVAResult data product
       art::Handle<art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>> crvInfHandle;
-      // grab the associations from the art::Event  
+      // grab the associations from the art::Event
       event.getByLabel(_crvInferenceTag, crvInfHandle);
       // build a map from KalSeed ptr to scores
       std::map<art::Ptr<KalSeed>, std::vector<MVAResultInfo>> crvInfMap;
       // Get the scores from the associations and fill the map
-      if(crvInfHandle.isValid()) { 
+      if(crvInfHandle.isValid()) {
         // loop through association
         for(const auto& assn : *crvInfHandle) {
           MVAResultInfo info;
           info.result = assn.data->_value; // the model score
           info.valid = true; // true if assns is valid
-          crvInfMap[assn.first].push_back(info); 
+          crvInfMap[assn.first].push_back(info);
         }
       }
       // fill the branch
       // iterate over all tracks to keep alignment with trk branches
-      // this means filling empty vectors for tracks with no coincidence 
+      // this means filling empty vectors for tracks with no coincidence
       const auto& kseedptr_coll = *_allKSPCHs.at(0);
       for(size_t i = 0; i < kseedptr_coll.size(); ++i) {
         auto it = crvInfMap.find(kseedptr_coll[i]);

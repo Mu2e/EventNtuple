@@ -9,11 +9,13 @@ namespace mu2e
   {
     float adc = -1;
     float time = -1;
+    int   barId = -1;
     int   SiPMId = -1;
     CrvWaveformInfo(){}
-    CrvWaveformInfo(float adc, float time, int SiPMId) :
+    CrvWaveformInfo(float adc, float time, int barId, int SiPMId) :
       adc(adc),
       time(time),
+      barId(barId),
       SiPMId(SiPMId)
     {}
   };
