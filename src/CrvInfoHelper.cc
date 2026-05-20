@@ -235,7 +235,6 @@ namespace mu2e
     if(!crvRecoPulses.isValid()) return;
 
     GeomHandle<CosmicRayShield> CRS;
-    const std::map<int,int> sipm_map = GetSiPMMap(CRS);
 
     // Loop through all reco pulses
     for(size_t recoPulseIndex=0; recoPulseIndex<crvRecoPulses->size(); recoPulseIndex++)
@@ -250,14 +249,14 @@ namespace mu2e
       CrvHelper::GetCrvCounterInfo(CRS, barIndex, sectorNumber, moduleNumber, layerNumber, counterNumber);
 
       //Reco pulses information
-      int SiPM = crvRecoPulse->GetSiPMNumber();
-      int SiPMId = sipm_map.find(barIndex.asInt()*CRVId::nChanPerBar + SiPM)->second;
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
-      recoInfo.emplace_back(HitPos, barIndex.asInt(), sectorNumber, SiPMId,
+      recoInfo.emplace_back(tdet->toDetector(HitPos), barIndex.asInt(), sectorNumber, crvRecoPulse->GetSiPMNumber(),
           crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
           crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime());
 
       //MCtruth pulses information
+      if(!crvDigiMCs.isValid()) return;
+
       double visibleEnergyDeposited  = 0;
       double earliestHitTime         = 0;
       double avgHitTime         = 0;
@@ -296,22 +295,17 @@ namespace mu2e
 
   // Fill digis struct
   void CrvInfoHelper::FillCrvDigiInfoCollections (
-      art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiCollection> const& crvDigis,
       CrvWaveformInfoCollection &digiInfo){
 
-    if(!crvRecoPulses.isValid()) return;
-
     GeomHandle<CosmicRayShield> CRS;
-    const std::map<int,int> sipm_map = GetSiPMMap(CRS);
 
     // Fill digis/waveforminfo struct
     for(size_t j=0; j<crvDigis->size(); j++)
     {
       mu2e::CrvDigi const& digi(crvDigis->at(j));
-      int SiPMId = sipm_map.find(digi.GetScintillatorBarIndex().asInt()*4 + digi.GetSiPMNumber())->second;
       for(size_t k=0; k<digi.GetADCs().size(); k++)
-        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, SiPMId);
+        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, digi.GetScintillatorBarIndex().asInt(), digi.GetSiPMNumber());
     }
   } // FillCrvDigiInfoCollections
 
