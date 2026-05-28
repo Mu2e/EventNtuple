@@ -33,6 +33,13 @@ Note that the ```before``` file is created before any changes, and the ```after`
 
 We expect perfect matches between all histograms. However, in some rare instances, we may expect differences. If you see any non-perfect matches, then discuss with the EventNtuple L4.
 
+### Validating ```roodask``` Runs
+To make sure ```roodask``` is working, you can run the following calidation script:
+
+```
+. ./EventNtuple/validation/roodask_test.sh
+```
+
 ### Validating EventNtuple Builds (Spack/CMake)
 From a clean login do:
 

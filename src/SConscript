@@ -11,12 +11,10 @@ Import('mu2e_helper')
 helper=mu2e_helper(env)
 
 rootlibs  = env['ROOTLIBS']
-babarlibs = env['BABARLIBS']
 
 mainlib = helper.make_mainlib ( [
     'CLHEP',
     rootlibs,
-    babarlibs,
     'canvas',
     'cetlib_except',
     'art_Framework_Principal',
@@ -24,7 +22,6 @@ mainlib = helper.make_mainlib ( [
     'art_Utilities',
     'mu2e_GlobalConstantsService',
     'mu2e_GeometryService',
-    'mu2e_KinKalGeom',
     'mu2e_Mu2eUtilities',
     'mu2e_GeneralUtilities',
     'mu2e_BFieldGeom',
@@ -38,7 +35,8 @@ mainlib = helper.make_mainlib ( [
     'mu2e_CRVReco',
     'KinKal_Geometry',
     'KinKal_Trajectory',
-    'KinKal_General'
+    'KinKal_General',
+    'cetlib'
     ] )
 
 # Fixme: split into link lists for each module.
@@ -51,15 +49,9 @@ helper.make_plugins( [
     'art_Persistency_Provenance',
     'art_root_io_TFileService',
     'art_root_io_tfile_support',
-    'cetlib',
-    'cetlib_except',
-    'fhiclcpp',
-    'fhiclcpp_types',
-    'tbb',
-    'canvas',
-    rootlibs,
     'boost_filesystem',
     'mu2e_DataProducts',
+    'mu2e_MCDataProducts',
     'mu2e_RecoDataProducts',
     'mu2e_Mu2eUtilities',
     'mu2e_GeneralUtilities',
@@ -68,10 +60,16 @@ helper.make_plugins( [
     'mu2e_KinKalGeom',
     'KinKal_Geometry',
     'KinKal_Trajectory',
-    'KinKal_General'
+    'KinKal_General',
+    'cetlib',
+    'cetlib_except',
+    'fhiclcpp',
+    'fhiclcpp_types',
+    'tbb',
+    'canvas',
+    rootlibs
     ] )
 
-# Fixme: do I need all of babarlibs below?
 helper.make_dict_and_map( [
         mainlib,
         'Core',

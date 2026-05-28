@@ -1,0 +1,12 @@
+#include "ArtAnalysis/CrvInference/fcl/prolog.fcl"
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+
+services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common_MDC2020.txt"
+
+physics.producers.CrvInference : {
+  @table::CrvInference
+  KalSeedPtrCollection : "MergeKKAll"
+}
+
+physics.EventNtuplePath : [ @sequence::EventNtuple.Path, CrvInference ]
+physics.analyzers.EventNtuple.CrvInferenceTag : "CrvInference"

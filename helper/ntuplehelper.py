@@ -3,7 +3,7 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calomcsim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
@@ -14,8 +14,8 @@ class nthelper:
     general_mc_branches = [ 'mcsteps' ]
     basic_branches = [ 'timeclusters' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
-    calo_mc_branches = ['caloclustersmc', 'calomcsim']
-    crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane']
+    calo_mc_branches = ['caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim']
+    crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane','crvpulses','crvdigis','crvpulsesmc']
     deprecated_branches = ['trkmcsci','trkmcssi']
 
     track_types_dict = { 'kl' : "kinematic line fit (i.e. straight-line fit)",
@@ -51,7 +51,11 @@ class nthelper:
                            'trkmcssi' : "MCStepSummaryInfo",
                            'timeclusters' : "TimeClusterInfo",
                            'caloclustersmc': "CaloClusterInfoMC",
+                           'calohitmc' : "CaloHitInfoMC",
+                           'calohitsmc' : "CaloHitInfoMC",
+                           'calodigismc' : "CaloDigiMCInfo",
                            'calomcsim' : "SimInfo",
+                           'calodigisim' : "SimInfo",
                            'caloclusters' : "CaloClusterInfo",
                            'calohits' : "CaloHitInfo",
                            'calorecodigis' : "CaloRecoDigiInfo",
@@ -65,7 +69,10 @@ class nthelper:
                            "trkpid" : "MVAResultInfo",
                            "helices" : "HelixInfo",
                            "trksegsmc" : "SurfaceStepInfo",
-                           "mcsteps" : "MCStepInfo"
+                           "mcsteps" : "MCStepInfo",
+                           "crvpulses" : "CrvPulseInfoReco",
+                           "crvdigis" : "CrvWaveformInfo",
+                           "crvpulsesmc" : "CrvPulseInfoReco"
                           }
 
     #
@@ -239,12 +246,11 @@ class nthelper:
         else:
             print("## Calorimeter Branches\n")
             print("These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.")
-            print("The branch is empty if there are no calo cluster during the event.\n")
             print("While each branch can be read independently, i.e. all the hits of the event, each element contains indexes to the other branches for parentage link.")
             print("The cluster element contains the vector \'hits_\' containing the indexes of the hits branch belonging to this cluster.")
             print("Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.")
             print("Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have \'clusterIdx_\' = 3.")
-            print("Calo hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.")
+            print("Calo digis and hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.")
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.calo_branches:

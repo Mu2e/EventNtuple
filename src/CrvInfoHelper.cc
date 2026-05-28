@@ -44,15 +44,21 @@ namespace mu2e
       std::array<float, CRVId::nLayers> PEsPerLayer_ = {0.};
       // Initialize PEs per layer per side
       std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer_ = {0.};
+      // Convert doubles to floats in side times
+      std::array<float,CRVId::nSidesPerBar> sideTimes_ = {static_cast<float>(cluster.GetSideTimes()[0]), static_cast<float>(cluster.GetSideTimes()[1])};
+      // Initiatlize RecoPulse vector
+      CrvPulseInfoRecoCollection  recoPulses;  //this is the reco vector which will be stored in the main TTree
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
         // Get PEs associated with this reco pulse
         float PEs = coincRecoPulses_.at(j)->GetPEs();
         // Get layer number from the bar index associated with this reco pulse
         const CRSScintillatorBarIndex &crvBarIndex = coincRecoPulses_.at(j)->GetScintillatorBarIndex();
-        const CRSScintillatorBar &crvCounter = CRS->getBar(crvBarIndex);
-        const CRSScintillatorBarId &crvCounterId = crvCounter.id();
-        int layerNumber = crvCounterId.getLayerNumber();
+        int sectorNumber  = -1;
+        int moduleNumber  = -1;
+        int layerNumber   = -1;
+        int counterNumber = -1;
+        CrvHelper::GetCrvCounterInfo(CRS, crvBarIndex, sectorNumber, moduleNumber, layerNumber, counterNumber);
         // Get the side number
         // The negative side has SiPM indices 0 and 2, the postive side has indices 1 and 3.
         // zero/one index indicates negative/positive; negative/positive indicates direction wrt the axis in the coordinate system.
@@ -62,19 +68,31 @@ namespace mu2e
         // Sum PEs for this coincidence, indexed by layer number and side number
         int layerSideIndex = layerNumber * CRVId::nSidesPerBar + side; // Indices for a flattened 2D matrix: layers (rows), sides (columns)
         sidePEsPerLayer_[layerSideIndex] += PEs;
+
+        // Fill recoPulses
+        const auto &recoPulse = coincRecoPulses_.at(j);
+        CLHEP::Hep3Vector hitPos = CrvHelper::GetCrvCounterPos(CRS, crvBarIndex);
+        recoPulses.emplace_back(tdet->toDetector(hitPos), crvBarIndex.asInt(), sectorNumber, recoPulse->GetSiPMNumber(),
+          recoPulse->GetPEs(), recoPulse->GetPEsPulseHeight(), recoPulse->GetPulseHeight(),
+          recoPulse->GetPulseBeta(), recoPulse->GetPulseFitChi2(), recoPulse->GetPulseTime());
       }
 
       //fill the Reco collection
       recoInfo.emplace_back(
           cluster.GetCrvSectorType(),
+          cluster.HitPosAndTimeCalculated(),
           tdet->toDetector(cluster.GetAvgHitPos()),
           cluster.GetStartTime(), cluster.GetEndTime(), cluster.GetAvgHitTime(),
           cluster.GetPEs(),
           PEsPerLayer_, // PEsPerLayer array is not a member of the mu2e::CrvCoincidenceCluster class
           sidePEsPerLayer_, // ""
+          cluster.GetSideHits(),
+          cluster.GetSidePEs(),
+          sideTimes_,
           cluster.GetCrvRecoPulses().size(),
           cluster.GetLayers().size(),
-          cluster.GetSlope());
+          cluster.GetSlope(),
+          recoPulses);
     }
 
     if(!crvRecoPulses.isValid()) return;
@@ -217,7 +235,6 @@ namespace mu2e
     if(!crvRecoPulses.isValid()) return;
 
     GeomHandle<CosmicRayShield> CRS;
-    const std::map<int,int> sipm_map = GetSiPMMap(CRS);
 
     // Loop through all reco pulses
     for(size_t recoPulseIndex=0; recoPulseIndex<crvRecoPulses->size(); recoPulseIndex++)
@@ -232,14 +249,14 @@ namespace mu2e
       CrvHelper::GetCrvCounterInfo(CRS, barIndex, sectorNumber, moduleNumber, layerNumber, counterNumber);
 
       //Reco pulses information
-      int SiPM = crvRecoPulse->GetSiPMNumber();
-      int SiPMId = sipm_map.find(barIndex.asInt()*CRVId::nChanPerBar + SiPM)->second;
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
-      recoInfo.emplace_back(HitPos, barIndex.asInt(), sectorNumber, SiPMId,
+      recoInfo.emplace_back(tdet->toDetector(HitPos), barIndex.asInt(), sectorNumber, crvRecoPulse->GetSiPMNumber(),
           crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
           crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime());
 
       //MCtruth pulses information
+      if(!crvDigiMCs.isValid()) return;
+
       double visibleEnergyDeposited  = 0;
       double earliestHitTime         = 0;
       double avgHitTime         = 0;
@@ -278,22 +295,17 @@ namespace mu2e
 
   // Fill digis struct
   void CrvInfoHelper::FillCrvDigiInfoCollections (
-      art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiCollection> const& crvDigis,
       CrvWaveformInfoCollection &digiInfo){
 
-    if(!crvRecoPulses.isValid()) return;
-
     GeomHandle<CosmicRayShield> CRS;
-    const std::map<int,int> sipm_map = GetSiPMMap(CRS);
 
     // Fill digis/waveforminfo struct
     for(size_t j=0; j<crvDigis->size(); j++)
     {
       mu2e::CrvDigi const& digi(crvDigis->at(j));
-      int SiPMId = sipm_map.find(digi.GetScintillatorBarIndex().asInt()*4 + digi.GetSiPMNumber())->second;
       for(size_t k=0; k<digi.GetADCs().size(); k++)
-        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, SiPMId);
+        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, digi.GetScintillatorBarIndex().asInt(), digi.GetSiPMNumber());
     }
   } // FillCrvDigiInfoCollections
 

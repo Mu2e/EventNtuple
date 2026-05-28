@@ -12,6 +12,7 @@ TrkQual : {
   module_type : TrackQuality
   onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
   debugLevel : 0
+
 }
 TrkQualDeM           : @local::TrkQual
 TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
@@ -287,7 +288,7 @@ EventNtupleMaker : {
   FillTimeClusterInfo : false
   CaloClustersTag : "CaloClusterMaker"
   CaloHitsTag : "CaloHitMaker"
-  CaloRecoDigisTag : ""
+  CaloRecoDigisTag : "CaloRecoDigiMaker"
   CaloDigisTag : "SelectReco"
   FillCaloClusters : true
   FillCaloHits : true
@@ -304,7 +305,7 @@ EventNtupleMaker : {
   FillHitCalibInfo : false
   FillTriggerInfo : true
   TriggerProcessName : "Digitize"
-  TriggerPathSuffix : "DigitizePath"  
+  TriggerPathSuffix : "DigitizePath"
   FillCRVCoincs : true
   FillCRVPulses : false
   FillCRVDigis : false
@@ -316,6 +317,7 @@ EventNtupleMaker : {
   PrimaryParticleTag : "compressRecoMCs"
   KalSeedMCAssns : "SelectReco"
   CaloClusterMCTag : "compressRecoMCs"
+  CaloHitMCTag : "compressRecoMCs"
   InfoMCStructHelper : {
     SimParticleCollectionTag : "compressRecoMCs"
     MinGoodMomFraction : 0.9

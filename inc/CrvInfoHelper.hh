@@ -49,7 +49,6 @@ namespace mu2e
           CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo);
 
       void FillCrvDigiInfoCollections(
-          art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
           art::Handle<CrvDigiCollection> const& crvDigis,
           CrvWaveformInfoCollection &digiInfo);
 

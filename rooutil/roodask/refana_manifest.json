@@ -1,0 +1,10 @@
+{
+  "binary": "RooCount",
+  "args": ["{filelist}", "{output}", "MDS3a"],
+  "include_dirs": [ "${ROOT_INCLUDE_PATH}" ],
+  "libraries": [],
+  "compile_flags": [],
+  "output_dir": "./output",
+  "output_pattern": "{first_filestem}_{job_id}.hist.root",
+  "timeout_seconds": 3600
+}

@@ -89,6 +89,7 @@ git checkout --no-track -b vXX-YY-ZZ mu2e/main
 * update version number in histogram ```_hVersion``` in ```src/EventNtupleMaker_module.cc``` and commit
 * make sure EventNtuple runs following these [steps](validation/README.md#Validating-eventntuple-runs)
   * if any test fails, then you can look in ```test_fcls.log``` to see the error. You can also see the command to rerun and debug locally without having to re-run the whole ```test_fcls.sh``` script
+* also make sure ```roodask``` by following these [steps](validation/README.md#Validating-roodask-runs)
 * create a "before" ntuple with the previous release of EventNtuple. In a fresh login:
 ```
 mu2einit
@@ -100,7 +101,7 @@ root -l -b ${MUSE_WORK_DIR}/EventNtuple/validation/create_val_file_rooutil.C\(\"
 * create a comparison booklet following these [steps](validation/README.md#Validating-EventNtuple-Contents)
    * make sure any differences are understood
 * open PR with final changes and merge
-* make sure EventNtuple builds with spack following these [steps](validation/README.md#Validating-EventNtuple-Builds-SpackCMake), fix any errors and merge them
+* as of this writing (4-22-2026), this step does not work: (make sure EventNtuple builds with spack following these [steps](validation/README.md#Validating-EventNtuple-Builds-SpackCMake), fix any errors and merge them)
    * this needs to be done after merging so that we can checkout the ```main``` branch
 * create new release on GitHub
    * auto-generate release notes but add text to highlight important changes
