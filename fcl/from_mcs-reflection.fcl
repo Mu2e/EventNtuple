@@ -8,15 +8,13 @@ EN : {
   @table::EventNtupleMaker
   FitType : LoopHelix
   diagLevel : 2
-  FillMCInfo : true
-  FillTrkPIDInfo : false
-  FillHitInfo : false
   FillTriggerInfo : false
-  SurfaceStepCollectionTag : "compressRecoMCs"
+  trk.fillHits : false
+  trk.fillTrkQual : false
+  trk.fillTrkPID : false
 }
 ENBranch : {
   branch : "trk"
-  options : { fillMC : true   genealogyDepth : -1 }
 }
 END_PROLOG
 process_name: ENeflect
@@ -62,7 +60,7 @@ physics :
     ENe : {
       @table::EN
       SelectEvents : [ "eTrig" ]
-      branches : [
+      trk.branches : [
         { @table::ENBranch
           trkQualTags : ["TrkQualReflecte"]
           trkPIDTags : ["TrkPIDReflecte"]
@@ -73,7 +71,7 @@ physics :
     ENmu : {
       @table::EN
       SelectEvents : [ "muTrig" ]
-      branches : [
+      trk.branches : [
         { @table::ENBranch
           trkQualTags : ["TrkQualReflectmu"]
           trkPIDTags : ["TrkPIDReflectmu"]

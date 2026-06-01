@@ -9,4 +9,4 @@ physics.producers.CrvInference : {
 }
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.Path, CrvInference ]
-physics.analyzers.EventNtuple.CrvInferenceTag : "CrvInference"
+physics.analyzers.EventNtuple.crv.inferenceTag : "CrvInference"

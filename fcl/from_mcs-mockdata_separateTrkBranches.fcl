@@ -1,5 +1,5 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
-physics.analyzers.EventNtuple.branches : [ @local::DeM, @local::DeP, @local::UeM, @local::UeP,
+physics.analyzers.EventNtuple.trk.branches : [ @local::DeM, @local::DeP, @local::UeM, @local::UeP,
   @local::DmuM, @local::DmuP, @local::UmuM, @local::UmuP ]
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathSeparate ]

@@ -97,12 +97,9 @@ TTProducersPath : [ MergeTTApr, MergeTTTpr, MergeTTCpr, MergeTTMpr ]
 
 genCountLogger: { module_type: GenEventCountReader }
 
-AllOpt : {
-  fillMC : true
-  fillHits : true
-  genealogyDepth : -1
-  matchDepth : -1
-}
+# AllOpt is no longer needed: BranchOptConfig C++ defaults now match these values.
+# Kept here only for reference / backwards compatibility with any external FCLs.
+# AllOpt : { fillMC : true  fillHits : true  genealogyDepth : -1  matchDepth : -1 }
 
 # With move to using KalSeedPtr need to "merge" KalSeeds so that we get KalSeedPtr collections
 MergeKK : { module_type : MergeKalSeeds }
@@ -192,37 +189,31 @@ MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKK
 
 DeM : { input : "MergeKKDeM"
   branch : "dem"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDeM"]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branch : "uem"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branch : "dmm"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branch : "umm"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branch : "dep"
-  options : { fillMC : true   genealogyDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branch : "uep"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
@@ -233,125 +224,138 @@ DmuP : { input : "MergeKKDmuP"
 }
 UmuP : { input : "MergeKKUmuP"
   branch : "ump"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branch : "trk"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branch : "trk"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 fillHits : true }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branch : "trk"
-  options : { fillHits : true fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
   trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branch : "trk"
-  options : { fillMC : true fillHits : true  genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branch : "de"
-  options : { fillMC : true   genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
   trkPIDTags : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
   module_type : EventNtupleMaker
-  branches : [ @local::All ]
   RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
   EWMTag : "EWMProducer"
-  PBTMCTag : "EWMProducer"
-  CrvCoincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
-  CrvCoincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
-  CrvRecoPulsesTag : "SelectReco"
-  CrvStepsTag : "compressRecoMCs"
-  SimParticlesTag : "compressRecoMCs"
-  MCTrajectoriesTag : "compressRecoMCs"
-  TimeClustersTag : "MHDe"
-  FillTimeClusterInfo : false
-  CaloClustersTag : "CaloClusterMaker"
-  CaloHitsTag : "CaloHitMaker"
-  CaloRecoDigisTag : "CaloRecoDigiMaker"
-  CaloDigisTag : "SelectReco"
-  FillCaloClusters : true
-  FillCaloHits : true
-  FillCaloRecoDigis : false
-  FillCaloDigis : false
-  CrvDigiMCsTag : "compressRecoMCs"
-  CrvDigisTag : "SelectReco"
-  CrvCoincidenceClusterMCAssnsTag : "CrvCoincidenceClusterMCAssns"
-  CrvPlaneY : @local::crvPlaneY.CRV_T
-  FillMCInfo : true
-  FillTrkQual : true
-  FillTrkPIDInfo : false
-  FillHitInfo : true
-  FillHitCalibInfo : false
   FillTriggerInfo : true
   TriggerProcessName : "Digitize"
   TriggerPathSuffix : "DigitizePath"
-  FillCRVCoincs : true
-  FillCRVPulses : false
-  FillCRVDigis : false
-  FillCaloMC : true
-  FillCaloClustersMC : true
-  FillCaloHitsMC : true
-  FillHelixInfo : false
-  FillCaloSimInfos : true
-  PrimaryParticleTag : "compressRecoMCs"
-  KalSeedMCAssns : "SelectReco"
-  CaloClusterMCTag : "compressRecoMCs"
-  CaloHitMCTag : "compressRecoMCs"
-  InfoMCStructHelper : {
-    SimParticleCollectionTag : "compressRecoMCs"
-    MinGoodMomFraction : 0.9
-    MaxVDDt : 5 # ns
-  }
-#  ExtraMCStepCollectionTags : [ "compressRecoMCs:protonabsorber", "compressRecoMCs:stoppingtarget" ]
-  ExtraMCStepCollectionTags : []
-  SurfaceStepCollectionTag : "compressRecoMCs"
   FitType : LoopHelix
-  StepPointMCTags : [ ]
+  # ── Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ──────
+  mc : {
+    fill : true
+    PBTMCTag : "EWMProducer"
+    simParticlesTag : "compressRecoMCs"
+    mcTrajectoriesTag : "compressRecoMCs"
+    primaryParticleTag : "compressRecoMCs"
+    infoMCStructHelper : {
+      SimParticleCollectionTag : "compressRecoMCs"
+      MinGoodMomFraction : 0.9
+      MaxVDDt : 5 # ns
+    }
+  }
+  # ── Tracker subsystem ─────────────────────────────────────────────────────
+  trk : {
+    fillHits : true
+    fillHitCalibs : false
+    fillHelices : false
+    fillTrkQual : true
+    fillTrkPID : false
+    fillTimeClusters : false
+    timeClustersTag : "MHDe"
+    branches : [ @local::All ]
+    mc : {
+      kalSeedMCAssns : "SelectReco"
+      surfaceStepsTag : "compressRecoMCs"
+      stepPointMCTags : [ ]
+    }
+  }
+  # ── Calorimeter subsystem ─────────────────────────────────────────────────
+  # calo.mc.fill is independent of mc.fill: calo-only jobs can fill calo MC
+  # without loading tracker/event-level MC products.
+  calo : {
+    fill : true
+    fillClusters : true
+    clustersTag : "CaloClusterMaker"
+    fillHits : true
+    hitsTag : "CaloHitMaker"
+    fillRecoDigis : false
+    recoDigisTag : "CaloRecoDigiMaker"
+    fillDigis : false
+    digisTag : "SelectReco"
+    mc : {
+      fill : true
+      fillTrackMatch : true
+      fillClusters : true
+      clusterMCTag : "compressRecoMCs"
+      fillHits : true
+      hitMCTag : "compressRecoMCs"
+      fillSim : true
+      fillDigis : false
+      fillDigiSim : false
+      showerSimTag : "compressRecoMCs"
+    }
+  }
+  # ── CRV subsystem ─────────────────────────────────────────────────────────
+  crv : {
+    fill : true
+    fillCoincs : true
+    coincidencesTag : "SelectReco:CrvCoincidenceClusterFinder"
+    recoPulsesTag : "SelectReco"
+    stepsTag : "compressRecoMCs"
+    fillPulses : false
+    fillDigis : false
+    digisTag : "SelectReco"
+    planeY : @local::crvPlaneY.CRV_T
+    mc : {
+      coincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
+      digiMCsTag : "compressRecoMCs"
+      assnsTag : "CrvCoincidenceClusterMCAssns"
+    }
+  }
 }
 # instance for processing trigger (digitization) output from simulation
-EventNtupleMakerTTMC: {
+EventNtupleMakerTTMC : {
   @table::EventNtupleMaker
   diagLevel : 2
-  FillCRVCoincs : false
-  FillCaloMC : false
   FillTriggerInfo : true
-  FillTrkPIDInfo : false
-  FillHitInfo : true
-  PrimaryParticleTag: "compressDigiMCs"
-  MCTrajectoriesTag: "compressDigiMCs"
   FitType : LoopHelix
-  TriggerProcessName : "Digitize"
-  SimParticlesTag : "compressDigiMCs"
-  ExtraMCStepCollectionTags: []
-  InfoMCStructHelper : {
-    MinGoodMomFraction : 0.9
-    MaxVDDt : 5 # ns
-    SimParticleCollectionTag : "compressDigiMCs"
-  }
+  crv.fill : false
+  calo.mc.fillTrackMatch : false
+  mc.primaryParticleTag : "compressDigiMCs"
+  mc.mcTrajectoriesTag : "compressDigiMCs"
+  mc.simParticlesTag : "compressDigiMCs"
+  mc.infoMCStructHelper.SimParticleCollectionTag : "compressDigiMCs"
+  trk.mc.extraMCStepTags : []
 }
 
+# TTMCBranch: per-branch config for trigger MC branches.
+# No options needed — BranchOptConfig defaults are fillMC:true, fillHits:true,
+# genealogyDepth:-1, matchDepth:-1.
 TTMCBranch : {
   branch : "trk"
-  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
 }
 
 EventNtuple : {
@@ -383,12 +387,11 @@ ENDeCalib : {
   @table::EventNtupleMaker
   hasTracks : true
   FitType : LoopHelix
-  branches :  [
+  trk.branches : [
     { input: "MergeKKDeCalib"
       branch : "trk"
       trkQualTags : ["TrkQualDe"]
       trkPIDTags : ["TrkPIDDe"]
-      options : { fillMC : true fillHits : true  genealogyDepth : -1 }
     }
   ]
   SelectEvents : [ TriggerPath ]

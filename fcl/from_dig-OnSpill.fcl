@@ -16,44 +16,44 @@ physics : {
     # apr
     EventNtupleTTMCApr : {
       @table::EventNtupleMakerTTMC
-      branches : [ {
+      trk.branches : [ {
         @table::TTMCBranch
         input : "MergeTTApr"
       } ]
-      KalSeedMCAssns: "TTAprKSFMC"
+      trk.mc.kalSeedMCAssns : "TTAprKSFMC"
       RecoCountTag : "TTAprKSFMC"
       SelectEvents : [ "Digitize:apr_highP*"  ]
     }
     # tpr
     EventNtupleTTMCTpr : {
       @table::EventNtupleMakerTTMC
-      branches : [ {
+      trk.branches : [ {
         @table::TTMCBranch
         input : "MergeTTTpr"
       } ]
-      KalSeedMCAssns: "TTTprDeKSFMC"
+      trk.mc.kalSeedMCAssns : "TTTprDeKSFMC"
       RecoCountTag : "TTTprDeKSFMC"
       SelectEvents : [ "Digitize:tprDe_highP*"  ]
     }
     # cpr
     EventNtupleTTMCCpr : {
       @table::EventNtupleMakerTTMC
-      branches : [ {
+      trk.branches : [ {
         @table::TTMCBranch
         input : "MergeTTCpr"
       } ]
-      KalSeedMCAssns: "TTCprDeKSFMC"
+      trk.mc.kalSeedMCAssns : "TTCprDeKSFMC"
       RecoCountTag : "TTCprDeKSFMC"
       SelectEvents : [ "Digitize:cprDe_highP*"  ]
     }
     # mpr
     EventNtupleTTMCMpr : {
       @table::EventNtupleMakerTTMC
-      branches : [ {
+      trk.branches : [ {
         @table::TTMCBranch
         input : "MergeTTMpr"
       } ]
-      KalSeedMCAssns: "TTMprDeKSFMC"
+      trk.mc.kalSeedMCAssns : "TTMprDeKSFMC"
       RecoCountTag : "TTMprDeKSFMC"
       SelectEvents : [ "Digitize:mprDe_highP*"  ]
    }

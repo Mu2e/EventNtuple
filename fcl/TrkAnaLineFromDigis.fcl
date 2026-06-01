@@ -38,17 +38,14 @@ physics :
       @table::EventNtupleMaker
       FitType : KinematicLine
       diagLevel : 2
-      FillMCInfo : true
-      FillTrkPIDInfo : false
-      FillHitInfo : true
       FillTriggerInfo : false
-      branches :  [
+      trk.branches :  [
         { input: "KKLine"
           branch : "kl"
-          options : { fillMC : true   genealogyDepth : 5 }
+          options : { genealogyDepth : 5 }
         }
       ]
-      ExtraMCStepCollectionTags : [ "compressDigiMCs:protonabsorber", "compressDigiMCs:stoppingtarget" ]
+      trk.mc.extraMCStepTags : [ "compressDigiMCs:protonabsorber", "compressDigiMCs:stoppingtarget" ]
     }
 
     @table::TrkAnaReco.analyzers
