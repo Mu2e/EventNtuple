@@ -263,7 +263,7 @@ EventNtupleMaker : {
   TriggerProcessName : "Digitize"
   TriggerPathSuffix : "DigitizePath"
   FitType : LoopHelix
-  # ── Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ──────
+  # -- Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ------
   mc : {
     fill : true
     PBTMCTag : "EWMProducer"
@@ -276,7 +276,7 @@ EventNtupleMaker : {
       MaxVDDt : 5 # ns
     }
   }
-  # ── Tracker subsystem ─────────────────────────────────────────────────────
+  # -- Tracker subsystem -----------------------------------------------------
   trk : {
     fillHits : true
     fillHitCalibs : false
@@ -292,7 +292,7 @@ EventNtupleMaker : {
       stepPointMCTags : [ ]
     }
   }
-  # ── Calorimeter subsystem ─────────────────────────────────────────────────
+  # -- Calorimeter subsystem -------------------------------------------------
   # calo.mc.fill is independent of mc.fill: calo-only jobs can fill calo MC
   # without loading tracker/event-level MC products.
   calo : {
@@ -318,7 +318,7 @@ EventNtupleMaker : {
       showerSimTag : "compressRecoMCs"
     }
   }
-  # ── CRV subsystem ─────────────────────────────────────────────────────────
+  # -- CRV subsystem ---------------------------------------------------------
   crv : {
     fill : true
     fillCoincs : true
@@ -352,7 +352,7 @@ EventNtupleMakerTTMC : {
 }
 
 # TTMCBranch: per-branch config for trigger MC branches.
-# No options needed — BranchOptConfig defaults are fillMC:true, fillHits:true,
+# No options needed -- BranchOptConfig defaults are fillMC:true, fillHits:true,
 # genealogyDepth:-1, matchDepth:-1.
 TTMCBranch : {
   branch : "trk"
