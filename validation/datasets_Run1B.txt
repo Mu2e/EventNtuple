@@ -1,0 +1,7 @@
+# Test Datasets for Validating EventNtuple with MDC2025
+{mock} N/A
+{primary} mcs.mu2e.CeEndpointOnSpillTriggerable-KL.Run1Baf_best_v1_4-000.art
+{mixed} mcs.mu2e.CeEndpointMix1BB-KL.Run1Bah_best_v1_4-001.art
+{extracted} N/A
+{digi} N/A
+{crv_kpp} N/A

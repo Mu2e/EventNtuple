@@ -1,0 +1,36 @@
+# Test mock datasets with and without MC
+mu2e -c fcl/from_mcs-mockdata.fcl -S {mock} --TFileName nts.ntuple.mock.root -n 100
+mu2e -c fcl/from_mcs-mockdata_noMC.fcl -S {mock} --TFileName nts.ntuple.mockNoMC.root -n 100
+
+# Test some individual reconstructed datasets
+mu2e -c fcl/from_mcs-primary.fcl -S {primary} --TFileName nts.ntuple.primary.root -n 100
+mu2e -c fcl/from_mcs-mixed.fcl -S {mixed} --TFileName nts.ntuple.mixed.root -n 100
+mu2e -c fcl/from_mcs-extracted.fcl -S {extracted} --TFileName nts.ntuple.extracted.root -n 100
+
+# Test ceSimReco works
+mu2e -c Production/Validation/ceSimReco.fcl -n 10
+mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --TFileName nts.ntuple.ceSimReco.root
+
+# Create a dataset with trkhitcalib branch
+mu2e -c validation/ceSimReco.fcl -n 100
+mu2e -c validation/ceTrig.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceTrig.roo
+mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceTrig.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root
+
+# Test some options
+mu2e -c fcl/from_mcs-mockdata_separateTrkBranches.fcl -S {mock} --TFileName nts.ntuple.mockSepTrkBranches.root -n 100
+mu2e -c fcl/from_mcs-mockdata_selectorExample.fcl -S {mock} --TFileName nts.ntuple.mockSelector.root -n 100
+mu2e -c fcl/from_mcs-primary_addVDSteps.fcl -S {primary} --TFileName nts.ntuple.primaryVDSteps.root -n 100
+
+# Test digi datasets
+mu2e -c fcl/from_dig-mockdata.fcl -S {digi} --TFileName nts.ntuple.dig.root -n 100
+
+# Create validation histogras
+mu2e -c fcl/from_mcs-mockdata.fcl -S {mock} --TFileName nts.ntuple.after.root -n 100
+root -l -b -q validation/create_val_file_rooutil.C\(\"nts.ntuple.after.root\",\"val.ntuple.after.root\"\) 
+
+# CRV KPP (real data)
+mu2e -c fcl/from_rec-crv-kpp.fcl -S {crv_kpp} --TFileName nts.ntuple.crv-kpp.root -n 100
+mu2e -c fcl/from_rec-crv-kpp_withCrvDigis.fcl -S {crv_kpp} --TFileName nts.ntuple.crv-kpp_withCrvDigis.root -n 100
+
+# DeCalib tests
+mu2e -c fcl/from_mcs-DeCalib.fcl -S {mixed} --TFileName nts.ntuple.deCalib.root -n 100

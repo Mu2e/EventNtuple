@@ -1,0 +1,7 @@
+# Test Datasets for Validating EventNtuple with MDC2020
+{mock} mcs.mu2e.ensembleMDS2cMix1BBTriggered.MDC2020ba_best_v1_3.art
+{primary} mcs.mu2e.CeEndpointOnSpillTriggered.MDC2020aw_best_v1_3.art
+{mixed} mcs.mu2e.CeEndpointMix1BBTriggered.MDC2020aw_best_v1_3.art
+{extracted} mcs.mu2e.CosmicCRYExtractedTriggered.MDC2020aw.art
+{digi} dig.mu2e.DIOtail95OnSpillTriggered.MDC2020au_perfect_v1_3.art
+{crv_kpp} N/A
