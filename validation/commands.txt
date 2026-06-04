@@ -13,7 +13,7 @@ mu2e -c fcl/from_mcs-ceSimReco.fcl -s mcs.owner.val-ceSimReco.dsconf.seq.art --T
 
 # Create a dataset with trkhitcalib branch
 mu2e -c validation/ceSimReco.fcl -n 100
-mu2e -c validation/ceTrig.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceTrig.roo
+mu2e -c validation/ceTrig.fcl -s mcs.owner.val-ceSimRecoVal.dsconf.seq.art --TFileName nts.ntuple.ceTrig.root
 mu2e -c fcl/from_mcs-ceSimRecoVal.fcl -s mcs.owner.val-ceTrig.dsconf.seq.art --TFileName nts.ntuple.ceSimRecoVal.root
 
 # Test some options
