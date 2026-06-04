@@ -87,7 +87,11 @@ def run(cmd, datasets_dict):
                 return Result.SKIPPED # returning SKIPPED to avoid counting as a failure, but skipping the test since dataset is not available
             cmd = cmd.replace(old_input_dataset, input_dataset)
         else:
-            print(f"Warning: Dataset name '{input_dataset}' not found in datasets file. Using as-is.")
+            if input_dataset.startswith("{"):
+                print(f"Warning: Dataset name '{input_dataset}' looks like it should be in the datasets file but it can't be found. Skipping test...")
+                return Result.SKIPPED
+            else:
+                print(f"Warning: Dataset name '{input_dataset}' not found in datasets file. Using as-is.")
         
         # Check for filelist
         filelist_path = Path("../filelists/") / f"{input_dataset}.list"
