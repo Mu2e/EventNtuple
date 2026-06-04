@@ -181,7 +181,7 @@ def main():
     print(f"Total: {len(results)}, Passed: {passed}, Failed: {failed}, Skipped: {skipped}")
       
     if passed < len(results):
-        print("\nFailed datasets:")
+        print("\nFailed commands:")
         for command, result in results:
             if result == Result.FAILED:
                 print(f"  - {command}")

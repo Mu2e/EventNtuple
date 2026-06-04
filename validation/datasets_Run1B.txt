@@ -5,3 +5,4 @@
 {extracted} N/A
 {digi} N/A
 {crv_kpp} N/A
+{Run1B} mcs.mu2e.CeEndpointOnSpillTriggerable-KL.Run1Baf_best_v1_4-000.art

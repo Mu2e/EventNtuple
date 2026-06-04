@@ -23,6 +23,8 @@ mu2e -c fcl/from_mcs-primary_addVDSteps.fcl -S {primary} --TFileName nts.ntuple.
 
 # Test digi datasets
 mu2e -c fcl/from_dig-mockdata.fcl -S {digi} --TFileName nts.ntuple.dig.root -n 100
+mu2e -c fcl/from_dig-OnSpill.fcl -S {digi} --TFileName nts.ntuple.digOnSpill.root -n 100
+mu2e -c fcl/from_dig-calo.fcl -S {digi} --TFileName nts.ntuple.digCalo.root -n 100
 
 # Create validation histogras
 mu2e -c fcl/from_mcs-mockdata.fcl -S {mock} --TFileName nts.ntuple.after.root -n 100
@@ -34,3 +36,6 @@ mu2e -c fcl/from_rec-crv-kpp_withCrvDigis.fcl -S {crv_kpp} --TFileName nts.ntupl
 
 # DeCalib tests
 mu2e -c fcl/from_mcs-DeCalib.fcl -S {mixed} --TFileName nts.ntuple.deCalib.root -n 100
+
+# Campaign-specific
+mu2e -c fcl/from_mcs-Run1B.fcl -S {Run1B} --TFileName nts.ntuple.Run1B.root -n 100
