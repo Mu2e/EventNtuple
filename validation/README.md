@@ -16,6 +16,8 @@ This script will run all the supported fcl files over relevant datasets. The out
 
 The reason for separating the commands from the datasets is so that we can easily change to a different set of datasets with new simulation campaigns, as well as update datasets in currently-supported simulation campaigns.
 
+You can comment out commands in the ```commands.txt``` with a ```#``` to focus on failing tests
+
 ### Creating a Validation File
 Before making any changes, create an EventNtuple file and run the validation script. This creates a new ROOT file with histograms created from the EventNtuple ntuple:
 
