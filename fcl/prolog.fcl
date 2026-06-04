@@ -188,67 +188,67 @@ MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKK
 
 
 DeM : { input : "MergeKKDeM"
-  branch : "dem"
+  branchname : "dem"
   trkQualTags : ["TrkQualDeM"]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
-  branch : "uem"
+  branchname : "uem"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
-  branch : "dmm"
+  branchname : "dmm"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
-  branch : "umm"
+  branchname : "umm"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
-  branch : "dep"
+  branchname : "dep"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
-  branch : "uep"
+  branchname : "uep"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
-  branch : "dmp"
+  branchname : "dmp"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
-  branch : "ump"
+  branchname : "ump"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
-  branch : "trk"
+  branchname : "trk"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
-  branch : "trk"
+  branchname : "trk"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
-  branch : "trk"
+  branchname : "trk"
   trkQualTags : ["TrkQualAll"]
   trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
-  branch : "trk"
+  branchname : "trk"
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
-  branch : "de"
+  branchname : "de"
   trkQualTags : ["TrkQualDe"]
   trkPIDTags : ["TrkPIDDe"]
 }
@@ -263,6 +263,7 @@ EventNtupleMaker : {
   TriggerProcessName : "Digitize"
   TriggerPathSuffix : "DigitizePath"
   FitType : LoopHelix
+  diagLevel : 0
   # -- Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ------
   mc : {
     fill : true
@@ -278,18 +279,14 @@ EventNtupleMaker : {
   }
   # -- Tracker subsystem -----------------------------------------------------
   trk : {
+    fill : true
     fillHits : true
     fillHitCalibs : false
-    fillHelices : false
     fillTrkQual : true
     fillTrkPID : false
-    fillTimeClusters : false
-    timeClustersTag : "MHDe"
-    branches : [ @local::All ]
+    fits : [ @local::All ]
     mc : {
       kalSeedMCAssns : "SelectReco"
-      surfaceStepsTag : "compressRecoMCs"
-      stepPointMCTags : [ ]
     }
   }
   # -- Calorimeter subsystem -------------------------------------------------
@@ -335,6 +332,19 @@ EventNtupleMaker : {
       assnsTag : "CrvCoincidenceClusterMCAssns"
     }
   }
+  # -- Helix seeds -----------------------------------------------------------
+  helices : {
+    fill : false
+  }
+  # -- Time clusters ---------------------------------------------------------
+  timeclusters : {
+    fill : false
+    tag  : "MHDe"
+  }
+  # -- MC step collections ---------------------------------------------------
+  mcsteps : {
+    surfaceStepsTag : "compressRecoMCs"
+  }
 }
 # instance for processing trigger (digitization) output from simulation
 EventNtupleMakerTTMC : {
@@ -342,20 +352,21 @@ EventNtupleMakerTTMC : {
   diagLevel : 2
   FillTriggerInfo : true
   FitType : LoopHelix
-  crv.fill : false
-  calo.mc.fillTrackMatch : false
-  mc.primaryParticleTag : "compressDigiMCs"
-  mc.mcTrajectoriesTag : "compressDigiMCs"
-  mc.simParticlesTag : "compressDigiMCs"
-  mc.infoMCStructHelper.SimParticleCollectionTag : "compressDigiMCs"
-  trk.mc.extraMCStepTags : []
 }
+EventNtupleMakerTTMC.crv.fill : false
+EventNtupleMakerTTMC.calo.mc.fillTrackMatch : false
+EventNtupleMakerTTMC.mc.primaryParticleTag : "compressDigiMCs"
+EventNtupleMakerTTMC.mc.mcTrajectoriesTag : "compressDigiMCs"
+EventNtupleMakerTTMC.mc.simParticlesTag : "compressDigiMCs"
+EventNtupleMakerTTMC.mc.infoMCStructHelper.SimParticleCollectionTag : "compressDigiMCs"
 
 # TTMCBranch: per-branch config for trigger MC branches.
 # No options needed -- BranchOptConfig defaults are fillMC:true, fillHits:true,
 # genealogyDepth:-1, matchDepth:-1.
 TTMCBranch : {
-  branch : "trk"
+  branchname : "trk"
+  trkQualTags : [ ]
+  trkPIDTags : [ ]
 }
 
 EventNtuple : {
@@ -387,14 +398,14 @@ ENDeCalib : {
   @table::EventNtupleMaker
   hasTracks : true
   FitType : LoopHelix
-  trk.branches : [
-    { input: "MergeKKDeCalib"
-      branch : "trk"
-      trkQualTags : ["TrkQualDe"]
-      trkPIDTags : ["TrkPIDDe"]
-    }
-  ]
   SelectEvents : [ TriggerPath ]
 }
+ENDeCalib.trk.fits : [
+  { input: "MergeKKDeCalib"
+    branchname : "trk"
+    trkQualTags : ["TrkQualDe"]
+    trkPIDTags : ["TrkPIDDe"]
+  }
+]
 
 END_PROLOG

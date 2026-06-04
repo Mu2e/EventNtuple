@@ -1,8 +1,7 @@
 #include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
-physics.analyzers.EventNtuple.trk.branches : [ ] # no track branches
-physics.analyzers.EventNtuple.calo.fillClusters : false # no calorimeter
-physics.analyzers.EventNtuple.calo.fillHits : false # no calorimeter
+physics.analyzers.EventNtuple.trk.fill : false
+physics.analyzers.EventNtuple.calo.fill : false # no calorimeter
 physics.analyzers.EventNtuple.RecoCountTag : ""
 physics.analyzers.EventNtuple.PBTTag : ""
 physics.analyzers.EventNtuple.hasCRV : false #false keeps events that have no CRV coincidences

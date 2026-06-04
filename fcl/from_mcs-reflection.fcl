@@ -9,10 +9,10 @@ EN : {
   FitType : LoopHelix
   diagLevel : 2
   FillTriggerInfo : false
-  trk.fillHits : false
-  trk.fillTrkQual : false
-  trk.fillTrkPID : false
 }
+EN.trk.fillHits : false
+EN.trk.fillTrkQual : false
+EN.trk.fillTrkPID : false
 ENBranch : {
   branch : "trk"
 }
@@ -60,25 +60,10 @@ physics :
     ENe : {
       @table::EN
       SelectEvents : [ "eTrig" ]
-      trk.branches : [
-        { @table::ENBranch
-          trkQualTags : ["TrkQualReflecte"]
-          trkPIDTags : ["TrkPIDReflecte"]
-          input: "Reflecte"
-        }
-      ]
     }
     ENmu : {
       @table::EN
       SelectEvents : [ "muTrig" ]
-      trk.branches : [
-        { @table::ENBranch
-          trkQualTags : ["TrkQualReflectmu"]
-          trkPIDTags : ["TrkPIDReflectmu"]
-          input: "Reflectmu"
-        }
-
-      ]
     }
     printModule : {
       module_type : PrintModule
@@ -96,5 +81,19 @@ physics :
 
 physics.trigger_paths : [ "eTrig", "muTrig"]
 physics.end_paths : [ "eEnd", "muEnd", "CLPrint" ]
+physics.analyzers.ENe.trk.fits : [
+  { @table::ENBranch
+    trkQualTags : ["TrkQualReflecte"]
+    trkPIDTags : ["TrkPIDReflecte"]
+    input: "Reflecte"
+  }
+]
+physics.analyzers.ENmu.trk.fits : [
+  { @table::ENBranch
+    trkQualTags : ["TrkQualReflectmu"]
+    trkPIDTags : ["TrkPIDReflectmu"]
+    input: "Reflectmu"
+  }
+]
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.ENreflection.version.sequence.root"

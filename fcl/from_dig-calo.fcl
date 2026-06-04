@@ -30,10 +30,8 @@ physics.analyzers.EventNtuple.PBTTag : ""
 physics.analyzers.EventNtuple.mc.PBTMCTag : ""
 physics.analyzers.EventNtuple.mc.simParticlesTag : "CaloShowerStepMaker"
 #Turn off tracker and other branches
-physics.analyzers.EventNtuple.trk.branches : [ ]
-physics.analyzers.EventNtuple.trk.fillTrkQual : false
+physics.analyzers.EventNtuple.trk.fill : false
 physics.analyzers.EventNtuple.FillTriggerInfo : false
-physics.analyzers.EventNtuple.trk.fillHits : false
 physics.analyzers.EventNtuple.crv.fillCoincs : false
 
 #Toggle calo branches

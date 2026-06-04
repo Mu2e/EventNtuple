@@ -39,13 +39,6 @@ physics :
       FitType : KinematicLine
       diagLevel : 2
       FillTriggerInfo : false
-      trk.branches :  [
-        { input: "KKLine"
-          branch : "kl"
-          options : { genealogyDepth : 5 }
-        }
-      ]
-      trk.mc.extraMCStepTags : [ "compressDigiMCs:protonabsorber", "compressDigiMCs:stoppingtarget" ]
     }
 
     @table::TrkAnaReco.analyzers
@@ -78,6 +71,13 @@ physics.producers.KKLine.ModuleSettings.SaveAllFits : true
 physics.producers.KKLine.ExtensionSettings.BFieldCorrection : false
 
 physics.end_paths : [ EndPath ]
+physics.analyzers.TrkAnaLine.trk.fits : [
+  { input: "KKLine"
+    branchname : "kl"
+    options : { genealogyDepth : 5 }
+  }
+]
+physics.analyzers.TrkAnaLine.mcsteps.extraMCStepTags : [ "compressDigiMCs:protonabsorber", "compressDigiMCs:stoppingtarget" ]
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.TALineDigis.version.sequence.root"
 #include "Offline/CRVResponse/fcl/epilog_extracted.fcl"

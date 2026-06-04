@@ -16,44 +16,24 @@ physics : {
     # apr
     EventNtupleTTMCApr : {
       @table::EventNtupleMakerTTMC
-      trk.branches : [ {
-        @table::TTMCBranch
-        input : "MergeTTApr"
-      } ]
-      trk.mc.kalSeedMCAssns : "TTAprKSFMC"
       RecoCountTag : "TTAprKSFMC"
       SelectEvents : [ "Digitize:apr_highP*"  ]
     }
     # tpr
     EventNtupleTTMCTpr : {
       @table::EventNtupleMakerTTMC
-      trk.branches : [ {
-        @table::TTMCBranch
-        input : "MergeTTTpr"
-      } ]
-      trk.mc.kalSeedMCAssns : "TTTprDeKSFMC"
       RecoCountTag : "TTTprDeKSFMC"
       SelectEvents : [ "Digitize:tprDe_highP*"  ]
     }
     # cpr
     EventNtupleTTMCCpr : {
       @table::EventNtupleMakerTTMC
-      trk.branches : [ {
-        @table::TTMCBranch
-        input : "MergeTTCpr"
-      } ]
-      trk.mc.kalSeedMCAssns : "TTCprDeKSFMC"
       RecoCountTag : "TTCprDeKSFMC"
       SelectEvents : [ "Digitize:cprDe_highP*"  ]
     }
     # mpr
     EventNtupleTTMCMpr : {
       @table::EventNtupleMakerTTMC
-      trk.branches : [ {
-        @table::TTMCBranch
-        input : "MergeTTMpr"
-      } ]
-      trk.mc.kalSeedMCAssns : "TTMprDeKSFMC"
       RecoCountTag : "TTMprDeKSFMC"
       SelectEvents : [ "Digitize:mprDe_highP*"  ]
    }
@@ -63,6 +43,15 @@ physics : {
   TrigPath : [ @sequence::TTProducersPath]
 }
 #physics.analyzers.TAapr.InfoMCStructHelper.SimParticleCollectionTag: "compressDetStepMCs"
+
+physics.analyzers.EventNtupleTTMCApr.trk.fits : [ { @table::TTMCBranch input : "MergeTTApr" } ]
+physics.analyzers.EventNtupleTTMCApr.trk.mc.kalSeedMCAssns : "TTAprKSFMC"
+physics.analyzers.EventNtupleTTMCTpr.trk.fits : [ { @table::TTMCBranch input : "MergeTTTpr" } ]
+physics.analyzers.EventNtupleTTMCTpr.trk.mc.kalSeedMCAssns : "TTTprDeKSFMC"
+physics.analyzers.EventNtupleTTMCCpr.trk.fits : [ { @table::TTMCBranch input : "MergeTTCpr" } ]
+physics.analyzers.EventNtupleTTMCCpr.trk.mc.kalSeedMCAssns : "TTCprDeKSFMC"
+physics.analyzers.EventNtupleTTMCMpr.trk.fits : [ { @table::TTMCBranch input : "MergeTTMpr" } ]
+physics.analyzers.EventNtupleTTMCMpr.trk.mc.kalSeedMCAssns : "TTMprDeKSFMC"
 
 end_paths : [ EndPath ]
 physics.trigger_paths : [ "TrigPath" ]
