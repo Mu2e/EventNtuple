@@ -427,6 +427,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_crvpulses_pulseBeta = new TH1F("h_crvpulses_pulseBeta", "", 100,0,100);
   TH1F* h_crvpulses_pulseFitChi2 = new TH1F("h_crvpulses_pulseFitChi2", "", 100,0,100);
   TH1F* h_crvpulses_time = new TH1F("h_crvpulses_time", "", 100,0,100);
+  TH1F* h_crvpulses_crvHitIndex = new TH1F("h_crvpulses_crvHitIndex", "", 100,-1,99);
 
   TH1F* h_crvpulsesmc_valid = new TH1F("h_crvpulsesmc_valid", "", 100,0,100);
   TH1F* h_crvpulsesmc_pdgId = new TH1F("h_crvpulsesmc_pdgId", "", 100,0,100);
@@ -1092,6 +1093,7 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_crvpulses_pulseBeta->Fill(crvpulse.pulseBeta);
         h_crvpulses_pulseFitChi2->Fill(crvpulse.pulseFitChi2);
         h_crvpulses_time->Fill(crvpulse.time);
+        h_crvpulses_crvHitIndex->Fill(crvpulse.crvHitIndex);
       }
     }
 

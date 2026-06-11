@@ -21,9 +21,10 @@ namespace mu2e
     float  pulseBeta = -1;       //Pulse beta
     float  pulseFitChi2 = -1;    //Pulse Fit chi2
     float  time = -1;            //Time
+    int    crvHitIndex = -1;     //index of the CRV hit containing this pulse, or -1 if unclustered
 
     CrvPulseInfoReco(){}
-    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time);
+    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex);
   };
 
   typedef std::vector<CrvPulseInfoReco> CrvPulseInfoRecoCollection;  //this is the reco vector which will be stored in the main TTree

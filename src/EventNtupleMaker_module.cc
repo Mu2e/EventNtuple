@@ -171,6 +171,7 @@ namespace mu2e {
         // CRV -- flags
         fhicl::Atom<bool> fillcrvcoincs{Name("FillCRVCoincs"),Comment("Flag for turning on crv CoincidenceClusterbranches"), false};
         fhicl::Atom<bool> fillcrvpulses{Name("FillCRVPulses"),Comment("Flag for turning on crvpulses(mc) branches"), false};
+        fhicl::Atom<bool> keepUnclusteredPulses{Name("KeepUnclusteredPulses"),Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
         fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
         // CRV -- other
         fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),Comment("y of center of the top layer of the CRV-T counters"), 2751.485};  //This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
@@ -334,7 +335,7 @@ namespace mu2e {
       art::Handle<CrvDigiCollection>                 _crvDigis;
       art::Handle<CrvStepCollection>                 _crvSteps;
       // CRV -- fhicl parameters
-      bool _fillcrvcoincs, _fillcrvpulses, _fillcrvdigis;
+      bool _fillcrvcoincs, _fillcrvpulses, _keepUnclusteredPulses, _fillcrvdigis;
       double _crvPlaneY;  // needs to move to KinKalGeom FIXME
       // CRV inference
       bool _fillCrvInference;
@@ -349,6 +350,7 @@ namespace mu2e {
       CrvSummaryMC   _crvsummarymc;
       std::vector<CrvPlaneInfoMC> _crvcoincsmcplane;
       std::vector<CrvPulseInfoReco> _crvpulses;
+      std::vector<int> _crvPulseHitIndices;
       std::vector<CrvWaveformInfo> _crvdigis;
       std::vector<CrvHitInfoMC> _crvpulsesmc;
       std::vector<CrvHitInfoReco> _crvrecoinfo;
@@ -405,6 +407,7 @@ namespace mu2e {
     // CRV
     _fillcrvcoincs(conf().fillcrvcoincs()),
     _fillcrvpulses(conf().fillcrvpulses()),
+    _keepUnclusteredPulses(conf().keepUnclusteredPulses()),
     _fillcrvdigis(conf().fillcrvdigis()),
     _crvPlaneY(conf().crvPlaneY()),
     _infoMCStructHelper(conf().infoMCStructHelper()),
@@ -1004,13 +1007,16 @@ namespace mu2e {
     }
 
     // fill CRV info
+    if(_fillcrvcoincs || _fillcrvpulses){
+      event.getByLabel(_conf.crvCoincidencesTag(),_crvCoincidences);
+      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
+      _crvHelper.FillCrvPulseHitIndices(_crvCoincidences, _crvRecoPulses, _crvPulseHitIndices);
+    }
     if(_fillcrvcoincs){
       _crvcoincs.clear();
       _crvcoincsmc.clear();
       _crvcoincsmcplane.clear();
 
-      event.getByLabel(_conf.crvCoincidencesTag(),_crvCoincidences);
-      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
       event.getByLabel(_conf.crvStepsTag(),_crvSteps);
       if(_fillmc) event.getByLabel(_conf.crvCoincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
@@ -1021,9 +1027,9 @@ namespace mu2e {
     if(_fillcrvpulses){
       _crvpulses.clear();
       _crvpulsesmc.clear();
-      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
       if(_fillmc) event.getByLabel(_conf.crvDigiMCsTag(),_crvDigiMCs);
       _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
+                                             _crvPulseHitIndices, _keepUnclusteredPulses,
                                              _crvpulses, _crvpulsesmc);
     }
     if(_fillcrvdigis){

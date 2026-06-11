@@ -306,6 +306,7 @@ EventNtupleMaker : {
   TriggerPathSuffix : "DigitizePath"
   FillCRVCoincs : true
   FillCRVPulses : false
+  KeepUnclusteredPulses : false
   FillCRVDigis : false
   FillCaloMC : true
   FillCaloClustersMC : true
