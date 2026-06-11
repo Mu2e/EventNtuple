@@ -45,6 +45,15 @@ physics: {
   end_paths : [ OutPath ]
 }
 
+// Sim digi art input (ceSimRecoVal), not DTC fragments; after physics block so it overrides CaloHitMakerFast
+#include "mu2e-trig-config/core/trigDigiInputsEpilog.fcl"
+
+// Input products from ceSimRecoVal art (process ceSimReco; digis from SelectReco)
+physics.producers.CaloHitMakerFast.caloDigiCollection: "SelectReco::ceSimReco"
+physics.producers.CaloHitMakerFast.ProtonBunchTimeTag: "EWMProducer::ceSimReco"
+physics.producers.TrigMakeSH.StrawDigiCollectionTag: "SelectReco::ceSimReco"
+physics.producers.TrigOffSpMakeSH.StrawDigiCollectionTag: "SelectReco::ceSimReco"
+
 outputs : {
   Output : { module_type : RootOutput
     outputCommands : [ "keep *_*_*_*" ]
@@ -54,4 +63,5 @@ outputs : {
 
 #include "Production/Validation/database.fcl"
 
+services.TFileService.fileName: "/dev/null"
 services.scheduler.wantSummary : true

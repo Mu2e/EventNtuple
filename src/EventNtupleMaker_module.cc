@@ -856,12 +856,12 @@ namespace mu2e {
     // Fill Calo MC
 
     // Retrieve CaloShowerSim collection for both caloDigisMC and caloDigiSimInfos branches
-    if (_fillcalodigismc || _fillcalodigisiminfos) {
+    if (_fillmc && (_fillcalodigismc || _fillcalodigisiminfos)) {
       event.getByLabel(_conf.caloShowerSimTag(),_caloShowerSim);
     }
 
     // Fill Calo MC Digis branch
-    if (_fillcalodigismc){
+    if (_fillmc && _fillcalodigismc){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
@@ -870,14 +870,14 @@ namespace mu2e {
     }
 
     // Fill Calo MC Hits branch
-    if (_fillcalohitsmc){
+    if (_fillmc && _fillcalohitsmc){
       for (const auto& hitmc : *_chmcch.product()){
         _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
       }
     }
 
     // Fill Calo MC Clusters branch
-    if (_fillcaloclustersmc){
+    if (_fillmc && _fillcaloclustersmc){
       for (const auto& clustermc : *_ccmcch.product()){
 
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
@@ -902,13 +902,13 @@ namespace mu2e {
       }
     }
 
-    if (_fillcalosiminfos){
+    if (_fillmc && _fillcalosiminfos){
       for (const auto& clustermc : *_ccmcch.product()){
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
       }
     }
     
-    if (_fillcalodigisiminfos){
+    if (_fillmc && _fillcalodigisiminfos){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiSimInfos(showerSim,_caloDigiSIMCs);
@@ -989,6 +989,7 @@ namespace mu2e {
         //Find and link the existing hits
         if (_fillcalohits){
           for (const auto& hit : cluster.caloHitsPtrVector()){
+            if (!hit) continue;
             for (uint hitIdx=0; hitIdx < _caloHIs.size(); hitIdx++){
         
               if (_caloHIs[hitIdx] == *hit){

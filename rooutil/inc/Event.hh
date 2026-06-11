@@ -129,6 +129,8 @@ namespace rooutil {
       tracks.clear();
       for (int i_track = 0; i_track < nTracks(); ++i_track) {
         if (debug) { std::cout << "Event::Update(): Creating Track " << i_track << "... " << std::endl; }
+        if (trksegs == nullptr || i_track >= static_cast<int>(trksegs->size())) continue;
+        if (trkcalohit == nullptr || i_track >= static_cast<int>(trkcalohit->size())) continue;
         Track track(&(trk->at(i_track)), &(trksegs->at(i_track)), &(trkcalohit->at(i_track))); // passing the addresses of the underlying structs
         UpdateObject(track.trkmc, trkmc, i_track, debug);
         UpdateObject(track.trksegsmc, trksegsmc, i_track, debug);
@@ -154,7 +156,7 @@ namespace rooutil {
       crv_coincs.clear();
       for (int i_crv_coinc = 0; i_crv_coinc < nCrvCoincs(); ++i_crv_coinc) {
         CrvCoinc crv_coinc(&(crvcoincs->at(i_crv_coinc)));
-        if (crvcoincsmc != nullptr) {
+        if (crvcoincsmc != nullptr && i_crv_coinc < static_cast<int>(crvcoincsmc->size())) {
           crv_coinc.mc = &(crvcoincsmc->at(i_crv_coinc));
         }
         crv_coincs.emplace_back(crv_coinc);
@@ -182,10 +184,11 @@ namespace rooutil {
           // we need to loop through and add the correct ones to the CaloCluster class here
           if (calohits != nullptr) {
             for (const auto& calohit_Idx : calo_cluster.calocluster->hits_) { // the indexes into the calohits branch
+              if (calohit_Idx >= calohits->size()) continue;
               CaloHit calohit;
               calohit.reco = &(calohits->at(calohit_Idx)); // passing the addresses of the underlying structs
 
-              if (calohitsmc != nullptr) { // 1-to-1 matching of calohits and calohitsmc
+              if (calohitsmc != nullptr && calohit_Idx < calohitsmc->size()) { // 1-to-1 matching of calohits and calohitsmc
                 calohit.mc = &(calohitsmc->at(calohit_Idx));
               }
 
@@ -195,7 +198,7 @@ namespace rooutil {
 
           // Because calomcsim branch contains all calorimeter mc particles and not just those associated with the cluster
           // we need to loop through and add the correct ones to the CaloCluster class here
-          if (calomcsim != nullptr) {
+          if (calomcsim != nullptr && calo_cluster.caloclustermc != nullptr) {
             for (auto& calosim_Id : calo_cluster.caloclustermc->simParticleIds) { // the SimParticle IDs
               MCParticle mc_particle;
 
@@ -218,7 +221,7 @@ namespace rooutil {
     }
 
     template <typename T> void UpdateObject(T*& object, std::vector<T>* object_ptr, int index, bool debug = false) {
-      if (object_ptr != nullptr) {
+      if (object_ptr != nullptr && index < static_cast<int>(object_ptr->size())) {
         if (debug) {
           std::cout << "Event::Update(): Adding "
                     << abi::__cxa_demangle(typeid(*object).name(), nullptr, nullptr, nullptr) << " to Object " << index << "... " << std::endl;

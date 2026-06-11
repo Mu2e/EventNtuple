@@ -49,6 +49,7 @@ namespace mu2e
       std::array<float,CRVId::nSidesPerBar> sideTimes_ = {static_cast<float>(cluster.GetSideTimes()[0]), static_cast<float>(cluster.GetSideTimes()[1])};
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
+        if(!coincRecoPulses_.at(j)) continue;
         // Get PEs associated with this reco pulse
         float PEs = coincRecoPulses_.at(j)->GetPEs();
         // Get layer number from the bar index associated with this reco pulse
@@ -109,9 +110,14 @@ namespace mu2e
         if(clusterMC.HasMCInfo())
         {
           const art::Ptr<SimParticle> &simParticle = clusterMC.GetMostLikelySimParticle();
+          if(!simParticle.isNonnull()) { MCInfo.emplace_back(); continue; }
           const art::Ptr<SimParticle> &primaryParticle = FindPrimaryParticle(simParticle);
           const art::Ptr<SimParticle> &parentParticle  = FindParentParticle(simParticle);
           const art::Ptr<SimParticle> &gparentParticle = FindGParentParticle(simParticle);
+          if(!primaryParticle.isNonnull() || !parentParticle.isNonnull() || !gparentParticle.isNonnull()) {
+            MCInfo.emplace_back();
+            continue;
+          }
           MCInfo.emplace_back(
               true,
               simParticle->pdgId(),
@@ -144,18 +150,21 @@ namespace mu2e
         counters.insert(crvSteps->at(i).barIndex());
         const CRSScintillatorBarId &CRVCounterId = CRS->getBar(crvSteps->at(i).barIndex()).id();
         int layer = CRVCounterId.getLayerNumber();
-        int pdgId = crvSteps->at(i).simParticle()->pdgId();
-        if(abs(pdgId)==PDGCode::mu_minus)
-          totalStep[layer] = totalStep[layer] + crvSteps->at(i).pathLength();
+        const auto& simParticle = crvSteps->at(i).simParticle();
+        if(simParticle.isNonnull()) {
+          int pdgId = simParticle->pdgId();
+          if(abs(pdgId)==PDGCode::mu_minus)
+            totalStep[layer] = totalStep[layer] + crvSteps->at(i).pathLength();
 
-        // Save info from the first step in the CRV
-        if(i==0){
-          CLHEP::Hep3Vector CrvPos = crvSteps->at(i).startPosition();
-          MCSummary.pos = XYZVectorF(tdet->toDetector(CrvPos));
-          int sectorNumber = CRVCounterId.getShieldNumber();
-          MCSummary.sectorNumber = sectorNumber;
-          MCSummary.sectorType = CRS->getCRSScintillatorShield(sectorNumber).getSectorType();
-          MCSummary.pdgId = pdgId;
+          // Save info from the first step in the CRV
+          if(i==0){
+            CLHEP::Hep3Vector CrvPos = crvSteps->at(i).startPosition();
+            MCSummary.pos = XYZVectorF(tdet->toDetector(CrvPos));
+            int sectorNumber = CRVCounterId.getShieldNumber();
+            MCSummary.sectorNumber = sectorNumber;
+            MCSummary.sectorType = CRS->getCRSScintillatorShield(sectorNumber).getSectorType();
+            MCSummary.pdgId = pdgId;
+          }
         }
       }
 
@@ -182,6 +191,7 @@ namespace mu2e
         if(rel != MCRelationship::same && trajectorySimParticle->pdgId() != bestprimarysp->pdgId()) { continue; }
 
         const art::Ptr<SimParticle> &trajectoryPrimaryParticle = FindPrimaryParticle(trajectorySimParticle);
+        if(!trajectoryPrimaryParticle->genParticle()) continue;
         GenId genId = trajectoryPrimaryParticle->genParticle()->generatorId();
         if(genId.isCosmic())
         {
@@ -232,6 +242,7 @@ namespace mu2e
       const CrvCoincidenceCluster &cluster = crvCoincidences->at(hitIndex);
       for(const auto &crvRecoPulse : cluster.GetCrvRecoPulses())
       {
+        if(!crvRecoPulse) continue;
         const size_t pulseIndex = crvRecoPulse.key();
         if(pulseIndex >= pulseHitIndices.size())
         {
@@ -311,6 +322,10 @@ namespace mu2e
         const art::Ptr<SimParticle> &primaryParticle = FindPrimaryParticle(mostLikelySimParticle);
         const art::Ptr<SimParticle> &parentParticle = FindParentParticle(mostLikelySimParticle);
         const art::Ptr<SimParticle> &gparentParticle = FindGParentParticle(mostLikelySimParticle);
+        if(!primaryParticle.isNonnull() || !parentParticle.isNonnull() || !gparentParticle.isNonnull()) {
+          MCInfo.emplace_back();
+          continue;
+        }
         MCInfo.emplace_back(true, mostLikelySimParticle->pdgId(),
             primaryParticle->pdgId(),
             primaryParticle->startMomentum().e() - primaryParticle->startMomentum().m(),
