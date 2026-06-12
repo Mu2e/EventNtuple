@@ -514,6 +514,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calodigis_peakpos_ = new TH1F("h_calodigis_peakpos_", "", 100,0,100);
   TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
 
+  TH1F* h_calohitsmc_caloHitIdx_ = new TH1F("h_calohitsmc_caloHitIdx_", "", 100,-1,99);
+
   TH1F* h_caloclustersmc_nsim = new TH1F("h_caloclustersmc_nsim", "", 100,0,100);
   TH1F* h_caloclustersmc_etot = new TH1F("h_caloclustersmc_etot", "", 200,0,200);
   TH1F* h_caloclustersmc_tavg = new TH1F("h_caloclustersmc_tavg", "", 200,0,2000);
@@ -1223,6 +1225,13 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         }
         h_calodigis_peakpos_->Fill(calodigi.peakpos_);
         h_calodigis_caloRecoDigiIdx_->Fill(calodigi.caloRecoDigiIdx_);
+      }
+    }
+
+    if (event.calohitsmc != nullptr) {
+      std::cout << "Creating calohitsmc histograms..." << std::endl;
+      for (const auto& calohitmc : *(event.calohitsmc)) {
+        h_calohitsmc_caloHitIdx_->Fill(calohitmc.caloHitIdx_);
       }
     }
 

@@ -979,6 +979,15 @@ namespace mu2e {
       }
     }
 
+    // WARNING: calohits (CaloHitMaker) and calohitsmc (compressRecoMCs) are not index-aligned.
+    // Record the legacy positional index RooUtil used (calohitsmc[i] <-> calohits[i]) in caloHitIdx_.
+    if (_fillmc && _fillcalohitsmc && _fillcalohits) {
+      for (uint mcIdx = 0; mcIdx < _caloHIMCs.size(); ++mcIdx) {
+        _caloHIMCs[mcIdx].caloHitIdx_ =
+          (mcIdx < _caloHIs.size()) ? static_cast<int>(mcIdx) : -1;
+      }
+    }
+
     if (_fillcaloclusters){
       //Get the clusters
       event.getByLabel(_conf.caloClustersTag(),_caloClusters);
@@ -989,7 +998,6 @@ namespace mu2e {
         //Find and link the existing hits
         if (_fillcalohits){
           for (const auto& hit : cluster.caloHitsPtrVector()){
-            if (!hit) continue;
             for (uint hitIdx=0; hitIdx < _caloHIs.size(); hitIdx++){
         
               if (_caloHIs[hitIdx] == *hit){

@@ -1,7 +1,6 @@
 #ifndef Track_hh_
 #define Track_hh_
 
-#include <algorithm>
 #include <functional>
 #include "EventNtuple/inc/TrkInfo.hh"
 #include "EventNtuple/inc/TrkInfoMC.hh"
@@ -83,22 +82,19 @@ namespace rooutil {
   
       if (trksegpars_lh != nullptr) { // if we LoopHelix info
         if (debug) { std::cout << "Track::Update(): Updating trksegpars_lh..." << std::endl; }
-        const int n_lh = std::min(nSegments(), static_cast<int>(trksegpars_lh->size()));
-        for (int i_segment = 0; i_segment < n_lh; ++i_segment) {
+        for (int i_segment = 0; i_segment < nSegments(); ++i_segment) {
           segments[i_segment].trksegpars_lh = &(trksegpars_lh->at(i_segment));
         }
       }
       if (trksegpars_ch != nullptr) { // if we CentralHelix info
         if (debug) { std::cout << "Track::Update(): Updating trksegpars_ch..." << std::endl; }
-        const int n_ch = std::min(nSegments(), static_cast<int>(trksegpars_ch->size()));
-        for (int i_segment = 0; i_segment < n_ch; ++i_segment) {
+        for (int i_segment = 0; i_segment < nSegments(); ++i_segment) {
           segments[i_segment].trksegpars_ch = &(trksegpars_ch->at(i_segment));
         }
       }
       if (trksegpars_kl != nullptr) { // if we CentralHelix info
         if (debug) { std::cout << "Track::Update(): Updating trksegpars_kl..." << std::endl; }
-        const int n_kl = std::min(nSegments(), static_cast<int>(trksegpars_kl->size()));
-        for (int i_segment = 0; i_segment < n_kl; ++i_segment) {
+        for (int i_segment = 0; i_segment < nSegments(); ++i_segment) {
           segments[i_segment].trksegpars_kl = &(trksegpars_kl->at(i_segment));
         }
       }
@@ -112,12 +108,12 @@ namespace rooutil {
           trkhit.reco = &(trkhits->at(i_trkhit)); // passing the addresses of the underlying structs
   
           // the first trkhitsmc correspond 1:1 with the reco hits, the remaining trkhitsmc also go with the truth
-          if (trkhitsmc != nullptr && i_trkhit < static_cast<int>(trkhitsmc->size())) {
+          if (trkhitsmc != nullptr) {
             trkhit.mc = &(trkhitsmc->at(i_trkhit));
           }
   
           // trkhitcalibs have 1:1 correspondance with reco hits
-          if (trkhitcalibs != nullptr && i_trkhit < static_cast<int>(trkhitcalibs->size())) {
+          if (trkhitcalibs != nullptr) {
             trkhit.calib = &(trkhitcalibs->at(i_trkhit));
           }
 

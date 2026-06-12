@@ -424,10 +424,6 @@ namespace mu2e {
     if (kseed.hasCaloCluster()) {
       auto const& tch = kseed.caloHit();
       auto const& cc = tch.caloCluster();
-      if (!cc) {
-        all_tchinfos.push_back(tchinfo);
-        return;
-      }
       tchinfo.active = tch._flag.hasAllProperties(StrawHitFlag::active);
       tchinfo.did = cc->diskID();
       tchinfo.poca = tch._cpos;
