@@ -202,7 +202,7 @@ namespace rooutil {
 
           // Because calomcsim branch contains all calorimeter mc particles and not just those associated with the cluster
           // we need to loop through and add the correct ones to the CaloCluster class here
-          if (calomcsim != nullptr && calo_cluster.caloclustermc != nullptr) {
+          if (calomcsim != nullptr) {
             for (auto& calosim_Id : calo_cluster.caloclustermc->simParticleIds) { // the SimParticle IDs
               MCParticle mc_particle;
 

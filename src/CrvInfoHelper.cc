@@ -49,7 +49,6 @@ namespace mu2e
       std::array<float,CRVId::nSidesPerBar> sideTimes_ = {static_cast<float>(cluster.GetSideTimes()[0]), static_cast<float>(cluster.GetSideTimes()[1])};
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
-        if(!coincRecoPulses_.at(j)) continue;
         // Get PEs associated with this reco pulse
         float PEs = coincRecoPulses_.at(j)->GetPEs();
         // Get layer number from the bar index associated with this reco pulse

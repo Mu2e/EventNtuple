@@ -7,5 +7,3 @@
 
 physics.producers.KKDe.KKFitSettings.SaveHitCalibInfo : true
 outputs.Output.fileName : "mcs.owner.val-ceSimRecoVal.dsconf.seq.art"
-// Production/Validation/ceSimReco drops CaloDigis; append keep so it wins over drop
-outputs.Output.outputCommands[50]: "keep mu2e::CaloDigis_CaloDigiMaker_*_*"

@@ -856,12 +856,12 @@ namespace mu2e {
     // Fill Calo MC
 
     // Retrieve CaloShowerSim collection for both caloDigisMC and caloDigiSimInfos branches
-    if (_fillmc && (_fillcalodigismc || _fillcalodigisiminfos)) {
+    if (_fillcalodigismc || _fillcalodigisiminfos) {
       event.getByLabel(_conf.caloShowerSimTag(),_caloShowerSim);
     }
 
     // Fill Calo MC Digis branch
-    if (_fillmc && _fillcalodigismc){
+    if (_fillcalodigismc){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
@@ -870,14 +870,14 @@ namespace mu2e {
     }
 
     // Fill Calo MC Hits branch
-    if (_fillmc && _fillcalohitsmc){
+    if (_fillcalohitsmc){
       for (const auto& hitmc : *_chmcch.product()){
         _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
       }
     }
 
     // Fill Calo MC Clusters branch
-    if (_fillmc && _fillcaloclustersmc){
+    if (_fillcaloclustersmc){
       for (const auto& clustermc : *_ccmcch.product()){
 
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
@@ -902,13 +902,13 @@ namespace mu2e {
       }
     }
 
-    if (_fillmc && _fillcalosiminfos){
+    if (_fillcalosiminfos){
       for (const auto& clustermc : *_ccmcch.product()){
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
       }
     }
     
-    if (_fillmc && _fillcalodigisiminfos){
+    if (_fillcalodigisiminfos){
       if (_caloShowerSim.isValid()){
         for (const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiSimInfos(showerSim,_caloDigiSIMCs);
@@ -981,7 +981,7 @@ namespace mu2e {
 
     // WARNING: calohits (CaloHitMaker) and calohitsmc (compressRecoMCs) are not index-aligned.
     // Record the legacy positional index RooUtil used (calohitsmc[i] <-> calohits[i]) in caloHitIdx_.
-    if (_fillmc && _fillcalohitsmc && _fillcalohits) {
+    if (_fillcalohitsmc && _fillcalohits) {
       for (uint mcIdx = 0; mcIdx < _caloHIMCs.size(); ++mcIdx) {
         _caloHIMCs[mcIdx].caloHitIdx_ =
           (mcIdx < _caloHIs.size()) ? static_cast<int>(mcIdx) : -1;
