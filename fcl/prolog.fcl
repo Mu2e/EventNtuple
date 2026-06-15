@@ -189,72 +189,110 @@ MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKK
 
 DeM : { input : "MergeKKDeM"
   branchname : "dem"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDeM"]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branchname : "uem"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branchname : "dmm"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branchname : "umm"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branchname : "dep"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branchname : "uep"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branchname : "dmp"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branchname : "ump"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
+  fill : true
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
+  fill : true
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branchname : "trk"
+  fill : true
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
   trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
+  fill : true
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branchname : "de"
+  fill : true
+  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
   trkPIDTags : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
   module_type : EventNtupleMaker
+
+  # Debugging and diagnostics
+  diagLevel : 0
+  debugLevel : 0
+
+  # ROOT TTree parameters
+  splitlevel : 99
+  buffsize : 32000
+
+  # Filters
+  hasTracks : false # require >=1 track to write out event to ntuple
+  hasCRV : false # require CRV information to write out entry to ntuple
   RecoCountTag : "SelectReco"
   PBITag : "PBISim"
   PBTTag : "EWMProducer"
@@ -263,7 +301,6 @@ EventNtupleMaker : {
   TriggerProcessName : "Digitize"
   TriggerPathSuffix : "DigitizePath"
   FitType : LoopHelix
-  diagLevel : 0
   # -- Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ------
   mc : {
     fill : true
@@ -286,6 +323,7 @@ EventNtupleMaker : {
     fillTrkPID : false
     fits : [ @local::All ]
     mc : {
+      fill : true
       kalSeedMCAssns : "SelectReco"
     }
   }
@@ -327,6 +365,7 @@ EventNtupleMaker : {
     digisTag : "SelectReco"
     planeY : @local::crvPlaneY.CRV_T
     mc : {
+      fill : true
       coincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
       digiMCsTag : "compressRecoMCs"
       assnsTag : "CrvCoincidenceClusterMCAssns"
@@ -365,6 +404,8 @@ EventNtupleMakerTTMC.mc.infoMCStructHelper.SimParticleCollectionTag : "compressD
 # genealogyDepth:-1, matchDepth:-1.
 TTMCBranch : {
   branchname : "trk"
+  fill : true
+  options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : [ ]
   trkPIDTags : [ ]
 }
@@ -403,6 +444,8 @@ ENDeCalib : {
 ENDeCalib.trk.fits : [
   { input: "MergeKKDeCalib"
     branchname : "trk"
+    fill : true
+    options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
     trkQualTags : ["TrkQualDe"]
     trkPIDTags : ["TrkPIDDe"]
   }

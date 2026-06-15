@@ -107,10 +107,10 @@ namespace mu2e {
       struct TrkFitOptConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-        fhicl::Atom<bool> fillmc{Name("fillMC"), Comment("Fill MC information for this branch"), true};
-        fhicl::Atom<bool> fillhits{Name("fillHits"), Comment("Fill hit-level information for this branch"), true};
-        fhicl::Atom<int> genealogyDepth{Name("genealogyDepth"), Comment("Depth of MC genealogy to keep (-1 = all)"), -1};
-        fhicl::Atom<int> matchDepth{Name("matchDepth"), Comment("Depth of MC truth matching to keep (-1 = all)"), -1};
+        fhicl::Atom<bool> fillmc{Name("fillMC"), Comment("Fill MC information for this branch")};
+        fhicl::Atom<bool> fillhits{Name("fillHits"), Comment("Fill hit-level information for this branch")};
+        fhicl::Atom<int> genealogyDepth{Name("genealogyDepth"), Comment("Depth of MC genealogy to keep (-1 = all)")};
+        fhicl::Atom<int> matchDepth{Name("matchDepth"), Comment("Depth of MC truth matching to keep (-1 = all)")};
       };
 
       struct TrkFitConfig {
@@ -118,7 +118,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
         fhicl::Atom<std::string> branchname{Name("branchname"), Comment("Name of output branch")};
-        fhicl::Atom<bool> enabled{Name("enabled"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)"), true};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
         fhicl::Sequence<std::string> trkQualTags{Name("trkQualTags"), Comment("Input tags for MVAResultCollection to use for TrkQuals")};
         fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
         fhicl::Table<TrkFitOptConfig> options{Name("options"), Comment("Per-branch fill options")};
@@ -129,8 +129,7 @@ namespace mu2e {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
         fhicl::Atom<bool> fill{Name("fill"),
-          Comment("Master gate for tracker MC, CRV MC, and event-level MC info branches. "
-                  "Calo MC is controlled independently via calo.mc.fill."), true};
+          Comment("Master gate for tracker MC, Calo MC, CRV MC, and event-level MC info branches.")};
         fhicl::Atom<art::InputTag> PBTMCTag{Name("PBTMCTag"), Comment("Tag for ProtonBunchTimeMC object")};
         fhicl::Atom<art::InputTag> simParticlesTag{Name("simParticlesTag"), Comment("SimParticle Collection Tag")};
         fhicl::Atom<art::InputTag> mcTrajectoriesTag{Name("mcTrajectoriesTag"), Comment("MCTrajectory Collection Tag")};
@@ -143,20 +142,20 @@ namespace mu2e {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
         // master switch
-        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the tracker subsystem entirely"), true};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the tracker subsystem entirely")};
         // reco flags
         fhicl::Atom<bool> fillHits{Name("fillHits"),
-          Comment("Global enable for hit-level branches; per-branch options.fillHits also required"), true};
-        fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches"), false};
-        fhicl::Atom<bool> fillTrkQual{Name("fillTrkQual"), Comment("Fill TrkQual MVA branches"), false};
-        fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches"), false};
+          Comment("Global enable for hit-level branches; per-branch options.fillHits also required")};
+        fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
+        fhicl::Atom<bool> fillTrkQual{Name("fillTrkQual"), Comment("Fill TrkQual MVA branches")};
+        fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
         // per-branch configurations
         fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
         // tracker MC sub-config
         struct MCConfig {
           using Name=fhicl::Name;
           using Comment=fhicl::Comment;
-          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all tracker MC branches; mc.fill must also be true"), true};
+          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all tracker MC branches; mc.fill must also be true")};
           fhicl::Atom<art::InputTag> kalSeedMCAssns{Name("kalSeedMCAssns"), Comment("Tag for KalSeedMCAssn")};
         };
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("Tracker MC filling options")};
@@ -166,14 +165,14 @@ namespace mu2e {
       struct HelixConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-        fhicl::Atom<bool> fill{Name("fill"), Comment("Fill helix seed branches"), false};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Fill helix seed branches")};
       };
 
       // ── Time cluster config (independent of per-branch track config) ───────
       struct TimeClusterConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-        fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill time cluster branch"), false};
+        fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill time cluster branch")};
         fhicl::Atom<art::InputTag> tag {Name("tag"),  Comment("Tag for time cluster collection")};
       };
 
@@ -193,31 +192,31 @@ namespace mu2e {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
         // master switch
-        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the calorimeter subsystem entirely"), true};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the calorimeter subsystem entirely")};
         // reco flags + collocated tags
-        fhicl::Atom<bool>          fillClusters {Name("fillClusters"),  Comment("Fill calorimeter cluster branch"), true};
+        fhicl::Atom<bool>          fillClusters {Name("fillClusters"),  Comment("Fill calorimeter cluster branch")};
         fhicl::Atom<art::InputTag> clustersTag  {Name("clustersTag"),   Comment("Tag for CaloCluster collection")};
-        fhicl::Atom<bool>          fillHits     {Name("fillHits"),      Comment("Fill calorimeter hit branch"), false};
+        fhicl::Atom<bool>          fillHits     {Name("fillHits"),      Comment("Fill calorimeter hit branch")};
         fhicl::Atom<art::InputTag> hitsTag      {Name("hitsTag"),       Comment("Tag for CaloHit collection")};
-        fhicl::Atom<bool>          fillRecoDigis{Name("fillRecoDigis"), Comment("Fill calorimeter reco-digi branch"), false};
+        fhicl::Atom<bool>          fillRecoDigis{Name("fillRecoDigis"), Comment("Fill calorimeter reco-digi branch")};
         fhicl::Atom<art::InputTag> recoDigisTag {Name("recoDigisTag"),  Comment("Tag for CaloRecoDigi collection")};
-        fhicl::Atom<bool>          fillDigis    {Name("fillDigis"),     Comment("Fill calorimeter digi branch"), false};
+        fhicl::Atom<bool>          fillDigis    {Name("fillDigis"),     Comment("Fill calorimeter digi branch")};
         fhicl::Atom<art::InputTag> digisTag     {Name("digisTag"),      Comment("Tag for CaloDigi collection")};
         // MC sub-config
         struct MCConfig {
           using Name=fhicl::Name;
           using Comment=fhicl::Comment;
-          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all calorimeter MC branches; independent of mc.fill"), true};
+          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all calorimeter MC branches; independent of mc.fill")};
           // track-associated calo MC (the <branch>calohitmc. branch per track type)
-          fhicl::Atom<bool> fillTrackMatch{Name("fillTrackMatch"), Comment("Fill per-track calo cluster MC branch (<branch>calohitmc.)"), true};
+          fhicl::Atom<bool> fillTrackMatch{Name("fillTrackMatch"), Comment("Fill per-track calo cluster MC branch (<branch>calohitmc.)")};
           // standalone calo MC branches
-          fhicl::Atom<bool>          fillClusters{Name("fillClusters"), Comment("Fill standalone caloclustersmc. branch"), true};
+          fhicl::Atom<bool>          fillClusters{Name("fillClusters"), Comment("Fill standalone caloclustersmc. branch")};
           fhicl::Atom<art::InputTag> clusterMCTag{Name("clusterMCTag"), Comment("Tag for CaloClusterMCCollection")};
-          fhicl::Atom<bool>          fillHits    {Name("fillHits"),     Comment("Fill standalone calohitsmc. branch"), true};
+          fhicl::Atom<bool>          fillHits    {Name("fillHits"),     Comment("Fill standalone calohitsmc. branch")};
           fhicl::Atom<art::InputTag> hitMCTag    {Name("hitMCTag"),     Comment("Tag for CaloHitMCCollection")};
-          fhicl::Atom<bool>          fillSim     {Name("fillSim"),      Comment("Fill calomcsim. (sim particle info) branch"), true};
-          fhicl::Atom<bool>          fillDigis   {Name("fillDigis"),    Comment("Fill standalone calodigismc. branch"), false};
-          fhicl::Atom<bool>          fillDigiSim {Name("fillDigiSim"),  Comment("Fill calodigisim. branch"), false};
+          fhicl::Atom<bool>          fillSim     {Name("fillSim"),      Comment("Fill calomcsim. (sim particle info) branch")};
+          fhicl::Atom<bool>          fillDigis   {Name("fillDigis"),    Comment("Fill standalone calodigismc. branch")};
+          fhicl::Atom<bool>          fillDigiSim {Name("fillDigiSim"),  Comment("Fill calodigisim. branch")};
           fhicl::Atom<art::InputTag> showerSimTag{Name("showerSimTag"), Comment("Tag for CaloShowerSim collection")};
         };
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("Calorimeter MC filling options")};
@@ -228,14 +227,14 @@ namespace mu2e {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
         // master switch
-        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the CRV subsystem entirely"), false};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the CRV subsystem entirely")};
         // reco flags + collocated tags
-        fhicl::Atom<bool>          fillCoincs    {Name("fillCoincs"),      Comment("Fill CRV coincidence cluster branches"), false};
+        fhicl::Atom<bool>          fillCoincs    {Name("fillCoincs"),      Comment("Fill CRV coincidence cluster branches")};
         fhicl::Atom<art::InputTag> coincidencesTag{Name("coincidencesTag"), Comment("Tag for CrvCoincidenceCluster collection")};
         fhicl::Atom<art::InputTag> recoPulsesTag  {Name("recoPulsesTag"),   Comment("Tag for CrvRecoPulse collection")};
         fhicl::Atom<art::InputTag> stepsTag       {Name("stepsTag"),        Comment("Tag for CrvStep collection")};
-        fhicl::Atom<bool>          fillPulses     {Name("fillPulses"),      Comment("Fill CRV reco pulse branches"), false};
-        fhicl::Atom<bool>          fillDigis      {Name("fillDigis"),       Comment("Fill CRV digi branch"), false};
+        fhicl::Atom<bool>          fillPulses     {Name("fillPulses"),      Comment("Fill CRV reco pulse branches")};
+        fhicl::Atom<bool>          fillDigis      {Name("fillDigis"),       Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
         fhicl::Atom<double>        planeY         {Name("planeY"),          Comment("Y of center of top layer of CRV-T counters (mm)")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
@@ -243,7 +242,7 @@ namespace mu2e {
         struct MCConfig {
           using Name=fhicl::Name;
           using Comment=fhicl::Comment;
-          fhicl::Atom<bool>          fill              {Name("fill"),               Comment("Master switch for CRV MC branches; mc.fill must also be true"), true};
+          fhicl::Atom<bool>          fill              {Name("fill"),               Comment("Master switch for CRV MC branches; mc.fill must also be true")};
           fhicl::Atom<art::InputTag> coincidenceMCsTag {Name("coincidenceMCsTag"),  Comment("Tag for CrvCoincidenceClusterMC collection")};
           fhicl::Atom<art::InputTag> digiMCsTag        {Name("digiMCsTag"),         Comment("Tag for CrvDigiMC collection")};
           fhicl::Atom<art::InputTag> assnsTag          {Name("assnsTag"),            Comment("Tag for CrvCoincidenceClusterMCAssns")};
@@ -257,18 +256,18 @@ namespace mu2e {
 
         // General control
         fhicl::Atom<int> diag{Name("diagLevel")};
-        fhicl::Atom<int> debug{Name("debugLevel"),0};
-        fhicl::Atom<int> splitlevel{Name("splitlevel"),99};
-        fhicl::Atom<int> buffsize{Name("buffsize"),32000};
-        fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple"), false};
-        fhicl::Atom<bool> hascrv{Name("hasCRV"), Comment("Require CRV information to fill tuple"), false};
+        fhicl::Atom<int> debug{Name("debugLevel")};
+        fhicl::Atom<int> splitlevel{Name("splitlevel")};
+        fhicl::Atom<int> buffsize{Name("buffsize")};
+        fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple")};
+        fhicl::Atom<bool> hascrv{Name("hasCRV"), Comment("Require CRV information to fill tuple")};
         // General event info
         fhicl::Atom<art::InputTag> rctag{Name("RecoCountTag"), Comment("RecoCount")};
         fhicl::Atom<art::InputTag> PBITag{Name("PBITag"), Comment("Tag for ProtonBunchIntensity object")};
         fhicl::Atom<art::InputTag> PBTTag{Name("PBTTag"), Comment("Tag for ProtonBunchTime object")};
         fhicl::Atom<art::InputTag> EWMTag{Name("EWMTag"), Comment("Tag for EventWindowMarker object")};
         // Trigger
-        fhicl::Atom<bool> filltrig{Name("FillTriggerInfo"), false};
+        fhicl::Atom<bool> filltrig{Name("FillTriggerInfo")};
         fhicl::Atom<std::string> trigProcessName{Name("TriggerProcessName"), Comment("Process name for Trigger")};
         fhicl::Atom<std::string> trigpathsuffix{Name("TriggerPathSuffix"), "_trigger"};
         // Fit type
@@ -435,7 +434,7 @@ namespace mu2e {
       // Calorimeter MC: independent of fillEventMC() — calo MC products do not
       // require simParticles/primaryParticle so calo-only jobs can enable this
       // while keeping mc.fill false.
-      bool fillCaloMC()            const { return _conf.calo().fill() && _conf.calo().mc().fill() && _conf.mc().fill; }
+      bool fillCaloMC()            const { return _conf.calo().fill() && _conf.calo().mc().fill() && _conf.mc().fill(); }
       bool fillCaloTrackMatchMC()  const { return fillCaloMC() && _conf.calo().mc().fillTrackMatch(); }
       bool fillCaloClsMC()         const { return fillCaloMC() && _conf.calo().mc().fillClusters(); }
       bool fillCaloHitsMC()        const { return fillCaloMC() && _conf.calo().mc().fillHits(); }
@@ -496,7 +495,7 @@ namespace mu2e {
     // create per-branch storage (skip disabled branches)
     for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
       const auto& i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
-      if (!i_trkFitConfig.enabled()) continue;
+      if (!i_trkFitConfig.fill()) continue;
 
       _allTIs[i_trk_fit_branch]       = {};
       _allTSIs[i_trk_fit_branch]      = {};
@@ -554,7 +553,7 @@ namespace mu2e {
     _ntuple->Branch("hitcount",&_hcnt);
     // track counting branches
     for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
-      if (!_allTrkFitBranches.at(i_trk_fit_branch).enabled()) continue;
+      if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
       std::string leafname = _allTrkFitBranches.at(i_trk_fit_branch).branchname();
       _ntuple->Branch(("tcnt.n"+leafname).c_str(),&_tcnt._counts[i_trk_fit_branch]);
     }
@@ -563,7 +562,7 @@ namespace mu2e {
     if (_conf.trk().fill()) {
       for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
         const TrkFitConfig& i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
-        if (!i_trkFitConfig.enabled()) continue;
+        if (!i_trkFitConfig.fill()) continue;
         std::string branch = i_trkFitConfig.branchname();
         _ntuple->Branch((branch+".").c_str(),&_allTIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         _ntuple->Branch((branch+"segs.").c_str(),&_allTSIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
@@ -726,7 +725,7 @@ namespace mu2e {
     if (_conf.trk().fill()) {
       for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
         TrkFitConfig i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
-        if (!i_trkFitConfig.enabled()) {
+        if (!i_trkFitConfig.fill()) {
           // push empty placeholders to keep index alignment
           _allKSPCHs.push_back(art::Handle<KalSeedPtrCollection>());
           _allTrkQualCHs.emplace_back();
@@ -791,7 +790,7 @@ namespace mu2e {
     // fill track counts
     if (_conf.trk().fill()) {
       for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
-        if (!_allTrkFitBranches.at(i_trk_fit_branch).enabled()) continue;
+        if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
         _tcnt._counts[i_trk_fit_branch] = (_allKSPCHs.at(i_trk_fit_branch))->size();
       }
     }
@@ -817,7 +816,7 @@ namespace mu2e {
     unsigned ntrks(0);
     for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
       TrkFitConfig i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
-      if (!i_trkFitConfig.enabled()) continue;
+      if (!i_trkFitConfig.fill()) continue;
 
       _allTIs.at(i_trk_fit_branch).clear();
       _allTSIs.at(i_trk_fit_branch).clear();
@@ -1270,7 +1269,7 @@ namespace mu2e {
 
   void EventNtupleMaker::resetTrackBranches() {
     for(TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
-      if (!_allTrkFitBranches.at(i_trk_fit_branch).enabled()) continue;
+      if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
       _allRQIs.at(i_trk_fit_branch).reset();
     }
   }
