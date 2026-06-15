@@ -435,7 +435,7 @@ namespace mu2e {
       // Calorimeter MC: independent of fillEventMC() — calo MC products do not
       // require simParticles/primaryParticle so calo-only jobs can enable this
       // while keeping mc.fill false.
-      bool fillCaloMC()            const { return _conf.calo().fill() && _conf.calo().mc().fill(); }
+      bool fillCaloMC()            const { return _conf.calo().fill() && _conf.calo().mc().fill() && _conf.mc().fill; }
       bool fillCaloTrackMatchMC()  const { return fillCaloMC() && _conf.calo().mc().fillTrackMatch(); }
       bool fillCaloClsMC()         const { return fillCaloMC() && _conf.calo().mc().fillClusters(); }
       bool fillCaloHitsMC()        const { return fillCaloMC() && _conf.calo().mc().fillHits(); }
