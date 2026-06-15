@@ -15,6 +15,9 @@ namespace mu2e
     int    barId = -1;           //CRV counter ID
     int    sectorId = -1;        //CRV sector ID
     int    SiPMId = -1;          //SiPMId number
+    int    ROC = -1;             //ROC number
+    int    FEB = -1;             //FEB number
+    int    FEBchannel = -1;      //FEB channel number
     int    PEs = -1;             //PEs using pulse integral
     int    PEsPulseHeight = -1;  //PEs using pulse height
     float  pulseHeight = -1;     //Pulse height
@@ -24,7 +27,7 @@ namespace mu2e
     int    crvHitIndex = -1;     //index of the CRV hit containing this pulse, or -1 if unclustered
 
     CrvPulseInfoReco(){}
-    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex);
+    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int ROC, int FEB, int FEBchannel, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex);
   };
 
   typedef std::vector<CrvPulseInfoReco> CrvPulseInfoRecoCollection;  //this is the reco vector which will be stored in the main TTree

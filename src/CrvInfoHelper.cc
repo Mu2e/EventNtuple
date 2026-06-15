@@ -295,6 +295,7 @@ namespace mu2e
       //Reco pulses information
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
       recoInfo.emplace_back(tdet->toDetector(HitPos), barIndex.asInt(), sectorNumber, crvRecoPulse->GetSiPMNumber(),
+          crvRecoPulse->GetROC(), crvRecoPulse->GetFEB(), crvRecoPulse->GetFEBchannel(),
           crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
           crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime(), crvHitIndex);
 

@@ -421,6 +421,9 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_crvpulses_barId = new TH1F("h_crvpulses_barId", "", 100,0,100);
   TH1F* h_crvpulses_sectorId = new TH1F("h_crvpulses_sectorId", "", 100,0,100);
   TH1F* h_crvpulses_SiPMId = new TH1F("h_crvpulses_SiPMId", "", 100,0,100);
+  TH1F* h_crvpulses_ROC = new TH1F("h_crvpulses_ROC", "", 100,0,100);
+  TH1F* h_crvpulses_FEB = new TH1F("h_crvpulses_FEB", "", 100,0,100);
+  TH1F* h_crvpulses_FEBchannel = new TH1F("h_crvpulses_FEBchannel", "", 100,0,100);
   TH1F* h_crvpulses_PEs = new TH1F("h_crvpulses_PEs", "", 100,0,100);
   TH1F* h_crvpulses_PEsPulseHeight = new TH1F("h_crvpulses_PEsPulseHeight", "", 100,0,100);
   TH1F* h_crvpulses_pulseHeight = new TH1F("h_crvpulses_pulseHeight", "", 100,0,100);
@@ -1089,6 +1092,9 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_crvpulses_barId->Fill(crvpulse.barId);
         h_crvpulses_sectorId->Fill(crvpulse.sectorId);
         h_crvpulses_SiPMId->Fill(crvpulse.SiPMId);
+        h_crvpulses_ROC->Fill(crvpulse.ROC);
+        h_crvpulses_FEB->Fill(crvpulse.FEB);
+        h_crvpulses_FEBchannel->Fill(crvpulse.FEBchannel);
         h_crvpulses_PEs->Fill(crvpulse.PEs);
         h_crvpulses_PEsPulseHeight->Fill(crvpulse.PEsPulseHeight);
         h_crvpulses_pulseHeight->Fill(crvpulse.pulseHeight);

@@ -143,7 +143,7 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincs |  Vector branch |   information about a cluster of CRV coincidence triplets| [see CrvHitInfoReco.hh](../inc/CrvHitInfoReco.hh)
 | crvcoincsmc |  Vector branch |   information about the MC track which most likely caused the CRV coincidence triplets| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
-| crvpulses |  Vector branch |   information about CRV reco pulses. `crvHitIndex` gives the index in `crvcoincs`, or -1 if the pulse was not clustered into a CRV hit| [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
+| crvpulses |  Vector branch |   information about CRV reco pulses, including ROC/FEB/FEB channel IDs. `crvHitIndex` gives the index in `crvcoincs`, or -1 if the pulse was not clustered into a CRV hit| [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
 | crvpulsesmc |  Vector branch |   MC-truth information corresponding entry-by-entry to `crvpulses`| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 ## Trigger Branches
 
