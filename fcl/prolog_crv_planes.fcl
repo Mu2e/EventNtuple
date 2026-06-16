@@ -1,9 +1,19 @@
 BEGIN_PROLOG
 
 crvPlaneY : {
-
-  CRV_T : 2653
+  CRV_T   : 2653
   DSHatch : 4287
+}
+
+# Top-face (entry) y-values for each CRV sector in v02 geometry (Mu2e global coords, mm).
+# Derived from first_counter y + layer-3 center offset (154.575) + half bar thickness (9.9).
+#   T1 : 4237.0 + 164.475 = 4401.475
+#   EX : 4387.0 + 164.475 = 4551.475
+#   T2 : 4537.0 + 164.475 = 4701.475
+crvSectorEntryY_v02 : {
+  T1 : 4401.475
+  EX : 4551.475
+  T2 : 4701.475
 }
 
 END_PROLOG

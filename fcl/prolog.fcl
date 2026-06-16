@@ -364,7 +364,8 @@ EventNtupleMaker : {
     keepUnclusteredPulses : false
     fillDigis : false
     digisTag : "SelectReco"
-    planeY : @local::crvPlaneY.CRV_T
+    planeYs    : [@local::crvPlaneY.CRV_T]
+    planeNames : ["crv_t"]
     mc : {
       fill : true
       coincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"

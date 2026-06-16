@@ -237,7 +237,8 @@ namespace mu2e {
         fhicl::Atom<bool>          keepUnclusteredPulses {Name("keepUnclusteredPulses"), Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
         fhicl::Atom<bool>          fillDigis             {Name("fillDigis"),             Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
-        fhicl::Atom<double>        planeY         {Name("planeY"),          Comment("Y of center of top layer of CRV-T counters (mm)")};
+        fhicl::Sequence<double>      planeYs   {Name("planeYs"),   Comment("y-values (Mu2e global coords, mm) of CRV truth planes for MC analysis")};
+        fhicl::Sequence<std::string> planeNames{Name("planeNames"),Comment("Branch-name suffix per CRV truth plane; branch is crvcoincsmcplane_<name> (or crvcoincsmcplane for an empty string)")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
         // MC sub-config (requires mc.fill also be true)
         struct MCConfig {
@@ -402,7 +403,7 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<CrvHitInfoMC>> _allBestCrvMCs;
       CrvSummaryReco _crvsummary;
       CrvSummaryMC   _crvsummarymc;
-      std::vector<CrvPlaneInfoMC> _crvcoincsmcplane;
+      std::vector<std::vector<CrvPlaneInfoMC>> _crvcoincsmcplanes;
       std::vector<CrvPulseInfoReco> _crvpulses;
       std::vector<int> _crvPulseHitIndices;
       std::vector<CrvWaveformInfo> _crvdigis;
@@ -657,7 +658,12 @@ namespace mu2e {
       if(fillCRVMC()){
         _ntuple->Branch("crvsummarymc",&_crvsummarymc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmc.",&_crvcoincsmc,_buffsize,_splitlevel);
-        _ntuple->Branch("crvcoincsmcplane.",&_crvcoincsmcplane,_buffsize,_splitlevel);
+        auto const& crvPlaneNames = _conf.crv().planeNames();
+        _crvcoincsmcplanes.resize(crvPlaneNames.size());
+        for(size_t k=0; k<crvPlaneNames.size(); ++k){
+          std::string bname = crvPlaneNames[k].empty() ? "crvcoincsmcplane." : "crvcoincsmcplane_" + crvPlaneNames[k] + ".";
+          _ntuple->Branch(bname.c_str(), &_crvcoincsmcplanes[k], _buffsize, _splitlevel);
+        }
       }
     }
     if(_conf.crv().fill() && _conf.crv().fillPulses()) {
@@ -1025,13 +1031,13 @@ namespace mu2e {
     if(_conf.crv().fill() && _conf.crv().fillCoincs()){
       _crvcoincs.clear();
       _crvcoincsmc.clear();
-      _crvcoincsmcplane.clear();
+      for(auto& v : _crvcoincsmcplanes) v.clear();
       event.getByLabel(_conf.crv().stepsTag(),_crvSteps);
       if(fillCRVMC()) event.getByLabel(_conf.crv().mc().coincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
           _crvCoincidences, _crvCoincidenceMCs,
           _crvRecoPulses, _crvSteps, _mcTrajectories, _crvcoincs, _crvcoincsmc,
-          _crvsummary, _crvsummarymc, _crvcoincsmcplane, _conf.crv().planeY(), _pph);
+          _crvsummary, _crvsummarymc, _crvcoincsmcplanes, _conf.crv().planeYs(), _pph);
     }
     if(_conf.crv().fill() && _conf.crv().fillPulses()){
       _crvpulses.clear();
