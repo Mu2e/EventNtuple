@@ -8,10 +8,15 @@ We want to make sure that any changes we make to the code don't:
 From ```EventNtuple/``` directory:
 
 ```
-. ./validation/test_fcls.sh [MDC2020 or MDC2025 or Run1B]
+python validation/test_fcls.py --tests validation/commands.txt --datasets validation/datasets_XXXXX.txt
 ```
+where ```XXXXXX``` is any of ```MDC2020```, ```MDC2025```, or ```Run1B```.
 
-This script will run all the supported fcl files over relevant datasets. All tests should report ```OK```. If one reports ```FAIL```, you can find the exact command that failed in the ```test_fcls.log``` file in order to debug.
+This script will run all the supported fcl files over relevant datasets. The output should be self-explanatory.
+
+The reason for separating the commands from the datasets is so that we can easily change to a different set of datasets with new simulation campaigns, as well as update datasets in currently-supported simulation campaigns.
+
+You can comment out commands in the ```commands.txt``` with a ```#``` to focus on failing tests
 
 ### Creating a Validation File
 Before making any changes, create an EventNtuple file and run the validation script. This creates a new ROOT file with histograms created from the EventNtuple ntuple:

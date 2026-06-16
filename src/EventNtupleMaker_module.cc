@@ -95,114 +95,191 @@ namespace mu2e {
   // Need this for the BaBar headers.
   using CLHEP::Hep3Vector;
   typedef KalSeedCollection::const_iterator KSCIter;
-  typedef size_t BranchIndex;
+  typedef size_t TrkFitBranchIndex;
   typedef size_t StepCollIndex;
 
   class EventNtupleMaker : public art::EDAnalyzer {
 
     public:
 
-      struct BranchOptConfig {
+      // ── Per-branch options (defaults match intended use; omit options in FCL
+      //    unless you want to override a specific field) ──────────────────────
+      struct TrkFitOptConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-        fhicl::Atom<bool> fillmc{Name("fillMC"), Comment("Switch to turn on filling of MC information for this set of tracks"), false};
-        fhicl::Atom<bool> fillhits{Name("fillHits"), Comment("Switch to turn on filling of hit-level information for this set of tracks"), false};
-        fhicl::Atom<int> genealogyDepth{Name("genealogyDepth"), Comment("The depth of the genealogy information you want to keep"), 1};
-        fhicl::Atom<int> matchDepth{Name("matchDepth"), Comment("The depth into the MC true particle matching you want to keep"), 1};
+        fhicl::Atom<bool> fillmc{Name("fillMC"), Comment("Fill MC information for this branch")};
+        fhicl::Atom<bool> fillhits{Name("fillHits"), Comment("Fill hit-level information for this branch")};
+        fhicl::Atom<int> genealogyDepth{Name("genealogyDepth"), Comment("Depth of MC genealogy to keep (-1 = all)")};
+        fhicl::Atom<int> matchDepth{Name("matchDepth"), Comment("Depth of MC truth matching to keep (-1 = all)")};
       };
 
-      struct BranchConfig {
+      struct TrkFitConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
-        fhicl::Atom<std::string> branch{Name("branch"), Comment("Name of output branch")};
+        fhicl::Atom<std::string> branchname{Name("branchname"), Comment("Name of output branch")};
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
         fhicl::Sequence<std::string> trkQualTags{Name("trkQualTags"), Comment("Input tags for MVAResultCollection to use for TrkQuals")};
         fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
-        fhicl::Table<BranchOptConfig> options{Name("options"), Comment("Optional arguments for a branch")};
+        fhicl::Table<TrkFitOptConfig> options{Name("options"), Comment("Per-branch fill options")};
+      };
+
+      // ── Event-level MC config (tracker+CRV share these event products) ─────
+      struct EventMCConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::Atom<bool> fill{Name("fill"),
+          Comment("Master gate for tracker MC, Calo MC, CRV MC, and event-level MC info branches.")};
+        fhicl::Atom<art::InputTag> PBTMCTag{Name("PBTMCTag"), Comment("Tag for ProtonBunchTimeMC object")};
+        fhicl::Atom<art::InputTag> simParticlesTag{Name("simParticlesTag"), Comment("SimParticle Collection Tag")};
+        fhicl::Atom<art::InputTag> mcTrajectoriesTag{Name("mcTrajectoriesTag"), Comment("MCTrajectory Collection Tag")};
+        fhicl::Atom<art::InputTag> primaryParticleTag{Name("primaryParticleTag"), Comment("Tag for PrimaryParticle")};
+        fhicl::Table<InfoMCStructHelper::Config> infoMCStructHelper{Name("infoMCStructHelper"), Comment("Configuration for InfoMCStructHelper")};
+      };
+
+      // ── Tracker subsystem config ───────────────────────────────────────────
+      struct TrkConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        // master switch
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the tracker subsystem entirely")};
+        // reco flags
+        fhicl::Atom<bool> fillHits{Name("fillHits"),
+          Comment("Global enable for hit-level branches; per-branch options.fillHits also required")};
+        fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
+        fhicl::Atom<bool> fillTrkQual{Name("fillTrkQual"), Comment("Fill TrkQual MVA branches")};
+        fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
+        // per-branch configurations
+        fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
+        // tracker MC sub-config
+        struct MCConfig {
+          using Name=fhicl::Name;
+          using Comment=fhicl::Comment;
+          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all tracker MC branches; mc.fill must also be true")};
+          fhicl::Atom<art::InputTag> kalSeedMCAssns{Name("kalSeedMCAssns"), Comment("Tag for KalSeedMCAssn")};
+        };
+        fhicl::Table<MCConfig> mc{Name("mc"), Comment("Tracker MC filling options")};
+      };
+
+      // ── Helix seed config (independent of per-branch track config) ─────────
+      struct HelixConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Fill helix seed branches")};
+      };
+
+      // ── Time cluster config (independent of per-branch track config) ───────
+      struct TimeClusterConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill time cluster branch")};
+        fhicl::Atom<art::InputTag> tag {Name("tag"),  Comment("Tag for time cluster collection")};
+      };
+
+      // ── MC step collections config (independent of per-branch track config) ─
+      struct MCStepsConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::OptionalSequence<art::InputTag> extraMCStepTags{Name("extraMCStepTags"), Comment("Tags for extra StepPointMCCollections associated with KalSeeds")};
+        fhicl::OptionalAtom<art::InputTag>     surfaceStepsTag{Name("surfaceStepsTag"), Comment("SurfaceStep collection tag; omit to disable surface step branches")};
+        fhicl::OptionalSequence<art::InputTag> stepPointMCTags{Name("stepPointMCTags"), Comment("Tags for global StepPointMCCollections (not per-track)")};
+      };
+
+      // ── Calorimeter subsystem config ───────────────────────────────────────
+      // Calo MC is gated solely by calo.mc.fill; it is independent of mc.fill
+      // so that calo-only jobs can fill calo MC without loading tracker MC products.
+      struct CaloConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        // master switch
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the calorimeter subsystem entirely")};
+        // reco flags + collocated tags
+        fhicl::Atom<bool>          fillClusters {Name("fillClusters"),  Comment("Fill calorimeter cluster branch")};
+        fhicl::Atom<art::InputTag> clustersTag  {Name("clustersTag"),   Comment("Tag for CaloCluster collection")};
+        fhicl::Atom<bool>          fillHits     {Name("fillHits"),      Comment("Fill calorimeter hit branch")};
+        fhicl::Atom<art::InputTag> hitsTag      {Name("hitsTag"),       Comment("Tag for CaloHit collection")};
+        fhicl::Atom<bool>          fillRecoDigis{Name("fillRecoDigis"), Comment("Fill calorimeter reco-digi branch")};
+        fhicl::Atom<art::InputTag> recoDigisTag {Name("recoDigisTag"),  Comment("Tag for CaloRecoDigi collection")};
+        fhicl::Atom<bool>          fillDigis    {Name("fillDigis"),     Comment("Fill calorimeter digi branch")};
+        fhicl::Atom<art::InputTag> digisTag     {Name("digisTag"),      Comment("Tag for CaloDigi collection")};
+        // MC sub-config
+        struct MCConfig {
+          using Name=fhicl::Name;
+          using Comment=fhicl::Comment;
+          fhicl::Atom<bool> fill{Name("fill"), Comment("Master switch for all calorimeter MC branches; independent of mc.fill")};
+          // track-associated calo MC (the <branch>calohitmc. branch per track type)
+          fhicl::Atom<bool> fillTrackMatch{Name("fillTrackMatch"), Comment("Fill per-track calo cluster MC branch (<branch>calohitmc.)")};
+          // standalone calo MC branches
+          fhicl::Atom<bool>          fillClusters{Name("fillClusters"), Comment("Fill standalone caloclustersmc. branch")};
+          fhicl::Atom<art::InputTag> clusterMCTag{Name("clusterMCTag"), Comment("Tag for CaloClusterMCCollection")};
+          fhicl::Atom<bool>          fillHits    {Name("fillHits"),     Comment("Fill standalone calohitsmc. branch")};
+          fhicl::Atom<art::InputTag> hitMCTag    {Name("hitMCTag"),     Comment("Tag for CaloHitMCCollection")};
+          fhicl::Atom<bool>          fillSim     {Name("fillSim"),      Comment("Fill calomcsim. (sim particle info) branch")};
+          fhicl::Atom<bool>          fillDigis   {Name("fillDigis"),    Comment("Fill standalone calodigismc. branch")};
+          fhicl::Atom<bool>          fillDigiSim {Name("fillDigiSim"),  Comment("Fill calodigisim. branch")};
+          fhicl::Atom<art::InputTag> showerSimTag{Name("showerSimTag"), Comment("Tag for CaloShowerSim collection")};
+        };
+        fhicl::Table<MCConfig> mc{Name("mc"), Comment("Calorimeter MC filling options")};
+      };
+
+      // ── CRV subsystem config ───────────────────────────────────────────────
+      struct CRVConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        // master switch
+        fhicl::Atom<bool> fill{Name("fill"), Comment("Enable the CRV subsystem entirely")};
+        // reco flags + collocated tags
+        fhicl::Atom<bool>          fillCoincs    {Name("fillCoincs"),      Comment("Fill CRV coincidence cluster branches")};
+        fhicl::Atom<art::InputTag> coincidencesTag{Name("coincidencesTag"), Comment("Tag for CrvCoincidenceCluster collection")};
+        fhicl::Atom<art::InputTag> recoPulsesTag  {Name("recoPulsesTag"),   Comment("Tag for CrvRecoPulse collection")};
+        fhicl::Atom<art::InputTag> stepsTag       {Name("stepsTag"),        Comment("Tag for CrvStep collection")};
+        fhicl::Atom<bool>          fillPulses     {Name("fillPulses"),      Comment("Fill CRV reco pulse branches")};
+        fhicl::Atom<bool>          fillDigis      {Name("fillDigis"),       Comment("Fill CRV digi branch")};
+        fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
+        fhicl::Atom<double>        planeY         {Name("planeY"),          Comment("Y of center of top layer of CRV-T counters (mm)")};
+        fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
+        // MC sub-config (requires mc.fill also be true)
+        struct MCConfig {
+          using Name=fhicl::Name;
+          using Comment=fhicl::Comment;
+          fhicl::Atom<bool>          fill              {Name("fill"),               Comment("Master switch for CRV MC branches; mc.fill must also be true")};
+          fhicl::Atom<art::InputTag> coincidenceMCsTag {Name("coincidenceMCsTag"),  Comment("Tag for CrvCoincidenceClusterMC collection")};
+          fhicl::Atom<art::InputTag> digiMCsTag        {Name("digiMCsTag"),         Comment("Tag for CrvDigiMC collection")};
+          fhicl::Atom<art::InputTag> assnsTag          {Name("assnsTag"),            Comment("Tag for CrvCoincidenceClusterMCAssns")};
+        };
+        fhicl::Table<MCConfig> mc{Name("mc"), Comment("CRV MC filling options")};
       };
 
       struct Config {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
 
-        // General control and config
-        fhicl::Atom<int> diag{Name("diagLevel"),1};
-        fhicl::Atom<int> debug{Name("debugLevel"),0};
-        fhicl::Atom<int> splitlevel{Name("splitlevel"),99};
-        fhicl::Atom<int> buffsize{Name("buffsize"),32000};
-        fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple"), false};
-        fhicl::Atom<bool> hascrv{Name("hasCRV"), Comment("Require CRV information to fill tuple"), false};
-       // General event info
-        fhicl::Atom<art::InputTag> rctag{Name("RecoCountTag"), Comment("RecoCount"), art::InputTag()};
-        fhicl::Atom<art::InputTag> PBITag{Name("PBITag"), Comment("Tag for ProtonBunchIntensity object") ,art::InputTag()};
-        fhicl::Atom<art::InputTag> PBTTag{Name("PBTTag"), Comment("Tag for ProtonBunchTime object") ,art::InputTag()};
-        fhicl::Atom<art::InputTag> EWMTag{Name("EWMTag"), Comment("Tag for EventWindowMarker object") ,art::InputTag()};
-        fhicl::Atom<bool> filltrig{Name("FillTriggerInfo"),false};
+        // General control
+        fhicl::Atom<int> diag{Name("diagLevel")};
+        fhicl::Atom<int> debug{Name("debugLevel")};
+        fhicl::Atom<int> splitlevel{Name("splitlevel")};
+        fhicl::Atom<int> buffsize{Name("buffsize")};
+        fhicl::Atom<bool> hastrks{Name("hasTracks"), Comment("Require >=1 tracks to fill tuple")};
+        fhicl::Atom<bool> hascrv{Name("hasCRV"), Comment("Require CRV information to fill tuple")};
+        // General event info
+        fhicl::Atom<art::InputTag> rctag{Name("RecoCountTag"), Comment("RecoCount")};
+        fhicl::Atom<art::InputTag> PBITag{Name("PBITag"), Comment("Tag for ProtonBunchIntensity object")};
+        fhicl::Atom<art::InputTag> PBTTag{Name("PBTTag"), Comment("Tag for ProtonBunchTime object")};
+        fhicl::Atom<art::InputTag> EWMTag{Name("EWMTag"), Comment("Tag for EventWindowMarker object")};
+        // Trigger
+        fhicl::Atom<bool> filltrig{Name("FillTriggerInfo")};
         fhicl::Atom<std::string> trigProcessName{Name("TriggerProcessName"), Comment("Process name for Trigger")};
-        fhicl::Atom<std::string> trigpathsuffix{Name("TriggerPathSuffix"), "_trigger"}; // all trigger paths have this in the name
-        // core tracking
-        fhicl::Sequence<fhicl::Table<BranchConfig> > branches{Name("branches"), Comment("All the branches we want to write")};
-        // Additional (optional) tracking information
-        fhicl::Atom<bool> fillhits{Name("FillHitInfo"),Comment("Global switch to turn on/off hit-level info"), false};
-        fhicl::Atom<bool> fillhitcalibs{Name("FillHitCalibInfo"), Comment("Switch to turn on filling of hit-level information for this set of tracks"), false};
-        fhicl::Atom<std::string> fittype{Name("FitType"),Comment("Type of track Fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"),"Unknown"};
-        fhicl::Atom<bool> helices{Name("FillHelixInfo"),false};
-        fhicl::Atom<bool> fillTimeClusters{Name("FillTimeClusterInfo"),Comment("Global switch to turn on/off time cluster info"), false};
-        fhicl::Atom<art::InputTag> timeClustersTag{Name("TimeClustersTag"), Comment("Tag for time cluster collection"), art::InputTag()};
-        // Calorimeter input
-        fhicl::Atom<art::InputTag> caloClustersTag{Name("CaloClustersTag"), Comment("Tag for Calorimeter cluster collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> caloHitsTag{Name("CaloHitsTag"), Comment("Tag for Calorimeter hit collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> caloRecoDigisTag{Name("CaloRecoDigisTag"), Comment("Tag for Calorimeter recodigi collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> caloDigisTag{Name("CaloDigisTag"), Comment("Tag for Calorimeter digi collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> caloShowerSimTag{Name("CaloShowerSimTag"), Comment("Tag for Calorimeter shower sim collection"), art::InputTag()};
-        // Calorimeter flags
-        fhicl::Atom<bool> fillCaloClusters{Name("FillCaloClusters"),Comment("Flag for turning on Calo Clusters branch"), true};
-        fhicl::Atom<bool> fillCaloHits{Name("FillCaloHits"),Comment("Flag for turning on Calo Hits branch"), false};
-        fhicl::Atom<bool> fillCaloRecoDigis{Name("FillCaloRecoDigis"),Comment("Flag for turning on Calo RecoDigis branch"), false};
-        fhicl::Atom<bool> fillCaloDigis{Name("FillCaloDigis"),Comment("Flag for turning on Calo Digis branch"), false};
-        fhicl::Atom<bool> fillCaloDigisMC{Name("FillCaloDigisMC"),Comment("Flag for turning on Calo Digis MC branch"), false};
-        // CRV -- input tags
-        fhicl::Atom<art::InputTag> crvCoincidencesTag{Name("CrvCoincidencesTag"), Comment("Tag for CrvCoincidenceCluster Collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> crvRecoPulsesTag{Name("CrvRecoPulsesTag"), Comment("Tag for CrvRecopPulse Collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> crvStepsTag{Name("CrvStepsTag"), Comment("Tag for CrvStep Collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> crvDigiMCsTag{Name("CrvDigiMCsTag"), Comment("Tag for CrvDigiMC Collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> crvDigisTag{Name("CrvDigisTag"), Comment("Tag for CrvDigi Collection"), art::InputTag()};
-        // CRV -- flags
-        fhicl::Atom<bool> fillcrvcoincs{Name("FillCRVCoincs"),Comment("Flag for turning on crv CoincidenceClusterbranches"), false};
-        fhicl::Atom<bool> fillcrvpulses{Name("FillCRVPulses"),Comment("Flag for turning on crvpulses(mc) branches"), false};
-        fhicl::Atom<bool> fillcrvdigis{Name("FillCRVDigis"),Comment("Flag for turning on crvdigis branch"), false};
-        // CRV -- other
-        fhicl::Atom<double> crvPlaneY{Name("CrvPlaneY"),Comment("y of center of the top layer of the CRV-T counters"), 2751.485};  //This belongs in KinKalGeom as an intersection plane, together with the rest of the CRV planes FIXME
-        // CRV inference
-        fhicl::OptionalAtom<art::InputTag> crvInferenceTag{Name("CrvInferenceTag"), Comment("Tag for CrvInference associations (art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>)")};
-        // MC truth
-        fhicl::Atom<bool> fillmc{Name("FillMCInfo"),Comment("Global switch to turn on/off MC info"),true};
-        fhicl::Table<InfoMCStructHelper::Config> infoMCStructHelper{Name("InfoMCStructHelper"), Comment("Configuration for the InfoMCStructHelper")};
-        fhicl::Atom<art::InputTag> PBTMCTag{Name("PBTMCTag"), Comment("Tag for ProtonBunchTimeMC object") ,art::InputTag()};
-        fhicl::Atom<art::InputTag> simParticlesTag{Name("SimParticlesTag"), Comment("SimParticle Collection Tag")};
-        fhicl::Atom<art::InputTag> mcTrajectoriesTag{Name("MCTrajectoriesTag"), Comment("MCTrajectory Collection Tag")};
-        fhicl::Atom<art::InputTag> primaryParticleTag{Name("PrimaryParticleTag"), Comment("Tag for PrimaryParticle"), art::InputTag()};
-        fhicl::Atom<art::InputTag> kalSeedMCTag{Name("KalSeedMCAssns"), Comment("Tag for KalSeedMCAssn"), art::InputTag()};
-        // extra MC
-        fhicl::OptionalSequence<art::InputTag> extraMCStepTags{Name("ExtraMCStepCollectionTags"), Comment("Input tags for any other StepPointMCCollections you want written out. This will only write out steps associated with the KalSeed")};
-        // passive elements and Virtual Detector MC information
-        fhicl::OptionalAtom<art::InputTag> SurfaceStepsTag{Name("SurfaceStepCollectionTag"), Comment("SurfaceStep Collection")};
-        fhicl::OptionalSequence<art::InputTag> stepPointMCTags{Name("StepPointMCTags"), Comment("Input tags for any other StepPointMCCollections you want written out. This will write out all steps in the collection")};
-        // Calo MC
-        fhicl::Atom<bool> fillCaloMC{ Name("FillCaloMC"),Comment("Fill CaloMC information"), true};
-        fhicl::Atom<bool> fillCaloClustersMC{ Name("FillCaloClustersMC"),Comment("Fill Calo Cluster MC information"), true};
-        fhicl::Atom<bool> fillCaloHitsMC{ Name("FillCaloHitsMC"),Comment("Fill Calo Hit MC information"), true};
-        fhicl::Atom<bool> fillCaloSimInfos{ Name("FillCaloSimInfos"),Comment("Fill Sim particles information associated with calo clusters"), true};
-        fhicl::Atom<bool> fillCaloDigiSimInfos{ Name("FillCaloDigiSimInfos"),Comment("Fill Sim particles information associated with calo digis"), true};
-        fhicl::Atom<art::InputTag> caloClusterMCTag{Name("CaloClusterMCTag"), Comment("Tag for CaloClusterMCCollection") ,art::InputTag()};
-        fhicl::Atom<art::InputTag> caloHitMCTag{Name("CaloHitMCTag"), Comment("Tag for CaloHitMCCollection") ,art::InputTag()};
-        // CRV MC
-        fhicl::Atom<art::InputTag> crvCoincidenceMCsTag{Name("CrvCoincidenceMCsTag"), Comment("Tag for CrvCoincidenceClusterMC Collection"), art::InputTag()};
-        fhicl::Atom<art::InputTag> crvMCAssnsTag{ Name("CrvCoincidenceClusterMCAssnsTag"), Comment("art::InputTag for CrvCoincidenceClusterMCAssns")};
-        // Pre-processed analysis info; are these redundant with the branch config ?
-        fhicl::Atom<bool> filltrkpid{Name("FillTrkPIDInfo"),false};
-        fhicl::Atom<bool> filltrkqual{Name("FillTrkQual"),false};
+        fhicl::Atom<std::string> trigpathsuffix{Name("TriggerPathSuffix"), "_trigger"};
+        // Fit type
+        fhicl::Atom<std::string> fittype{Name("FitType"), Comment("Type of track fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"), "Unknown"};
+        // ── Subsystems ────────────────────────────────────────────────────────
+        fhicl::Table<EventMCConfig>     mc          {Name("mc"),          Comment("Event-level MC config: gates tracker+CRV MC and provides shared event MC products")};
+        fhicl::Table<TrkConfig>         trk         {Name("trk"),         Comment("Tracker subsystem config")};
+        fhicl::Table<CaloConfig>        calo        {Name("calo"),        Comment("Calorimeter subsystem config")};
+        fhicl::Table<CRVConfig>         crv         {Name("crv"),         Comment("CRV subsystem config")};
+        fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
+        fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
+        fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
       };
       typedef art::EDAnalyzer::Table<Config> Parameters;
 
@@ -216,7 +293,7 @@ namespace mu2e {
     private:
 
       Config _conf;
-      std::vector<BranchConfig> _allBranches; // configurations for all track branches
+      std::vector<TrkFitConfig> _allTrkFitBranches; // configurations for all track fit branches
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
@@ -224,7 +301,7 @@ namespace mu2e {
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
-      art::InputTag _recoCountTag, _PBITag, _PBTTag, _EWMTag, _PBTMCTag;
+      art::InputTag _recoCountTag, _PBITag, _PBTTag, _EWMTag;
       art::Handle<mu2e::EventWindowMarker> _ewmh;
       // track control
       bool _hastrks;
@@ -236,73 +313,58 @@ namespace mu2e {
       // track branches (inputs)
       std::vector<art::Handle<KalSeedPtrCollection> > _allKSPCHs;
       // track branches (outputs)
-      std::map<BranchIndex, std::vector<TrkInfo>> _allTIs;
-      std::map<BranchIndex, std::vector<std::vector<TrkSegInfo>>> _allTSIs;
-      std::map<BranchIndex, std::vector<std::vector<LoopHelixInfo>>> _allLHIs;
-      std::map<BranchIndex, std::vector<std::vector<CentralHelixInfo>>> _allCHIs;
-      std::map<BranchIndex, std::vector<std::vector<KinematicLineInfo>>> _allKLIs;
-
-      std::map<BranchIndex, std::vector<TrkCaloHitInfo>> _allTCHIs;
+      std::map<TrkFitBranchIndex, std::vector<TrkInfo>> _allTIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<TrkSegInfo>>> _allTSIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<LoopHelixInfo>>> _allLHIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<CentralHelixInfo>>> _allCHIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<KinematicLineInfo>>> _allKLIs;
+      std::map<TrkFitBranchIndex, std::vector<TrkCaloHitInfo>> _allTCHIs;
       // quality branches (inputs)
-
-      std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs; // outer vector is for each track type, inner vector is all RecoQuals
+      std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs;
       std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkQualCHs;
       std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkPIDCHs;
-
       // quality branches (outputs)
       std::vector<RecoQualInfo> _allRQIs;
-      std::map<BranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkQualResults;
-      std::map<BranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkPIDResults;
-
+      std::map<TrkFitBranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkQualResults;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkPIDResults;
       // trigger information
       unsigned _trigbits;
       std::map<size_t,unsigned> _tmap; // map between path and trigger ID.  ID should come from trigger itself FIXME!
       TrigInfo _triggerResults;
-      // MC truth (fcl parameters)
-      bool _fillmc;
-      // MC steps (associated with KalSeed)
+      // cached optional tracker MC tags
       std::vector<art::InputTag> _extraMCStepTags;
       std::vector<art::Handle<StepPointMCCollection>> _extraMCStepCollections;
-      std::map<BranchIndex, std::map<StepCollIndex, std::vector<MCStepInfos>>> _extraMCStepInfos;
-      std::map<BranchIndex, std::map<StepCollIndex, std::vector<MCStepSummaryInfo>>> _extraMCStepSummaryInfos;
-      // SurfaceSteps
+      std::map<TrkFitBranchIndex, std::map<StepCollIndex, std::vector<MCStepInfos>>> _extraMCStepInfos;
+      std::map<TrkFitBranchIndex, std::map<StepCollIndex, std::vector<MCStepSummaryInfo>>> _extraMCStepSummaryInfos;
       art::InputTag _surfaceStepsTag;
-      std::map<BranchIndex, std::vector<std::vector<SurfaceStepInfo>>> _surfaceStepInfos;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<SurfaceStepInfo>>> _surfaceStepInfos;
       art::Handle<SurfaceStepCollection> _surfaceStepsHandle;
-      // MC steps (all)
       std::vector<art::InputTag> _stepPointMCTags;
       std::vector<art::Handle<StepPointMCCollection>> _stepPointMCCollections;
       std::map<StepCollIndex, MCStepInfos> _stepPointMCInfos;
-
-      //
+      // MC truth handles
       art::Handle<PrimaryParticle> _pph;
       art::Handle<KalSeedMCAssns> _ksmcah;
       art::Handle<SimParticleCollection> _simParticles;
       art::Handle<MCTrajectoryCollection> _mcTrajectories;
-      // MC truth branches (outputs)
-      std::map<BranchIndex, std::vector<TrkInfoMC>> _allMCTIs;
-      std::map<BranchIndex, std::vector<std::vector<SimInfo>>> _allMCSimTIs;
-      std::map<BranchIndex, std::vector<std::vector<MCStepInfo>>> _allMCVDInfos;
-      bool _fillcalomc;
+      // tracker MC truth branches (outputs)
+      std::map<TrkFitBranchIndex, std::vector<TrkInfoMC>> _allMCTIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<SimInfo>>> _allMCSimTIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<MCStepInfo>>> _allMCVDInfos;
       art::Handle<CaloClusterMCCollection> _ccmcch;
       art::Handle<CaloHitMCCollection> _chmcch;
-      std::map<BranchIndex, std::vector<CaloClusterInfoMC>> _allMCTCHIs;
-
+      std::map<TrkFitBranchIndex, std::vector<CaloClusterInfoMC>> _allMCTCHIs;
       // hit level info branches
-      std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfo>>> _allTSHIs;
-      std::map<BranchIndex, std::vector<std::vector<TrkStrawHitCalibInfo>>> _allTSHCIs;
-      std::map<BranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
-      std::map<BranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
-
+      std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitInfo>>> _allTSHIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitCalibInfo>>> _allTSHCIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
       // time cluster branch
       art::Handle<TimeClusterCollection> _tcsHandle;
       std::vector<EventNtupleTimeClusterInfo> _tcIs;
-      bool _filltcs;
-
       // event weights
       std::vector<art::Handle<EventWeight> > _wtHandles;
       EventWeightInfo _wtinfo;
-
       // Calorimeter
       art::Handle<CaloClusterCollection> _caloClusters;
       art::Handle<CaloHitCollection> _caloHits;
@@ -314,18 +376,13 @@ namespace mu2e {
       std::vector<CaloRecoDigiInfo> _caloRDIs;
       std::vector<CaloDigiInfo> _caloDIs;
       std::vector<CaloDigiMCInfo> _caloDigiMCIs;
-
-      bool _fillcaloclusters, _fillcalohits, _fillcalorecodigis, _fillcalodigis, _fillcalodigismc;
-
       // Calorimeter MC
-      std::vector<CaloClusterInfoMC> _caloCIMCs; //Independent from tracker
-      std::vector<CaloHitInfoMC> _caloHIMCs; //Independent from tracker
-      std::vector<SimInfo> _caloSIMCs; //Sim particle infos associated with calo clusters
-      std::vector<SimInfo> _caloDigiSIMCs; //Sim particle infos associated with calo digis
-      bool _fillcaloclustersmc, _fillcalohitsmc, _fillcalosiminfos, _fillcalodigisiminfos;
-
+      std::vector<CaloClusterInfoMC> _caloCIMCs;
+      std::vector<CaloHitInfoMC> _caloHIMCs;
+      std::vector<SimInfo> _caloSIMCs;
+      std::vector<SimInfo> _caloDigiSIMCs;
       // CRV (inputs)
-      std::map<BranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
+      std::map<TrkFitBranchIndex, std::vector<art::Handle<BestCrvAssns>>> _allBestCrvAssns;
       art::Handle<CrvCoincidenceClusterMCAssns>      _crvMCAssns;
       art::Handle<CrvCoincidenceClusterCollection>   _crvCoincidences;
       art::Handle<CrvCoincidenceClusterMCCollection> _crvCoincidenceMCs;
@@ -333,18 +390,15 @@ namespace mu2e {
       art::Handle<CrvDigiMCCollection>               _crvDigiMCs;
       art::Handle<CrvDigiCollection>                 _crvDigis;
       art::Handle<CrvStepCollection>                 _crvSteps;
-      // CRV -- fhicl parameters
-      bool _fillcrvcoincs, _fillcrvpulses, _fillcrvdigis;
-      double _crvPlaneY;  // needs to move to KinKalGeom FIXME
       // CRV inference
       bool _fillCrvInference;
       art::InputTag _crvInferenceTag;
       std::vector<std::vector<MVAResultInfo>> _crvInference;
       // CRV (output)
       std::vector<CrvHitInfoReco> _crvcoincs;
-      std::map<BranchIndex, std::vector<CrvHitInfoReco>> _allBestCrvs; // there can be more than one of these per track type
+      std::map<TrkFitBranchIndex, std::vector<CrvHitInfoReco>> _allBestCrvs;
       std::vector<CrvHitInfoMC> _crvcoincsmc;
-      std::map<BranchIndex, std::vector<CrvHitInfoMC>> _allBestCrvMCs;
+      std::map<TrkFitBranchIndex, std::vector<CrvHitInfoMC>> _allBestCrvMCs;
       CrvSummaryReco _crvsummary;
       CrvSummaryMC   _crvsummarymc;
       std::vector<CrvPlaneInfoMC> _crvcoincsmcplane;
@@ -363,14 +417,41 @@ namespace mu2e {
       enum FType{Unknown=0,LoopHelix,CentralHelix,KinematicLine};
       FType _ftype = Unknown;
       std::vector<std::string> fitNames = {"Unknown", "LoopHelix","CentralHelix","KinematicLine"};
-
       // for trigger branch:
       bool firstEvent = true;
+
+      // ── Gating helpers ─────────────────────────────────────────────────────
+      // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
+      // Also gates tracker MC and CRV MC.
+      bool fillEventMC() const { return _conf.mc().fill(); }
+
+      // Tracker MC: both the global event MC gate and the tracker MC gate must
+      // be true, plus the per-branch flag.
+      bool fillTrkMC(const TrkFitOptConfig& opt) const {
+        return _conf.trk().fill() && _conf.mc().fill() && _conf.trk().mc().fill() && opt.fillmc();
+      }
+
+      // Calorimeter MC: independent of fillEventMC() — calo MC products do not
+      // require simParticles/primaryParticle so calo-only jobs can enable this
+      // while keeping mc.fill false.
+      bool fillCaloMC()            const { return _conf.calo().fill() && _conf.calo().mc().fill() && _conf.mc().fill(); }
+      bool fillCaloTrackMatchMC()  const { return fillCaloMC() && _conf.calo().mc().fillTrackMatch(); }
+      bool fillCaloClsMC()         const { return fillCaloMC() && _conf.calo().mc().fillClusters(); }
+      bool fillCaloHitsMC()        const { return fillCaloMC() && _conf.calo().mc().fillHits(); }
+      bool fillCaloSimMC()         const { return fillCaloMC() && _conf.calo().mc().fillSim(); }
+      bool fillCaloDigisMC()       const { return fillCaloMC() && _conf.calo().mc().fillDigis(); }
+      bool fillCaloDigiSimMC()     const { return fillCaloMC() && _conf.calo().mc().fillDigiSim(); }
+
+      // CRV MC: needs global event MC gate (CRV uses mcTrajectories/primaryParticle).
+      bool fillCRVMC() const {
+        return _conf.mc().fill() && _conf.crv().fill() && _conf.crv().mc().fill();
+      }
+
       // helper functions
       void fillEventInfo(const art::Event& event);
-      void fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent);
+      void fillTriggerBranch(const art::Event& event, std::string const& process, bool firstEvent);
       void resetTrackBranches();
-      void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, BranchIndex i_branch, size_t i_kseedptr);
+      void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, TrkFitBranchIndex i_trk_fit_branch, size_t i_kseedptr);
 
       template <typename T, typename TI, typename TIA>
         std::vector<art::Handle<T> > createSpecialBranch(const art::Event& event, const std::string& branchname,
@@ -385,108 +466,72 @@ namespace mu2e {
     _PBITag(conf().PBITag()),
     _PBTTag(conf().PBTTag()),
     _EWMTag(conf().EWMTag()),
-    _PBTMCTag(conf().PBTMCTag()),
     _hastrks(conf().hastrks()),
     _hascrv(conf().hascrv()),
-    _fillmc(conf().fillmc()),
-    _fillcalomc(conf().fillCaloMC()),
-    _filltcs(conf().fillTimeClusters()),
-    // Calorimeter
-    _fillcaloclusters(conf().fillCaloClusters()),
-    _fillcalohits(conf().fillCaloHits()),
-    _fillcalorecodigis(conf().fillCaloRecoDigis()),
-    _fillcalodigis(conf().fillCaloDigis()),
-    _fillcalodigismc(conf().fillCaloDigisMC()),
-    // Calorimeter MC
-    _fillcaloclustersmc(conf().fillCaloClustersMC()),
-    _fillcalohitsmc(conf().fillCaloHitsMC()),
-    _fillcalosiminfos(conf().fillCaloSimInfos()),
-    _fillcalodigisiminfos(conf().fillCaloDigiSimInfos()),
-    // CRV
-    _fillcrvcoincs(conf().fillcrvcoincs()),
-    _fillcrvpulses(conf().fillcrvpulses()),
-    _fillcrvdigis(conf().fillcrvdigis()),
-    _crvPlaneY(conf().crvPlaneY()),
-    _infoMCStructHelper(conf().infoMCStructHelper()),
+    _infoMCStructHelper(conf().mc().infoMCStructHelper()),
     _buffsize(conf().buffsize()),
     _splitlevel(conf().splitlevel())
   {
-    _fillCrvInference = conf().crvInferenceTag(_crvInferenceTag);
+    _fillCrvInference = conf().crv().inferenceTag(_crvInferenceTag);
 
     // decode fit type
-    for(size_t ifit=0;ifit < fitNames.size();++ifit){
-      auto const& fname = fitNames[ifit];
-      if(_conf.fittype() == fname){
-        _ftype= (FType)ifit;
+    for(size_t ifit = 0; ifit < fitNames.size(); ++ifit){
+      if(_conf.fittype() == fitNames[ifit]){
+        _ftype = (FType)ifit;
         break;
       }
     }
 
-    // Put all the branch configurations together
-    for(const auto& branch_cfg : _conf.branches()){
-      _allBranches.push_back(branch_cfg);
+    // resolve optional MC step tags from top-level mcsteps config
+    _conf.mcsteps().extraMCStepTags(_extraMCStepTags);
+    _conf.mcsteps().surfaceStepsTag(_surfaceStepsTag);
+    _conf.mcsteps().stepPointMCTags(_stepPointMCTags);
+
+    // populate branch list from trk.branches
+    for(const auto& trk_fit_cfg : _conf.trk().fits()){
+      _allTrkFitBranches.push_back(trk_fit_cfg);
     }
-    // Create all the info structs
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      auto i_branchConfig = _allBranches.at(i_branch);
-      _allTIs[i_branch] = std::vector<TrkInfo>();
-      // fit sampling (KalIntersection) at a surface
-      _allTSIs[i_branch] = std::vector<std::vector<TrkSegInfo>>();
-      // fit-specific branches
-      _allLHIs[i_branch] = std::vector<std::vector<LoopHelixInfo>>();
-      _allCHIs[i_branch] = std::vector<std::vector<CentralHelixInfo>>();
-      _allKLIs[i_branch] = std::vector<std::vector<KinematicLineInfo>>();
 
-      // mc truth info at VDs
-      _allMCVDInfos[i_branch] = std::vector<std::vector<MCStepInfo>>();
+    // create per-branch storage (skip disabled branches)
+    for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+      const auto& i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
+      if (!i_trkFitConfig.fill()) continue;
 
-      _allTCHIs[i_branch] = std::vector<TrkCaloHitInfo>();
+      _allTIs[i_trk_fit_branch]       = {};
+      _allTSIs[i_trk_fit_branch]      = {};
+      _allLHIs[i_trk_fit_branch]      = {};
+      _allCHIs[i_trk_fit_branch]      = {};
+      _allKLIs[i_trk_fit_branch]      = {};
+      _allMCVDInfos[i_trk_fit_branch] = {};
+      _allTCHIs[i_trk_fit_branch]     = {};
+      _allMCTIs[i_trk_fit_branch]     = {};
+      _allMCSimTIs[i_trk_fit_branch]  = {};
 
-      _allMCTIs[i_branch] = std::vector<TrkInfoMC>();
-      _allMCSimTIs[i_branch] = std::vector<std::vector<SimInfo>>();
-
-      if(_fillcalomc && _fillmc){
-        _allMCTCHIs[i_branch] = std::vector<CaloClusterInfoMC>();
+      if(fillCaloTrackMatchMC()){
+        _allMCTCHIs[i_trk_fit_branch] = {};
       }
 
-      RecoQualInfo rqi;
-      _allRQIs.push_back(rqi);
+      _allRQIs.push_back(RecoQualInfo{});
+      _allTSHIs[i_trk_fit_branch]   = {};
+      _allTSHCIs[i_trk_fit_branch]  = {};
+      _allTSMIs[i_trk_fit_branch]   = {};
+      _allTSHIMCs[i_trk_fit_branch] = {};
 
-      _allTSHIs[i_branch] = std::vector<std::vector<TrkStrawHitInfo>>();
-      _allTSHCIs[i_branch] = std::vector<std::vector<TrkStrawHitCalibInfo>>();
-      _allTSMIs[i_branch] = std::vector<std::vector<TrkStrawMatInfo>>();
-      _allTSHIMCs[i_branch] = std::vector<std::vector<TrkStrawHitInfoMC>>();
+      _allTrkQualResults[i_trk_fit_branch].resize(i_trkFitConfig.trkQualTags().size());
+      _allTrkPIDResults[i_trk_fit_branch].resize(i_trkFitConfig.trkPIDTags().size());
 
-      std::vector<std::vector<MVAResultInfo>> trkQualResults;
-      for (size_t i_trkQualTag = 0; i_trkQualTag < i_branchConfig.trkQualTags().size(); ++i_trkQualTag) {
-        trkQualResults.emplace_back(std::vector<MVAResultInfo>());
+      for (StepCollIndex ixt = 0; ixt < _extraMCStepTags.size(); ++ixt) {
+        _extraMCStepInfos[i_trk_fit_branch][ixt]        = {};
+        _extraMCStepSummaryInfos[i_trk_fit_branch][ixt] = {};
       }
-      _allTrkQualResults[i_branch] = trkQualResults;
+      if (!_surfaceStepsTag.empty()) {
+        _surfaceStepInfos[i_trk_fit_branch] = {};
+      }
+    }
 
-      std::vector<std::vector<MVAResultInfo>> trkPIDResults;
-      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
-        trkPIDResults.emplace_back(std::vector<MVAResultInfo>());
-      }
-      _allTrkPIDResults[i_branch] = trkPIDResults;
-
-      if(_conf.extraMCStepTags(_extraMCStepTags)){
-        for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-          for (StepCollIndex i_extraMCStepTag = 0; i_extraMCStepTag < _extraMCStepTags.size(); ++i_extraMCStepTag) {
-            _extraMCStepInfos[i_branch][i_extraMCStepTag] = std::vector<MCStepInfos>();
-            _extraMCStepSummaryInfos[i_branch][i_extraMCStepTag] = std::vector<MCStepSummaryInfo>();
-          }
-        }
-      }
-      if(_conf.SurfaceStepsTag(_surfaceStepsTag)){
-        for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-          _surfaceStepInfos[i_branch] = std::vector<std::vector<SurfaceStepInfo>>();
-        }
-      }
-      if(_conf.stepPointMCTags(_stepPointMCTags)){
-        for (StepCollIndex i_stepPointMCTag = 0; i_stepPointMCTag < _stepPointMCTags.size(); ++i_stepPointMCTag) {
-          _stepPointMCInfos[i_stepPointMCTag] = MCStepInfos();
-        }
-      }
+    // global (non-per-branch) MC step storage
+    for (StepCollIndex icoll = 0; icoll < _stepPointMCTags.size(); ++icoll) {
+      _stepPointMCInfos[icoll] = MCStepInfos{};
     }
   }
 
@@ -499,136 +544,125 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 11);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
     _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
-    // add event info branch
+    // event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
-    if (_fillmc) {
+    if (fillEventMC()) {
       _ntuple->Branch("evtinfomc",&_einfomc,_buffsize,_splitlevel);
     }
     // hit counting branch
     _ntuple->Branch("hitcount",&_hcnt);
     // track counting branches
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      BranchConfig i_branchConfig = _allBranches.at(i_branch);
-      std::string leafname = i_branchConfig.branch();
-      _ntuple->Branch(("tcnt.n"+leafname).c_str(),&_tcnt._counts[i_branch]);
+    for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+      if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
+      std::string leafname = _allTrkFitBranches.at(i_trk_fit_branch).branchname();
+      _ntuple->Branch(("tcnt.n"+leafname).c_str(),&_tcnt._counts[i_trk_fit_branch]);
     }
 
     // create all track branches
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      BranchConfig i_branchConfig = _allBranches.at(i_branch);
-      std::string branch = i_branchConfig.branch();
-      _ntuple->Branch((branch+".").c_str(),&_allTIs.at(i_branch),_buffsize,_splitlevel);
-      _ntuple->Branch((branch+"segs.").c_str(),&_allTSIs.at(i_branch),_buffsize,_splitlevel);
-// add traj-specific branches
-      if(_ftype == LoopHelix )_ntuple->Branch((branch+"segpars_lh.").c_str(),&_allLHIs.at(i_branch),_buffsize,_splitlevel);
-      if(_ftype == CentralHelix )_ntuple->Branch((branch+"segpars_ch.").c_str(),&_allCHIs.at(i_branch),_buffsize,_splitlevel);
-      if(_ftype == KinematicLine )_ntuple->Branch((branch+"segpars_kl.").c_str(),&_allKLIs.at(i_branch),_buffsize,_splitlevel);
-      // TrkCaloHit: currently only 1
-      _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_branch));
-      for (size_t i_trkQualTag = 0; i_trkQualTag < i_branchConfig.trkQualTags().size(); ++i_trkQualTag) {
-        std::string branchname = "qual";
-        if (i_trkQualTag > 0) {
-          branchname += std::to_string(i_trkQualTag+1); // +1 so that the second trkqual will be "trkqual2"
+    if (_conf.trk().fill()) {
+      for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+        const TrkFitConfig& i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
+        if (!i_trkFitConfig.fill()) continue;
+        std::string branch = i_trkFitConfig.branchname();
+        _ntuple->Branch((branch+".").c_str(),&_allTIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        _ntuple->Branch((branch+"segs.").c_str(),&_allTSIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        // add traj-specific branches
+        if(_ftype == LoopHelix)    _ntuple->Branch((branch+"segpars_lh.").c_str(),&_allLHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        if(_ftype == CentralHelix) _ntuple->Branch((branch+"segpars_ch.").c_str(),&_allCHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        if(_ftype == KinematicLine) _ntuple->Branch((branch+"segpars_kl.").c_str(),&_allKLIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        // TrkCaloHit: currently only 1
+        _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_trk_fit_branch));
+        for (size_t i_trkQualTag = 0; i_trkQualTag < i_trkFitConfig.trkQualTags().size(); ++i_trkQualTag) {
+          std::string branchname = "qual";
+          if (i_trkQualTag > 0) branchname += std::to_string(i_trkQualTag+1);
+          _ntuple->Branch((branch+branchname+".").c_str(),&_allTrkQualResults.at(i_trk_fit_branch).at(i_trkQualTag),_buffsize,_splitlevel);
         }
-        _ntuple->Branch((branch+branchname+".").c_str(),&_allTrkQualResults.at(i_branch).at(i_trkQualTag),_buffsize,_splitlevel);
-      }
-      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
-        std::string branchname = "pid";
-        if (i_trkPIDTag > 0) {
-          branchname += std::to_string(i_trkPIDTag+1); // +1 so that the second trkpid will be "trkpid2"
+        for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_trkFitConfig.trkPIDTags().size(); ++i_trkPIDTag) {
+          std::string branchname = "pid";
+          if (i_trkPIDTag > 0) branchname += std::to_string(i_trkPIDTag+1);
+          _ntuple->Branch((branch+branchname+'.').c_str(),&_allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDTag),_buffsize,_splitlevel);
         }
-        _ntuple->Branch((branch+branchname+'.').c_str(),&_allTrkPIDResults.at(i_branch).at(i_trkPIDTag),_buffsize,_splitlevel);
-      }
-      // optionally add hit-level branches
-      // (for the time being diagLevel : 2 will still work, but I propose removing this at some point)
-      if(_conf.diag() > 1 || (_conf.fillhits() && i_branchConfig.options().fillhits())){
-        _ntuple->Branch((branch+"hits.").c_str(),&_allTSHIs.at(i_branch),_buffsize,_splitlevel);
-        if (_conf.fillhitcalibs())
-          _ntuple->Branch((branch+"hitcalibs.").c_str(),&_allTSHCIs.at(i_branch),_buffsize,_splitlevel);
-        _ntuple->Branch((branch+"mats.").c_str(),&_allTSMIs.at(i_branch),_buffsize,_splitlevel);
-      }
-
-      // optionally add MC branches
-      if(_fillmc && i_branchConfig.options().fillmc()){
-        _ntuple->Branch((branch+"mc.").c_str(),&_allMCTIs.at(i_branch),_buffsize,_splitlevel);
-
-        _ntuple->Branch((branch+"mcsim.").c_str(),&_allMCSimTIs.at(i_branch),_buffsize,_splitlevel);
-        _ntuple->Branch((branch+"mcvd.").c_str(),&_allMCVDInfos.at(i_branch),_buffsize,_splitlevel);
-        if(_fillcalomc)_ntuple->Branch((branch+"calohitmc.").c_str(),&_allMCTCHIs.at(i_branch),_buffsize,_splitlevel);
-        // at hit-level MC information
-        // (for the time being diagLevel will still work, but I propose removing this at some point)
-        if(_conf.diag() > 1 || (_conf.fillhits() && i_branchConfig.options().fillhits())){
-          _ntuple->Branch((branch+"hitsmc.").c_str(),&_allTSHIMCs.at(i_branch),_buffsize,_splitlevel);
+        // hit-level branches (global trk.fillHits AND per-branch options.fillHits both required)
+        if(_conf.diag() > 1 || (_conf.trk().fillHits() && i_trkFitConfig.options().fillhits())){
+          _ntuple->Branch((branch+"hits.").c_str(),&_allTSHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          if (_conf.trk().fillHitCalibs())
+            _ntuple->Branch((branch+"hitcalibs.").c_str(),&_allTSHCIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          _ntuple->Branch((branch+"mats.").c_str(),&_allTSMIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         }
-        // configure extra MCStep branches for this track type
-        if(_conf.extraMCStepTags(_extraMCStepTags)){
-          for(size_t ixtra=0;ixtra < _extraMCStepTags.size(); ++ixtra) {
+        // tracker MC branches
+        if(fillTrkMC(i_trkFitConfig.options())){
+          _ntuple->Branch((branch+"mc.").c_str(),&_allMCTIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          _ntuple->Branch((branch+"mcsim.").c_str(),&_allMCSimTIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          _ntuple->Branch((branch+"mcvd.").c_str(),&_allMCVDInfos.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          if(fillCaloTrackMatchMC())
+            _ntuple->Branch((branch+"calohitmc.").c_str(),&_allMCTCHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          if(_conf.diag() > 1 || (_conf.trk().fillHits() && i_trkFitConfig.options().fillhits())){
+            _ntuple->Branch((branch+"hitsmc.").c_str(),&_allTSHIMCs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+          }
+          // extra MCStep branches per track type
+          for(size_t ixtra = 0; ixtra < _extraMCStepTags.size(); ++ixtra) {
             auto const& tag = _extraMCStepTags[ixtra];
             auto inst = tag.instance();
-            std::string  mcsiname = branch +"mcsic_" + inst + ".";
-            std::string  mcssiname = branch + "mcssi_" + inst + ".";
-            _ntuple->Branch(mcsiname.c_str(),&_extraMCStepInfos[i_branch][ixtra],_buffsize,_splitlevel);
-            _ntuple->Branch(mcssiname.c_str(),&_extraMCStepSummaryInfos[i_branch][ixtra],_buffsize,_splitlevel);
+            _ntuple->Branch((branch+"mcsic_"+inst+".").c_str(),&_extraMCStepInfos[i_trk_fit_branch][ixtra],_buffsize,_splitlevel);
+            _ntuple->Branch((branch+"mcssi_"+inst+".").c_str(),&_extraMCStepSummaryInfos[i_trk_fit_branch][ixtra],_buffsize,_splitlevel);
           }
-        }
-        if(_conf.SurfaceStepsTag(_surfaceStepsTag)){
-          _ntuple->Branch((branch+"segsmc.").c_str(),&_surfaceStepInfos[i_branch],_buffsize,_splitlevel);
+          if(!_surfaceStepsTag.empty()){
+            _ntuple->Branch((branch+"segsmc.").c_str(),&_surfaceStepInfos[i_trk_fit_branch],_buffsize,_splitlevel);
+          }
         }
       }
     }
 
     // Time clusters
-    if(_filltcs) {
+    if(_conf.timeclusters().fill()) {
       _ntuple->Branch("timeclusters.",&_tcIs,_buffsize,_splitlevel);
     }
 
-    // Calorimeter
-    if (_fillcaloclusters){
+    // ── Calorimeter reco branches ──────────────────────────────────────────
+    if(_conf.calo().fill() && _conf.calo().fillClusters()){
       _ntuple->Branch("caloclusters.",&_caloCIs,_buffsize,_splitlevel);
     }
-    if (_fillcalohits){
+    if(_conf.calo().fill() && _conf.calo().fillHits()){
       _ntuple->Branch("calohits.",&_caloHIs,_buffsize,_splitlevel);
     }
-    if (_fillcalorecodigis){
+    if(_conf.calo().fill() && _conf.calo().fillRecoDigis()){
       _ntuple->Branch("calorecodigis.",&_caloRDIs,_buffsize,_splitlevel);
     }
-    if (_fillcalodigis){
+    if(_conf.calo().fill() && _conf.calo().fillDigis()){
       _ntuple->Branch("calodigis.",&_caloDIs,_buffsize,_splitlevel);
     }
-    if (_fillcalodigismc){
+    // ── Calorimeter MC branches ────────────────────────────────────────────
+    if(fillCaloDigisMC()){
       _ntuple->Branch("calodigismc.",&_caloDigiMCIs,_buffsize,_splitlevel);
     }
-    if (_fillcalodigisiminfos){
+    if(fillCaloDigiSimMC()){
       _ntuple->Branch("calodigisim.",&_caloDigiSIMCs,_buffsize,_splitlevel);
     }
-    // Calorimeter MC
-    if (_fillmc) {
-      if (_fillcaloclustersmc){
-        _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
-      }
-      if (_fillcalohitsmc){
-        _ntuple->Branch("calohitsmc.",&_caloHIMCs,_buffsize,_splitlevel);
-      }
-      if (_fillcalosiminfos){
-        _ntuple->Branch("calomcsim.",&_caloSIMCs,_buffsize,_splitlevel);
-      }
+    if(fillCaloClsMC()){
+      _ntuple->Branch("caloclustersmc.",&_caloCIMCs,_buffsize,_splitlevel);
+    }
+    if(fillCaloHitsMC()){
+      _ntuple->Branch("calohitsmc.",&_caloHIMCs,_buffsize,_splitlevel);
+    }
+    if(fillCaloSimMC()){
+      _ntuple->Branch("calomcsim.",&_caloSIMCs,_buffsize,_splitlevel);
     }
 
-    // general CRV info
-    if(_fillcrvcoincs) {
+    // ── CRV reco branches ──────────────────────────────────────────────────
+    if(_conf.crv().fill() && _conf.crv().fillCoincs()) {
       _ntuple->Branch("crvsummary",&_crvsummary,_buffsize,_splitlevel);
       _ntuple->Branch("crvcoincs.",&_crvcoincs,_buffsize,_splitlevel);
-      if(_fillmc){
+      if(fillCRVMC()){
         _ntuple->Branch("crvsummarymc",&_crvsummarymc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmc.",&_crvcoincsmc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmcplane.",&_crvcoincsmcplane,_buffsize,_splitlevel);
       }
     }
-    if(_fillcrvpulses) {
+    if(_conf.crv().fill() && _conf.crv().fillPulses()) {
       _ntuple->Branch("crvpulses.",&_crvpulses,_buffsize,_splitlevel);
-      if(_fillmc) _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
+      if(fillCRVMC()) _ntuple->Branch("crvpulsesmc.",&_crvpulsesmc,_buffsize,_splitlevel);
     }
-    if(_fillcrvdigis) {
+    if(_conf.crv().fill() && _conf.crv().fillDigis()) {
       _ntuple->Branch("crvdigis.",&_crvdigis,_buffsize,_splitlevel);
     }
     // CRV cosmic inference
@@ -636,23 +670,19 @@ namespace mu2e {
       _ntuple->Branch("crvcosmic.",&_crvInference,_buffsize,_splitlevel);
     }
     // helix info
-    if(_conf.helices()) _ntuple->Branch("helices.",&_hinfos,_buffsize,_splitlevel);
+    if(_conf.helices().fill()) _ntuple->Branch("helices.",&_hinfos,_buffsize,_splitlevel);
 
-    // all MC information
-    if (_fillmc) {
-      if(_conf.stepPointMCTags(_stepPointMCTags)){
-        for(size_t icoll=0;icoll < _stepPointMCTags.size(); ++icoll) {
-          auto const& tag = _stepPointMCTags[icoll];
-          auto inst = tag.instance();
-          std::string branchname  = "mcsteps_" + inst + ".";
-          _ntuple->Branch(branchname.c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
-        }
+    // global MC step branches (all steps, not per-track)
+    if(fillEventMC()){
+      for(size_t icoll = 0; icoll < _stepPointMCTags.size(); ++icoll) {
+        auto const& tag = _stepPointMCTags[icoll];
+        auto inst = tag.instance();
+        _ntuple->Branch(("mcsteps_"+inst+".").c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
       }
     }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
-    // get bfield
     _infoStructHelper.updateSubRun();
   }
 
@@ -668,13 +698,13 @@ namespace mu2e {
     _hinfos.clear();
 
     // update timing maps for MC
-    if(_fillmc){
+    if(fillEventMC()){
       _infoMCStructHelper.updateEvent(event);
     }
     // fill event level info
     fillEventInfo(event);
 
-    // need to create and define the event weight branch here because we only now know the EventWeight creating modules that have been run through the Event
+    // create event weight branch
     std::vector<art::Handle<EventWeight> > eventWeightHandles;
     _wtHandles = createSpecialBranch(event, "evtwt", eventWeightHandles, _wtinfo, _wtinfo._weights, false);
 
@@ -686,47 +716,54 @@ namespace mu2e {
     _allTrkPIDCHs.clear();
 
     art::Handle<KalHelixAssns> khaH;
-    if(_conf.helices()){ // find associated Helices
-      BranchConfig i_branchConfig = _allBranches.at(0);
-      art::InputTag kalSeedInputTag = i_branchConfig.input();
+    if(_conf.helices().fill()){
+      TrkFitConfig i_trkFitConfig = _allTrkFitBranches.at(0);
+      art::InputTag kalSeedInputTag = i_trkFitConfig.input();
       event.getByLabel(kalSeedInputTag,khaH);
     }
 
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      BranchConfig i_branchConfig = _allBranches.at(i_branch);
-      art::Handle<KalSeedPtrCollection> kalSeedPtrCollHandle;
-      art::InputTag kalSeedPtrInputTag = i_branchConfig.input();
-      event.getByLabel(kalSeedPtrInputTag,kalSeedPtrCollHandle);
-      _allKSPCHs.push_back(kalSeedPtrCollHandle);
-
-      std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
-      for (const auto& i_trkQualTag : i_branchConfig.trkQualTags()) {
-        art::Handle<MVAResultCollection> trkQualCollHandle;
-        event.getByLabel(i_trkQualTag,trkQualCollHandle);
-        trkQualCollHandles.push_back(trkQualCollHandle);
-      }
-      _allTrkQualCHs.emplace_back(trkQualCollHandles);
-
-      // also create the reco qual branches
-      std::vector<art::Handle<RecoQualCollection> > recoQualCollHandles;
-      std::vector<art::Handle<RecoQualCollection> > selectedRQCHs;
-      selectedRQCHs = createSpecialBranch(event, i_branchConfig.branch()+"qual", recoQualCollHandles, _allRQIs.at(i_branch), _allRQIs.at(i_branch)._qualsAndCalibs, true);
-      for (const auto& i_selectedRQCH : selectedRQCHs) {
-        if (i_selectedRQCH->size() != kalSeedPtrCollHandle->size()) {
-          throw cet::exception("TrkAna") << "Sizes of KalSeedPtrCollection and this RecoQualCollection are inconsistent (" << kalSeedPtrCollHandle->size() << " and " << i_selectedRQCH->size() << " respectively)";
+    if (_conf.trk().fill()) {
+      for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+        TrkFitConfig i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
+        if (!i_trkFitConfig.fill()) {
+          // push empty placeholders to keep index alignment
+          _allKSPCHs.push_back(art::Handle<KalSeedPtrCollection>());
+          _allTrkQualCHs.emplace_back();
+          _allRQCHs.push_back({});
+          _allTrkPIDCHs.emplace_back();
+          continue;
         }
-      }
-      _allRQCHs.push_back(selectedRQCHs);
+        art::Handle<KalSeedPtrCollection> kalSeedPtrCollHandle;
+        art::InputTag kalSeedPtrInputTag = i_trkFitConfig.input();
+        event.getByLabel(kalSeedPtrInputTag,kalSeedPtrCollHandle);
+        _allKSPCHs.push_back(kalSeedPtrCollHandle);
 
-      // TrkCaloHitPID
-      std::vector<art::Handle<MVAResultCollection>> trkPIDCollHandles;
-      for (const auto& i_trkPIDTag : i_branchConfig.trkPIDTags()) {
-        art::Handle<MVAResultCollection> trkPIDCollHandle;
-        event.getByLabel(i_trkPIDTag,trkPIDCollHandle);
-        trkPIDCollHandles.push_back(trkPIDCollHandle);
-      }
-      _allTrkPIDCHs.emplace_back(trkPIDCollHandles);
+        std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
+        for (const auto& i_trkQualTag : i_trkFitConfig.trkQualTags()) {
+          art::Handle<MVAResultCollection> trkQualCollHandle;
+          event.getByLabel(i_trkQualTag,trkQualCollHandle);
+          trkQualCollHandles.push_back(trkQualCollHandle);
+        }
+        _allTrkQualCHs.emplace_back(trkQualCollHandles);
 
+        std::vector<art::Handle<RecoQualCollection> > recoQualCollHandles;
+        std::vector<art::Handle<RecoQualCollection> > selectedRQCHs;
+        selectedRQCHs = createSpecialBranch(event, i_trkFitConfig.branchname()+"qual", recoQualCollHandles, _allRQIs.at(i_trk_fit_branch), _allRQIs.at(i_trk_fit_branch)._qualsAndCalibs, true);
+        for (const auto& i_selectedRQCH : selectedRQCHs) {
+          if (i_selectedRQCH->size() != kalSeedPtrCollHandle->size()) {
+            throw cet::exception("TrkAna") << "Sizes of KalSeedPtrCollection and this RecoQualCollection are inconsistent (" << kalSeedPtrCollHandle->size() << " and " << i_selectedRQCH->size() << " respectively)";
+          }
+        }
+        _allRQCHs.push_back(selectedRQCHs);
+
+        std::vector<art::Handle<MVAResultCollection>> trkPIDCollHandles;
+        for (const auto& i_trkPIDTag : i_trkFitConfig.trkPIDTags()) {
+          art::Handle<MVAResultCollection> trkPIDCollHandle;
+          event.getByLabel(i_trkPIDTag,trkPIDCollHandle);
+          trkPIDCollHandles.push_back(trkPIDCollHandle);
+        }
+        _allTrkPIDCHs.emplace_back(trkPIDCollHandles);
+      }
     }
 
     // trigger information
@@ -735,102 +772,105 @@ namespace mu2e {
       firstEvent=false;
     }
 
-    // MC data
-    if(_fillmc) { // get MC product collections
-      event.getByLabel(_conf.primaryParticleTag(),_pph);
-      event.getByLabel(_conf.kalSeedMCTag(),_ksmcah);
-      event.getByLabel(_conf.simParticlesTag(),_simParticles);
-      event.getByLabel(_conf.mcTrajectoriesTag(),_mcTrajectories);
-      if(_fillcalomc || _fillcaloclustersmc)event.getByLabel(_conf.caloClusterMCTag(),_ccmcch);
-      if(_fillcalohitsmc)event.getByLabel(_conf.caloHitMCTag(),_chmcch);
+    // load event-level MC products (tracker + CRV MC)
+    if(fillEventMC()) {
+      event.getByLabel(_conf.mc().primaryParticleTag(),_pph);
+      event.getByLabel(_conf.trk().mc().kalSeedMCAssns(),_ksmcah);
+      event.getByLabel(_conf.mc().simParticlesTag(),_simParticles);
+      event.getByLabel(_conf.mc().mcTrajectoriesTag(),_mcTrajectories);
     }
+    // load calo MC products (independent of fillEventMC)
+    if(fillCaloClsMC() || fillCaloTrackMatchMC()){
+      event.getByLabel(_conf.calo().mc().clusterMCTag(),_ccmcch);
+    }
+    if(fillCaloHitsMC()){
+      event.getByLabel(_conf.calo().mc().hitMCTag(),_chmcch);
+    }
+
     // fill track counts
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      _tcnt._counts[i_branch] = (_allKSPCHs.at(i_branch))->size();
+    if (_conf.trk().fill()) {
+      for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+        if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
+        _tcnt._counts[i_trk_fit_branch] = (_allKSPCHs.at(i_trk_fit_branch))->size();
+      }
     }
 
     // find extra MCStep collections
     _extraMCStepCollections.clear();
     for(size_t ixt = 0; ixt < _extraMCStepTags.size(); ixt++){
-      auto const& tag = _extraMCStepTags[ixt];
       art::Handle<StepPointMCCollection> mcstepch;
-      event.getByLabel(tag,mcstepch);
+      event.getByLabel(_extraMCStepTags[ixt],mcstepch);
       _extraMCStepCollections.push_back(mcstepch);
     }
     event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
 
-    // find extra MCStep collections
+    // find global MCStep collections
     _stepPointMCCollections.clear();
     for(size_t icoll = 0; icoll < _stepPointMCTags.size(); icoll++){
-      auto const& tag = _stepPointMCTags[icoll];
       art::Handle<StepPointMCCollection> mcstepch;
-      event.getByLabel(tag,mcstepch);
+      event.getByLabel(_stepPointMCTags[icoll],mcstepch);
       _stepPointMCCollections.push_back(mcstepch);
     }
 
-
     // loop through all track types
     unsigned ntrks(0);
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-      BranchConfig i_branchConfig = _allBranches.at(i_branch);
+    for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+      TrkFitConfig i_trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
+      if (!i_trkFitConfig.fill()) continue;
 
-      _allTIs.at(i_branch).clear();
-      _allTSIs.at(i_branch).clear();
-      _allLHIs.at(i_branch).clear();
-      _allCHIs.at(i_branch).clear();
-      _allKLIs.at(i_branch).clear();
-      _allTCHIs.at(i_branch).clear();
+      _allTIs.at(i_trk_fit_branch).clear();
+      _allTSIs.at(i_trk_fit_branch).clear();
+      _allLHIs.at(i_trk_fit_branch).clear();
+      _allCHIs.at(i_trk_fit_branch).clear();
+      _allKLIs.at(i_trk_fit_branch).clear();
+      _allTCHIs.at(i_trk_fit_branch).clear();
 
-      _allTSHIs.at(i_branch).clear();
-      _allTSHCIs.at(i_branch).clear();
-      _allTSMIs.at(i_branch).clear();
-      _allTSHIMCs.at(i_branch).clear();
+      _allTSHIs.at(i_trk_fit_branch).clear();
+      _allTSHCIs.at(i_trk_fit_branch).clear();
+      _allTSMIs.at(i_trk_fit_branch).clear();
+      _allTSHIMCs.at(i_trk_fit_branch).clear();
 
-      _allMCTIs.at(i_branch).clear();
-      _allMCVDInfos.at(i_branch).clear();
-      _allMCSimTIs.at(i_branch).clear();
+      _allMCTIs.at(i_trk_fit_branch).clear();
+      _allMCVDInfos.at(i_trk_fit_branch).clear();
+      _allMCSimTIs.at(i_trk_fit_branch).clear();
 
-      for (size_t i_trkQualTag = 0; i_trkQualTag < i_branchConfig.trkQualTags().size(); ++i_trkQualTag) {
-        _allTrkQualResults.at(i_branch).at(i_trkQualTag).clear();
+      for (size_t i_trkQualTag = 0; i_trkQualTag < i_trkFitConfig.trkQualTags().size(); ++i_trkQualTag) {
+        _allTrkQualResults.at(i_trk_fit_branch).at(i_trkQualTag).clear();
+      }
+      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_trkFitConfig.trkPIDTags().size(); ++i_trkPIDTag) {
+        _allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDTag).clear();
+      }
+      for (StepCollIndex ixt = 0; ixt < _extraMCStepTags.size(); ++ixt) {
+        _extraMCStepInfos.at(i_trk_fit_branch).at(ixt).clear();
+        _extraMCStepSummaryInfos.at(i_trk_fit_branch).at(ixt).clear();
+      }
+      _surfaceStepInfos.at(i_trk_fit_branch).clear();
+      for (StepCollIndex icoll = 0; icoll < _stepPointMCTags.size(); ++icoll) {
+        _stepPointMCInfos.at(icoll).clear();
       }
 
-      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_branchConfig.trkPIDTags().size(); ++i_trkPIDTag) {
-        _allTrkPIDResults.at(i_branch).at(i_trkPIDTag).clear();
-      }
+      if(fillCaloTrackMatchMC()) { _allMCTCHIs.at(i_trk_fit_branch).clear(); }
 
-      for (StepCollIndex i_extraMCStepTag = 0; i_extraMCStepTag < _extraMCStepTags.size(); ++i_extraMCStepTag) {
-        _extraMCStepInfos.at(i_branch).at(i_extraMCStepTag).clear();
-        _extraMCStepSummaryInfos.at(i_branch).at(i_extraMCStepTag).clear();
-      }
-      _surfaceStepInfos.at(i_branch).clear();
-      for (StepCollIndex i_stepPointMCTag = 0; i_stepPointMCTag < _stepPointMCTags.size(); ++i_stepPointMCTag) {
-        _stepPointMCInfos.at(i_stepPointMCTag).clear();
-      }
-
-
-      if(_fillcalomc) { _allMCTCHIs.at(i_branch).clear(); }
-
-      const auto& kseedptr_coll_h = _allKSPCHs.at(i_branch);
-      const auto& kseedptr_coll = *kseedptr_coll_h;
-      for (size_t i_kseedptr = 0; i_kseedptr < kseedptr_coll.size(); ++i_kseedptr) {
-        resetTrackBranches(); // reset track branches here so that we don't get information from previous tracks in the next entry
-
-        fillTrackBranches(kseedptr_coll_h, i_branch, i_kseedptr); // fill the info structs for this track
-        if(_conf.helices()){
-          auto const& khassns = khaH.product();
-          // find the associated HelixSeed to this KalSeed using the assns.
-          auto hptr = (*khassns)[i_kseedptr].second;
-          _infoStructHelper.fillHelixInfo(hptr, _hinfos);
+      if (_conf.trk().fill()) {
+        const auto& kseedptr_coll_h = _allKSPCHs.at(i_trk_fit_branch);
+        const auto& kseedptr_coll = *kseedptr_coll_h;
+        for (size_t i_kseedptr = 0; i_kseedptr < kseedptr_coll.size(); ++i_kseedptr) {
+          resetTrackBranches();
+          fillTrackBranches(kseedptr_coll_h, i_trk_fit_branch, i_kseedptr);
+          if(_conf.helices().fill()){
+            auto const& khassns = khaH.product();
+            auto hptr = (*khassns)[i_kseedptr].second;
+            _infoStructHelper.fillHelixInfo(hptr, _hinfos);
+          }
+          ntrks++;
         }
-        ntrks++; // count total # of tracks
       }
     }
 
     // Time clusters
-    if(_filltcs) {
+    if(_conf.timeclusters().fill()) {
       _tcIs.clear();
-      //Get the clusters
-      event.getByLabel(_conf.timeClustersTag(),_tcsHandle);
+      event.getByLabel(_conf.timeclusters().tag(),_tcsHandle);
       if(_tcsHandle.isValid()) {
         for(const auto& tc : *(_tcsHandle)) {
           _infoStructHelper.fillTimeClusterInfo(tc, _tcIs);
@@ -838,299 +878,237 @@ namespace mu2e {
       }
     }
 
-    // Calorimeter
-    // Clear lists for this event
-    if (_fillcaloclustersmc) { _caloCIMCs.clear(); }
-    if (_fillcalohitsmc) { _caloHIMCs.clear(); }
-    if (_fillcalosiminfos) { _caloSIMCs.clear(); }
-    if (_fillcalodigisiminfos) { _caloDigiSIMCs.clear(); }
-    if (_fillcalodigismc) { _caloDigiMCIs.clear(); }
-    if (_fillcaloclusters) { _caloCIs.clear(); }
-    if (_fillcalohits) { _caloHIs.clear(); }
-    if (_fillcalorecodigis) { _caloRDIs.clear(); }
-    if (_fillcalodigis) { _caloDIs.clear(); }
+    // ── Calorimeter ────────────────────────────────────────────────────────
+    if(fillCaloClsMC())    { _caloCIMCs.clear(); }
+    if(fillCaloHitsMC())   { _caloHIMCs.clear(); }
+    if(fillCaloSimMC())    { _caloSIMCs.clear(); }
+    if(fillCaloDigiSimMC()){ _caloDigiSIMCs.clear(); }
+    if(fillCaloDigisMC())  { _caloDigiMCIs.clear(); }
+    if(_conf.calo().fill() && _conf.calo().fillClusters()) { _caloCIs.clear(); }
+    if(_conf.calo().fill() && _conf.calo().fillHits())     { _caloHIs.clear(); }
+    if(_conf.calo().fill() && _conf.calo().fillRecoDigis()){ _caloRDIs.clear(); }
+    if(_conf.calo().fill() && _conf.calo().fillDigis())    { _caloDIs.clear(); }
 
-    // Fill Calo MC
-
-    // Retrieve CaloShowerSim collection for both caloDigisMC and caloDigiSimInfos branches
-    if (_fillcalodigismc || _fillcalodigisiminfos) {
-      event.getByLabel(_conf.caloShowerSimTag(),_caloShowerSim);
+    // Calo MC digi branches (need showerSim)
+    if(fillCaloDigisMC() || fillCaloDigiSimMC()) {
+      event.getByLabel(_conf.calo().mc().showerSimTag(),_caloShowerSim);
     }
-
-    // Fill Calo MC Digis branch
-    if (_fillcalodigismc){
-      if (_caloShowerSim.isValid()){
-        for (const auto& showerSim : *_caloShowerSim.product()){
+    if(fillCaloDigisMC()){
+      if(_caloShowerSim.isValid()){
+        for(const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiMCInfo(showerSim,_caloDigiMCIs);
         }
       }
     }
-
-    // Fill Calo MC Hits branch
-    if (_fillcalohitsmc){
-      for (const auto& hitmc : *_chmcch.product()){
+    if(fillCaloHitsMC()){
+      for(const auto& hitmc : *_chmcch.product()){
         _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
       }
     }
-
-    // Fill Calo MC Clusters branch
-    if (_fillcaloclustersmc){
-      for (const auto& clustermc : *_ccmcch.product()){
-
+    if(fillCaloClsMC()){
+      for(const auto& clustermc : *_ccmcch.product()){
         _infoMCStructHelper.fillCaloClusterInfoMC(clustermc,_caloCIMCs);
-
-        //Find and link the existing hits
-        if (_fillcalohitsmc){
-          for (const auto& hitmc : clustermc.caloHitMCs()){
-            for (uint hitIdx=0; hitIdx < _caloHIMCs.size(); hitIdx++){
-              
-              if (hitmc && _caloHIMCs[hitIdx] == *hitmc){
-                //Update the hit and cluster indexes
+        if(fillCaloHitsMC()){
+          for(const auto& hitmc : clustermc.caloHitMCs()){
+            for(uint hitIdx = 0; hitIdx < _caloHIMCs.size(); hitIdx++){
+              if(hitmc && _caloHIMCs[hitIdx] == *hitmc){
                 _caloHIMCs[hitIdx].clusterIdx_ = _caloCIMCs.size()-1;
                 _caloCIMCs.back().hits_.push_back(hitIdx);
                 break;
               }
             }
           }
-          if (int(_caloCIMCs.back().hits_.size()) != _caloCIMCs.back().nhits){
+          if(int(_caloCIMCs.back().hits_.size()) != _caloCIMCs.back().nhits){
             throw cet::exception("EventNtuple") << "Could not find one or all CaloHitMCs linked to CaloClusterMC " << _caloCIMCs.size()-1 << "\n";
           }
         }
       }
     }
-
-    if (_fillcalosiminfos){
-      for (const auto& clustermc : *_ccmcch.product()){
+    if(fillCaloSimMC()){
+      for(const auto& clustermc : *_ccmcch.product()){
         _infoMCStructHelper.fillCaloSimInfos(clustermc,_caloSIMCs);
       }
     }
-    
-    if (_fillcalodigisiminfos){
-      if (_caloShowerSim.isValid()){
-        for (const auto& showerSim : *_caloShowerSim.product()){
+    if(fillCaloDigiSimMC()){
+      if(_caloShowerSim.isValid()){
+        for(const auto& showerSim : *_caloShowerSim.product()){
           _infoMCStructHelper.fillCaloDigiSimInfos(showerSim,_caloDigiSIMCs);
         }
       }
     }
 
     // Calorimeter reco branches
-
-    if (_fillcalodigis){
-      //Get the digis
-      event.getByLabel(_conf.caloDigisTag(),_caloDigis);
-      for (const auto& digi : *_caloDigis.product()){
+    if(_conf.calo().fill() && _conf.calo().fillDigis()){
+      event.getByLabel(_conf.calo().digisTag(),_caloDigis);
+      for(const auto& digi : *_caloDigis.product()){
         _infoStructHelper.fillCaloDigiInfo(digi,_caloDIs);
       }
     }
-
-    if (_fillcalorecodigis){
-      //Get the recodigis
-      event.getByLabel(_conf.caloRecoDigisTag(),_caloRecoDigis);
-      for (const auto& recodigi : *_caloRecoDigis.product()){
-
+    if(_conf.calo().fill() && _conf.calo().fillRecoDigis()){
+      event.getByLabel(_conf.calo().recoDigisTag(),_caloRecoDigis);
+      for(const auto& recodigi : *_caloRecoDigis.product()){
         _infoStructHelper.fillCaloRecoDigiInfo(recodigi,_caloRDIs);
-
-        //Find and link the existing digis
-        if (_fillcalodigis){
+        if(_conf.calo().fillDigis()){
           const auto& digi = recodigi.caloDigiPtr();
-          for (uint digiIdx=0; digiIdx < _caloDIs.size(); digiIdx++){
-        
-            if (_caloDIs[digiIdx] == *digi){
-              //Update the digi and recodigi indexes
+          for(uint digiIdx = 0; digiIdx < _caloDIs.size(); digiIdx++){
+            if(_caloDIs[digiIdx] == *digi){
               _caloDIs[digiIdx].caloRecoDigiIdx_ = _caloRDIs.size()-1;
               _caloRDIs.back().caloDigiIdx_ = digiIdx;
               break;
             }
           }
-          if (_caloRDIs.back().caloDigiIdx_ < 0){
+          if(_caloRDIs.back().caloDigiIdx_ < 0){
             throw cet::exception("EventNtuple") << "Could not find CaloDigi linked to CaloRecoDigi " << _caloRDIs.size()-1 << "\n";
           }
         }
       }
     }
-
-    if (_fillcalohits){
-      //Get the hits
-      event.getByLabel(_conf.caloHitsTag(),_caloHits);
-      for (const auto& hit : *_caloHits.product()){
-
+    if(_conf.calo().fill() && _conf.calo().fillHits()){
+      event.getByLabel(_conf.calo().hitsTag(),_caloHits);
+      for(const auto& hit : *_caloHits.product()){
         _infoStructHelper.fillCaloHitInfo(hit,_caloHIs);
-
-        //Find and link the existing recodigis
-        if (_fillcalorecodigis){
-          for (const auto& recodigi : hit.recoCaloDigis()){
-            for (uint recoDigiIdx=0; recoDigiIdx < _caloRDIs.size(); recoDigiIdx++){
-        
-              if (_caloRDIs[recoDigiIdx] == *recodigi){
-                //Update the recodigi and hit indexes
+        if(_conf.calo().fillRecoDigis()){
+          for(const auto& recodigi : hit.recoCaloDigis()){
+            for(uint recoDigiIdx = 0; recoDigiIdx < _caloRDIs.size(); recoDigiIdx++){
+              if(_caloRDIs[recoDigiIdx] == *recodigi){
                 _caloRDIs[recoDigiIdx].caloHitIdx_ = _caloHIs.size()-1;
                 _caloHIs.back().recoDigis_.push_back(recoDigiIdx);
                 break;
               }
             }
           }
-          if (int(_caloHIs.back().recoDigis_.size()) != _caloHIs.back().nSiPMs_){
+          if(int(_caloHIs.back().recoDigis_.size()) != _caloHIs.back().nSiPMs_){
             throw cet::exception("EventNtuple") << "Could not find one or all CaloRecoDigi linked to CaloHit " << _caloHIs.size()-1 << "\n";
           }
         }
       }
     }
-
-    if (_fillcaloclusters){
-      //Get the clusters
-      event.getByLabel(_conf.caloClustersTag(),_caloClusters);
-      for (const auto& cluster : *_caloClusters.product()){
-
+    if(_conf.calo().fill() && _conf.calo().fillClusters()){
+      event.getByLabel(_conf.calo().clustersTag(),_caloClusters);
+      for(const auto& cluster : *_caloClusters.product()){
         _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs);
-
-        //Find and link the existing hits
-        if (_fillcalohits){
-          for (const auto& hit : cluster.caloHitsPtrVector()){
-            for (uint hitIdx=0; hitIdx < _caloHIs.size(); hitIdx++){
-        
-              if (_caloHIs[hitIdx] == *hit){
-                //Update the hit and cluster indexes
+        if(_conf.calo().fillHits()){
+          for(const auto& hit : cluster.caloHitsPtrVector()){
+            for(uint hitIdx = 0; hitIdx < _caloHIs.size(); hitIdx++){
+              if(_caloHIs[hitIdx] == *hit){
                 _caloHIs[hitIdx].clusterIdx_ = _caloCIs.size()-1;
                 _caloCIs.back().hits_.push_back(hitIdx);
                 break;
               }
             }
           }
-          if (_caloCIs.back().hits_.size() != _caloCIs.back().size_){
+          if(_caloCIs.back().hits_.size() != _caloCIs.back().size_){
             throw cet::exception("EventNtuple") << "Could not find one or all CaloHits linked to CaloCluster " << _caloCIs.size()-1 << "\n";
           }
         }
       }
     }
 
-    // fill CRV info
-    if(_fillcrvcoincs){
+    // ── CRV ───────────────────────────────────────────────────────────────
+    if(_conf.crv().fill() && _conf.crv().fillCoincs()){
       _crvcoincs.clear();
       _crvcoincsmc.clear();
       _crvcoincsmcplane.clear();
-
-      event.getByLabel(_conf.crvCoincidencesTag(),_crvCoincidences);
-      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
-      event.getByLabel(_conf.crvStepsTag(),_crvSteps);
-      if(_fillmc) event.getByLabel(_conf.crvCoincidenceMCsTag(),_crvCoincidenceMCs);
+      event.getByLabel(_conf.crv().coincidencesTag(),_crvCoincidences);
+      event.getByLabel(_conf.crv().recoPulsesTag(),_crvRecoPulses);
+      event.getByLabel(_conf.crv().stepsTag(),_crvSteps);
+      if(fillCRVMC()) event.getByLabel(_conf.crv().mc().coincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
-                                           _crvCoincidences, _crvCoincidenceMCs,
-                                           _crvRecoPulses, _crvSteps, _mcTrajectories,_crvcoincs, _crvcoincsmc,
-                                           _crvsummary, _crvsummarymc, _crvcoincsmcplane, _crvPlaneY, _pph);
+          _crvCoincidences, _crvCoincidenceMCs,
+          _crvRecoPulses, _crvSteps, _mcTrajectories, _crvcoincs, _crvcoincsmc,
+          _crvsummary, _crvsummarymc, _crvcoincsmcplane, _conf.crv().planeY(), _pph);
     }
-    if(_fillcrvpulses){
+    if(_conf.crv().fill() && _conf.crv().fillPulses()){
       _crvpulses.clear();
       _crvpulsesmc.clear();
-      event.getByLabel(_conf.crvRecoPulsesTag(),_crvRecoPulses);
-      if(_fillmc) event.getByLabel(_conf.crvDigiMCsTag(),_crvDigiMCs);
+      event.getByLabel(_conf.crv().recoPulsesTag(),_crvRecoPulses);
+      if(fillCRVMC()) event.getByLabel(_conf.crv().mc().digiMCsTag(),_crvDigiMCs);
       _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
-                                             _crvpulses, _crvpulsesmc);
+          _crvpulses, _crvpulsesmc);
     }
-    if(_fillcrvdigis){
+    if(_conf.crv().fill() && _conf.crv().fillDigis()){
       _crvdigis.clear();
-      event.getByLabel(_conf.crvDigisTag(),_crvDigis);
+      event.getByLabel(_conf.crv().digisTag(),_crvDigis);
       _crvHelper.FillCrvDigiInfoCollections(_crvDigis,_crvdigis);
     }
 
-    // fill CRV cosmic inference scores (T x C structure aligned with trk branches)
+    // CRV cosmic inference
     if(_fillCrvInference) {
       _crvInference.clear();
-      // Init associations from CrvInference module: KalSeed <-> CrvCoincidenceCluster with MVAResult data product
       art::Handle<art::Assns<KalSeed, CrvCoincidenceCluster, MVAResult>> crvInfHandle;
-      // grab the associations from the art::Event
       event.getByLabel(_crvInferenceTag, crvInfHandle);
-      // build a map from KalSeed ptr to scores
       std::map<art::Ptr<KalSeed>, std::vector<MVAResultInfo>> crvInfMap;
-      // Get the scores from the associations and fill the map
       if(crvInfHandle.isValid()) {
-        // loop through association
         for(const auto& assn : *crvInfHandle) {
           MVAResultInfo info;
-          info.result = assn.data->_value; // the model score
-          info.valid = true; // true if assns is valid
+          info.result = assn.data->_value;
+          info.valid = true;
           crvInfMap[assn.first].push_back(info);
         }
       }
-      // fill the branch
-      // iterate over all tracks to keep alignment with trk branches
-      // this means filling empty vectors for tracks with no coincidence
       const auto& kseedptr_coll = *_allKSPCHs.at(0);
       for(size_t i = 0; i < kseedptr_coll.size(); ++i) {
         auto it = crvInfMap.find(kseedptr_coll[i]);
         if(it != crvInfMap.end()) {
-          _crvInference.push_back(it->second); // fill
+          _crvInference.push_back(it->second);
         } else {
-          _crvInference.emplace_back(); // empty vector for tracks with no CRV match
+          _crvInference.emplace_back();
         }
       }
     }
 
-    // fill MC information unrelated to any reconstructed object
-    if (_fillmc) {
-      // fill MCStepCollection branch
+    // global MC step branches (not per-track)
+    if(fillEventMC()) {
       for(size_t icoll = 0; icoll < _stepPointMCTags.size(); icoll++){
         auto const& mcsteps = *_stepPointMCCollections[icoll];
-        auto& mcstepinfos = _stepPointMCInfos[icoll];
-        _infoMCStructHelper.fillStepPointMCInfo(mcsteps, mcstepinfos);
+        _infoMCStructHelper.fillStepPointMCInfo(mcsteps, _stepPointMCInfos[icoll]);
       }
     }
 
     // fill this row in the TTree
-    bool fill = true; // default to fliling event
-    if(_hastrks && ntrks == 0) { // if we require tracks (_hastrks) but we have none, don't write
-      fill = false;
-    }
-    if (_hascrv && _crvsummary.totalPEs == 0) { // if we require CRV but we have none, don't write
-      fill = false;
-    }
-    if (fill) {
+    bool fill = true;
+    if(_hastrks && ntrks == 0) fill = false;
+    if(_hascrv && _crvsummary.totalPEs == 0) fill = false;
+    if(fill) {
       _ntuple->Fill();
     }
-    _hProcEvents->Fill(0); // this is the number of events we have processed, which may be different to the number of events stored in the ntuple
+    _hProcEvents->Fill(0);
   }
 
 
   void EventNtupleMaker::fillEventInfo( const art::Event& event) {
-    // fill basic event information
-    _einfo.event = event.event();
-    _einfo.run = event.run();
+    _einfo.event  = event.event();
+    _einfo.run    = event.run();
     _einfo.subrun = event.subRun();
 
-    if (_recoCountTag != "") {
+    if(_recoCountTag != "") {
       art::Handle<mu2e::RecoCount> recoCountHandle;
       if(event.getByLabel(_recoCountTag, recoCountHandle)) {
-        auto recoCount = *recoCountHandle;
-        _infoStructHelper.fillHitCount(recoCount, _hcnt);
+        _infoStructHelper.fillHitCount(*recoCountHandle, _hcnt);
       }
     }
 
-    // currently no reco nproton estimate TODO
-    if (_PBTTag != "") {
+    if(_PBTTag != "") {
       auto PBThandle = event.getValidHandle<mu2e::ProtonBunchTime>(_PBTTag);
-      auto PBT = *PBThandle;
-      _einfo.pbtime = PBT.pbtime_;
-      _einfo.pbterr = PBT.pbterr_;
+      _einfo.pbtime = PBThandle->pbtime_;
+      _einfo.pbterr = PBThandle->pbterr_;
     }
 
-    if (_EWMTag != "") {
+    if(_EWMTag != "") {
       event.getByLabel(_EWMTag, _ewmh);
     }
 
-    if (_fillmc) {
-      auto PBTMChandle = event.getValidHandle<mu2e::ProtonBunchTimeMC>(_PBTMCTag);
-      auto PBTMC = *PBTMChandle;
-      _einfomc.pbtime = PBTMC.pbtime_;
+    if(fillEventMC()) {
+      auto PBTMChandle = event.getValidHandle<mu2e::ProtonBunchTimeMC>(_conf.mc().PBTMCTag());
+      _einfomc.pbtime = PBTMChandle->pbtime_;
 
       auto PBIhandle = event.getValidHandle<mu2e::ProtonBunchIntensity>(_PBITag);
-      auto PBI = *PBIhandle;
-      _einfomc.nprotons = PBI.intensity();
+      _einfomc.nprotons = PBIhandle->intensity();
     }
 
-    // get event weight products
     std::vector<Float_t> weights;
-    for (const auto& i_weightHandle : _wtHandles) {
-      double weight = i_weightHandle->weight();
-      weights.push_back(weight);
+    for(const auto& i_weightHandle : _wtHandles) {
+      weights.push_back(i_weightHandle->weight());
     }
     _wtinfo.setWeights(weights);
   }
@@ -1141,48 +1119,39 @@ namespace mu2e {
     const art::TriggerResults* trigResults = trigResultsH.product();
     TriggerResultsNavigator tnav(trigResults);
 
-    if (firstEvent) {
-      if (tnav.getTrigPaths().size() > TrigInfo::ntrig_) {
+    if(firstEvent) {
+      if(tnav.getTrigPaths().size() > TrigInfo::ntrig_) {
         throw cet::exception("EventNtuple") << "More trigger paths in TriggerResultsNavigator than maximum allowed by TrigInfo::ntrig_. Increase TrigInfo::ntrig_ and rebuild\n";
       }
-      for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-          const std::string name = "trig_"+tnav.getTrigPathNameByIndex(i);
-          _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
+      for(unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
+        const std::string name = "trig_"+tnav.getTrigPathNameByIndex(i);
+        _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
     }
-
-    for (unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
-        const std::string path = tnav.getTrigPathNameByIndex(i);
-        bool accepted = tnav.accepted(path);
-        _triggerResults._triggerArray[i] = accepted;
+    for(unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
+      _triggerResults._triggerArray[i] = tnav.accepted(tnav.getTrigPathNameByIndex(i));
     }
-
-
   }
 
-  void EventNtupleMaker::fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, BranchIndex i_branch, size_t i_kseedptr) {
+  void EventNtupleMaker::fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, TrkFitBranchIndex i_trk_fit_branch, size_t i_kseedptr) {
 
     const auto& kseedptr = (kspch->at(i_kseedptr));
     const auto& kseed = *kseedptr;
     // general info
-    _infoStructHelper.fillTrkInfo(kseed,_allTIs.at(i_branch));
-
-    // fit information at specific points:e
-    _infoStructHelper.fillTrkSegInfo(kseed,_allTSIs.at(i_branch));
-    if(_ftype == LoopHelix && kseed.loopHelixFit())_infoStructHelper.fillLoopHelixInfo(kseed,_allLHIs.at(i_branch));
-    if(_ftype == CentralHelix && kseed.centralHelixFit())_infoStructHelper.fillCentralHelixInfo(kseed,_allCHIs.at(i_branch));
-    if(_ftype == KinematicLine && kseed.kinematicLineFit())_infoStructHelper.fillKinematicLineInfo(kseed,_allKLIs.at(i_branch));
-    BranchConfig branchConfig = _allBranches.at(i_branch);
-    if(_conf.diag() > 1 || (_conf.fillhits() && branchConfig.options().fillhits())){ // want hit level info
-      _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_branch), _allTSHCIs.at(i_branch), _conf.fillhitcalibs());
-      _infoStructHelper.fillMatInfo(kseed, _allTSMIs.at(i_branch));
+    _infoStructHelper.fillTrkInfo(kseed,_allTIs.at(i_trk_fit_branch));
+    _infoStructHelper.fillTrkSegInfo(kseed,_allTSIs.at(i_trk_fit_branch));
+    if(_ftype == LoopHelix    && kseed.loopHelixFit())    _infoStructHelper.fillLoopHelixInfo(kseed,_allLHIs.at(i_trk_fit_branch));
+    if(_ftype == CentralHelix && kseed.centralHelixFit()) _infoStructHelper.fillCentralHelixInfo(kseed,_allCHIs.at(i_trk_fit_branch));
+    if(_ftype == KinematicLine && kseed.kinematicLineFit()) _infoStructHelper.fillKinematicLineInfo(kseed,_allKLIs.at(i_trk_fit_branch));
+    const TrkFitConfig& trkFitConfig = _allTrkFitBranches.at(i_trk_fit_branch);
+    if(_conf.diag() > 1 || (_conf.trk().fillHits() && trkFitConfig.options().fillhits())){
+      _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_trk_fit_branch), _allTSHCIs.at(i_trk_fit_branch), _conf.trk().fillHitCalibs());
+      _infoStructHelper.fillMatInfo(kseed, _allTSMIs.at(i_trk_fit_branch));
     }
 
-    // calorimeter info
-    _infoStructHelper.fillTrkCaloHitInfo(kseed,  _allTCHIs.at(i_branch)); // fillTrkCaloHitInfo handles whether there is a calo hit or not
-    if (kseed.hasCaloCluster()) {
-      _tcnt._ndec = 1; // only 1 possible calo hit at the moment FIXME: should work with the above
-      // test
+    _infoStructHelper.fillTrkCaloHitInfo(kseed, _allTCHIs.at(i_trk_fit_branch));
+    if(kseed.hasCaloCluster()) {
+      _tcnt._ndec = 1;
       if(_conf.debug()>0){
         auto const& tch = kseed.caloHit();
         auto const& cc = tch.caloCluster();
@@ -1191,127 +1160,106 @@ namespace mu2e {
       }
     }
 
-
-    const auto& trkQualHandles = _allTrkQualCHs.at(i_branch);
-    for (size_t i_trkQualHandle = 0; i_trkQualHandle < trkQualHandles.size(); ++i_trkQualHandle) {
+    const auto& trkQualHandles = _allTrkQualCHs.at(i_trk_fit_branch);
+    for(size_t i_trkQualHandle = 0; i_trkQualHandle < trkQualHandles.size(); ++i_trkQualHandle) {
       const auto& trkQualHandle = trkQualHandles.at(i_trkQualHandle);
-      if (trkQualHandle.isValid()) { // might not have a valid handle
-        _infoStructHelper.fillTrkQualInfo(kseed, trkQualHandle->at(i_kseedptr) , _allTrkQualResults.at(i_branch).at(i_trkQualHandle));
+      if(trkQualHandle.isValid()) {
+        _infoStructHelper.fillTrkQualInfo(kseed, trkQualHandle->at(i_kseedptr), _allTrkQualResults.at(i_trk_fit_branch).at(i_trkQualHandle));
       }
     }
 
-    // all RecoQuals
-    std::vector<Float_t> recoQuals; // for the output value
-    for (const auto& i_recoQualHandle : _allRQCHs.at(i_branch)) {
-      Float_t recoQual = i_recoQualHandle->at(i_kseedptr)._value;
-      recoQuals.push_back(recoQual);
-      Float_t recoQualCalib = i_recoQualHandle->at(i_kseedptr)._calib;
-      recoQuals.push_back(recoQualCalib);
+    std::vector<Float_t> recoQuals;
+    for(const auto& i_recoQualHandle : _allRQCHs.at(i_trk_fit_branch)) {
+      recoQuals.push_back(i_recoQualHandle->at(i_kseedptr)._value);
+      recoQuals.push_back(i_recoQualHandle->at(i_kseedptr)._calib);
     }
-    _allRQIs.at(i_branch).setQuals(recoQuals);
-    // TrkCaloHitPID
+    _allRQIs.at(i_trk_fit_branch).setQuals(recoQuals);
 
-    const auto& trkPIDHandles = _allTrkPIDCHs.at(i_branch);
-    for (size_t i_trkPIDHandle = 0; i_trkPIDHandle < trkPIDHandles.size(); ++i_trkPIDHandle) {
+    const auto& trkPIDHandles = _allTrkPIDCHs.at(i_trk_fit_branch);
+    for(size_t i_trkPIDHandle = 0; i_trkPIDHandle < trkPIDHandles.size(); ++i_trkPIDHandle) {
       const auto& trkPIDHandle = trkPIDHandles.at(i_trkPIDHandle);
-      if (trkPIDHandle.isValid()) { // might not have a valid handle
-        _infoStructHelper.fillTrkPIDInfo(kseed, trkPIDHandle->at(i_kseedptr) , _allTrkPIDResults.at(i_branch).at(i_trkPIDHandle));
+      if(trkPIDHandle.isValid()) {
+        _infoStructHelper.fillTrkPIDInfo(kseed, trkPIDHandle->at(i_kseedptr), _allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDHandle));
       }
     }
 
-    // fill MC info associated with this track
-    if(_fillmc && branchConfig.options().fillmc()) {
+    // fill tracker MC info
+    if(fillTrkMC(trkFitConfig.options())) {
       const PrimaryParticle& primary = *_pph;
-      // use Assns interface to find the associated KalSeedMC; this uses ptrs
-      if(_conf.debug() > 1)std::cout << "KalSeedMCMatch has " << _ksmcah->size() << " entries" << std::endl;
-      for(auto iksmca = _ksmcah->begin(); iksmca!= _ksmcah->end(); iksmca++){
+      if(_conf.debug() > 1) std::cout << "KalSeedMCMatch has " << _ksmcah->size() << " entries" << std::endl;
+      for(auto iksmca = _ksmcah->begin(); iksmca != _ksmcah->end(); iksmca++){
         if(_conf.debug() > 2) std::cout << "KalSeed Ptr " << kseedptr << " match Ptr " << iksmca->first << "?" << std::endl;
         if(iksmca->first == kseedptr) {
           auto const& kseedmc = *(iksmca->second);
-          _infoMCStructHelper.fillTrkInfoMC(kseed, kseedmc, _surfaceStepsHandle, _allMCTIs.at(i_branch));
-          auto& mcvdis = _allMCVDInfos.at(i_branch);
-          _infoMCStructHelper.fillVDInfo(kseed, kseedmc, mcvdis);
-          _infoMCStructHelper.fillAllSimInfos(kseedmc, primary, _allMCSimTIs.at(i_branch), branchConfig.options().genealogyDepth(), branchConfig.options().matchDepth());
-
-          if(_conf.diag() > 1 || (_conf.fillhits() && branchConfig.options().fillhits())){
-            _infoMCStructHelper.fillHitInfoMCs(kseed,kseedmc, _allTSHIMCs.at(i_branch));
+          _infoMCStructHelper.fillTrkInfoMC(kseed, kseedmc, _surfaceStepsHandle, _allMCTIs.at(i_trk_fit_branch));
+          _infoMCStructHelper.fillVDInfo(kseed, kseedmc, _allMCVDInfos.at(i_trk_fit_branch));
+          _infoMCStructHelper.fillAllSimInfos(kseedmc, primary, _allMCSimTIs.at(i_trk_fit_branch), trkFitConfig.options().genealogyDepth(), trkFitConfig.options().matchDepth());
+          if(_conf.diag() > 1 || (_conf.trk().fillHits() && trkFitConfig.options().fillhits())){
+            _infoMCStructHelper.fillHitInfoMCs(kseed,kseedmc, _allTSHIMCs.at(i_trk_fit_branch));
           }
-          // fill extra MCStep info for this branch
           for(size_t ixt = 0; ixt < _extraMCStepTags.size(); ixt++){
-            auto const& mcsc = *_extraMCStepCollections[ixt];
-            auto& mcsic = _extraMCStepInfos[i_branch][ixt];
-            auto& mcssi = _extraMCStepSummaryInfos.at(i_branch).at(ixt);
-            _infoMCStructHelper.fillExtraMCStepInfos(kseedmc,mcsc,mcsic,mcssi);
+            _infoMCStructHelper.fillExtraMCStepInfos(kseedmc,*_extraMCStepCollections[ixt],
+                _extraMCStepInfos[i_trk_fit_branch][ixt],_extraMCStepSummaryInfos.at(i_trk_fit_branch).at(ixt));
           }
-          // fill SurfaceStep info
           if(_surfaceStepsHandle.isValid()){
-            if(_conf.debug() > 2)std::cout << "SurfaceSteps from handle " << _surfaceStepsHandle << std::endl;
-            auto& ssi = _surfaceStepInfos.at(i_branch);
+            if(_conf.debug() > 2) std::cout << "SurfaceSteps from handle " << _surfaceStepsHandle << std::endl;
+            auto& ssi = _surfaceStepInfos.at(i_trk_fit_branch);
             ssi.push_back(std::vector<SurfaceStepInfo>());
             _infoMCStructHelper.fillSurfaceStepInfos(kseedmc,*_surfaceStepsHandle,ssi.back());
           }
           break;
         }
       }
-      if (kseed.hasCaloCluster() && _fillcalomc) {
-        // fill MC truth of the associated CaloCluster.  Use the fact that these are correlated by index with the clusters in that collection
+      if(kseed.hasCaloCluster() && fillCaloTrackMatchMC()) {
         auto index = kseed.caloCluster().key();
-        auto const& ccmcc = *_ccmcch;
-        auto const& ccmc = ccmcc[index];
-        _infoMCStructHelper.fillCaloClusterInfoMC(ccmc,_allMCTCHIs.at(i_branch));  // currently broken due to CaloMC changes.  This needs fixing in compression
+        auto const& ccmc = (*_ccmcch)[index];
+        _infoMCStructHelper.fillCaloClusterInfoMC(ccmc,_allMCTCHIs.at(i_trk_fit_branch));
       }
     }
   }
 
   // some branches can't be made until the analyze() function because we want to write out all data products of a certain type
-  // these all have an underlying array where we want to name the individual elements in the array with different leaf names
   template <typename T, typename TI, typename TIA>
   std::vector<art::Handle<T> >  EventNtupleMaker::createSpecialBranch(const art::Event& event, const std::string& branchname,
-  std::vector<art::Handle<T> >& handles, // this parameter is only needed so that the template parameter T can be deduced. There is probably a better way to do this FIXME
+  std::vector<art::Handle<T> >& handles,
   TI& infostruct, TIA& array, bool make_individual_branches, const std::string& selection) {
     std::vector<art::Handle<T> > outputHandles;
     std::vector<art::Handle<T> > inputHandles = event.getMany<T>();
-    if (inputHandles.size()>0) {
+    if(inputHandles.size()>0) {
       std::vector<std::string> labels;
-      for (const auto& i_handle : inputHandles) {
+      for(const auto& i_handle : inputHandles) {
         std::string moduleLabel = i_handle.provenance()->moduleLabel();
-        // event.getMany() doesn't have a way to wildcard part of the ModuleLabel, do it ourselves here
         size_t pos;
-        if (selection != "") { // if we want to add a selection
+        if(selection != "") {
           pos = moduleLabel.find(selection);
-
-          // make sure that the selection (e.g. "DeM") appears at the end of the module label
-          if (pos == std::string::npos) {
-            if(_conf.debug() > 3)std::cout << "Selection not found" << std::endl;
+          if(pos == std::string::npos) {
+            if(_conf.debug() > 3) std::cout << "Selection not found" << std::endl;
             continue;
           }
-          else if (pos+selection.length() != moduleLabel.size()) {
-            if(_conf.debug() > 3)std::cout << "Selection wasn't at end of moduleLabel" << std::endl;
+          else if(pos+selection.length() != moduleLabel.size()) {
+            if(_conf.debug() > 3) std::cout << "Selection wasn't at end of moduleLabel" << std::endl;
             continue;
           }
           moduleLabel = moduleLabel.erase(pos, selection.length());
         }
         std::string instanceName = i_handle.provenance()->productInstanceName();
-
-        std::string branchname = moduleLabel;
-        if (instanceName != "") {
-          branchname += "_" + instanceName;
-        }
+        std::string bname = moduleLabel;
+        if(instanceName != "") bname += "_" + instanceName;
         outputHandles.push_back(i_handle);
-        labels.push_back(branchname);
+        labels.push_back(bname);
       }
-      if (make_individual_branches) { // if we want to make individual branches per leaf (e.g. to avoid branch ambiguities in python such as detrkqual.NActiveHits vs uetrkqual.NActiveHits)
+      if(make_individual_branches) {
         const std::vector<std::string>& leafnames = infostruct.leafnames(labels);
         int n_leaves = leafnames.size();
-        for (int i_leaf = 0; i_leaf < n_leaves; ++i_leaf) {
+        for(int i_leaf = 0; i_leaf < n_leaves; ++i_leaf) {
           std::string thisbranchname = (branchname+"."+leafnames.at(i_leaf));
-          if (!_ntuple->GetBranch(thisbranchname.c_str())) {  // only want to create the branch once
+          if(!_ntuple->GetBranch(thisbranchname.c_str())) {
             _ntuple->Branch(thisbranchname.c_str(), &array[i_leaf]);
           }
         }
       }
       else {
-        if (!_ntuple->GetBranch((branchname+".").c_str())) {  // only want to create the branch once
+        if(!_ntuple->GetBranch((branchname+".").c_str())) {
           _ntuple->Branch((branchname+".").c_str(), &infostruct, infostruct.leafname(labels).c_str());
         }
       }
@@ -1320,14 +1268,12 @@ namespace mu2e {
   }
 
   void EventNtupleMaker::resetTrackBranches() {
-    for (BranchIndex i_branch = 0; i_branch < _allBranches.size(); ++i_branch) {
-
-      _allRQIs.at(i_branch).reset();
+    for(TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+      if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
+      _allRQIs.at(i_trk_fit_branch).reset();
     }
   }
 }  // end namespace mu2e
 
-// Part of the magic that makes this class a module.
-// create an instance of the module.  It also registers
 using mu2e::EventNtupleMaker;
 DEFINE_ART_MODULE(EventNtupleMaker)

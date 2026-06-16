@@ -1,7 +1,7 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
-physics.analyzers.EventNtuple.branches : [ @local::De ]
-physics.analyzers.EventNtuple.branches[0].branch : "trk"
+physics.analyzers.EventNtuple.trk.fits : [ @local::De ]
+physics.analyzers.EventNtuple.trk.fits[0].branchname : "trk"
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkPIDDe ]
 physics.EventNtupleEndPath : [ EventNtuple, genCountLogger ]
