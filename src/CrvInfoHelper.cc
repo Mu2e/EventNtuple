@@ -102,7 +102,7 @@ namespace mu2e
     if(crvCoincidencesMC.isValid())
     {
       size_t nClustersMC=crvCoincidencesMC->size();
-      if(nClusters!=nClustersMC) std::cout<<"The number of MC and reco CRV coincidence clusters does not match!"<<std::endl;
+      if(nClusters!=nClustersMC) throw cet::exception("CrvInfoHelper") << "The number of MC and reco CRV coincidence clusters does not match: " << nClusters << " reco vs " << nClustersMC << " MC\n";
       for(size_t i=0; i<nClustersMC; i++)
       {
         const CrvCoincidenceClusterMC &clusterMC = crvCoincidencesMC->at(i);

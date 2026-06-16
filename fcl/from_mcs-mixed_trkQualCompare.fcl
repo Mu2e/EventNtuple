@@ -14,4 +14,4 @@ physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualA
 physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAllV10", "TrkQualAllV11", "TrkQualAllV2" ]
 
 # Removin hits
-physics.analyzers.EventNtuple.FillHitInfo : false
+physics.analyzers.EventNtuple.trk.fillHits : false

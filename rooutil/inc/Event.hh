@@ -36,6 +36,7 @@
 #include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
+#include <stdexcept>
 
 #include "EventNtuple/inc/TrigInfo.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
@@ -155,6 +156,8 @@ namespace rooutil {
       for (int i_crv_coinc = 0; i_crv_coinc < nCrvCoincs(); ++i_crv_coinc) {
         CrvCoinc crv_coinc(&(crvcoincs->at(i_crv_coinc)));
         if (crvcoincsmc != nullptr) {
+          if (i_crv_coinc >= static_cast<int>(crvcoincsmc->size()))
+            throw std::runtime_error("CRV coincidence cluster count mismatch between reco and MC collections");
           crv_coinc.mc = &(crvcoincsmc->at(i_crv_coinc));
         }
         crv_coincs.emplace_back(crv_coinc);

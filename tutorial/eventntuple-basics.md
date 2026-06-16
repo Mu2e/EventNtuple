@@ -32,22 +32,19 @@ pyenv ana
 Because the EventNtuple is a [ROOT TTree](https://root.cern.ch/doc/master/classTTree.html), it can be accessed in either ROOT or python like any other TTree.
 
 ### Getting a list of EventNtuple files
-(Note these instructions may soon be outdated when Mu2e moves to the next generation of file handling tools. If they do not work, or you know that we have already updated, then post a message on the #analysis-tools Slack channel to let the Analysis Tools conveners know).
-
 First, get a list of EventNtuple datasets as follows:
 
 ```
-setup mu2efiletools
-mu2eDatasetList --tier=nts | grep v06_03_00
+muse setup ops
+metacat dataset list -l mu2e:nts.*MDC2025*.root
 ```
-replacing ```v06_03_00``` with the most recent version number of EventNtuple from the [Mu2e wiki page](https://mu2ewiki.fnal.gov/wiki/EventNtuple#Version_History_%26_Musings).
+You can see from the output which datasets are the most recent in ```created``` column.
 
 
 Pick a dataset from the list and to get a list of files that are already [prestaged](https://mu2ewiki.fnal.gov/wiki/Prestage), do the following:
 
 ```
-setup dhtools
-samListLocations -d --defname=nts.name.of.dataset.root > filelist.txt
+metacat query files from mu2e:nts.complete.dataset.name.root | mdh print-url -l disk - > filelist.txt
 ```
 
 Check the contents of ```filelist.txt```. If it is empty, then pick another dataset. If you have authentication errors, then consult [this page](https://mu2ewiki.fnal.gov/wiki/Authentication#Tokens) on the Mu2e wiki.
@@ -58,6 +55,8 @@ You can get some basic information about the EventNtuple, such as the version nu
 ```
 checkEventNtuple /path/to/nts.root
 ```
+
+EventNtuple versions are summarized on the [Mu2e wiki page](https://mu2ewiki.fnal.gov/wiki/EventNtuple#Version_History_%26_Musings).
 
 ### Printing the EventNtuple
 
