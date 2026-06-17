@@ -40,7 +40,8 @@ namespace mu2e
           CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
           CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
           std::vector<CrvPlaneInfoMCCollection> &MCInfoPlanes,
-          const std::vector<double> &crvPlaneYs,
+          const std::vector<double> &crvPlaneCoords,
+          const std::vector<int> &crvPlaneAxes,
           art::Handle<PrimaryParticle> const& primary);
 
       void FillCrvPulseHitIndices(

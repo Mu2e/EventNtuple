@@ -237,8 +237,9 @@ namespace mu2e {
         fhicl::Atom<bool>          keepUnclusteredPulses {Name("keepUnclusteredPulses"), Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
         fhicl::Atom<bool>          fillDigis             {Name("fillDigis"),             Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
-        fhicl::Sequence<double>      planeYs   {Name("planeYs"),   Comment("y-values (Mu2e global coords, mm) of CRV truth planes for MC analysis")};
-        fhicl::Sequence<std::string> planeNames{Name("planeNames"),Comment("Branch-name suffix per CRV truth plane; branch is crvcoincsmcplane_<name> (or crvcoincsmcplane for an empty string)")};
+        fhicl::Sequence<double>      planeCoords{Name("planeCoords"),Comment("Coordinate (mm, Mu2e frame) of each CRV truth plane; the axis is chosen by planeAxes")};
+        fhicl::Sequence<int>         planeAxes  {Name("planeAxes"),  Comment("Axis each truth plane is perpendicular to: 0=x (L/R sides), 1=y (top), 2=z")};
+        fhicl::Sequence<std::string> planeNames {Name("planeNames"), Comment("Branch-name suffix per CRV truth plane; branch is crvcoincsmcplane_<name> (or crvcoincsmcplane for an empty string)")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
         // MC sub-config (requires mc.fill also be true)
         struct MCConfig {
@@ -1037,7 +1038,7 @@ namespace mu2e {
       _crvHelper.FillCrvHitInfoCollections(
           _crvCoincidences, _crvCoincidenceMCs,
           _crvRecoPulses, _crvSteps, _mcTrajectories, _crvcoincs, _crvcoincsmc,
-          _crvsummary, _crvsummarymc, _crvcoincsmcplanes, _conf.crv().planeYs(), _pph);
+          _crvsummary, _crvsummarymc, _crvcoincsmcplanes, _conf.crv().planeCoords(), _conf.crv().planeAxes(), _pph);
     }
     if(_conf.crv().fill() && _conf.crv().fillPulses()){
       _crvpulses.clear();

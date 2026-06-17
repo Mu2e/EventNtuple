@@ -31,7 +31,8 @@ namespace mu2e
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
       std::vector<CrvPlaneInfoMCCollection> &MCInfoPlanes,
-      const std::vector<double> &crvPlaneYs,
+      const std::vector<double> &crvPlaneCoords,
+      const std::vector<int> &crvPlaneAxes,
       art::Handle<PrimaryParticle> const& primary) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
@@ -174,7 +175,7 @@ namespace mu2e
     }
 
     //locate points where the cosmic MC trajectories cross each configured xz plane
-    if(mcTrajectories.isValid() && primary.isValid() && !crvPlaneYs.empty())
+    if(mcTrajectories.isValid() && primary.isValid() && !crvPlaneCoords.empty())
     {
       if(primary->primarySimParticles().empty()) return;
       auto bestprimarysp = primary->primarySimParticles().front();
@@ -201,12 +202,15 @@ namespace mu2e
           for(size_t i=1; i<points.size(); i++)
           {
             CLHEP::Hep3Vector pos=points[i].pos();
-            for(size_t k=0; k<crvPlaneYs.size(); k++)
+            for(size_t k=0; k<crvPlaneCoords.size(); k++)
             {
-              double planeY=crvPlaneYs[k];
-              if((previousPos.y()>planeY && pos.y()<=planeY) || (previousPos.y()<planeY && pos.y()>=planeY))
+              int axis = (k<crvPlaneAxes.size()) ? crvPlaneAxes[k] : 1;  // 0=x (L/R sides), 1=y (top), 2=z; default y
+              double planeC=crvPlaneCoords[k];
+              double prevC = (axis==0) ? previousPos.x() : (axis==2) ? previousPos.z() : previousPos.y();
+              double curC  = (axis==0) ? pos.x()         : (axis==2) ? pos.z()         : pos.y();
+              if((prevC>planeC && curC<=planeC) || (prevC<planeC && curC>=planeC))
               {
-                double fraction=(planeY-pos.y())/(previousPos.y()-pos.y());
+                double fraction=(planeC-curC)/(prevC-curC);
                 CLHEP::Hep3Vector planePos=fraction*(previousPos-pos)+pos;
                 CLHEP::Hep3Vector planeDir=(pos-previousPos).unit();
                 double planeTime=fraction*(points[i-1].t()-points[i].t())+points[i].t();
