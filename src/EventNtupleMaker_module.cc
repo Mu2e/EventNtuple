@@ -233,8 +233,9 @@ namespace mu2e {
         fhicl::Atom<art::InputTag> coincidencesTag{Name("coincidencesTag"), Comment("Tag for CrvCoincidenceCluster collection")};
         fhicl::Atom<art::InputTag> recoPulsesTag  {Name("recoPulsesTag"),   Comment("Tag for CrvRecoPulse collection")};
         fhicl::Atom<art::InputTag> stepsTag       {Name("stepsTag"),        Comment("Tag for CrvStep collection")};
-        fhicl::Atom<bool>          fillPulses     {Name("fillPulses"),      Comment("Fill CRV reco pulse branches")};
-        fhicl::Atom<bool>          fillDigis      {Name("fillDigis"),       Comment("Fill CRV digi branch")};
+        fhicl::Atom<bool>          fillPulses            {Name("fillPulses"),            Comment("Fill CRV reco pulse branches")};
+        fhicl::Atom<bool>          keepUnclusteredPulses {Name("keepUnclusteredPulses"), Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
+        fhicl::Atom<bool>          fillDigis             {Name("fillDigis"),             Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
         fhicl::Atom<double>        planeY         {Name("planeY"),          Comment("Y of center of top layer of CRV-T counters (mm)")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
@@ -403,6 +404,7 @@ namespace mu2e {
       CrvSummaryMC   _crvsummarymc;
       std::vector<CrvPlaneInfoMC> _crvcoincsmcplane;
       std::vector<CrvPulseInfoReco> _crvpulses;
+      std::vector<int> _crvPulseHitIndices;
       std::vector<CrvWaveformInfo> _crvdigis;
       std::vector<CrvHitInfoMC> _crvpulsesmc;
       std::vector<CrvHitInfoReco> _crvrecoinfo;
@@ -983,6 +985,16 @@ namespace mu2e {
         }
       }
     }
+
+    // WARNING: calohits (CaloHitMaker) and calohitsmc (compressRecoMCs) are not index-aligned.
+    // Record the legacy positional index RooUtil used (calohitsmc[i] <-> calohits[i]) in caloHitIdx_.
+    if (fillCaloHitsMC() && _conf.calo().fillHits()) {
+      for (uint mcIdx = 0; mcIdx < _caloHIMCs.size(); ++mcIdx) {
+        _caloHIMCs[mcIdx].caloHitIdx_ =
+          (mcIdx < _caloHIs.size()) ? static_cast<int>(mcIdx) : -1;
+      }
+    }
+
     if(_conf.calo().fill() && _conf.calo().fillClusters()){
       event.getByLabel(_conf.calo().clustersTag(),_caloClusters);
       for(const auto& cluster : *_caloClusters.product()){
@@ -1005,12 +1017,15 @@ namespace mu2e {
     }
 
     // ── CRV ───────────────────────────────────────────────────────────────
+    if(_conf.crv().fill() && (_conf.crv().fillCoincs() || _conf.crv().fillPulses())){
+      event.getByLabel(_conf.crv().coincidencesTag(),_crvCoincidences);
+      event.getByLabel(_conf.crv().recoPulsesTag(),_crvRecoPulses);
+      _crvHelper.FillCrvPulseHitIndices(_crvCoincidences, _crvRecoPulses, _crvPulseHitIndices);
+    }
     if(_conf.crv().fill() && _conf.crv().fillCoincs()){
       _crvcoincs.clear();
       _crvcoincsmc.clear();
       _crvcoincsmcplane.clear();
-      event.getByLabel(_conf.crv().coincidencesTag(),_crvCoincidences);
-      event.getByLabel(_conf.crv().recoPulsesTag(),_crvRecoPulses);
       event.getByLabel(_conf.crv().stepsTag(),_crvSteps);
       if(fillCRVMC()) event.getByLabel(_conf.crv().mc().coincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
@@ -1021,9 +1036,9 @@ namespace mu2e {
     if(_conf.crv().fill() && _conf.crv().fillPulses()){
       _crvpulses.clear();
       _crvpulsesmc.clear();
-      event.getByLabel(_conf.crv().recoPulsesTag(),_crvRecoPulses);
       if(fillCRVMC()) event.getByLabel(_conf.crv().mc().digiMCsTag(),_crvDigiMCs);
       _crvHelper.FillCrvPulseInfoCollections(_crvRecoPulses, _crvDigiMCs, _ewmh,
+          _crvPulseHitIndices, _conf.crv().keepUnclusteredPulses(),
           _crvpulses, _crvpulsesmc);
     }
     if(_conf.crv().fill() && _conf.crv().fillDigis()){

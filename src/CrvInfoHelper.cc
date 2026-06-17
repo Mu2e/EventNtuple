@@ -15,6 +15,7 @@
 #include "Offline/RecoDataProducts/inc/CrvRecoPulse.hh"
 #include "Offline/DataProducts/inc/PDGCode.hh"
 #include "art/Framework/Principal/Handle.h"
+#include "cetlib_except/exception.h"
 #include "Offline/CRVResponse/inc/CrvMCHelper.hh"
 #include "Offline/CRVReco/inc/CrvHelper.hh"
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
@@ -46,8 +47,6 @@ namespace mu2e
       std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer_ = {0.};
       // Convert doubles to floats in side times
       std::array<float,CRVId::nSidesPerBar> sideTimes_ = {static_cast<float>(cluster.GetSideTimes()[0]), static_cast<float>(cluster.GetSideTimes()[1])};
-      // Initiatlize RecoPulse vector
-      CrvPulseInfoRecoCollection  recoPulses;  //this is the reco vector which will be stored in the main TTree
       for(size_t j=0; j<coincRecoPulses_.size(); j++) // Loop through the pulses
       {
         // Get PEs associated with this reco pulse
@@ -68,13 +67,6 @@ namespace mu2e
         // Sum PEs for this coincidence, indexed by layer number and side number
         int layerSideIndex = layerNumber * CRVId::nSidesPerBar + side; // Indices for a flattened 2D matrix: layers (rows), sides (columns)
         sidePEsPerLayer_[layerSideIndex] += PEs;
-
-        // Fill recoPulses
-        const auto &recoPulse = coincRecoPulses_.at(j);
-        CLHEP::Hep3Vector hitPos = CrvHelper::GetCrvCounterPos(CRS, crvBarIndex);
-        recoPulses.emplace_back(tdet->toDetector(hitPos), crvBarIndex.asInt(), sectorNumber, recoPulse->GetSiPMNumber(),
-          recoPulse->GetPEs(), recoPulse->GetPEsPulseHeight(), recoPulse->GetPulseHeight(),
-          recoPulse->GetPulseBeta(), recoPulse->GetPulseFitChi2(), recoPulse->GetPulseTime());
       }
 
       //fill the Reco collection
@@ -91,8 +83,7 @@ namespace mu2e
           sideTimes_,
           cluster.GetCrvRecoPulses().size(),
           cluster.GetLayers().size(),
-          cluster.GetSlope(),
-          recoPulses);
+          cluster.GetSlope());
     }
 
     if(!crvRecoPulses.isValid()) return;
@@ -111,16 +102,21 @@ namespace mu2e
     if(crvCoincidencesMC.isValid())
     {
       size_t nClustersMC=crvCoincidencesMC->size();
-      if(nClusters!=nClustersMC) std::cout<<"The number of MC and reco CRV coincidence clusters does not match!"<<std::endl;
+      if(nClusters!=nClustersMC) throw cet::exception("CrvInfoHelper") << "The number of MC and reco CRV coincidence clusters does not match: " << nClusters << " reco vs " << nClustersMC << " MC\n";
       for(size_t i=0; i<nClustersMC; i++)
       {
         const CrvCoincidenceClusterMC &clusterMC = crvCoincidencesMC->at(i);
         if(clusterMC.HasMCInfo())
         {
           const art::Ptr<SimParticle> &simParticle = clusterMC.GetMostLikelySimParticle();
+          if(!simParticle.isNonnull()) { MCInfo.emplace_back(); continue; }
           const art::Ptr<SimParticle> &primaryParticle = FindPrimaryParticle(simParticle);
           const art::Ptr<SimParticle> &parentParticle  = FindParentParticle(simParticle);
           const art::Ptr<SimParticle> &gparentParticle = FindGParentParticle(simParticle);
+          if(!primaryParticle.isNonnull() || !parentParticle.isNonnull() || !gparentParticle.isNonnull()) {
+            MCInfo.emplace_back();
+            continue;
+          }
           MCInfo.emplace_back(
               true,
               simParticle->pdgId(),
@@ -153,18 +149,21 @@ namespace mu2e
         counters.insert(crvSteps->at(i).barIndex());
         const CRSScintillatorBarId &CRVCounterId = CRS->getBar(crvSteps->at(i).barIndex()).id();
         int layer = CRVCounterId.getLayerNumber();
-        int pdgId = crvSteps->at(i).simParticle()->pdgId();
-        if(abs(pdgId)==PDGCode::mu_minus)
-          totalStep[layer] = totalStep[layer] + crvSteps->at(i).pathLength();
+        const auto& simParticle = crvSteps->at(i).simParticle();
+        if(simParticle.isNonnull()) {
+          int pdgId = simParticle->pdgId();
+          if(abs(pdgId)==PDGCode::mu_minus)
+            totalStep[layer] = totalStep[layer] + crvSteps->at(i).pathLength();
 
-        // Save info from the first step in the CRV
-        if(i==0){
-          CLHEP::Hep3Vector CrvPos = crvSteps->at(i).startPosition();
-          MCSummary.pos = XYZVectorF(tdet->toDetector(CrvPos));
-          int sectorNumber = CRVCounterId.getShieldNumber();
-          MCSummary.sectorNumber = sectorNumber;
-          MCSummary.sectorType = CRS->getCRSScintillatorShield(sectorNumber).getSectorType();
-          MCSummary.pdgId = pdgId;
+          // Save info from the first step in the CRV
+          if(i==0){
+            CLHEP::Hep3Vector CrvPos = crvSteps->at(i).startPosition();
+            MCSummary.pos = XYZVectorF(tdet->toDetector(CrvPos));
+            int sectorNumber = CRVCounterId.getShieldNumber();
+            MCSummary.sectorNumber = sectorNumber;
+            MCSummary.sectorType = CRS->getCRSScintillatorShield(sectorNumber).getSectorType();
+            MCSummary.pdgId = pdgId;
+          }
         }
       }
 
@@ -191,6 +190,7 @@ namespace mu2e
         if(rel != MCRelationship::same && trajectorySimParticle->pdgId() != bestprimarysp->pdgId()) { continue; }
 
         const art::Ptr<SimParticle> &trajectoryPrimaryParticle = FindPrimaryParticle(trajectorySimParticle);
+        if(!trajectoryPrimaryParticle->genParticle()) continue;
         GenId genId = trajectoryPrimaryParticle->genParticle()->generatorId();
         if(genId.isCosmic())
         {
@@ -225,10 +225,51 @@ namespace mu2e
 
   }//FillCrvInfoStructure
 
+  void CrvInfoHelper::FillCrvPulseHitIndices(
+      art::Handle<CrvCoincidenceClusterCollection> const& crvCoincidences,
+      art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
+      std::vector<int> &pulseHitIndices) {
+    pulseHitIndices.clear();
+    if(!crvRecoPulses.isValid()) return;
+    pulseHitIndices.assign(crvRecoPulses->size(), -1);
+
+    if(!crvCoincidences.isValid()) return;
+
+    for(size_t hitIndex=0; hitIndex<crvCoincidences->size(); ++hitIndex)
+    {
+      const int hitIndexInt = static_cast<int>(hitIndex);
+      const CrvCoincidenceCluster &cluster = crvCoincidences->at(hitIndex);
+      for(const auto &crvRecoPulse : cluster.GetCrvRecoPulses())
+      {
+        if(!crvRecoPulse) continue;
+        const size_t pulseIndex = crvRecoPulse.key();
+        if(pulseIndex >= pulseHitIndices.size())
+        {
+          throw cet::exception("EventNtuple")
+            << "CRV coincidence cluster " << hitIndex
+            << " references CrvRecoPulse index " << pulseIndex
+            << ", but the CrvRecoPulse collection has size " << pulseHitIndices.size() << "\n";
+        }
+
+        if(pulseHitIndices[pulseIndex] >= 0)
+        {
+          throw cet::exception("EventNtuple")
+            << "CrvRecoPulse index " << pulseIndex
+            << " is assigned to multiple CRV coincidence clusters ("
+            << pulseHitIndices[pulseIndex] << " and " << hitIndexInt << ")\n";
+        }
+
+        pulseHitIndices[pulseIndex] = hitIndexInt;
+      }
+    }
+  }
+
   void CrvInfoHelper::FillCrvPulseInfoCollections (
       art::Handle<CrvRecoPulseCollection> const& crvRecoPulses,
       art::Handle<CrvDigiMCCollection> const& crvDigiMCs,
       art::Handle<EventWindowMarker> const& ewmh,
+      const std::vector<int> &pulseHitIndices,
+      bool keepUnclusteredPulses,
       CrvPulseInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo){
     GeomHandle<DetectorSystem> tdet;
 
@@ -240,6 +281,9 @@ namespace mu2e
     for(size_t recoPulseIndex=0; recoPulseIndex<crvRecoPulses->size(); recoPulseIndex++)
     {
       const art::Ptr<CrvRecoPulse> crvRecoPulse(crvRecoPulses, recoPulseIndex);
+      const int crvHitIndex = recoPulseIndex < pulseHitIndices.size() ? pulseHitIndices.at(recoPulseIndex) : -1;
+      if(crvHitIndex < 0 && !keepUnclusteredPulses) continue;
+
       //get information about the counter
       const CRSScintillatorBarIndex &barIndex = crvRecoPulse->GetScintillatorBarIndex();
       int sectorNumber  = -1;
@@ -251,11 +295,16 @@ namespace mu2e
       //Reco pulses information
       CLHEP::Hep3Vector HitPos = CrvHelper::GetCrvCounterPos(CRS, barIndex);
       recoInfo.emplace_back(tdet->toDetector(HitPos), barIndex.asInt(), sectorNumber, crvRecoPulse->GetSiPMNumber(),
+          crvRecoPulse->GetROC(), crvRecoPulse->GetFEB(), crvRecoPulse->GetFEBchannel(),
           crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
-          crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime());
+          crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime(), crvHitIndex);
 
       //MCtruth pulses information
-      if(!crvDigiMCs.isValid()) return;
+      if(!crvDigiMCs.isValid())
+      {
+        MCInfo.emplace_back();
+        continue;
+      }
 
       double visibleEnergyDeposited  = 0;
       double earliestHitTime         = 0;
@@ -273,6 +322,10 @@ namespace mu2e
         const art::Ptr<SimParticle> &primaryParticle = FindPrimaryParticle(mostLikelySimParticle);
         const art::Ptr<SimParticle> &parentParticle = FindParentParticle(mostLikelySimParticle);
         const art::Ptr<SimParticle> &gparentParticle = FindGParentParticle(mostLikelySimParticle);
+        if(!primaryParticle.isNonnull() || !parentParticle.isNonnull() || !gparentParticle.isNonnull()) {
+          MCInfo.emplace_back();
+          continue;
+        }
         MCInfo.emplace_back(true, mostLikelySimParticle->pdgId(),
             primaryParticle->pdgId(),
             primaryParticle->startMomentum().e() - primaryParticle->startMomentum().m(),

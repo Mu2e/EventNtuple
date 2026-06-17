@@ -361,6 +361,7 @@ EventNtupleMaker : {
     recoPulsesTag : "SelectReco"
     stepsTag : "compressRecoMCs"
     fillPulses : false
+    keepUnclusteredPulses : false
     fillDigis : false
     digisTag : "SelectReco"
     planeY : @local::crvPlaneY.CRV_T

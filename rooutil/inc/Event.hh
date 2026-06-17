@@ -36,6 +36,7 @@
 #include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 
 #include "EventNtuple/inc/MVAResultInfo.hh"
+#include <stdexcept>
 
 #include "EventNtuple/inc/TrigInfo.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
@@ -155,6 +156,8 @@ namespace rooutil {
       for (int i_crv_coinc = 0; i_crv_coinc < nCrvCoincs(); ++i_crv_coinc) {
         CrvCoinc crv_coinc(&(crvcoincs->at(i_crv_coinc)));
         if (crvcoincsmc != nullptr) {
+          if (i_crv_coinc >= static_cast<int>(crvcoincsmc->size()))
+            throw std::runtime_error("CRV coincidence cluster count mismatch between reco and MC collections");
           crv_coinc.mc = &(crvcoincsmc->at(i_crv_coinc));
         }
         crv_coincs.emplace_back(crv_coinc);
@@ -185,8 +188,15 @@ namespace rooutil {
               CaloHit calohit;
               calohit.reco = &(calohits->at(calohit_Idx)); // passing the addresses of the underlying structs
 
-              if (calohitsmc != nullptr) { // 1-to-1 matching of calohits and calohitsmc
-                calohit.mc = &(calohitsmc->at(calohit_Idx));
+              // WARNING: calohitsmc is NOT index-aligned with calohits (different art products).
+              // Do not use calohitsmc->at(calohit_Idx); look up via caloHitIdx_ instead.
+              if (calohitsmc != nullptr) {
+                for (int i_mc = 0; i_mc < static_cast<int>(calohitsmc->size()); ++i_mc) {
+                  if (calohitsmc->at(i_mc).caloHitIdx_ == static_cast<int>(calohit_Idx)) {
+                    calohit.mc = &(calohitsmc->at(i_mc));
+                    break;
+                  }
+                }
               }
 
               calo_cluster.hits.emplace_back(calohit);

@@ -389,6 +389,7 @@ namespace mu2e {
     chimc.eDep = chmc.totalEnergyDep();
     chimc.eDepG4 = chmc.totalEnergyDepG4();
     chimc.clusterIdx_ = clusterIdx;
+    chimc.caloHitIdx_ = -1;
     if (chimc.nsim > 0){
       chimc.eprimary = edeps.front().energyDep();
       chimc.tprimary = edeps.front().time();

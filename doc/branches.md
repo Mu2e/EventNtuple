@@ -112,10 +112,13 @@ Calorimeter hits store crystal position in (x,y,z) with frame origin at tracker 
 The calorimeter MC branches provide MC-truth information at different levels of the calorimeter reconstruction hierarchy.
 
 **Alignment with Reconstruction Branches:**
-MC information branches are aligned with their corresponding reco branches:
+Most calorimeter MC branches are index-aligned with their reco counterparts (same size and element index). One important exception:
+
+> **Warning — `calohitsmc` is not aligned with `calohits`.** Reco hits come from `CaloHitMaker`; MC hits come from `compressRecoMCs`, which repacks `CaloHitMC` objects when copying cluster MC truth. The two branches can differ in size and order. Offline pairs reco and MC hits via `CaloHitMCTruthAssn` at reconstruction time, but that association is not kept in production art files read by EventNtuple. Each `calohitsmc` element therefore carries `caloHitIdx_` (index into `calohits`, or `-1`). RooUtil resolves MC hits through `caloHitIdx_`; do **not** assume `calohitsmc[i]` corresponds to `calohits[i]`.
+
 - `caloclustersmc` ← aligned with `caloclusters` (same size & indices)
-- `calohitsmc` ← aligned with `calohits` (same size & indices)
-- `calodigismc` ← aligned with `calodigis` (same size & indices; raw digi MC truth) (also: `calorecodigis` too)
+- `calohitsmc` ← **not** index-aligned with `calohits` (see warning above); use `caloHitIdx_` to find the reco hit
+- `calodigismc` ← aligned with `calodigis` when both branches are filled (same size & indices; raw digi MC truth)
 - `calodigisim` ← unique SimParticles from raw digis
 - `calomcsim` ← unique SimParticles from MC clusters
 
@@ -124,7 +127,7 @@ Each MC element contains `simParticleIds` to index into the corresponding `*mcsi
 | branch | structure | explanation | key fields | leaf information |
 |--------|-----------|-------------|-----------|------------------|
 | caloclustersmc |  Vector branch |   MC-truth information for calorimeter clusters (aligned with caloclusters)| `nsim` (# of sim particles), `etot` (total true energy), `tavg` (avg time), `eprimary` (primary particle energy), `tprimary` (primary time), `simParticleIds`, `simRels` (MCRelationship), `hits_`, `prel` (primary to event primary relationship) | [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
-| calohitsmc |  Vector branch |   MC-truth information for calorimeter hits (aligned with calohits)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `caloClusterIdx_`, etc. | [see CaloHitInfoMC.hh](../inc/CaloHitInfoMC.hh)
+| calohitsmc |  Vector branch |   MC-truth for calorimeter hits (**not** index-aligned with `calohits`; use `caloHitIdx_`)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `clusterIdx_`, `caloHitIdx_`, etc. | [see CaloHitInfoMC.hh](../inc/CaloHitInfoMC.hh)
 | calodigismc |  Vector branch |   MC-truth information for raw calorimeter digis (aligned with calodigis)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `caloHitIdx_`, `crystalID_`, `diskID_`, `energyCorr_`, `timeCorr_`, `posX_`, `posY_` | [see CaloDigiMCInfo.hh](../inc/CaloDigiMCInfo.hh)
 | calodigisim |  Vector branch |   unique SimParticles in all raw digis (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
 | calomcsim |  Vector branch |   unique SimParticles in all MC clusters (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
@@ -140,6 +143,8 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincs |  Vector branch |   information about a cluster of CRV coincidence triplets| [see CrvHitInfoReco.hh](../inc/CrvHitInfoReco.hh)
 | crvcoincsmc |  Vector branch |   information about the MC track which most likely caused the CRV coincidence triplets| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
+| crvpulses |  Vector branch |   information about CRV reco pulses, including ROC/FEB/FEB channel IDs. `crvHitIndex` gives the index in `crvcoincs`, or -1 if the pulse was not clustered into a CRV hit| [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
+| crvpulsesmc |  Vector branch |   MC-truth information corresponding entry-by-entry to `crvpulses`| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 ## Trigger Branches
 
 Trigger branches store trigger decision information for each event and track hypothesis. Each trigger branch corresponds to a different trigger path or decision criterion.

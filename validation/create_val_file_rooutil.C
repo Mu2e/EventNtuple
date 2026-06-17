@@ -421,12 +421,16 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_crvpulses_barId = new TH1F("h_crvpulses_barId", "", 100,0,100);
   TH1F* h_crvpulses_sectorId = new TH1F("h_crvpulses_sectorId", "", 100,0,100);
   TH1F* h_crvpulses_SiPMId = new TH1F("h_crvpulses_SiPMId", "", 100,0,100);
+  TH1F* h_crvpulses_ROC = new TH1F("h_crvpulses_ROC", "", 100,0,100);
+  TH1F* h_crvpulses_FEB = new TH1F("h_crvpulses_FEB", "", 100,0,100);
+  TH1F* h_crvpulses_FEBchannel = new TH1F("h_crvpulses_FEBchannel", "", 100,0,100);
   TH1F* h_crvpulses_PEs = new TH1F("h_crvpulses_PEs", "", 100,0,100);
   TH1F* h_crvpulses_PEsPulseHeight = new TH1F("h_crvpulses_PEsPulseHeight", "", 100,0,100);
   TH1F* h_crvpulses_pulseHeight = new TH1F("h_crvpulses_pulseHeight", "", 100,0,100);
   TH1F* h_crvpulses_pulseBeta = new TH1F("h_crvpulses_pulseBeta", "", 100,0,100);
   TH1F* h_crvpulses_pulseFitChi2 = new TH1F("h_crvpulses_pulseFitChi2", "", 100,0,100);
   TH1F* h_crvpulses_time = new TH1F("h_crvpulses_time", "", 100,0,100);
+  TH1F* h_crvpulses_crvHitIndex = new TH1F("h_crvpulses_crvHitIndex", "", 100,-1,99);
 
   TH1F* h_crvpulsesmc_valid = new TH1F("h_crvpulsesmc_valid", "", 100,0,100);
   TH1F* h_crvpulsesmc_pdgId = new TH1F("h_crvpulsesmc_pdgId", "", 100,0,100);
@@ -512,6 +516,8 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
   TH1F* h_calodigis_waveform_ = new TH1F("h_calodigis_waveform_", "", 100,0,100);
   TH1F* h_calodigis_peakpos_ = new TH1F("h_calodigis_peakpos_", "", 100,0,100);
   TH1F* h_calodigis_caloRecoDigiIdx_ = new TH1F("h_calodigis_caloRecoDigiIdx_", "", 100,0,100);
+
+  TH1F* h_calohitsmc_caloHitIdx_ = new TH1F("h_calohitsmc_caloHitIdx_", "", 100,-1,99);
 
   TH1F* h_caloclustersmc_nsim = new TH1F("h_caloclustersmc_nsim", "", 100,0,100);
   TH1F* h_caloclustersmc_etot = new TH1F("h_caloclustersmc_etot", "", 200,0,200);
@@ -1086,12 +1092,16 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         h_crvpulses_barId->Fill(crvpulse.barId);
         h_crvpulses_sectorId->Fill(crvpulse.sectorId);
         h_crvpulses_SiPMId->Fill(crvpulse.SiPMId);
+        h_crvpulses_ROC->Fill(crvpulse.ROC);
+        h_crvpulses_FEB->Fill(crvpulse.FEB);
+        h_crvpulses_FEBchannel->Fill(crvpulse.FEBchannel);
         h_crvpulses_PEs->Fill(crvpulse.PEs);
         h_crvpulses_PEsPulseHeight->Fill(crvpulse.PEsPulseHeight);
         h_crvpulses_pulseHeight->Fill(crvpulse.pulseHeight);
         h_crvpulses_pulseBeta->Fill(crvpulse.pulseBeta);
         h_crvpulses_pulseFitChi2->Fill(crvpulse.pulseFitChi2);
         h_crvpulses_time->Fill(crvpulse.time);
+        h_crvpulses_crvHitIndex->Fill(crvpulse.crvHitIndex);
       }
     }
 
@@ -1221,6 +1231,13 @@ void create_val_file_rooutil(std::string filename, std::string outfilename) {
         }
         h_calodigis_peakpos_->Fill(calodigi.peakpos_);
         h_calodigis_caloRecoDigiIdx_->Fill(calodigi.caloRecoDigiIdx_);
+      }
+    }
+
+    if (event.calohitsmc != nullptr) {
+      std::cout << "Creating calohitsmc histograms..." << std::endl;
+      for (const auto& calohitmc : *(event.calohitsmc)) {
+        h_calohitsmc_caloHitIdx_->Fill(calohitmc.caloHitIdx_);
       }
     }
 

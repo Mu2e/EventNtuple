@@ -3,7 +3,6 @@
 
 // CrvHitInfoReco: information about a cluster of CRV coincidence triplets
 
-#include "EventNtuple/inc/CrvPulseInfoReco.hh"
 #include "EventNtuple/inc/RootVectors.hh"
 #include "Offline/DataProducts/inc/CRVId.hh"
 namespace CLHEP {class Hep3Vector; }
@@ -30,10 +29,9 @@ namespace mu2e
     int               nHits = -1;      //number of coincidence hits in this cluster
     int               nLayers = -1;      //number of coincidence layers in this cluster
     float             angle = -999;   //coincidence direction
-    std::vector<CrvPulseInfoReco> crvPulses;
 
     CrvHitInfoReco(){}
-    CrvHitInfoReco(int sectorType, bool hitPosAndTimeCalculated, CLHEP::Hep3Vector hpos, float timeWindowStart, float timeWindowEnd, float timeAvg, float PEs, std::array<float, CRVId::nLayers> PEsPerLayer, std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer, std::array<size_t, CRVId::nSidesPerBar> sidePulses, std::array<float, CRVId::nSidesPerBar> sidePEs, std::array<float, CRVId::nSidesPerBar> sideTimes, int nCoincidenceHits, int nCoincidenceLayers, float coincidenceAngle, std::vector<CrvPulseInfoReco> crvPulses);
+    CrvHitInfoReco(int sectorType, bool hitPosAndTimeCalculated, CLHEP::Hep3Vector hpos, float timeWindowStart, float timeWindowEnd, float timeAvg, float PEs, std::array<float, CRVId::nLayers> PEsPerLayer, std::array<float, CRVId::nLayers * CRVId::nSidesPerBar> sidePEsPerLayer, std::array<size_t, CRVId::nSidesPerBar> sidePulses, std::array<float, CRVId::nSidesPerBar> sidePEs, std::array<float, CRVId::nSidesPerBar> sideTimes, int nCoincidenceHits, int nCoincidenceLayers, float coincidenceAngle);
   };
   typedef std::vector<CrvHitInfoReco> CrvHitInfoRecoCollection;  //this is the reco vector which will be stored in the main TTree
 }

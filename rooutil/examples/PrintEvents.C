@@ -212,7 +212,7 @@ void PrintEvents(std::string filename) {
     // crvpulses branch
     if (event.crvpulses != nullptr) {
       for (const auto& crvpulse : *(event.crvpulses)) {
-        std::cout << "crvpulse: " << crvpulse.pos.x() << "," << crvpulse.barId << "," << crvpulse.time << std::endl;
+        std::cout << "crvpulse: " << crvpulse.pos.x() << "," << crvpulse.barId << "," << crvpulse.ROC << "," << crvpulse.FEB << "," << crvpulse.FEBchannel << "," << crvpulse.time << "," << crvpulse.crvHitIndex << std::endl;
       }
     }
 

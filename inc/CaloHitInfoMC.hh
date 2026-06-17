@@ -22,8 +22,9 @@ namespace mu2e
     std::vector<int> simParticleIds; // list of simparticle ids
     std::vector<MCRelationship> simRels; // relationship to the particle that deposited the most energy in the calo Hit
     int clusterIdx_; // Cluster index
+    int caloHitIdx_; // index into calohits branch, -1 if unset; calohitsmc is NOT index-aligned with calohits
 
-    CaloHitInfoMC() : crystalID_(0), nsim(0), eDep(0.0), eDepG4(0.0), eprimary(0.0), tprimary(0.0), clusterIdx_(-1){}
+    CaloHitInfoMC() : crystalID_(0), nsim(0), eDep(0.0), eDepG4(0.0), eprimary(0.0), tprimary(0.0), clusterIdx_(-1), caloHitIdx_(-1){}
 
     void reset() { *this = CaloHitInfoMC(); }
 
