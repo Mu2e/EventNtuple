@@ -1,0 +1,34 @@
+# MC-enabled KPP / extracted-geometry CRV EventNtuple.
+#
+# MC sibling of from_rec-crv-kpp.fcl: same CRV-only configuration (no tracker,
+# no calorimeter), but with MC truth ENABLED so the CRV truth-plane branches are
+# actually produced. The no-MC sibling disables MC (mc.fill:false), which gates
+# off the crvcoincsmcplane* branches; this file keeps MC on so they fill.
+#
+# Run on MC reco files in the extracted (KPP) geometry that carry the CRV reco,
+# CRV MC, MCTrajectory and primary/sim-particle products -- e.g. MDC2025
+# CosmicCRYExtractedTriggered reco compressed with compressRecoMCs. The CRV reco
+# and MC product tags are inherited unchanged from prolog.fcl
+# (SelectReco* / compressRecoMCs*), which already match that compressed layout;
+# override crv.*Tag / mc.*Tag here if your input uses plain module labels.
+
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+
+# -- CRV only: no producers (analyze the existing reco+MC), no tracker/calo -----
+physics.EventNtuplePath : [ ]                       # drop track-fit producers
+physics.analyzers.EventNtuple.trk.fill : false
+physics.analyzers.EventNtuple.calo.fill : false     # no calorimeter
+physics.analyzers.EventNtuple.RecoCountTag : ""
+physics.analyzers.EventNtuple.PBTTag : ""
+physics.analyzers.EventNtuple.hasCRV : false        # keep events with no CRV coincidences
+physics.analyzers.EventNtuple.FillTriggerInfo : false
+
+# -- KPP / extracted CRV truth planes (v02 geometry) ---------------------------
+# Top-face entry plane of each CRV sector (T1/EX/T2), all horizontal -> axis 1=y.
+# Branches: crvcoincsmcplane_t1, crvcoincsmcplane_ex, crvcoincsmcplane_t2.
+physics.analyzers.EventNtuple.crv.planeCoords : [ @local::crvSectorEntryY_v02.T1, @local::crvSectorEntryY_v02.EX, @local::crvSectorEntryY_v02.T2 ]
+physics.analyzers.EventNtuple.crv.planeAxes   : [ 1, 1, 1 ]
+physics.analyzers.EventNtuple.crv.planeNames  : [ "t1", "ex", "t2" ]
+
+# Geometry must match the input MC file; v02 plane y-values pair with v02 geom.
+services.GeometryService.inputFile: "Offline/Mu2eG4/geom/geom_common_extracted_v02.txt"
