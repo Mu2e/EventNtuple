@@ -10,7 +10,9 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  datFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.dat"
+  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  debugLevel : 0
+
 }
 TrkQualDeM           : @local::TrkQual
 TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
