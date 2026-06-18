@@ -3,7 +3,6 @@
 #include "Offline/CommonMC/fcl/prolog.fcl"
 #include "Offline/fcl/TrkCaloDt.fcl"
 
-#include "EventNtuple/fcl/prolog_crv_planes.fcl"
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
@@ -364,10 +363,10 @@ EventNtupleMaker : {
     keepUnclusteredPulses : false
     fillDigis : false
     digisTag : "SelectReco"
-    # Default: a single horizontal plane at the top of the CRV-T counters,
-    planeCoords : [@local::crvPlaneY.CRV_T]
-    planeAxes   : [1]
-    planeNames  : [""]
+    # Default: a single truth plane at the detector-facing scintillator face of the
+    # CRV-T sectors. Position and orientation are read from the GeometryService, so
+    # this tracks the loaded geometry version automatically.
+    planes : [ { sector : "T" branchName : "" } ]
     mc : {
       fill : true
       coincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"

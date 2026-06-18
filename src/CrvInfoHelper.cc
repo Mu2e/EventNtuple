@@ -204,7 +204,7 @@ namespace mu2e
             CLHEP::Hep3Vector pos=points[i].pos();
             for(size_t k=0; k<crvPlaneCoords.size(); k++)
             {
-              int axis = (k<crvPlaneAxes.size()) ? crvPlaneAxes[k] : 1;  // 0=x (L/R sides), 1=y (top), 2=z; default y
+              int axis = crvPlaneAxes[k];  // 0=x (L/R sides), 1=y (top), 2=z; resolved from geometry, same size as crvPlaneCoords
               double planeC=crvPlaneCoords[k];
               double prevC = (axis==0) ? previousPos.x() : (axis==2) ? previousPos.z() : previousPos.y();
               double curC  = (axis==0) ? pos.x()         : (axis==2) ? pos.z()         : pos.y();

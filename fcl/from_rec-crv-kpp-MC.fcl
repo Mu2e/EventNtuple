@@ -24,11 +24,15 @@ physics.analyzers.EventNtuple.hasCRV : false        # keep events with no CRV co
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 
 # -- KPP / extracted CRV truth planes (v02 geometry) ---------------------------
-# Top-face entry plane of each CRV sector (T1/EX/T2), all horizontal -> axis 1=y.
+# Detector-facing scintillator face of each extracted-geometry CRV sector (T1/EX/T2).
+# Position and orientation come from the GeometryService, so the v02 plane values
+# follow from the geometry file loaded below.
 # Branches: crvcoincsmcplane_t1, crvcoincsmcplane_ex, crvcoincsmcplane_t2.
-physics.analyzers.EventNtuple.crv.planeCoords : [ @local::crvSectorEntryY_v02.T1, @local::crvSectorEntryY_v02.EX, @local::crvSectorEntryY_v02.T2 ]
-physics.analyzers.EventNtuple.crv.planeAxes   : [ 1, 1, 1 ]
-physics.analyzers.EventNtuple.crv.planeNames  : [ "t1", "ex", "t2" ]
+physics.analyzers.EventNtuple.crv.planes : [
+  { sector : "T1" branchName : "t1" },
+  { sector : "EX" branchName : "ex" },
+  { sector : "T2" branchName : "t2" }
+]
 
 # Geometry must match the input MC file; v02 plane y-values pair with v02 geom.
 services.GeometryService.inputFile: "Offline/Mu2eG4/geom/geom_common_extracted_v02.txt"
