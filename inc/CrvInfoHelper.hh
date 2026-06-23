@@ -39,7 +39,9 @@ namespace mu2e
           art::Handle<MCTrajectoryCollection> const& mcTrajectories,
           CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
           CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
-          CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
+          std::vector<CrvPlaneInfoMCCollection> &MCInfoPlanes,
+          const std::vector<double> &crvPlaneCoords,
+          const std::vector<int> &crvPlaneAxes,
           art::Handle<PrimaryParticle> const& primary);
 
       void FillCrvPulseHitIndices(

@@ -30,7 +30,9 @@ namespace mu2e
       art::Handle<MCTrajectoryCollection> const& mcTrajectories,
       CrvHitInfoRecoCollection &recoInfo, CrvHitInfoMCCollection &MCInfo,
       CrvSummaryReco &recoSummary, CrvSummaryMC &MCSummary,
-      CrvPlaneInfoMCCollection &MCInfoPlane, double crvPlaneY,
+      std::vector<CrvPlaneInfoMCCollection> &MCInfoPlanes,
+      const std::vector<double> &crvPlaneCoords,
+      const std::vector<int> &crvPlaneAxes,
       art::Handle<PrimaryParticle> const& primary) {
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem> tdet;
@@ -172,8 +174,8 @@ namespace mu2e
       MCSummary.maxPathLayer=*std::max_element(totalStep,totalStep+4);
     }
 
-    //locate points where the cosmic MC trajectories cross the xz plane of CRV-T
-    if(mcTrajectories.isValid() && primary.isValid())
+    //locate points where the cosmic MC trajectories cross each configured xz plane
+    if(mcTrajectories.isValid() && primary.isValid() && !crvPlaneCoords.empty())
     {
       if(primary->primarySimParticles().empty()) return;
       auto bestprimarysp = primary->primarySimParticles().front();
@@ -200,22 +202,29 @@ namespace mu2e
           for(size_t i=1; i<points.size(); i++)
           {
             CLHEP::Hep3Vector pos=points[i].pos();
-            if((previousPos.y()>crvPlaneY && pos.y()<=crvPlaneY) || (previousPos.y()<crvPlaneY && pos.y()>=crvPlaneY))
+            for(size_t k=0; k<crvPlaneCoords.size(); k++)
             {
-              double fraction=(crvPlaneY-pos.y())/(previousPos.y()-pos.y());
-              CLHEP::Hep3Vector planePos=fraction*(previousPos-pos)+pos;
-              CLHEP::Hep3Vector planeDir=(pos-previousPos).unit();
-              double planeTime=fraction*(points[i-1].t()-points[i].t())+points[i].t();
-              double planeKineticEnergy=fraction*(points[i-1].kineticEnergy()-points[i].kineticEnergy())+points[i].kineticEnergy();
-              MCInfoPlane.emplace_back(trajectorySimParticle->pdgId(),
-                  trajectoryPrimaryParticle->pdgId(),
-                  trajectoryPrimaryParticle->startMomentum().e(),
-                  tdet->toDetector(trajectoryPrimaryParticle->startPosition()),
-                  tdet->toDetector(planePos),
-                  planeDir,
-                  planeTime,
-                  planeKineticEnergy,
-                  0);  //unused
+              int axis = crvPlaneAxes[k];  // 0=x (L/R sides), 1=y (top), 2=z; resolved from geometry, same size as crvPlaneCoords
+              double planeC=crvPlaneCoords[k];
+              double prevC = (axis==0) ? previousPos.x() : (axis==2) ? previousPos.z() : previousPos.y();
+              double curC  = (axis==0) ? pos.x()         : (axis==2) ? pos.z()         : pos.y();
+              if((prevC>planeC && curC<=planeC) || (prevC<planeC && curC>=planeC))
+              {
+                double fraction=(planeC-curC)/(prevC-curC);
+                CLHEP::Hep3Vector planePos=fraction*(previousPos-pos)+pos;
+                CLHEP::Hep3Vector planeDir=(pos-previousPos).unit();
+                double planeTime=fraction*(points[i-1].t()-points[i].t())+points[i].t();
+                double planeKineticEnergy=fraction*(points[i-1].kineticEnergy()-points[i].kineticEnergy())+points[i].kineticEnergy();
+                MCInfoPlanes[k].emplace_back(trajectorySimParticle->pdgId(),
+                    trajectoryPrimaryParticle->pdgId(),
+                    trajectoryPrimaryParticle->startMomentum().e(),
+                    tdet->toDetector(trajectoryPrimaryParticle->startPosition()),
+                    tdet->toDetector(planePos),
+                    planeDir,
+                    planeTime,
+                    planeKineticEnergy,
+                    0);  //unused
+              }
             }
             previousPos=pos;
           }

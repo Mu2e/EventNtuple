@@ -27,6 +27,8 @@
 #include "Offline/Mu2eUtilities/inc/fromStrings.hh"
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
+#include "Offline/GeometryService/inc/DetectorSystem.hh"
+#include "Offline/CosmicRayShieldGeom/inc/CosmicRayShield.hh"
 #include "Offline/DataProducts/inc/SurfaceId.hh"
 // Framework includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -237,7 +239,17 @@ namespace mu2e {
         fhicl::Atom<bool>          keepUnclusteredPulses {Name("keepUnclusteredPulses"), Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
         fhicl::Atom<bool>          fillDigis             {Name("fillDigis"),             Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
-        fhicl::Atom<double>        planeY         {Name("planeY"),          Comment("Y of center of top layer of CRV-T counters (mm)")};
+        // CRV MC truth planes. Each plane names a CRV sector; its position and
+        // orientation (the detector-facing face and the perpendicular axis) are
+        // taken from the GeometryService, so no coordinates or axis integers live
+        // in fhicl.
+        struct CrvPlaneConfig {
+          using Name=fhicl::Name;
+          using Comment=fhicl::Comment;
+          fhicl::Atom<std::string> sector    {Name("sector"),     Comment("CRV sector name (e.g. \"T\", \"R\", \"L\", \"T1\", \"EX\"); the truth plane is placed at this sector's detector-facing scintillator face, with position and orientation read from the GeometryService")};
+          fhicl::Atom<std::string> branchName{Name("branchName"), Comment("Branch-name suffix for this plane; branch is crvcoincsmcplane_<branchName> (or crvcoincsmcplane for an empty string)"), ""};
+        };
+        fhicl::Sequence<fhicl::Table<CrvPlaneConfig>> planes{Name("planes"), Comment("CRV MC truth planes: one entry per CRV sector whose trajectory crossings should be recorded")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
         // MC sub-config (requires mc.fill also be true)
         struct MCConfig {
@@ -402,7 +414,13 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<CrvHitInfoMC>> _allBestCrvMCs;
       CrvSummaryReco _crvsummary;
       CrvSummaryMC   _crvsummarymc;
-      std::vector<CrvPlaneInfoMC> _crvcoincsmcplane;
+      std::vector<std::vector<CrvPlaneInfoMC>> _crvcoincsmcplanes;
+      // CRV truth-plane geometry, resolved once from the GeometryService:
+      // _crvPlaneCoords[k] is the plane coordinate (mm, Mu2e frame) and
+      // _crvPlaneAxes[k] the perpendicular axis (0=x,1=y,2=z) for plane k.
+      std::vector<double> _crvPlaneCoords;
+      std::vector<int>    _crvPlaneAxes;
+      bool                _crvPlanesResolved = false;
       std::vector<CrvPulseInfoReco> _crvpulses;
       std::vector<int> _crvPulseHitIndices;
       std::vector<CrvWaveformInfo> _crvdigis;
@@ -454,6 +472,10 @@ namespace mu2e {
       void fillTriggerBranch(const art::Event& event, std::string const& process, bool firstEvent);
       void resetTrackBranches();
       void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, TrkFitBranchIndex i_trk_fit_branch, size_t i_kseedptr);
+      // Resolve each configured CRV truth plane (by sector name) into a coordinate
+      // and perpendicular axis using the GeometryService. Called once, lazily, on
+      // the first event (when the geometry is available).
+      void resolveCrvPlanes();
 
       template <typename T, typename TI, typename TIA>
         std::vector<art::Handle<T> > createSpecialBranch(const art::Event& event, const std::string& branchname,
@@ -657,7 +679,13 @@ namespace mu2e {
       if(fillCRVMC()){
         _ntuple->Branch("crvsummarymc",&_crvsummarymc,_buffsize,_splitlevel);
         _ntuple->Branch("crvcoincsmc.",&_crvcoincsmc,_buffsize,_splitlevel);
-        _ntuple->Branch("crvcoincsmcplane.",&_crvcoincsmcplane,_buffsize,_splitlevel);
+        auto const& crvPlanes = _conf.crv().planes();
+        _crvcoincsmcplanes.resize(crvPlanes.size());
+        for(size_t k=0; k<crvPlanes.size(); ++k){
+          const std::string& suffix = crvPlanes[k].branchName();
+          std::string bname = suffix.empty() ? "crvcoincsmcplane." : "crvcoincsmcplane_" + suffix + ".";
+          _ntuple->Branch(bname.c_str(), &_crvcoincsmcplanes[k], _buffsize, _splitlevel);
+        }
       }
     }
     if(_conf.crv().fill() && _conf.crv().fillPulses()) {
@@ -686,6 +714,55 @@ namespace mu2e {
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
     _infoStructHelper.updateSubRun();
+  }
+
+  void EventNtupleMaker::resolveCrvPlanes() {
+    // Resolve each configured CRV truth plane (named by sector) into a plane
+    // coordinate and perpendicular axis, reading both from the GeometryService.
+    // The plane sits at the sector's detector-facing scintillator face: the inner
+    // face (toward the detector axis) of the innermost scintillator layer. This is
+    // the first CRV surface a track extrapolated outward from the detector reaches,
+    // matching the historical hard-coded default.
+    GeomHandle<CosmicRayShield> CRS;
+    GeomHandle<DetectorSystem>  tdet;
+    const CLHEP::Hep3Vector& detOrigin = tdet->getOrigin(); // detector axis, Mu2e frame
+    const std::vector<CRSScintillatorShield>& shields = CRS->getCRSScintillatorShields();
+
+    _crvPlaneCoords.clear();
+    _crvPlaneAxes.clear();
+    for(auto const& plane : _conf.crv().planes()) {
+      const std::string& sector = plane.sector();
+      // Sector names are "CRV_<sector>" (e.g. CRV_T1); match like CosmicRayShield does.
+      const CRSScintillatorShield* rep = nullptr;
+      for(auto const& s : shields) {
+        if(s.getName().find(sector, 4) == 4) { rep = &s; break; }
+      }
+      if(rep == nullptr)
+        throw cet::exception("EventNtuple")
+          << "crv.planes: no CRSScintillatorShield matches sector \"" << sector << "\"\n";
+
+      // The bar "thickness" direction is the axis the layers stack along, i.e. the
+      // plane normal (0=x for L/R sides, 1=y for top, 2=z).
+      const CRSScintillatorBarDetail& barDetail = rep->getCRSScintillatorBarDetail();
+      const int    axis      = barDetail.getThicknessDirection();
+      const double halfThick = barDetail.getHalfThickness();
+      const std::vector<CRSScintillatorLayer>& layers = rep->getModule(0).getLayers();
+      // Outward = away from the detector axis (toward where cosmics enter). The whole
+      // sector sits on one side of the detector axis, so any layer center fixes the sign.
+      const double outwardSign = (layers.front().getPosition()[axis] >= detOrigin[axis]) ? 1.0 : -1.0;
+      // Innermost scintillator layer = the one least far along the outward normal.
+      double innerLayerCenter = layers.front().getPosition()[axis];
+      for(auto const& layer : layers) {
+        const double c = layer.getPosition()[axis];
+        if(outwardSign * c < outwardSign * innerLayerCenter) innerLayerCenter = c;
+      }
+      // Detector-facing face of that layer: step inward by half a bar thickness.
+      const double coord = innerLayerCenter - outwardSign * halfThick;
+
+      _crvPlaneCoords.push_back(coord);
+      _crvPlaneAxes.push_back(axis);
+    }
+    _crvPlanesResolved = true;
   }
 
   void EventNtupleMaker::analyze(const art::Event& event) {
@@ -1023,15 +1100,16 @@ namespace mu2e {
       _crvHelper.FillCrvPulseHitIndices(_crvCoincidences, _crvRecoPulses, _crvPulseHitIndices);
     }
     if(_conf.crv().fill() && _conf.crv().fillCoincs()){
+      if(!_crvPlanesResolved) resolveCrvPlanes();
       _crvcoincs.clear();
       _crvcoincsmc.clear();
-      _crvcoincsmcplane.clear();
+      for(auto& v : _crvcoincsmcplanes) v.clear();
       event.getByLabel(_conf.crv().stepsTag(),_crvSteps);
       if(fillCRVMC()) event.getByLabel(_conf.crv().mc().coincidenceMCsTag(),_crvCoincidenceMCs);
       _crvHelper.FillCrvHitInfoCollections(
           _crvCoincidences, _crvCoincidenceMCs,
           _crvRecoPulses, _crvSteps, _mcTrajectories, _crvcoincs, _crvcoincsmc,
-          _crvsummary, _crvsummarymc, _crvcoincsmcplane, _conf.crv().planeY(), _pph);
+          _crvsummary, _crvsummarymc, _crvcoincsmcplanes, _crvPlaneCoords, _crvPlaneAxes, _pph);
     }
     if(_conf.crv().fill() && _conf.crv().fillPulses()){
       _crvpulses.clear();
