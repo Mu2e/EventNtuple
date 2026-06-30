@@ -881,7 +881,9 @@ namespace mu2e {
       event.getByLabel(_extraMCStepTags[ixt],mcstepch);
       _extraMCStepCollections.push_back(mcstepch);
     }
-    event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
+    if(!_surfaceStepsTag.empty()) {
+      event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
+    }
 
     // find global MCStep collections
     _stepPointMCCollections.clear();
