@@ -10,6 +10,7 @@ BEGIN_PROLOG
 TrkQual : {
   module_type : TrackQuality
   onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  xgbFilename : "ArtAnalysis/TrkDiag/data/TrkQual_BDT1_v2.0.ubj"
   debugLevel : 0
 
 }
@@ -192,7 +193,7 @@ DeM : { input : "MergeKKDeM"
   branchname : "dem"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDeM"]
+  trkQualTags : ["TrkQualDeM:ANN"]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
@@ -262,7 +263,7 @@ All : { input : "MergeKKAll"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualAll"]
+  trkQualTags : ["TrkQualAll:ANN", "TrkQualAll:BDT"]
   trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
@@ -276,7 +277,7 @@ De : { input : "MergeKKDe"
   branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDe"]
+  trkQualTags : ["TrkQualDe:ANN"]
   trkPIDTags : ["TrkPIDDe"]
 }
 
@@ -451,7 +452,7 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualTags : ["TrkQualDe"]
+    trkQualTags : ["TrkQualDe:ANN"]
     trkPIDTags : ["TrkPIDDe"]
   }
 ]
