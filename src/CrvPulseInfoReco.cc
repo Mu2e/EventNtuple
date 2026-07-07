@@ -1,7 +1,7 @@
 #include "EventNtuple/inc/CrvPulseInfoReco.hh"
 #include "CLHEP/Vector/ThreeVector.h"
 namespace mu2e {
-  CrvPulseInfoReco::CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int ROC, int FEB, int FEBchannel, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex, int sequenceIndex) :
+  CrvPulseInfoReco::CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int ROC, int FEB, int FEBchannel, float PEs, float PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex, int sequenceIndex) :
     pos(ppos),
     barId(barId),
     sectorId(sectorId),
