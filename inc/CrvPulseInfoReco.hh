@@ -18,8 +18,8 @@ namespace mu2e
     int    ROC = -1;             //ROC number
     int    FEB = -1;             //FEB number
     int    FEBchannel = -1;      //FEB channel number
-    int    PEs = -1;             //PEs using pulse integral
-    int    PEsPulseHeight = -1;  //PEs using pulse height
+    float  PEs = -1;             //PEs using pulse integral
+    float  PEsPulseHeight = -1;  //PEs using pulse height
     float  pulseHeight = -1;     //Pulse height
     float  pulseBeta = -1;       //Pulse beta
     float  pulseFitChi2 = -1;    //Pulse Fit chi2
@@ -28,7 +28,7 @@ namespace mu2e
     int    sequenceIndex = -1;   //index of the pulse within a waveform
 
     CrvPulseInfoReco(){}
-    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int ROC, int FEB, int FEBchannel, int PEs, int PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex, int sequenceIndex);
+    CrvPulseInfoReco(CLHEP::Hep3Vector ppos, int barId, int sectorId, int SiPMId, int ROC, int FEB, int FEBchannel, float PEs, float PEsPulseHeight, float pulseHeight, float pulseBeta, float pulseFitChi2, float time, int crvHitIndex, int sequenceIndex);
   };
 
   typedef std::vector<CrvPulseInfoReco> CrvPulseInfoRecoCollection;  //this is the reco vector which will be stored in the main TTree
