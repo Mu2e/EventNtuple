@@ -6,6 +6,11 @@
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
+
+#################################
+# Track quality
+#################################
+
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
@@ -50,31 +55,36 @@ TrkQualProducers : {
 
 TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQualUeP, TrkQualDmuP, TrkQualUmuM, TrkQualUmuP ]
 
-# track PID module
-TrkPID : {
-  module_type : TrackPID
-  MaxDE : 500.0 # MeV
-  DeltaTOffset : -1.15 # specific to MDC2018h
-  datFilename : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
-}
-# this module only makes sense for downstream electron fits
-TrkPIDDeM          : @local::TrkPID
-TrkPIDDeM.KalSeedPtrCollection : "MergeKKDeM"
-TrkPIDDeP          : @local::TrkPID
-TrkPIDDeP.KalSeedPtrCollection : "MergeKKDeP"
-TrkPIDDe           : @local::TrkPID
-TrkPIDDe.KalSeedPtrCollection : "MergeKKDe"
-TrkPIDAll          : @local::TrkPID
-TrkPIDAll.KalSeedPtrCollection : "MergeKKAll"
-TrkPIDProducers : {
-  TrkPIDDeM : @local::TrkPIDDeM
-  TrkPIDDeP : @local::TrkPIDDeP
-  TrkPIDDe : @local::TrkPIDDe
-  TrkPIDAll : @local::TrkPIDAll
-}
-TrkPIDProducersPath : [ TrkPIDDeM, TrkPIDDeP ]
+#################################
+# PID
+#################################
 
-# trigger
+TrkPIDProducers : {
+  # Reconstruct track dt_hit/dt_fit
+  TrkDtDt : {
+    module_type  : TrackDtDt
+    doHistograms : false
+    diagLevel    : 0
+    kalSeeds     : [ "KKDe", "KKUe", "KKDmu", "KKUmu", "MergeKKAll" ]
+  }
+
+  # Track PID module
+  TrkPID : {
+    module_type  : TrackPID
+    MaxDE        : 500.0 # MeV
+    KalSeeds     : [ "KKDe"       , "KKUe"        , "KKDmu"        , "KKUmu"        , "MergeKKAll"        ]
+    KalSeedDtDts : ["TrkDtDt:KKDe", "TrkDtDt:KKUe", "TrkDtDt:KKDmu", "TrkDtDt:KKUmu", "TrkDtDt:MergeKKAll"]
+    MVAVersion   : 1
+    DatFilename  : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
+    DebugLevel   : 0
+  }
+}
+
+TrkPIDPath : [ TrkDtDt, TrkPID ]
+
+#################################
+# Trigger
+#################################
 
 TTProducers : {
   MergeTTApr : {
@@ -263,7 +273,7 @@ All : { input : "MergeKKAll"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
-  trkPIDTags : ["TrkPIDAll"]
+  trkPIDTags : ["TrkPID:MergeKKAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
@@ -277,7 +287,7 @@ De : { input : "MergeKKDe"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
-  trkPIDTags : ["TrkPIDDe"]
+  trkPIDTags : ["TrkPID:KKDe"]
 }
 
 EventNtupleMaker : {
@@ -428,12 +438,12 @@ EventNtuple : {
     genCountLogger : @local::genCountLogger
   }
 
-  #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDAll ]
+  #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, @sequence::TrkPIDPath ]
   EndPath : [ EventNtuple, genCountLogger ]
   EndPathNoMC : [ EventNtuple ]
 
