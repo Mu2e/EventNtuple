@@ -59,6 +59,7 @@ namespace rooutil {
       AddTriggerInfo(ntuple);
 
       CheckForBranch(ntuple, "trk", &this->trk);
+      CheckForBranch(ntuple, "trkdtdt", &this->trkdtdt);
       CheckForBranch(ntuple, "trksegs", &this->trksegs);
       CheckForBranch(ntuple, "trkcalohit", &this->trkcalohit);
       CheckForBranch(ntuple, "trkqual", &this->trkqual);
@@ -132,6 +133,7 @@ namespace rooutil {
         if (debug) { std::cout << "Event::Update(): Creating Track " << i_track << "... " << std::endl; }
         Track track(&(trk->at(i_track)), &(trksegs->at(i_track)), &(trkcalohit->at(i_track))); // passing the addresses of the underlying structs
         UpdateObject(track.trkmc, trkmc, i_track, debug);
+        UpdateObject(track.trkdtdt, trkdtdt, i_track, debug);
         UpdateObject(track.trksegsmc, trksegsmc, i_track, debug);
         UpdateObject(track.trksegpars_lh, trksegpars_lh, i_track, debug);
         UpdateObject(track.trksegpars_ch, trksegpars_ch, i_track, debug);
@@ -283,6 +285,7 @@ namespace rooutil {
         for (int i_trk = trks_to_remove.size()-1; i_trk >= 0; --i_trk) {
           trk->erase(trk->begin()+trks_to_remove[i_trk]);
           if (trkmc) { trkmc->erase(trkmc->begin()+trks_to_remove[i_trk]); }
+          if (trkdtdt) { trkdtdt->erase(trkdtdt->begin()+trks_to_remove[i_trk]); }
           if (trksegs) { trksegs->erase(trksegs->begin()+trks_to_remove[i_trk]); }
           if (trksegsmc) { trksegsmc->erase(trksegsmc->begin()+trks_to_remove[i_trk]); }
           if (trkcalohit) { trkcalohit->erase(trkcalohit->begin()+trks_to_remove[i_trk]); }
@@ -417,6 +420,7 @@ namespace rooutil {
 
     std::vector<mu2e::TrkInfo>* trk = nullptr;
     std::vector<mu2e::TrkInfoMC>* trkmc = nullptr;
+    std::vector<mu2e::TrkDtDtInfo>* trkdtdt = nullptr;
     std::vector<mu2e::TrkCaloHitInfo>* trkcalohit = nullptr;
     std::vector<mu2e::CaloClusterInfoMC>* trkcalohitmc = nullptr;
     std::vector<mu2e::MVAResultInfo>* trkqual = nullptr;
