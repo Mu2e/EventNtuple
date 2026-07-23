@@ -226,11 +226,11 @@ namespace mu2e {
 
   void InfoStructHelper::fillTrkDtDtInfo(const KalSeedDtDt& dtdt,std::vector<TrkDtDtInfo>& trkinfo) {
     TrkDtDtInfo info;
-    info.slope_    = dtdt.slope_   ;
-    info.offset_   = dtdt.offset_  ;
-    info.slopeUnc_ = dtdt.slopeUnc_;
-    info.chisq_    = dtdt.chisq_   ;
-    info.dof_      = dtdt.dof_     ;
+    info.slope    = dtdt.slope_   ;
+    info.offset   = dtdt.offset_  ;
+    info.slopeUnc = dtdt.slopeUnc_;
+    info.chisq    = dtdt.chisq_   ;
+    info.dof      = dtdt.dof_     ;
     trkinfo.push_back(info);
   }
 
