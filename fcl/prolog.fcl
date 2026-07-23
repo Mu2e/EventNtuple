@@ -274,6 +274,7 @@ All : { input : "MergeKKAll"
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualAll"]
   trkPIDTags : ["TrkPID:MergeKKAll"]
+  trkDtDtTag : "TrkDtDt:MergeKKAll"
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
@@ -332,6 +333,7 @@ EventNtupleMaker : {
     fillHitCalibs : false
     fillTrkQual : true
     fillTrkPID : false
+    fillTrkDtDt : true
     fits : [ @local::All ]
     mc : {
       fill : true

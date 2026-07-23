@@ -224,6 +224,16 @@ namespace mu2e {
     all_mvas.push_back(result_TrkPID);
   }
 
+  void InfoStructHelper::fillTrkDtDtInfo(const KalSeedDtDt& dtdt,std::vector<TrkDtDtInfo>& trkinfo) {
+    TrkDtDtInfo info;
+    info.slope_    = dtdt.slope_   ;
+    info.offset_   = dtdt.offset_  ;
+    info.slopeUnc_ = dtdt.slopeUnc_;
+    info.chisq_    = dtdt.chisq_   ;
+    info.dof_      = dtdt.dof_     ;
+    trkinfo.push_back(info);
+  }
+
   void InfoStructHelper::fillTrkInfoHits(const KalSeed& kseed, TrkInfo& trkinfo) {
     static StrawHitFlag active(StrawHitFlag::active);
     std::set<unsigned> planes;

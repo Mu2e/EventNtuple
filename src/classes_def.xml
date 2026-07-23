@@ -22,6 +22,8 @@
   <class name="mu2e::TrkCount" />
   <class name="mu2e::TrkInfo" />
   <class name="std::vector<mu2e::TrkInfo>" />
+  <class name="mu2e::TrkDtDtInfo" />
+  <class name="std::vector<mu2e::TrkDtDtInfo>" />
   <class name="mu2e::LoopHelixInfo" />
   <class name="mu2e::CentralHelixInfo" />
   <class name="mu2e::KinematicLineInfo" />
