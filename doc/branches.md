@@ -32,10 +32,11 @@ If a Kalman fit fails or there are multiple downstream tracks to fit, the number
 |--------|-----------|-------------|------------------|
 | trk |  Vector branch |   information about the reconstructed track| [see TrkInfo.hh](../inc/TrkInfo.hh)
 | trkmc |  Vector branch |   MC-truth information about the track| [see TrkInfoMC.hh](../inc/TrkInfoMC.hh)
-| trkcalohit |  Vector branch |   calorimeter cluster associated with track with POCA and track-calo matching info (`active`, `did`, `poca`, `mom`, `cdepth`, `trkdepth`, `doca`, `dt`, `tresid`, `ctime`, `ctimeerr`, `edep`, `edeperr`)| [see TrkCaloHitInfo.hh](../inc/TrkCaloHitInfo.hh)
-| trkcalohitmc |  Vector branch |   MC-truth information for calorimeter clusters matched to track| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
-| trkqual |  Vector branch |   quality output from multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
-| trkpid |  Vector branch |   particle ID output from multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
+| trkcalohit |  Vector branch |   the calorimeter cluster assigned to a track| [see TrkCaloHitInfo.hh](../inc/TrkCaloHitInfo.hh)
+| trkcalohitmc |  Vector branch |   MC-truth infromation for calorimeter clusters| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
+| trkdtdt |  Vector branch |   Result of track dt_hit / dt_trk fit| [see TrkDtDtInfo.hh](../inc/TrkDtDtInfo.hh)
+| trkqual |  Vector branch |   the output of a multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
+| trkpid |  Vector branch |   the output of a multi-variate analysis (MVA)| [see MVAResultInfo.hh](../inc/MVAResultInfo.hh)
 ## Track segments Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).
@@ -88,49 +89,33 @@ The branch is empty if there are no time clusters during the event.
 | timeclusters |  Vector branch |   Information in a reconstructed time cluster| [see TimeClusterInfo.hh](../inc/TimeClusterInfo.hh)
 ## Calorimeter Branches
 
-These branches are vectors of calorimeter clusters/hits/recodigis/digis that occurred during the event.
-
-Each branch can be read independently, but elements contain indexes to other branches to maintain parentage links:
-- Each cluster contains a vector `hits_` with indices of hits in this cluster
-- Each hit contains indices of its recodigis (vector `recoDigis_`) and parent cluster index (`clusterIdx_`)
-- Each recodi contains index of its raw digi (`caloDigiIdx_`) and parent hit index (`caloHitIdx_`)
-- Each raw digi contains index of parent recodi if any (`caloRecoDigiIdx_`)
-
-**Hierarchy:** digis --> recodigis --> hits --> clusters
-
-Example: cluster 3 has `hits_ = {12, 13, 14, 15}`. Each of those hits will have `clusterIdx_ = 3`.
-Calorimeter hits store crystal position in (x,y,z) with frame origin at tracker center.
-
-| branch | structure | explanation | key fields | leaf information |
-|--------|-----------|-------------|-----------|------------------|
-| caloclusters |  Vector branch |   calorimeter clusters with indices of hits| `diskID_`, `time_`, `timeErr_`, `energyDep_`, `energyDepErr_`, `cog_` (centroid), `hits_` (vector of hit indices), `size_`, `isSplit_` | [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
-| calohits |  Vector branch |   calorimeter hits with crystal positions and indices to recodigis/cluster| `crystalId_`, `nSiPMs_`, `time_`, `timeErr_`, `eDep_`, `eDepErr_`, `crystalPos_`, `recoDigis_` (vector of recodi indices), `clusterIdx_` | [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
-| calorecodigis |  Vector branch |   fitted calorimeter recodigis with indices to raw digi and parent hit| `eDep_`, `eDepErr_`, `time_`, `timeErr_`, `chi2_`, `ndf_`, `pileUp_`, `caloDigiIdx_`, `caloHitIdx_` | [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
-| calodigis |  Vector branch |   raw calorimeter digis with waveform data and parent recodi index| `SiPMID_`, `diskID_`, `t0_` (first sample time), `waveform_`, `peakpos_` (peak index), `posX_`, `posY_`, `caloRecoDigiIdx_` | [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
+These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.
+While each branch can be read independently, i.e. all the hits of the event, each element contains indexes to the other branches for parentage link.
+The cluster element contains the vector 'hits_' containing the indexes of the hits branch belonging to this cluster.
+Similarly, each hit contains the indexes of its two recodigis (left and right channels) and the index of its parent cluster.
+Example: cluster 3 has hits_ = {12, 13, 14, 15}. Each of those hits will have 'clusterIdx_' = 3.
+Calo digis and hits have the crystal (x,y,z) position saved. Frame origin is center of tracker.
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| caloclusters |  Vector branch |   calorimeter clusters with indices of hits| [see CaloClusterInfo.hh](../inc/CaloClusterInfo.hh)
+| calohits |  Vector branch |   calorimeter hits with indices of recodigis and of parent cluster| [see CaloHitInfo.hh](../inc/CaloHitInfo.hh)
+| calorecodigis |  Vector branch |   calorimeter recodigis with index of raw digi and of parent hit| [see CaloRecoDigiInfo.hh](../inc/CaloRecoDigiInfo.hh)
+| calodigis |  Vector branch |   calorimeter raw digis with index of parent recodigi if any| [see CaloDigiInfo.hh](../inc/CaloDigiInfo.hh)
 ## Calorimeter MC Branches
 
-The calorimeter MC branches provide MC-truth information at different levels of the calorimeter reconstruction hierarchy.
+The calorimeter mc clusters branch is a vector of MC clusters associated with the reconstructed clusters.
+The vector is aligned with the reconstructed clusters (same size & indexes).
 
-**Alignment with Reconstruction Branches:**
-Most calorimeter MC branches are index-aligned with their reco counterparts (same size and element index). One important exception:
-
-> **Warning — `calohitsmc` is not aligned with `calohits`.** Reco hits come from `CaloHitMaker`; MC hits come from `compressRecoMCs`, which repacks `CaloHitMC` objects when copying cluster MC truth. The two branches can differ in size and order. Offline pairs reco and MC hits via `CaloHitMCTruthAssn` at reconstruction time, but that association is not kept in production art files read by EventNtuple. Each `calohitsmc` element therefore carries `caloHitIdx_` (index into `calohits`, or `-1`). RooUtil resolves MC hits through `caloHitIdx_`; do **not** assume `calohitsmc[i]` corresponds to `calohits[i]`.
-
-- `caloclustersmc` ← aligned with `caloclusters` (same size & indices)
-- `calohitsmc` ← **not** index-aligned with `calohits` (see warning above); use `caloHitIdx_` to find the reco hit
-- `calodigismc` ← aligned with `calodigis` when both branches are filled (same size & indices; raw digi MC truth)
-- `calodigisim` ← unique SimParticles from raw digis
-- `calomcsim` ← unique SimParticles from MC clusters
-
-Each MC element contains `simParticleIds` to index into the corresponding `*mcsim` branch for genealogy information.
-
-| branch | structure | explanation | key fields | leaf information |
-|--------|-----------|-------------|-----------|------------------|
-| caloclustersmc |  Vector branch |   MC-truth information for calorimeter clusters (aligned with caloclusters)| `nsim` (# of sim particles), `etot` (total true energy), `tavg` (avg time), `eprimary` (primary particle energy), `tprimary` (primary time), `simParticleIds`, `simRels` (MCRelationship), `hits_`, `prel` (primary to event primary relationship) | [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
-| calohitsmc |  Vector branch |   MC-truth for calorimeter hits (**not** index-aligned with `calohits`; use `caloHitIdx_`)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `clusterIdx_`, `caloHitIdx_`, etc. | [see CaloHitInfoMC.hh](../inc/CaloHitInfoMC.hh)
-| calodigismc |  Vector branch |   MC-truth information for raw calorimeter digis (aligned with calodigis)| `nsim`, `eDep`, `eDepG4`, `eprimary`, `tprimary`, `eDeps`, `tDeps`, `momentumIns`, `simParticleIds`, `simRels`, `caloHitIdx_`, `crystalID_`, `diskID_`, `energyCorr_`, `timeCorr_`, `posX_`, `posY_` | [see CaloDigiMCInfo.hh](../inc/CaloDigiMCInfo.hh)
-| calodigisim |  Vector branch |   unique SimParticles in all raw digis (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
-| calomcsim |  Vector branch |   unique SimParticles in all MC clusters (genealogy information)| SimParticle genealogy info | [see SimInfo.hh](../inc/SimInfo.hh)
+The calorimeter sim info branch is a vector of SimParticles belonging to any MC cluster.
+This branch is filled according to the MC clusters order, but no sim particles are repeated (if they belong to multiple clusters)
+The correct SimParticle can be retrieved from the MC cluster via the simid number
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| caloclustersmc |  Vector branch |   MC-truth infromation for calorimeter clusters| [see CaloClusterInfoMC.hh](../inc/CaloClusterInfoMC.hh)
+| calohitsmc |  Vector branch |   MC-truth infromation for calorimeter Hits| [see CaloHitInfoMC.hh](../inc/CaloHitInfoMC.hh)
+| calodigismc |  Vector branch |   MC-truth information for calorimeter raw digis| [see CaloDigiMCInfo.hh](../inc/CaloDigiMCInfo.hh)
+| calomcsim |  Vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
+| calodigisim |  Vector branch |   information about SimParticles in genealogy| [see SimInfo.hh](../inc/SimInfo.hh)
 ## CRV Branches
 
 These branches contain a vector where each element is a CRV hit that happened during the event.
@@ -143,25 +128,14 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincs |  Vector branch |   information about a cluster of CRV coincidence triplets| [see CrvHitInfoReco.hh](../inc/CrvHitInfoReco.hh)
 | crvcoincsmc |  Vector branch |   information about the MC track which most likely caused the CRV coincidence triplets| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
-| crvpulses |  Vector branch |   information about CRV reco pulses, including ROC/FEB/FEB channel IDs. `crvHitIndex` gives the index in `crvcoincs`, or -1 if the pulse was not clustered into a CRV hit| [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
-| crvpulsesmc |  Vector branch |   MC-truth information corresponding entry-by-entry to `crvpulses`| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
+| crvpulses |  Vector branch |  | [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
+| crvdigis |  Vector branch |  | [see CrvWaveformInfo.hh](../inc/CrvWaveformInfo.hh)
+| crvpulsesmc |  Vector branch |  | [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
 ## Trigger Branches
 
-Trigger branches store trigger decision information for each event and track hypothesis. Each trigger branch corresponds to a different trigger path or decision criterion.
+Each element in these branch corresponds to a different Kalman fit hypotheses to reconstruct the track:
 
-Trigger branches are named with the prefix `trig_` followed by the trigger name. The structure of trigger branches is a single object per event containing an array of boolean decision bits, one for each trigger name.
-
-**TrigInfo Structure:**
-- **`_triggerArray[ntrig_]`**: A boolean array with up to 500 trigger decision bits, where `ntrig_ = 500`
-- Each element is a boolean that indicates whether the trigger passed (true) or failed (false) for that event
-- The index corresponds to a specific trigger path or decision algorithm
-
-To discover the names and meanings of all trigger branches available in your file, run:
-```
-checkEventNtuple filename.root
-```
-
-This will display the mapping of indices to trigger names, allowing you to correctly interpret the trigger array. For more details about the trigger structure, see [TrigInfo.hh](../inc/TrigInfo.hh).
+Trigger branches are prefixed with ```trig_```. To find the names of the trigger branches run ```checkEventNtuple filename.root```
 ## Deprecated Branches
 
 These branches are remnants from trkana and are deprecated.
