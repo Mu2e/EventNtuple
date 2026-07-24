@@ -114,7 +114,7 @@ Examples: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C), [PlotCa
 ### The ```UserBranch``` Class
 There are some branches in EventNtuple that can have their names defined at runtime. For example, additional ```trkqual``` branches can be added in order to compare different trainings or different algorithms. The ```UserBranch``` class handles these sorts of branches.
 
-Example: [CompareTrkQualTrainings_UserBranches.C](./examples/CompareTrkQualTrainings_UserBranches.C]
+Example: [CompareTrkQualTrainings_UserBranches.C](./examples/CompareTrkQualTrainings_UserBranches.C)
 
 ### Branches not contained within a class
 Some branches are not contained in any of the above classes:
