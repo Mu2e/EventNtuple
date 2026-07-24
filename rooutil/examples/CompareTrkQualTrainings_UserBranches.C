@@ -18,7 +18,9 @@ using namespace rooutil;
 
 void CompareTrkQualTrainings_UserBranches(std::string filename,
                                           std::string reference_branch = "trkqual",
-                                          std::string candidate_branch = "trkqual_candidate") {
+                                          std::string candidate_branch = "trkqual_bdt",
+                                          std::string expected_reference_version = "ANN1_v2",
+                                          std::string expected_candidate_version = "BDT1_v2") {
 
   bool save_plots = false;
   std::string plotsdir = "/exp/mu2e/app/users/edmonds/plots/2025-09-25/";
@@ -28,6 +30,9 @@ void CompareTrkQualTrainings_UserBranches(std::string filename,
   TH2F* hTrkQual_ReferenceVsCandidate_LQ = new TH2F("hTrkQual_ReferenceVsCandidate_LQ", "", 100,0,1, 100,0,1);
 
   RooUtil util(filename, true);
+  // If you want to require a specific version of a model, uncomment the lines below
+  //  util.RequireTrkQualVersion(reference_branch, expected_reference_version);
+  //  util.RequireTrkQualVersion(candidate_branch, expected_candidate_version);
 
   // In this example, we have commented out reference_trkqual since we will use the standard "trkqual" branch
   //  auto reference_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(reference_branch);

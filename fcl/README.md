@@ -23,8 +23,7 @@ trkQualLeaves : [
 
 This writes `trkqual` and `trkqual_candidate`. EventNtuple also records the
 track branch, output branch, input tag, and model version in
-`EventNtuple/trkqual_metadata`; `checkEventNtuple` prints this metadata. RooUtil
-can bind either output by name with `MakeTrackUserBranch<mu2e::MVAResultInfo>`.
+`EventNtuple/trkqual_metadata`; `checkEventNtuple` prints this metadata.
 
 ## Table of Fcl Files
 

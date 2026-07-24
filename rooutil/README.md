@@ -116,6 +116,14 @@ There are some branches in EventNtuple that can have their names defined at runt
 
 Example: [CompareTrkQualTrainings_UserBranches.C](./examples/CompareTrkQualTrainings_UserBranches.C)
 
+#### TrkQual Branches
+RooUtil can bind either output by name with `MakeTrackUserBranch<mu2e::MVAResultInfo>`.
+Analysis code can stop on unexpected provenance with:
+
+```
+util.RequireTrkQualVersion("trkqual", "ANN2_v2");
+```
+
 ### Branches not contained within a class
 Some branches are not contained in any of the above classes:
 

@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <fstream>
+#include <map>
+#include <stdexcept>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -12,6 +14,12 @@
 #include "EventNtuple/rooutil/inc/UserBranch.hh"
 
 namespace rooutil {
+  struct TrkQualMetadata {
+    std::string output_branch;
+    std::string input_tag;
+    std::string model_version;
+  };
+
   class RooUtil {
   public:
     RooUtil(std::string filename, bool debug = false, std::string treename = "EventNtuple/ntuple") : debug(debug), n_proc_events(0) {
@@ -23,6 +31,7 @@ namespace rooutil {
         ntuple->Add(filename.c_str());
         SetVersionNumber(filename);
         SetNProcessedEvents(filename);
+        LoadTrkQualMetadata(filename);
       }
       else { //  assume its a file list
         std::ifstream filelist(filename);
@@ -38,6 +47,7 @@ namespace rooutil {
               first_line = false;
             }
             SetNProcessedEvents(line);
+            LoadTrkQualMetadata(line);
           }
           filelist.close();
         } else {
@@ -85,6 +95,29 @@ namespace rooutil {
 
     int GetNEvents() { return ntuple->GetEntries(); }
     int GetNProcEvents() { return n_proc_events; }
+
+    bool HasTrkQualMetadata(const std::string& output_branch) const {
+      return trkqual_metadata.find(output_branch) != trkqual_metadata.end();
+    }
+
+    const TrkQualMetadata& GetTrkQualMetadata(const std::string& output_branch) const {
+      const auto metadata = trkqual_metadata.find(output_branch);
+      if (metadata == trkqual_metadata.end()) {
+        throw std::runtime_error(
+          "No TrkQual metadata is available for output branch " + output_branch);
+      }
+      return metadata->second;
+    }
+
+    void RequireTrkQualVersion(
+        const std::string& output_branch, const std::string& expected_model_version) const {
+      const auto& metadata = GetTrkQualMetadata(output_branch);
+      if (metadata.model_version != expected_model_version) {
+        throw std::runtime_error(
+          "Unexpected TrkQual version for " + output_branch + ": expected " +
+          expected_model_version + ", got " + metadata.model_version);
+      }
+    }
 
     Event& GetEvent(int i_event) {
       if (debug) { std::cout << "RooUtil::GetEvent(): Getting event " << i_event << std::endl; }
@@ -202,12 +235,50 @@ namespace rooutil {
     }
 
   private:
+    void LoadTrkQualMetadata(const std::string& filename) {
+      TFile file(filename.c_str(), "READ");
+      TH1I* metadata_histogram = nullptr;
+      file.GetObject("EventNtuple/trkqual_metadata", metadata_histogram);
+      if (metadata_histogram == nullptr) {
+        return;
+      }
+
+      const std::string input_tag_marker = ": input tag = ";
+      const std::string model_version_marker = "; model version = ";
+      for (int bin = 1; bin <= metadata_histogram->GetNbinsX(); ++bin) {
+        const std::string label = metadata_histogram->GetXaxis()->GetBinLabel(bin);
+        const auto input_tag_pos = label.find(input_tag_marker);
+        const auto model_version_pos = label.find(model_version_marker);
+        if (input_tag_pos == std::string::npos || model_version_pos == std::string::npos ||
+            input_tag_pos >= model_version_pos) {
+          throw std::runtime_error("Invalid TrkQual metadata in " + filename + ": " + label);
+        }
+
+        TrkQualMetadata metadata{
+          label.substr(0, input_tag_pos),
+          label.substr(input_tag_pos + input_tag_marker.size(),
+                       model_version_pos - input_tag_pos - input_tag_marker.size()),
+          label.substr(model_version_pos + model_version_marker.size())
+        };
+        const auto existing = trkqual_metadata.find(metadata.output_branch);
+        if (existing != trkqual_metadata.end() &&
+            (existing->second.input_tag != metadata.input_tag ||
+             existing->second.model_version != metadata.model_version)) {
+          throw std::runtime_error(
+            "TrkQual metadata for " + metadata.output_branch +
+            " differs between input files");
+        }
+        trkqual_metadata[metadata.output_branch] = metadata;
+      }
+    }
+
     TChain* ntuple;
     Event* event; // holds all the variables for SetBranchAddress
     bool debug;
 
     TH1I* hVersion;
     int n_proc_events;
+    std::map<std::string, TrkQualMetadata> trkqual_metadata;
     std::vector<std::shared_ptr<UserBranchBase>> user_branches;
 
     TTree* output_ntuple; // for output
