@@ -111,6 +111,10 @@ The ```CaloCluster``` class contains all information related to a single calorim
 
 Examples: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C), [PlotCaloClusterEnergy_RecoVsTrue.C](./examples/PlotCaloClusterEnergy_RecoVsTrue.C), [PlotCaloClusterAndHits.C](./examples/PlotCaloClusterAndHits.C), [PlotCaloCluster_SimParticles.C](./examples/PlotCaloCluster_SimParticles.C)
 
+### The ```UserBranch``` Class
+There are some branches in EventNtuple that can have their names defined at runtime. For example, additional ```trkqual``` branches can be added in order to compare different trainings or different algorithms. The ```UserBranch``` class handles these sorts of branches.
+
+Example: [CompareTrkQualTrainings_UserBranches.C](./examples/CompareTrkQualTrainings_UserBranches.C]
 
 ### Branches not contained within a class
 Some branches are not contained in any of the above classes:
