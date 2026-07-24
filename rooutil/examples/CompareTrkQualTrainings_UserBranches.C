@@ -27,16 +27,17 @@ void CompareTrkQualTrainings_UserBranches(std::string filename,
   TH2F* hTrkQual_ReferenceVsCandidate_HQ = new TH2F("hTrkQual_ReferenceVsCandidate_HQ", "", 100,0,1, 100,0,1);
   TH2F* hTrkQual_ReferenceVsCandidate_LQ = new TH2F("hTrkQual_ReferenceVsCandidate_LQ", "", 100,0,1, 100,0,1);
 
-  RooUtil util(filename);
+  RooUtil util(filename, true);
 
-  auto reference_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(reference_branch);
+  // In this example, we have commented out reference_trkqual since we will use the standard "trkqual" branch
+  //  auto reference_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(reference_branch);
   auto candidate_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(candidate_branch);
-  util.SetUserBranches({reference_trkqual, candidate_trkqual});
+  util.SetUserBranches({candidate_trkqual});
 
-  if (!reference_trkqual->is_bound()) {
-    std::cout << "Could not bind reference branch " << reference_branch << std::endl;
-    return;
-  }
+  // if (!reference_trkqual->is_bound()) {
+  //   std::cout << "Could not bind reference branch " << reference_branch << std::endl;
+  //   return;
+  // }
   if (!candidate_trkqual->is_bound()) {
     std::cout << "Could not bind candidate branch " << candidate_branch << std::endl;
     return;
@@ -47,7 +48,7 @@ void CompareTrkQualTrainings_UserBranches(std::string filename,
     auto e_minus_tracks = event.GetTracks(is_e_minus);
 
     for (auto& track : e_minus_tracks) {
-      auto* reference_trkqual_result = track.GetUserBranch<mu2e::MVAResultInfo>(reference_branch);
+      auto* reference_trkqual_result = track.trkqual;
       auto* candidate_trkqual_result = track.GetUserBranch<mu2e::MVAResultInfo>(candidate_branch);
       if (reference_trkqual_result == nullptr || candidate_trkqual_result == nullptr) {
         continue;
