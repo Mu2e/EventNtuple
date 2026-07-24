@@ -15,7 +15,6 @@
 #include "EventNtuple/rooutil/inc/UserBranch.hh"
 
 namespace rooutil {
-  using TrkQualMetadata = mu2e::TrkQualMetadata;
 
   class RooUtil {
   public:
@@ -97,7 +96,7 @@ namespace rooutil {
       return trkqual_metadata.find(output_branch) != trkqual_metadata.end();
     }
 
-    const TrkQualMetadata& GetTrkQualMetadata(const std::string& output_branch) const {
+    const mu2e::TrkQualMetadata& GetTrkQualMetadata(const std::string& output_branch) const {
       const auto metadata = trkqual_metadata.find(output_branch);
       if (metadata == trkqual_metadata.end()) {
         throw std::runtime_error(
@@ -251,7 +250,7 @@ namespace rooutil {
           throw std::runtime_error("Invalid TrkQual metadata in " + filename + ": " + label);
         }
 
-        TrkQualMetadata metadata{
+        mu2e::TrkQualMetadata metadata{
           label.substr(0, input_tag_pos),
           label.substr(input_tag_pos + input_tag_marker.size(),
                        model_version_pos - input_tag_pos - input_tag_marker.size()),
@@ -275,7 +274,7 @@ namespace rooutil {
 
     TH1I* hVersion;
     int n_proc_events;
-    std::map<std::string, TrkQualMetadata> trkqual_metadata;
+    std::map<std::string, mu2e::TrkQualMetadata> trkqual_metadata;
     std::vector<std::shared_ptr<UserBranchBase>> user_branches;
 
     TTree* output_ntuple; // for output
