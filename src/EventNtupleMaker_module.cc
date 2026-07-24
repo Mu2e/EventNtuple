@@ -636,8 +636,8 @@ namespace mu2e {
           char metadataLabel[1024];
           std::snprintf(
             metadataLabel, sizeof(metadataLabel),
-            "output branch: %s; track branch: %s; input tag: %s; model version: %s",
-            outputBranch.c_str(), branch.c_str(), trkQualProvenance.inputTag.c_str(), trkQualProvenance.modelVersion.c_str());
+            "%s: input tag = %s; model version = %s",
+            outputBranch.c_str(), trkQualProvenance.inputTag.c_str(), trkQualProvenance.modelVersion.c_str());
           hTrkQualMetadata->GetXaxis()->SetBinLabel(++iTrkQualAlgorithm, metadataLabel);
           hTrkQualMetadata->SetBinContent(iTrkQualAlgorithm, 1);
         }

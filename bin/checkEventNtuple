@@ -40,7 +40,7 @@ def main():
                 # Print configured track-quality algorithms, if available.
                 if folder.GetListOfKeys().Contains(trkqualmetadataname):
                     metadata = f.Get(foldername+"/"+trkqualmetadataname)
-                    print("\nIt contains the following track-quality algorithms:", flush=True)
+                    print("\nIt contains the following trkqual branches:", flush=True)
                     ROOT.printTrkQualMetadata(metadata)
 
                 # Print triggers
