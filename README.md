@@ -31,7 +31,9 @@ You can get some basic information about the EventNtuple file useing ```checkEve
 checkEventNtuple file1.root file2.root
 ```
 
-This will print the version number (for versions after v6.3.0) and the trigger branches in the file (for versions after v6.8.0)
+This will print the version number (for versions after v6.3.0), configured
+TrkQual model metadata when available, and the trigger branches in the file
+(for versions after v6.8.0).
 
 
 ## How to Analyze an EventNtuple

@@ -2,6 +2,8 @@
 #define Track_hh_
 
 #include <functional>
+#include <string>
+#include <unordered_map>
 #include "EventNtuple/inc/TrkInfo.hh"
 #include "EventNtuple/inc/TrkInfoMC.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
@@ -173,6 +175,16 @@ namespace rooutil {
       return select_hits;
     }
     TrackHits hits;
+
+    void SetUserBranch(const std::string& branch_name, void* value) {
+      user_branches[branch_name] = value;
+    }
+
+    template <typename T>
+    T* GetUserBranch(const std::string& branch_name) {
+      const auto branch = user_branches.find(branch_name);
+      return branch == user_branches.end() ? nullptr : static_cast<T*>(branch->second);
+    }
   
     // Pointers to the data
     mu2e::TrkInfo* trk = nullptr;
@@ -189,8 +201,11 @@ namespace rooutil {
     mu2e::TrkCaloHitInfo* trkcalohit = nullptr;
     std::vector<mu2e::SimInfo>* trkmcsim = nullptr;
     mu2e::MVAResultInfo* trkqual = nullptr;
-    mu2e::MVAResultInfo* trkqual_alt = nullptr; // TODO: is there a way to allow for more than two...
+    mu2e::MVAResultInfo* trkqual_bdt = nullptr;
     mu2e::MVAResultInfo* trkpid = nullptr;
+
+  private:
+    std::unordered_map<std::string, void*> user_branches;
   };
   
   typedef std::function<bool(Track&)> TrackCut;

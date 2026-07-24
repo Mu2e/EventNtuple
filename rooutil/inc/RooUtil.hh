@@ -1,6 +1,7 @@
 #ifndef RooUtil_hh_
 #define RooUtil_hh_
 
+#include <algorithm>
 #include <fstream>
 
 #include "TFile.h"
@@ -8,6 +9,7 @@
 #include "TH1I.h"
 
 #include "EventNtuple/rooutil/inc/Event.hh"
+#include "EventNtuple/rooutil/inc/UserBranch.hh"
 
 namespace rooutil {
   class RooUtil {
@@ -118,6 +120,22 @@ namespace rooutil {
       TurnOnBranch("*");
     }
 
+    void SetUserBranches(const std::vector<std::shared_ptr<UserBranchBase>>& branches) {
+      for (const auto& branch : branches) {
+        branch->Bind(ntuple);
+        const auto existing = std::find_if(user_branches.begin(), user_branches.end(),
+          [&branch](const std::shared_ptr<UserBranchBase>& registered) {
+            return registered->name() == branch->name();
+          });
+        if (existing == user_branches.end()) {
+          user_branches.push_back(branch);
+        } else {
+          *existing = branch;
+        }
+      }
+      event->SetUserBranches(user_branches);
+    }
+
     void CreateOutputEventNtuple(TFile* outfile) {
       auto dir = outfile->mkdir("EventNtuple");
       dir->cd();
@@ -134,7 +152,6 @@ namespace rooutil {
       if(event->trkcalohit) { output_ntuple->Branch("trkcalohit", event->trkcalohit); }
       if(event->trkcalohitmc) { output_ntuple->Branch("trkcalohitmc", event->trkcalohitmc); }
       if(event->trkqual) { output_ntuple->Branch("trkqual", event->trkqual); }
-      if(event->trkqual_alt) { output_ntuple->Branch("trkqual_alt", event->trkqual_alt); }
       if(event->trkpid) { output_ntuple->Branch("trkpid", event->trkpid); }
       if(event->trksegs) { output_ntuple->Branch("trksegs", event->trksegs); }
       if(event->trksegsmc) { output_ntuple->Branch("trksegsmc", event->trksegsmc); }
@@ -170,6 +187,11 @@ namespace rooutil {
       }
 
       if (event->mcsteps_virtualdetector) { output_ntuple->Branch("mcsteps_virtualdetector", event->mcsteps_virtualdetector); }
+      for (const auto& branch : user_branches) {
+        if (branch->is_bound()) {
+          branch->BranchOutput(output_ntuple);
+        }
+      }
 
       // Write out histograms from input to output
       hVersion->Write();
@@ -186,6 +208,7 @@ namespace rooutil {
 
     TH1I* hVersion;
     int n_proc_events;
+    std::vector<std::shared_ptr<UserBranchBase>> user_branches;
 
     TTree* output_ntuple; // for output
   };

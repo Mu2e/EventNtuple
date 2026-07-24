@@ -3,6 +3,14 @@
 import argparse
 import ROOT
 
+ROOT.gInterpreter.Declare("""
+void printTrkQualMetadata(TH1* metadata) {
+  for (int bin = 1; bin <= metadata->GetNbinsX(); ++bin) {
+    std::cout << " - " << metadata->GetXaxis()->GetBinLabel(bin) << std::endl;
+  }
+}
+""")
+
 # A main function so that this can be run on the command line
 def main():
     parser = argparse.ArgumentParser(
@@ -16,6 +24,7 @@ def main():
     foldername = "EventNtuple"
     histname = "version"
     treename = "ntuple"
+    trkqualmetadataname = "trkqual_metadata"
     for filename in args.filenames:
         try:
             f = ROOT.TFile(filename, "READ");
@@ -27,6 +36,12 @@ def main():
                     print("{} contains EventNtuple v{:02.0f}_{:02.0f}_{:02.0f}".format(filename, h.GetBinContent(1), h.GetBinContent(2), h.GetBinContent(3)))
                 else:
                     print("{} histogram does not exist in {} (it is either v06_02_00 or older)".format(histname, filename))
+
+                # Print configured track-quality algorithms, if available.
+                if folder.GetListOfKeys().Contains(trkqualmetadataname):
+                    metadata = f.Get(foldername+"/"+trkqualmetadataname)
+                    print("\nIt contains the following track-quality algorithms:", flush=True)
+                    ROOT.printTrkQualMetadata(metadata)
 
                 # Print triggers
                 if (folder.GetListOfKeys().Contains(treename)):

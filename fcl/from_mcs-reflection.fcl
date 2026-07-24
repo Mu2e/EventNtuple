@@ -83,14 +83,14 @@ physics.trigger_paths : [ "eTrig", "muTrig"]
 physics.end_paths : [ "eEnd", "muEnd", "CLPrint" ]
 physics.analyzers.ENe.trk.fits : [
   { @table::ENBranch
-    trkQualTags : ["TrkQualReflecte:ANN"]
+    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualReflecte:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
     trkPIDTags : ["TrkPIDReflecte"]
     input: "Reflecte"
   }
 ]
 physics.analyzers.ENmu.trk.fits : [
   { @table::ENBranch
-    trkQualTags : ["TrkQualReflectmu:ANN"]
+    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualReflectmu:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
     trkPIDTags : ["TrkPIDReflectmu"]
     input: "Reflectmu"
   }

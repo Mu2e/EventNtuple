@@ -193,91 +193,94 @@ DeM : { input : "MergeKKDeM"
   branchname : "dem"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDeM:ANN"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeM:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branchname : "uem"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branchname : "dmm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branchname : "umm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branchname : "dep"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branchname : "uep"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branchname : "dmp"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branchname : "ump"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualAll:ANN", "TrkQualAll:BDT"]
+  trkQualLeaves : [
+    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "TrkQual_ANN1_v2" },
+    { leafname : "_bdt_v2" inputTag : "TrkQualAll:BDT" modelVersion : "TrkQual_BDT1_v2_0" }
+  ]
   trkPIDTags : ["TrkPIDAll"]
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDe:ANN"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
   trkPIDTags : ["TrkPIDDe"]
 }
 
@@ -412,7 +415,7 @@ TTMCBranch : {
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 
@@ -452,7 +455,7 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualTags : ["TrkQualDe:ANN"]
+    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
     trkPIDTags : ["TrkPIDDe"]
   }
 ]

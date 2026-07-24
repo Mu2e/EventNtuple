@@ -13,7 +13,9 @@
 
 using namespace rooutil;
 
-void CompareTrkQualTrainings(std::string filename) {
+void CompareTrkQualTrainings(std::string filename,
+                             std::string reference_branch = "trkqual",
+                             std::string candidate_branch = "trkqual_candidate") {
 
   bool save_plots = false;
   std::string plotsdir = "/exp/mu2e/app/users/edmonds/plots/2025-09-25/";
@@ -25,6 +27,13 @@ void CompareTrkQualTrainings(std::string filename) {
 
   // Set up RooUtil
   RooUtil util(filename);
+  auto reference_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(reference_branch);
+  auto candidate_trkqual = MakeTrackUserBranch<mu2e::MVAResultInfo>(candidate_branch);
+  util.SetUserBranches({reference_trkqual, candidate_trkqual});
+  if (!reference_trkqual->is_bound() || !candidate_trkqual->is_bound()) {
+    std::cout << "Could not bind " << reference_branch << " and " << candidate_branch << std::endl;
+    return;
+  }
   //  util.Debug(true);
   // Loop through the events
   for (int i_event = 0; i_event < util.GetNEvents(); ++i_event) {
@@ -37,8 +46,13 @@ void CompareTrkQualTrainings(std::string filename) {
     // Loop through the e_minus tracks
     for (auto& track : e_minus_tracks) {
 
-      auto old_trkqual = track.trkqual->result;
-      auto new_trkqual = track.trkqual_alt->result;
+      auto* old_trkqual_result = track.GetUserBranch<mu2e::MVAResultInfo>(reference_branch);
+      auto* new_trkqual_result = track.GetUserBranch<mu2e::MVAResultInfo>(candidate_branch);
+      if (old_trkqual_result == nullptr || new_trkqual_result == nullptr) {
+        continue;
+      }
+      auto old_trkqual = old_trkqual_result->result;
+      auto new_trkqual = new_trkqual_result->result;
 
       hTrkQual_OldVsNew->Fill(old_trkqual, new_trkqual);
       // Get the track segments at the tracker entrance and has an MC step
