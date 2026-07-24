@@ -32,7 +32,7 @@ checkEventNtuple file1.root file2.root
 ```
 
 This will print the version number (for versions after v6.3.0), configured
-TrkQual model metadata when available, and the trigger branches in the file
+TrkQual model metadata when available (for versions after v6.13.0), and the trigger branches in the file
 (for versions after v6.8.0).
 
 
