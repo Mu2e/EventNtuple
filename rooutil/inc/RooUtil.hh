@@ -10,15 +10,12 @@
 #include "TTree.h"
 #include "TH1I.h"
 
+#include "EventNtuple/inc/TrkQualMetadata.hh"
 #include "EventNtuple/rooutil/inc/Event.hh"
 #include "EventNtuple/rooutil/inc/UserBranch.hh"
 
 namespace rooutil {
-  struct TrkQualMetadata {
-    std::string output_branch;
-    std::string input_tag;
-    std::string model_version;
-  };
+  using TrkQualMetadata = mu2e::TrkQualMetadata;
 
   class RooUtil {
   public:

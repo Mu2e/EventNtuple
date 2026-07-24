@@ -80,6 +80,7 @@
 #include "EventNtuple/inc/RecoQualInfo.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/BestCrvAssns.hh"
+#include "EventNtuple/inc/TrkQualMetadata.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
@@ -316,12 +317,7 @@ namespace mu2e {
 
       Config _conf;
       std::vector<TrkFitConfig> _allTrkFitBranches; // configurations for all track fit branches
-      struct TrkQualProvenance {
-        std::string leafname;
-        std::string inputTag;
-        std::string modelVersion;
-      };
-      std::map<TrkFitBranchIndex, std::vector<TrkQualProvenance>> _trkQualProvenance;
+      std::map<TrkFitBranchIndex, std::vector<TrkQualMetadata>> _trkQualMetadata;
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
@@ -530,8 +526,8 @@ namespace mu2e {
     for(const auto& trk_fit_cfg : _conf.trk().fits()){
       const TrkFitBranchIndex i_trk_fit_branch = _allTrkFitBranches.size();
       for (const auto& trkQualConfig : trk_fit_cfg.trkQualLeaves()) {
-        _trkQualProvenance[i_trk_fit_branch].push_back({
-          trkQualConfig.leafname(),
+        _trkQualMetadata[i_trk_fit_branch].push_back({
+          trk_fit_cfg.branchname() + "qual" + trkQualConfig.leafname(),
           trkQualConfig.inputTag(),
           trkQualConfig.modelVersion()
         });
@@ -630,14 +626,14 @@ namespace mu2e {
         // TrkCaloHit: currently only 1
         _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_trk_fit_branch));
         for (size_t i_trkQual = 0; i_trkQual < i_trkFitConfig.trkQualLeaves().size(); ++i_trkQual) {
-          const auto& trkQualProvenance = _trkQualProvenance.at(i_trk_fit_branch).at(i_trkQual);
-          const std::string outputBranch = branch + "qual" + trkQualProvenance.leafname;
+          const auto& trkQualMetadata = _trkQualMetadata.at(i_trk_fit_branch).at(i_trkQual);
+          const std::string& outputBranch = trkQualMetadata.output_branch;
           _ntuple->Branch((outputBranch+".").c_str(),&_allTrkQualResults.at(i_trk_fit_branch).at(i_trkQual),_buffsize,_splitlevel);
           char metadataLabel[1024];
           std::snprintf(
             metadataLabel, sizeof(metadataLabel),
             "%s: input tag = %s; model version = %s",
-            outputBranch.c_str(), trkQualProvenance.inputTag.c_str(), trkQualProvenance.modelVersion.c_str());
+            outputBranch.c_str(), trkQualMetadata.input_tag.c_str(), trkQualMetadata.model_version.c_str());
           hTrkQualMetadata->GetXaxis()->SetBinLabel(++iTrkQualAlgorithm, metadataLabel);
           hTrkQualMetadata->SetBinContent(iTrkQualAlgorithm, 1);
         }
