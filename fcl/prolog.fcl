@@ -393,10 +393,10 @@ EventNtupleMaker : {
   subruns : {
     makeNtuple : true
     makeTotalsHistograms : true
-    genEventCount : { include : false inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
+    genEventCount : { include : true inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
+    procEventCount : { include : true inputTag : "" fillNtuple : true fillTotalsHistogram : true }
   }
 
-#    procEventCount : { fill : true inputTag : "" totalsHistogram : true }
 #    cosmicLivetime : { fill : true inputTag : "" totalsHistogram : true }
 #  }
 }

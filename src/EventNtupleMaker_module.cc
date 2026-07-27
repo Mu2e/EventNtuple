@@ -284,6 +284,7 @@ namespace mu2e {
         fhicl::Atom<bool> makeNtuple{Name("makeNtuple"), Comment("True/false of whether to make the subrun ntuple")};
         fhicl::Atom<bool> makeTotalsHistograms{Name("makeTotalsHistograms"), Comment("True/false of whether to make the totals histograms")};
         fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
+        fhicl::Table<SubRunBranchConfig> procEventCount{Name("procEventCount"), Comment("Number of processed events")};
       };
 
 
@@ -327,6 +328,7 @@ namespace mu2e {
       void beginJob() override;
       void beginSubRun(const art::SubRun & subrun ) override;
       void analyze(const art::Event& e) override;
+      void endSubRun(const art::SubRun & subrun ) override;
 
     private:
 
@@ -335,9 +337,9 @@ namespace mu2e {
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
-      TH1I* _hProcEvents;
       TTree* _subrunNtuple;
       TH1I* _hGenEventCount;
+      TH1I* _hProcEventCount;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -470,6 +472,7 @@ namespace mu2e {
       // For subrun ntuple
       mu2e::SubRunInfo _srinfo;
       long _genEventCount;
+      long _procEventCount;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
@@ -598,7 +601,6 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 12);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 1);
-    _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
     // event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
     if (fillEventMC()) {
@@ -750,10 +752,18 @@ namespace mu2e {
       if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillNtuple()) {
         _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
       }
+
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("procEventCount", &_procEventCount, _buffsize, _splitlevel);
+      }
+
     }
     if (_conf.subruns().makeTotalsHistograms()) {
       if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
         _hGenEventCount = tfs->make<TH1I>("n_gen_events", "total number of generated events", 1,0,1);
+      }
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount = tfs->make<TH1I>("n_proc_events", "total number of processed events", 1,0,1);
       }
     }
   }
@@ -763,6 +773,10 @@ namespace mu2e {
 
     _srinfo.run = subrun.run();
     _srinfo.subrun = subrun.subRun();
+
+  }
+
+  void EventNtupleMaker::endSubRun(const art::SubRun & subrun ) {
 
     if (_conf.subruns().genEventCount().include()) {
       art::Handle<GenEventCount> genEventCountHandle;
@@ -777,6 +791,14 @@ namespace mu2e {
     if (_conf.subruns().makeNtuple()) {
       _subrunNtuple->Fill();
     }
+
+    if (_conf.subruns().procEventCount().include()) {
+      if (_conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount->Fill(0.0, _procEventCount);
+      }
+    }
+
+    _procEventCount = 0; // reset procEventCount every subrun
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
@@ -1230,7 +1252,7 @@ namespace mu2e {
     if(fill) {
       _ntuple->Fill();
     }
-    _hProcEvents->Fill(0);
+    _procEventCount++;
   }
 
 
