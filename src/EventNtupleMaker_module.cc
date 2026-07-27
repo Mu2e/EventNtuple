@@ -10,6 +10,7 @@
 #include "Offline/MCDataProducts/inc/CaloClusterMC.hh"
 #include "Offline/MCDataProducts/inc/CaloHitMC.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
+#include "Offline/MCDataProducts/inc/GenEventCount.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
@@ -311,6 +312,7 @@ namespace mu2e {
       TTree* _ntuple;
       TH1I* _hVersion;
       TH1I* _hProcEvents;
+      TTree* _subrunInfo;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -439,6 +441,9 @@ namespace mu2e {
       std::vector<std::string> fitNames = {"Unknown", "LoopHelix","CentralHelix","KinematicLine"};
       // for trigger branch:
       bool firstEvent = true;
+
+      // For subrun ntuple
+      long _genEventCount;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
@@ -710,10 +715,22 @@ namespace mu2e {
         _ntuple->Branch(("mcsteps_"+inst+".").c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
       }
     }
+
+    // Subrun tree
+    _subrunInfo = tfs->make<TTree>("subruns","Mu2e SubRun Ntuple");
+    //    _subrunInfo->Branch("run"
+    //    _subrunInfo->Branch("subrun"
+    _subrunInfo->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
     _infoStructHelper.updateSubRun();
+
+    art::Handle<GenEventCount> genEventCountHandle;
+    subrun.getByLabel<GenEventCount>("genCounter", genEventCountHandle);
+    _genEventCount = genEventCountHandle->count();
+    std::cout << "AE: count = " << _genEventCount << std::endl;
+    _subrunInfo->Fill();
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {

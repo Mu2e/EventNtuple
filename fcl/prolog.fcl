@@ -389,6 +389,12 @@ EventNtupleMaker : {
   mcsteps : {
     surfaceStepsTag : "compressRecoMCs"
   }
+
+#  subruns : {
+#    genEventCount : { fill : true inputTag : "genCounter" totalsHistogram : true }
+#    procEventCount : { fill : true inputTag : "" totalsHistogram : true }
+#    cosmicLivetime : { fill : true inputTag : "" totalsHistogram : true }
+#  }
 }
 # instance for processing trigger (digitization) output from simulation
 EventNtupleMakerTTMC : {
