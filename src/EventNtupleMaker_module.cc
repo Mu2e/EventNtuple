@@ -272,6 +272,7 @@ namespace mu2e {
 
         fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
         fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
+        fhicl::Atom<bool> fillTotalsHistogram{Name("fillTotalsHistogram"), Comment("True/false to make a totals histogram for this quantity")};
       };
 
       // Overal configuration for subrun ntuple and histograms
@@ -280,6 +281,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
 
         fhicl::Atom<bool> makeNtuple{Name("makeNtuple"), Comment("True/false of whether to make the subrun ntuple")};
+        fhicl::Atom<bool> makeTotalsHistograms{Name("makeTotalsHistograms"), Comment("True/false of whether to make the totals histograms")};
         fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
       };
 
@@ -334,6 +336,7 @@ namespace mu2e {
       TH1I* _hVersion;
       TH1I* _hProcEvents;
       TTree* _subrunNtuple;
+      TH1I* _hGenEventCount;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -746,7 +749,11 @@ namespace mu2e {
       if (_conf.subruns().genEventCount().fillNtuple()) {
         _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
       }
-      // check whether to make a totals histogram as well
+    }
+    if (_conf.subruns().makeTotalsHistograms()) {
+      if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount = tfs->make<TH1I>("n_gen_events", "total number of generated events", 1,0,1);
+      }
     }
   }
 
@@ -759,6 +766,9 @@ namespace mu2e {
     art::Handle<GenEventCount> genEventCountHandle;
     subrun.getByLabel<GenEventCount>("genCounter", genEventCountHandle);
     _genEventCount = genEventCountHandle->count();
+    if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
+      _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+    }
 
     if (_conf.subruns().makeNtuple()) {
       _subrunNtuple->Fill();
