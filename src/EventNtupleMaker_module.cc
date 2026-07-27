@@ -796,7 +796,7 @@ namespace mu2e {
       subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
 
       _genEventCount = genEventCountHandle->count();
-      if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
         _hGenEventCount->Fill(0.0, genEventCountHandle->count());
       }
     }
@@ -806,7 +806,7 @@ namespace mu2e {
       subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
 
       _cosmicLivetime = cosmicLivetimeHandle->liveTime();
-      if (_conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
         _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
       }
     }
@@ -816,7 +816,7 @@ namespace mu2e {
     }
 
     if (_conf.subruns().procEventCount().include()) {
-      if (_conf.subruns().procEventCount().fillTotalsHistogram()) {
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
         _hProcEventCount->Fill(0.0, _procEventCount);
       }
     }
