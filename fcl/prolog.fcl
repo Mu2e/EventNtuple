@@ -434,7 +434,6 @@ EventNtuple : {
 
   analyzers : {
     EventNtuple : { @table::EventNtupleMaker  }
-    genCountLogger : @local::genCountLogger
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
@@ -443,8 +442,7 @@ EventNtuple : {
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
   PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
-  EndPath : [ EventNtuple, genCountLogger ]
-  EndPathNoMC : [ EventNtuple ]
+  EndPath : [ EventNtuple ]
 
 }
 
