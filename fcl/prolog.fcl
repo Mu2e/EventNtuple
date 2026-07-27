@@ -390,8 +390,12 @@ EventNtupleMaker : {
     surfaceStepsTag : "compressRecoMCs"
   }
 
-#  subruns : {
-#    genEventCount : { fill : true inputTag : "genCounter" totalsHistogram : true }
+  subruns : {
+    makeNtuple : true
+    genEventCount : { inputTag : "genCounter" fillNtuple : true }
+  }
+#    makeTotalsHists : true
+
 #    procEventCount : { fill : true inputTag : "" totalsHistogram : true }
 #    cosmicLivetime : { fill : true inputTag : "" totalsHistogram : true }
 #  }

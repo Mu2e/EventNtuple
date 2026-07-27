@@ -265,6 +265,25 @@ namespace mu2e {
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("CRV MC filling options")};
       };
 
+      // Configuration for specific subrun quantities
+      struct SubRunBranchConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
+        fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
+      };
+
+      // Overal configuration for subrun ntuple and histograms
+      struct SubRunConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<bool> makeNtuple{Name("makeNtuple"), Comment("True/false of whether to make the subrun ntuple")};
+        fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
+      };
+
+
       struct Config {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
@@ -295,6 +314,7 @@ namespace mu2e {
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
         fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
+        fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
       };
       typedef art::EDAnalyzer::Table<Config> Parameters;
 
@@ -719,9 +739,11 @@ namespace mu2e {
     }
 
     // Subrun tree
-    _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
-    _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
-    _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
+      _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
+      _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+    }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
@@ -733,8 +755,10 @@ namespace mu2e {
     art::Handle<GenEventCount> genEventCountHandle;
     subrun.getByLabel<GenEventCount>("genCounter", genEventCountHandle);
     _genEventCount = genEventCountHandle->count();
-    std::cout << "AE: count = " << _genEventCount << std::endl;
-    _subrunNtuple->Fill();
+
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple->Fill();
+    }
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
