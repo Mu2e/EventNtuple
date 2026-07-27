@@ -270,6 +270,7 @@ namespace mu2e {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
 
+        fhicl::Atom<bool> include{Name("include"), Comment("True/false to include this quantity or not (master switch)")};
         fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
         fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
         fhicl::Atom<bool> fillTotalsHistogram{Name("fillTotalsHistogram"), Comment("True/false to make a totals histogram for this quantity")};
@@ -746,12 +747,12 @@ namespace mu2e {
       _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
       _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
 
-      if (_conf.subruns().genEventCount().fillNtuple()) {
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillNtuple()) {
         _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
       }
     }
     if (_conf.subruns().makeTotalsHistograms()) {
-      if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
         _hGenEventCount = tfs->make<TH1I>("n_gen_events", "total number of generated events", 1,0,1);
       }
     }
@@ -763,11 +764,14 @@ namespace mu2e {
     _srinfo.run = subrun.run();
     _srinfo.subrun = subrun.subRun();
 
-    art::Handle<GenEventCount> genEventCountHandle;
-    subrun.getByLabel<GenEventCount>("genCounter", genEventCountHandle);
-    _genEventCount = genEventCountHandle->count();
-    if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
-      _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+    if (_conf.subruns().genEventCount().include()) {
+      art::Handle<GenEventCount> genEventCountHandle;
+      subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
+
+      _genEventCount = genEventCountHandle->count();
+      if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+      }
     }
 
     if (_conf.subruns().makeNtuple()) {

@@ -393,7 +393,7 @@ EventNtupleMaker : {
   subruns : {
     makeNtuple : true
     makeTotalsHistograms : true
-    genEventCount : { inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
+    genEventCount : { include : false inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
   }
 
 #    procEventCount : { fill : true inputTag : "" totalsHistogram : true }
