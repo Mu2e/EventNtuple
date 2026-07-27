@@ -11,6 +11,7 @@
 #include "Offline/MCDataProducts/inc/CaloHitMC.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
 #include "Offline/MCDataProducts/inc/GenEventCount.hh"
+#include "Offline/MCDataProducts/inc/CosmicLivetime.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
@@ -285,6 +286,7 @@ namespace mu2e {
         fhicl::Atom<bool> makeTotalsHistograms{Name("makeTotalsHistograms"), Comment("True/false of whether to make the totals histograms")};
         fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
         fhicl::Table<SubRunBranchConfig> procEventCount{Name("procEventCount"), Comment("Number of processed events")};
+        fhicl::Table<SubRunBranchConfig> cosmicLivetime{Name("cosmicLivetime"), Comment("Cosmic livetime [s]")};
       };
 
 
@@ -337,9 +339,11 @@ namespace mu2e {
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
+      // subrun quantities
       TTree* _subrunNtuple;
       TH1I* _hGenEventCount;
       TH1I* _hProcEventCount;
+      TH1F* _hCosmicLivetime;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -473,6 +477,7 @@ namespace mu2e {
       mu2e::SubRunInfo _srinfo;
       long _genEventCount;
       long _procEventCount;
+      float _cosmicLivetime;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
@@ -757,6 +762,10 @@ namespace mu2e {
         _subrunNtuple->Branch("procEventCount", &_procEventCount, _buffsize, _splitlevel);
       }
 
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillNtuple()) {
+        _subrunNtuple->Branch("cosmicLivetime", &_cosmicLivetime, _buffsize, _splitlevel);
+      }
+
     }
     if (_conf.subruns().makeTotalsHistograms()) {
       if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
@@ -765,6 +774,10 @@ namespace mu2e {
       if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
         _hProcEventCount = tfs->make<TH1I>("n_proc_events", "total number of processed events", 1,0,1);
       }
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime = tfs->make<TH1F>("cosmic_livetime", "total cosmic livetime [sec]", 1,0,1);
+      }
+
     }
   }
 
@@ -785,6 +798,16 @@ namespace mu2e {
       _genEventCount = genEventCountHandle->count();
       if (_conf.subruns().genEventCount().fillTotalsHistogram()) {
         _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+      }
+    }
+
+    if (_conf.subruns().cosmicLivetime().include()) {
+      art::Handle<CosmicLivetime> cosmicLivetimeHandle;
+      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
+
+      _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+      if (_conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
       }
     }
 
