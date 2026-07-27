@@ -742,7 +742,11 @@ namespace mu2e {
     if (_conf.subruns().makeNtuple()) {
       _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
       _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
-      _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+
+      if (_conf.subruns().genEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+      }
+      // check whether to make a totals histogram as well
     }
   }
 
