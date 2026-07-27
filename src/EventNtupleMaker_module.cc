@@ -86,6 +86,7 @@
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
 #include "EventNtuple/inc/CaloDigiMCInfo.hh"
 #include "Offline/MCDataProducts/inc/CaloShowerSim.hh"
+#include "EventNtuple/inc/SubRunInfo.hh"
 
 // C++ includes.
 #include <iostream>
@@ -312,7 +313,7 @@ namespace mu2e {
       TTree* _ntuple;
       TH1I* _hVersion;
       TH1I* _hProcEvents;
-      TTree* _subrunInfo;
+      TTree* _subrunNtuple;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -443,6 +444,7 @@ namespace mu2e {
       bool firstEvent = true;
 
       // For subrun ntuple
+      mu2e::SubRunInfo _srinfo;
       long _genEventCount;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
@@ -717,20 +719,22 @@ namespace mu2e {
     }
 
     // Subrun tree
-    _subrunInfo = tfs->make<TTree>("subruns","Mu2e SubRun Ntuple");
-    //    _subrunInfo->Branch("run"
-    //    _subrunInfo->Branch("subrun"
-    _subrunInfo->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+    _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
+    _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
+    _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
     _infoStructHelper.updateSubRun();
 
+    _srinfo.run = subrun.run();
+    _srinfo.subrun = subrun.subRun();
+
     art::Handle<GenEventCount> genEventCountHandle;
     subrun.getByLabel<GenEventCount>("genCounter", genEventCountHandle);
     _genEventCount = genEventCountHandle->count();
     std::cout << "AE: count = " << _genEventCount << std::endl;
-    _subrunInfo->Fill();
+    _subrunNtuple->Fill();
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
