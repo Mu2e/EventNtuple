@@ -9,6 +9,7 @@
 #include "Offline/MCDataProducts/inc/KalSeedMC.hh"
 #include "Offline/MCDataProducts/inc/CaloClusterMC.hh"
 #include "Offline/MCDataProducts/inc/CaloHitMC.hh"
+#include "Offline/MCDataProducts/inc/CaloHitEntrant.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
@@ -220,6 +221,7 @@ namespace mu2e {
           fhicl::Atom<bool>          fillDigis   {Name("fillDigis"),    Comment("Fill standalone calodigismc. branch")};
           fhicl::Atom<bool>          fillDigiSim {Name("fillDigiSim"),  Comment("Fill calodigisim. branch")};
           fhicl::Atom<art::InputTag> showerSimTag{Name("showerSimTag"), Comment("Tag for CaloShowerSim collection")};
+          fhicl::Atom<art::InputTag> entrantTag  {Name("entrantTag"),   Comment("Tag for CaloHitEntrantCollection (calo-entrant truth in calohitsmc.entrantSimIds); empty disables"), art::InputTag()};
         };
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("Calorimeter MC filling options")};
       };
@@ -366,6 +368,7 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<std::vector<MCStepInfo>>> _allMCVDInfos;
       art::Handle<CaloClusterMCCollection> _ccmcch;
       art::Handle<CaloHitMCCollection> _chmcch;
+      art::Handle<CaloHitEntrantCollection> _caloEntrants;
       std::map<TrkFitBranchIndex, std::vector<CaloClusterInfoMC>> _allMCTCHIs;
       // hit level info branches
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitInfo>>> _allTSHIs;
@@ -982,8 +985,23 @@ namespace mu2e {
       }
     }
     if(fillCaloHitsMC()){
+      // Optional calo-entrant truth: the CaloHitEntrantCollection is
+      // index-parallel to the CaloHitMCCollection by construction.
+      const CaloHitEntrantCollection* entrants = nullptr;
+      if(!_conf.calo().mc().entrantTag().empty()){
+        event.getByLabel(_conf.calo().mc().entrantTag(),_caloEntrants);
+        if(!_caloEntrants.isValid()){
+          throw cet::exception("EventNtuple") << "CaloHitEntrantCollection not found for entrantTag \"" << _conf.calo().mc().entrantTag().encode() << "\"\n";
+        }
+        entrants = _caloEntrants.product();
+        if(entrants->size() != _chmcch->size()){
+          throw cet::exception("EventNtuple") << "CaloHitEntrantCollection size " << entrants->size() << " != CaloHitMCCollection size " << _chmcch->size() << "\n";
+        }
+      }
+      size_t entrantIdx = 0;
       for(const auto& hitmc : *_chmcch.product()){
-        _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs);
+        _infoMCStructHelper.fillCaloHitInfoMC(hitmc,_caloHIMCs,-1,entrants ? &(*entrants)[entrantIdx] : nullptr);
+        ++entrantIdx;
       }
     }
     if(fillCaloClsMC()){
