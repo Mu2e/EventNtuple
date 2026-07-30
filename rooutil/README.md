@@ -46,7 +46,7 @@ Use ```FindSubRun(run, subrun)``` to retrieve the SubRun corresponding to an eve
 
 The one-bin totals histograms are summed across every input file. ```GetTotal(name)``` returns ```std::optional<double>```, so a missing or incomplete total is distinct from a valid zero. The available names are ```n_gen_events```, ```n_proc_events```, and ```cosmic_livetime```. ```GetGeneratedEvents()```, ```GetProcessedEvents()```, and ```GetCosmicLivetime()``` are convenience accessors; ```GetRate(count)``` returns ```count / cosmic_livetime``` when a nonzero livetime is available. ```GetNProcEvents()``` remains available for compatibility and returns ```-1``` when the processed-event total is unavailable.
 
-Example: [SubRunCounting.C](./examples/SubRunCounting.C).
+Examples: [SubRunCounting.C](./examples/SubRunCounting.C), [SelectSubRuns.C](./examples/SelectSubRuns.C) for selecting SubRuns and retrieving the SubRun for an event, and [PlotCosmicTrackCrvZResidual_LivetimeNormalized.C](./examples/PlotCosmicTrackCrvZResidual_LivetimeNormalized.C) for normalizing a histogram with ```GetRate()```.
 
 ## The Event Class
 All branches and leaves can be accessed through the ```Event``` class like so:
