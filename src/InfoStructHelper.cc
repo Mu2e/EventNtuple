@@ -529,7 +529,7 @@ namespace mu2e {
     if (hitinfo.crystalId_ < CaloConst::_nCrystal){
       auto cal = GeomHandle<Calorimeter>();
       auto& crystal = cal->crystal(hitinfo.crystalId_);
-      hitinfo.crystalPos_ = cal->mu2eToTracker(crystal.position());
+      hitinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
     }
     hitinfos.push_back(hitinfo);
   }
@@ -561,7 +561,7 @@ namespace mu2e {
       int cryID = digiinfo.SiPMID_ / 2;
       auto cal = GeomHandle<Calorimeter>();
       auto& crystal = cal->crystal(cryID);
-      digiinfo.crystalPos_ = cal->mu2eToTracker(crystal.position());
+      digiinfo.crystalPos_ = cal->geomUtil().mu2eToTracker(crystal.position());
       digiinfo.diskID_ = crystal.diskID();
     }
     digiinfo.peakval_ = cdptr.waveform()[cdptr.peakpos()];
