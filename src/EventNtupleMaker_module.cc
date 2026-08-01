@@ -997,6 +997,16 @@ namespace mu2e {
         if(entrants->size() != _chmcch->size()){
           throw cet::exception("EventNtuple") << "CaloHitEntrantCollection size " << entrants->size() << " != CaloHitMCCollection size " << _chmcch->size() << "\n";
         }
+        // Source identity: each entrant carries a Ptr to the CaloHitMC it was
+        // computed for; require it to be entry i of the collection this fill
+        // iterates, so a product built from a different CaloHitMCCollection
+        // (or reordered) cannot be flattened silently.
+        for(size_t i = 0; i < entrants->size(); ++i){
+          const auto& hmcPtr = (*entrants)[i].caloHitMC();
+          if(hmcPtr.id() != _chmcch.id() || hmcPtr.key() != i){
+            throw cet::exception("EventNtuple") << "CaloHitEntrant " << i << " references CaloHitMC (ProductID " << hmcPtr.id() << ", key " << hmcPtr.key() << ") but this fill iterates (ProductID " << _chmcch.id() << ", key " << i << ")\n";
+          }
+        }
       }
       size_t entrantIdx = 0;
       for(const auto& hitmc : *_chmcch.product()){

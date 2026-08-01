@@ -385,8 +385,8 @@ namespace mu2e {
   void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx, const CaloHitEntrant* entrant) {
     CaloHitInfoMC chimc;
     auto const& edeps = chmc.energyDeposits();
-    if (entrant != nullptr && entrant->entrants.size() != edeps.size()) {
-      throw cet::exception("EventNtuple") << "CaloHitEntrant has " << entrant->entrants.size()
+    if (entrant != nullptr && entrant->entrants().size() != edeps.size()) {
+      throw cet::exception("EventNtuple") << "CaloHitEntrant has " << entrant->entrants().size()
           << " entrants but CaloHitMC has " << edeps.size() << " energy deposits\n";
     }
     chimc.crystalID_ = chmc.crystalID();
@@ -409,7 +409,7 @@ namespace mu2e {
         // entrantSimIds aligned with simParticleIds; -1 marks a deposit the
         // upstream CaloEntrantTruthMaker could not resolve
         if (entrant != nullptr) {
-          const auto& ep = entrant->entrants[iedep];
+          const auto& ep = entrant->entrants()[iedep];
           chimc.entrantSimIds.push_back(ep.isNonnull() ? ep->id().asInt() : -1);
         }
         ++iedep;
