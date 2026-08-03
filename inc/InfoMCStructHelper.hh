@@ -19,6 +19,7 @@
 #include "EventNtuple/inc/CaloClusterInfoMC.hh"
 #include "EventNtuple/inc/CaloHitInfoMC.hh"
 #include "EventNtuple/inc/CaloDigiMCInfo.hh"
+#include "Offline/MCDataProducts/inc/CaloHitEntrant.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
@@ -75,7 +76,7 @@ namespace mu2e {
       void fillVDInfo(KalSeed const& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<MCStepInfo>>& all_vdinfos);
       void fillHitInfoMCs(const KalSeed& kseed, const KalSeedMC& kseedmc, std::vector<std::vector<TrkStrawHitInfoMC>>& all_tshinfomcs);
       void fillCaloClusterInfoMC(CaloClusterMC const& ccmc, std::vector<CaloClusterInfoMC>& ccimc);
-      void fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimc, int clusterIdx = -1);
+      void fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimc, int clusterIdx = -1, const CaloHitEntrant* entrant = nullptr);
       void fillCaloDigiMCInfo(CaloShowerSim const& shower, std::vector<CaloDigiMCInfo>& calodigimc);
       void fillCaloDigiSimInfos(CaloShowerSim const& shower, std::vector<SimInfo>& cdsis);
       void fillCaloSimInfos(CaloClusterMC const& ccmc, std::vector<SimInfo>& csis);
