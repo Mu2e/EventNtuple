@@ -37,3 +37,4 @@
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
+#include "EventNtuple/inc/SubRunInfo.hh"

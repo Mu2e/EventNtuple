@@ -389,6 +389,15 @@ EventNtupleMaker : {
   mcsteps : {
     surfaceStepsTag : "compressRecoMCs"
   }
+
+  # -- SubRun quantities ---------------------------------------------------
+  subruns : {
+    makeNtuple : true
+    makeTotalsHistograms : true
+    genEventCount : { include : true inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
+    procEventCount : { include : true inputTag : "" fillNtuple : true fillTotalsHistogram : true }
+    cosmicLivetime : { include : true inputTag : "generate" fillNtuple : true fillTotalsHistogram : true }
+  }
 }
 # instance for processing trigger (digitization) output from simulation
 EventNtupleMakerTTMC : {
@@ -425,7 +434,6 @@ EventNtuple : {
 
   analyzers : {
     EventNtuple : { @table::EventNtupleMaker  }
-    genCountLogger : @local::genCountLogger
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
@@ -434,8 +442,7 @@ EventNtuple : {
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
   PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
-  EndPath : [ EventNtuple, genCountLogger ]
-  EndPathNoMC : [ EventNtuple ]
+  EndPath : [ EventNtuple ]
 
 }
 
