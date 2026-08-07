@@ -588,8 +588,10 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
     _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
     size_t nTrkQualAlgorithms = 0;
-    for (const auto& trkFitConfig : _allTrkFitBranches) {
-      if (trkFitConfig.fill()) nTrkQualAlgorithms += trkFitConfig.trkQualLeaves().size();
+    if (_conf.trk().fill()) {
+      for (const auto& trkFitConfig : _allTrkFitBranches) {
+        if (trkFitConfig.fill()) nTrkQualAlgorithms += trkFitConfig.trkQualLeaves().size();
+      }
     }
     TH1I* hTrkQualMetadata = nullptr;
     if (nTrkQualAlgorithms > 0) {
