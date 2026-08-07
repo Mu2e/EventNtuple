@@ -1268,6 +1268,10 @@ namespace mu2e {
     if(_conf.trk().fillTrkDtDt()) {
       auto handle = _allKSDtDtHs.at(i_trk_fit_branch);
       if(handle.isValid()) {
+        if(i_kseedptr >= handle->size()) throw cet::exception("EventNtuple")
+                                           << "Index " << i_kseedptr
+                                           << " out of range of DtDt list size = "
+                                           << handle->size();
         const auto& dtdt = handle->at(i_kseedptr);
         _infoStructHelper.fillTrkDtDtInfo(dtdt, _allTDtDtIs.at(i_trk_fit_branch));
       } else {
