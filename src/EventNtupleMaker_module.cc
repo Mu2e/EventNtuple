@@ -14,6 +14,7 @@
 #include "Offline/MCDataProducts/inc/CosmicLivetime.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
+#include "Offline/RecoDataProducts/inc/KalSeedDtDt.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloRecoDigi.hh"
@@ -63,6 +64,7 @@
 #include "EventNtuple/inc/LoopHelixInfo.hh"
 #include "EventNtuple/inc/CentralHelixInfo.hh"
 #include "EventNtuple/inc/KinematicLineInfo.hh"
+#include "EventNtuple/inc/TrkDtDtInfo.hh"
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/EventWeightInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
@@ -123,6 +125,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
         fhicl::Atom<std::string> branchname{Name("branchname"), Comment("Name of output branch")};
+        fhicl::Atom<std::string> trkDtDtTag{Name("trkDtDtTag"), Comment("Input tag for KalSeedDtDtCollection")};
         fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
         fhicl::Sequence<std::string> trkQualTags{Name("trkQualTags"), Comment("Input tags for MVAResultCollection to use for TrkQuals")};
         fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
@@ -154,6 +157,7 @@ namespace mu2e {
         fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
         fhicl::Atom<bool> fillTrkQual{Name("fillTrkQual"), Comment("Fill TrkQual MVA branches")};
         fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
+        fhicl::Atom<bool> fillTrkDtDt{Name("fillTrkDtDt"), Comment("Fill TrkDtDt branches")};
         // per-branch configurations
         fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
         // tracker MC sub-config
@@ -358,6 +362,7 @@ namespace mu2e {
       TrkCount _tcnt;
       // track branches (inputs)
       std::vector<art::Handle<KalSeedPtrCollection> > _allKSPCHs;
+      std::vector<art::Handle<KalSeedDtDtCollection>> _allKSDtDtHs;
       // track branches (outputs)
       std::map<TrkFitBranchIndex, std::vector<TrkInfo>> _allTIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkSegInfo>>> _allTSIs;
@@ -365,6 +370,7 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<std::vector<CentralHelixInfo>>> _allCHIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<KinematicLineInfo>>> _allKLIs;
       std::map<TrkFitBranchIndex, std::vector<TrkCaloHitInfo>> _allTCHIs;
+      std::map<TrkFitBranchIndex, std::vector<TrkDtDtInfo>> _allTDtDtIs;
       // quality branches (inputs)
       std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs;
       std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkQualCHs;
@@ -565,6 +571,7 @@ namespace mu2e {
       _allLHIs[i_trk_fit_branch]      = {};
       _allCHIs[i_trk_fit_branch]      = {};
       _allKLIs[i_trk_fit_branch]      = {};
+      _allTDtDtIs[i_trk_fit_branch]   = {};
       _allMCVDInfos[i_trk_fit_branch] = {};
       _allTCHIs[i_trk_fit_branch]     = {};
       _allMCTIs[i_trk_fit_branch]     = {};
@@ -632,6 +639,10 @@ namespace mu2e {
         if(_ftype == LoopHelix)    _ntuple->Branch((branch+"segpars_lh.").c_str(),&_allLHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         if(_ftype == CentralHelix) _ntuple->Branch((branch+"segpars_ch.").c_str(),&_allCHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         if(_ftype == KinematicLine) _ntuple->Branch((branch+"segpars_kl.").c_str(),&_allKLIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        if(_conf.trk().fillTrkDtDt()) {
+          _ntuple->Branch((branch+"dtdt.").c_str(),&_allTDtDtIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        }
+
         // TrkCaloHit: currently only 1
         _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_trk_fit_branch));
         for (size_t i_trkQualTag = 0; i_trkQualTag < i_trkFitConfig.trkQualTags().size(); ++i_trkQualTag) {
@@ -901,6 +912,7 @@ namespace mu2e {
     _allBestCrvAssns.clear();
     _allTrkQualCHs.clear();
     _allTrkPIDCHs.clear();
+    _allKSDtDtHs.clear();
 
     art::Handle<KalHelixAssns> khaH;
     if(_conf.helices().fill()){
@@ -918,12 +930,20 @@ namespace mu2e {
           _allTrkQualCHs.emplace_back();
           _allRQCHs.push_back({});
           _allTrkPIDCHs.emplace_back();
+          _allKSDtDtHs.push_back(art::Handle<KalSeedDtDtCollection>());
           continue;
         }
         art::Handle<KalSeedPtrCollection> kalSeedPtrCollHandle;
         art::InputTag kalSeedPtrInputTag = i_trkFitConfig.input();
         event.getByLabel(kalSeedPtrInputTag,kalSeedPtrCollHandle);
         _allKSPCHs.push_back(kalSeedPtrCollHandle);
+
+        art::Handle<KalSeedDtDtCollection> kalSeedDtDtCollHandle;
+        if(_conf.trk().fillTrkDtDt()) { // if not filling, pass invalid handle
+          art::InputTag kalSeedDtDtInputTag = i_trkFitConfig.trkDtDtTag();
+          event.getByLabel(kalSeedDtDtInputTag,kalSeedDtDtCollHandle);
+        }
+        _allKSDtDtHs.push_back(kalSeedDtDtCollHandle);
 
         std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
         for (const auto& i_trkQualTag : i_trkFitConfig.trkQualTags()) {
@@ -1013,6 +1033,7 @@ namespace mu2e {
       _allCHIs.at(i_trk_fit_branch).clear();
       _allKLIs.at(i_trk_fit_branch).clear();
       _allTCHIs.at(i_trk_fit_branch).clear();
+      _allTDtDtIs.at(i_trk_fit_branch).clear();
 
       _allTSHIs.at(i_trk_fit_branch).clear();
       _allTSHCIs.at(i_trk_fit_branch).clear();
@@ -1350,6 +1371,21 @@ namespace mu2e {
     if(_conf.diag() > 1 || (_conf.trk().fillHits() && trkFitConfig.options().fillhits())){
       _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_trk_fit_branch), _allTSHCIs.at(i_trk_fit_branch), _conf.trk().fillHitCalibs());
       _infoStructHelper.fillMatInfo(kseed, _allTSMIs.at(i_trk_fit_branch));
+    }
+
+    if(_conf.trk().fillTrkDtDt()) {
+      auto handle = _allKSDtDtHs.at(i_trk_fit_branch);
+      if(handle.isValid()) {
+        if(i_kseedptr >= handle->size()) throw cet::exception("EventNtuple")
+                                           << "Index " << i_kseedptr
+                                           << " out of range of DtDt list size = "
+                                           << handle->size();
+        const auto& dtdt = handle->at(i_kseedptr);
+        _infoStructHelper.fillTrkDtDtInfo(dtdt, _allTDtDtIs.at(i_trk_fit_branch));
+      } else {
+        throw cet::exception("EventNtuple")
+          << "TrkDtDt handle at " << i_trk_fit_branch << " isn't valid!";
+      }
     }
 
     _infoStructHelper.fillTrkCaloHitInfo(kseed, _allTCHIs.at(i_trk_fit_branch));
