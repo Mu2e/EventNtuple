@@ -306,7 +306,7 @@ namespace mu2e
       recoInfo.emplace_back(tdet->toDetector(HitPos), barIndex.asInt(), sectorNumber, crvRecoPulse->GetSiPMNumber(),
           crvRecoPulse->GetROC(), crvRecoPulse->GetFEB(), crvRecoPulse->GetFEBchannel(),
           crvRecoPulse->GetPEs(), crvRecoPulse->GetPEsPulseHeight(), crvRecoPulse->GetPulseHeight(),
-          crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime(), crvHitIndex);
+          crvRecoPulse->GetPulseBeta(), crvRecoPulse->GetPulseFitChi2(), crvRecoPulse->GetPulseTime(), crvHitIndex, crvRecoPulse->GetSequenceIndex());
 
       //MCtruth pulses information
       if(!crvDigiMCs.isValid())
@@ -367,7 +367,8 @@ namespace mu2e
     {
       mu2e::CrvDigi const& digi(crvDigis->at(j));
       for(size_t k=0; k<digi.GetADCs().size(); k++)
-        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, digi.GetScintillatorBarIndex().asInt(), digi.GetSiPMNumber());
+        digiInfo.emplace_back(digi.GetADCs()[k], (digi.GetStartTDC()+k)*CRVDigitizationPeriod, digi.GetScintillatorBarIndex().asInt(), digi.GetSiPMNumber(),
+                              digi.GetROC(), digi.GetFEB(), digi.GetFEBchannel());
     }
   } // FillCrvDigiInfoCollections
 

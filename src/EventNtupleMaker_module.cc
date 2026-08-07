@@ -10,8 +10,11 @@
 #include "Offline/MCDataProducts/inc/CaloClusterMC.hh"
 #include "Offline/MCDataProducts/inc/CaloHitMC.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
+#include "Offline/MCDataProducts/inc/GenEventCount.hh"
+#include "Offline/MCDataProducts/inc/CosmicLivetime.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
+#include "Offline/RecoDataProducts/inc/KalSeedDtDt.hh"
 #include "Offline/RecoDataProducts/inc/CaloCluster.hh"
 #include "Offline/RecoDataProducts/inc/CaloHit.hh"
 #include "Offline/RecoDataProducts/inc/CaloRecoDigi.hh"
@@ -61,6 +64,7 @@
 #include "EventNtuple/inc/LoopHelixInfo.hh"
 #include "EventNtuple/inc/CentralHelixInfo.hh"
 #include "EventNtuple/inc/KinematicLineInfo.hh"
+#include "EventNtuple/inc/TrkDtDtInfo.hh"
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/EventWeightInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
@@ -86,6 +90,7 @@
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
 #include "EventNtuple/inc/CaloDigiMCInfo.hh"
 #include "Offline/MCDataProducts/inc/CaloShowerSim.hh"
+#include "EventNtuple/inc/SubRunInfo.hh"
 
 // C++ includes.
 #include <iostream>
@@ -130,6 +135,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
         fhicl::Atom<std::string> branchname{Name("branchname"), Comment("Name of output branch")};
+        fhicl::Atom<std::string> trkDtDtTag{Name("trkDtDtTag"), Comment("Input tag for KalSeedDtDtCollection")};
         fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
         fhicl::Sequence<fhicl::Table<TrkQualLeafConfig>> trkQualLeaves{Name("trkQualLeaves"), Comment("TrkQual output branch names, input tags, and model provenance")};
         fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
@@ -160,6 +166,7 @@ namespace mu2e {
           Comment("Global enable for hit-level branches; per-branch options.fillHits also required")};
         fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
         fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
+        fhicl::Atom<bool> fillTrkDtDt{Name("fillTrkDtDt"), Comment("Fill TrkDtDt branches")};
         // per-branch configurations
         fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
         // tracker MC sub-config
@@ -272,6 +279,30 @@ namespace mu2e {
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("CRV MC filling options")};
       };
 
+      // Configuration for specific subrun quantities
+      struct SubRunBranchConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<bool> include{Name("include"), Comment("True/false to include this quantity or not (master switch)")};
+        fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
+        fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
+        fhicl::Atom<bool> fillTotalsHistogram{Name("fillTotalsHistogram"), Comment("True/false to make a totals histogram for this quantity")};
+      };
+
+      // Overal configuration for subrun ntuple and histograms
+      struct SubRunConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<bool> makeNtuple{Name("makeNtuple"), Comment("True/false of whether to make the subrun ntuple")};
+        fhicl::Atom<bool> makeTotalsHistograms{Name("makeTotalsHistograms"), Comment("True/false of whether to make the totals histograms")};
+        fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
+        fhicl::Table<SubRunBranchConfig> procEventCount{Name("procEventCount"), Comment("Number of processed events")};
+        fhicl::Table<SubRunBranchConfig> cosmicLivetime{Name("cosmicLivetime"), Comment("Cosmic livetime [s]")};
+      };
+
+
       struct Config {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
@@ -302,6 +333,7 @@ namespace mu2e {
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
         fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
+        fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
       };
       typedef art::EDAnalyzer::Table<Config> Parameters;
 
@@ -311,6 +343,7 @@ namespace mu2e {
       void beginJob() override;
       void beginSubRun(const art::SubRun & subrun ) override;
       void analyze(const art::Event& e) override;
+      void endSubRun(const art::SubRun & subrun ) override;
 
     private:
 
@@ -320,7 +353,11 @@ namespace mu2e {
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
-      TH1I* _hProcEvents;
+      // subrun quantities
+      TTree* _subrunNtuple;
+      TH1I* _hGenEventCount;
+      TH1I* _hProcEventCount;
+      TH1F* _hCosmicLivetime;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -335,6 +372,7 @@ namespace mu2e {
       TrkCount _tcnt;
       // track branches (inputs)
       std::vector<art::Handle<KalSeedPtrCollection> > _allKSPCHs;
+      std::vector<art::Handle<KalSeedDtDtCollection>> _allKSDtDtHs;
       // track branches (outputs)
       std::map<TrkFitBranchIndex, std::vector<TrkInfo>> _allTIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkSegInfo>>> _allTSIs;
@@ -342,6 +380,7 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<std::vector<CentralHelixInfo>>> _allCHIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<KinematicLineInfo>>> _allKLIs;
       std::map<TrkFitBranchIndex, std::vector<TrkCaloHitInfo>> _allTCHIs;
+      std::map<TrkFitBranchIndex, std::vector<TrkDtDtInfo>> _allTDtDtIs;
       // quality branches (inputs)
       std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs;
       std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkQualCHs;
@@ -450,6 +489,12 @@ namespace mu2e {
       // for trigger branch:
       bool firstEvent = true;
 
+      // For subrun ntuple
+      mu2e::SubRunInfo _srinfo;
+      long _genEventCount;
+      long _procEventCount;
+      float _cosmicLivetime;
+
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
       // Also gates tracker MC and CRV MC.
@@ -551,6 +596,7 @@ namespace mu2e {
       _allLHIs[i_trk_fit_branch]      = {};
       _allCHIs[i_trk_fit_branch]      = {};
       _allKLIs[i_trk_fit_branch]      = {};
+      _allTDtDtIs[i_trk_fit_branch]   = {};
       _allMCVDInfos[i_trk_fit_branch] = {};
       _allTCHIs[i_trk_fit_branch]     = {};
       _allMCTIs[i_trk_fit_branch]     = {};
@@ -592,7 +638,6 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 11);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
-    _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
     size_t nTrkQualAlgorithms = 0;
     if (_conf.trk().fill()) {
       for (const auto& trkFitConfig : _allTrkFitBranches) {
@@ -605,6 +650,7 @@ namespace mu2e {
         "trkqual_metadata", "Configured TrkQual ML algorithms", nTrkQualAlgorithms, 0, nTrkQualAlgorithms);
     }
     size_t iTrkQualAlgorithm = 0;
+
     // event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
     if (fillEventMC()) {
@@ -631,6 +677,10 @@ namespace mu2e {
         if(_ftype == LoopHelix)    _ntuple->Branch((branch+"segpars_lh.").c_str(),&_allLHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         if(_ftype == CentralHelix) _ntuple->Branch((branch+"segpars_ch.").c_str(),&_allCHIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
         if(_ftype == KinematicLine) _ntuple->Branch((branch+"segpars_kl.").c_str(),&_allKLIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        if(_conf.trk().fillTrkDtDt()) {
+          _ntuple->Branch((branch+"dtdt.").c_str(),&_allTDtDtIs.at(i_trk_fit_branch),_buffsize,_splitlevel);
+        }
+
         // TrkCaloHit: currently only 1
         _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_trk_fit_branch));
         for (size_t i_trkQual = 0; i_trkQual < i_trkFitConfig.trkQualLeaves().size(); ++i_trkQual) {
@@ -753,10 +803,80 @@ namespace mu2e {
         _ntuple->Branch(("mcsteps_"+inst+".").c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
       }
     }
+
+    // Subrun tree
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
+      _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
+
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+      }
+
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("procEventCount", &_procEventCount, _buffsize, _splitlevel);
+      }
+
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillNtuple()) {
+        _subrunNtuple->Branch("cosmicLivetime", &_cosmicLivetime, _buffsize, _splitlevel);
+      }
+
+    }
+    if (_conf.subruns().makeTotalsHistograms()) {
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount = tfs->make<TH1I>("n_gen_events", "total number of generated events", 1,0,1);
+      }
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount = tfs->make<TH1I>("n_proc_events", "total number of processed events", 1,0,1);
+      }
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime = tfs->make<TH1F>("cosmic_livetime", "total cosmic livetime [sec]", 1,0,1);
+      }
+
+    }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
     _infoStructHelper.updateSubRun();
+
+    _srinfo.run = subrun.run();
+    _srinfo.subrun = subrun.subRun();
+
+  }
+
+  void EventNtupleMaker::endSubRun(const art::SubRun & subrun ) {
+
+    if (_conf.subruns().genEventCount().include()) {
+      art::Handle<GenEventCount> genEventCountHandle;
+      subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
+
+      _genEventCount = genEventCountHandle->count();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+      }
+    }
+
+    if (_conf.subruns().cosmicLivetime().include()) {
+      art::Handle<CosmicLivetime> cosmicLivetimeHandle;
+      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
+
+      _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
+      }
+    }
+
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple->Fill();
+    }
+
+    if (_conf.subruns().procEventCount().include()) {
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount->Fill(0.0, _procEventCount);
+      }
+    }
+
+    _procEventCount = 0; // reset procEventCount every subrun
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
@@ -836,6 +956,7 @@ namespace mu2e {
     _allBestCrvAssns.clear();
     _allTrkQualCHs.clear();
     _allTrkPIDCHs.clear();
+    _allKSDtDtHs.clear();
 
     art::Handle<KalHelixAssns> khaH;
     if(_conf.helices().fill()){
@@ -853,12 +974,20 @@ namespace mu2e {
           _allTrkQualCHs.emplace_back();
           _allRQCHs.push_back({});
           _allTrkPIDCHs.emplace_back();
+          _allKSDtDtHs.push_back(art::Handle<KalSeedDtDtCollection>());
           continue;
         }
         art::Handle<KalSeedPtrCollection> kalSeedPtrCollHandle;
         art::InputTag kalSeedPtrInputTag = i_trkFitConfig.input();
         event.getByLabel(kalSeedPtrInputTag,kalSeedPtrCollHandle);
         _allKSPCHs.push_back(kalSeedPtrCollHandle);
+
+        art::Handle<KalSeedDtDtCollection> kalSeedDtDtCollHandle;
+        if(_conf.trk().fillTrkDtDt()) { // if not filling, pass invalid handle
+          art::InputTag kalSeedDtDtInputTag = i_trkFitConfig.trkDtDtTag();
+          event.getByLabel(kalSeedDtDtInputTag,kalSeedDtDtCollHandle);
+        }
+        _allKSDtDtHs.push_back(kalSeedDtDtCollHandle);
 
         std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
         for (const auto& i_trkQual : i_trkFitConfig.trkQualLeaves()) {
@@ -924,7 +1053,9 @@ namespace mu2e {
       event.getByLabel(_extraMCStepTags[ixt],mcstepch);
       _extraMCStepCollections.push_back(mcstepch);
     }
-    event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
+    if(!_surfaceStepsTag.empty()) {
+      event.getByLabel(_surfaceStepsTag,_surfaceStepsHandle);
+    }
 
     // find global MCStep collections
     _stepPointMCCollections.clear();
@@ -946,6 +1077,7 @@ namespace mu2e {
       _allCHIs.at(i_trk_fit_branch).clear();
       _allKLIs.at(i_trk_fit_branch).clear();
       _allTCHIs.at(i_trk_fit_branch).clear();
+      _allTDtDtIs.at(i_trk_fit_branch).clear();
 
       _allTSHIs.at(i_trk_fit_branch).clear();
       _allTSHCIs.at(i_trk_fit_branch).clear();
@@ -1207,7 +1339,7 @@ namespace mu2e {
     if(fill) {
       _ntuple->Fill();
     }
-    _hProcEvents->Fill(0);
+    _procEventCount++;
   }
 
 
@@ -1282,6 +1414,21 @@ namespace mu2e {
     if(_conf.diag() > 1 || (_conf.trk().fillHits() && trkFitConfig.options().fillhits())){
       _infoStructHelper.fillHitInfo(kseed, _allTSHIs.at(i_trk_fit_branch), _allTSHCIs.at(i_trk_fit_branch), _conf.trk().fillHitCalibs());
       _infoStructHelper.fillMatInfo(kseed, _allTSMIs.at(i_trk_fit_branch));
+    }
+
+    if(_conf.trk().fillTrkDtDt()) {
+      auto handle = _allKSDtDtHs.at(i_trk_fit_branch);
+      if(handle.isValid()) {
+        if(i_kseedptr >= handle->size()) throw cet::exception("EventNtuple")
+                                           << "Index " << i_kseedptr
+                                           << " out of range of DtDt list size = "
+                                           << handle->size();
+        const auto& dtdt = handle->at(i_kseedptr);
+        _infoStructHelper.fillTrkDtDtInfo(dtdt, _allTDtDtIs.at(i_trk_fit_branch));
+      } else {
+        throw cet::exception("EventNtuple")
+          << "TrkDtDt handle at " << i_trk_fit_branch << " isn't valid!";
+      }
     }
 
     _infoStructHelper.fillTrkCaloHitInfo(kseed, _allTCHIs.at(i_trk_fit_branch));

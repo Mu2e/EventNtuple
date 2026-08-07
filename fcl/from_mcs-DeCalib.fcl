@@ -24,3 +24,4 @@ physics.end_paths : [ EndPath ]
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
+physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

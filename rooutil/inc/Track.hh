@@ -14,6 +14,7 @@
 #include "EventNtuple/inc/TrkStrawHitInfoMC.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
 #include "EventNtuple/inc/TrkSegInfo.hh"
+#include "EventNtuple/inc/TrkDtDtInfo.hh"
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
@@ -21,19 +22,19 @@
 #include "EventNtuple/rooutil/inc/TrackSegment.hh"
 #include "EventNtuple/rooutil/inc/MCParticle.hh"
 #include "EventNtuple/rooutil/inc/TrackHit.hh"
-  
+
 namespace rooutil {
   struct Track {
     Track(mu2e::TrkInfo* trk, std::vector<mu2e::TrkSegInfo>* trksegs, mu2e::TrkCaloHitInfo* trkcalohit)
       : trk(trk), trksegs(trksegs), trkcalohit(trkcalohit) {
-  
+
       // Create the underlying track segments
       for (int i_segment = 0; i_segment < nSegments(); ++i_segment) {
         TrackSegment segment(&(trksegs->at(i_segment))); // passing the addresses of the underlying structs
         segments.emplace_back(segment);
       }
     }
-  
+
     void Update(bool debug = false) {
       if (trksegsmc != nullptr) { // if we have MC information
         // search for corresponding SurfaceStepInfo (it will have the same sid and sindex)
@@ -46,14 +47,14 @@ namespace rooutil {
           double max_dt = 5; // want to be at least this close
           for (auto& segment : segments) {
             if (segment.trkseg != nullptr) { // we might have added MC-only segments...
-  
+
               // Want to to match segments that are at the same surface (+ index) travelling in the same direction and closest in time
               double dt = std::fabs(segment.trkseg->time - trksegsmc->at(i_segment_mc).time);
               if (segment.trkseg->sid == trksegsmc->at(i_segment_mc).sid
                   && segment.trkseg->sindex == trksegsmc->at(i_segment_mc).sindex
                   && segment.trkseg->mom.Dot(trksegsmc->at(i_segment_mc).mom)>0
                   && dt < max_dt) {
-  
+
                 if (dt < min_dt) {
                   min_dt = dt;
                   segment.trksegmc = &(trksegsmc->at(i_segment_mc));
@@ -71,7 +72,7 @@ namespace rooutil {
           }
         }
       }
-  
+
       if (trkmcsim != nullptr) {
         if (debug) { std::cout << "Track::Update(): Updating trkmcsim..." << std::endl; }
         // Create the underlying MCParticles if possible
@@ -81,7 +82,7 @@ namespace rooutil {
           mc_particles.emplace_back(mc_particle);
         }
       }
-  
+
       if (trksegpars_lh != nullptr) { // if we LoopHelix info
         if (debug) { std::cout << "Track::Update(): Updating trksegpars_lh..." << std::endl; }
         for (int i_segment = 0; i_segment < nSegments(); ++i_segment) {
@@ -100,7 +101,7 @@ namespace rooutil {
           segments[i_segment].trksegpars_kl = &(trksegpars_kl->at(i_segment));
         }
       }
-  
+
       if (trkhits != nullptr) {
         if (debug) { std::cout << "Track::Update(): Updating trkhits..." << std::endl; }
         // Create the underlying TrackHits
@@ -108,12 +109,12 @@ namespace rooutil {
           if (debug) { std::cout << "Track::Update(): trkhit " << i_trkhit+1 << " / " << nHits() << std::endl; }
           TrackHit trkhit;
           trkhit.reco = &(trkhits->at(i_trkhit)); // passing the addresses of the underlying structs
-  
+
           // the first trkhitsmc correspond 1:1 with the reco hits, the remaining trkhitsmc also go with the truth
           if (trkhitsmc != nullptr) {
             trkhit.mc = &(trkhitsmc->at(i_trkhit));
           }
-  
+
           // trkhitcalibs have 1:1 correspondance with reco hits
           if (trkhitcalibs != nullptr) {
             trkhit.calib = &(trkhitcalibs->at(i_trkhit));
@@ -133,7 +134,7 @@ namespace rooutil {
         }
       }
     }
-  
+
     int nSegments() const { return trksegs->size(); }
     TrackSegments GetSegments() { return segments; }
     TrackSegments GetSegments(TrackSegmentCut cut) {
@@ -146,7 +147,7 @@ namespace rooutil {
       return select_segments;
     }
     TrackSegments segments;
-  
+
     int nMCParticles() const {
       if (trkmcsim == nullptr) { return 0; }
       else { return trkmcsim->size(); }
@@ -162,7 +163,7 @@ namespace rooutil {
       return select_mc_particles;
     }
     MCParticles mc_particles;
-  
+
     int nHits() const { return trkhits->size(); }
     TrackHits GetHits() { return hits; }
     TrackHits GetHits(TrackHitCut cut) {
@@ -189,6 +190,7 @@ namespace rooutil {
     // Pointers to the data
     mu2e::TrkInfo* trk = nullptr;
     mu2e::TrkInfoMC* trkmc = nullptr;
+    mu2e::TrkDtDtInfo* trkdtdt = nullptr;
     std::vector<mu2e::TrkSegInfo>* trksegs = nullptr;
     std::vector<mu2e::SurfaceStepInfo>* trksegsmc = nullptr;
     std::vector<mu2e::LoopHelixInfo>* trksegpars_lh = nullptr;
@@ -207,7 +209,7 @@ namespace rooutil {
   private:
     std::unordered_map<std::string, void*> user_branches;
   };
-  
+
   typedef std::function<bool(Track&)> TrackCut;
   typedef std::vector<Track> Tracks;
 } // namespace rooutil
