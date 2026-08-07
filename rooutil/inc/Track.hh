@@ -203,7 +203,6 @@ namespace rooutil {
     mu2e::TrkCaloHitInfo* trkcalohit = nullptr;
     std::vector<mu2e::SimInfo>* trkmcsim = nullptr;
     mu2e::MVAResultInfo* trkqual = nullptr;
-    mu2e::MVAResultInfo* trkqual_bdt = nullptr;
     mu2e::MVAResultInfo* trkpid = nullptr;
 
   private:
