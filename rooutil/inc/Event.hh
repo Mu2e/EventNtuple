@@ -104,13 +104,6 @@ namespace rooutil {
       user_branches = branches;
     }
 
-    // Check if a branch exists in the TChain, and optionally set its address
-    bool CheckForBranch(TChain* ntuple, const char* branch_name, void* address = nullptr) {
-      if(ntuple->GetBranch(branch_name) == nullptr || ntuple->GetBranchStatus(branch_name) == 0) return false;
-      if(address != nullptr) ntuple->SetBranchAddress(branch_name, address);
-      return true;
-    }
-
     // Add trigger branches and store the path name information
     void AddTriggerInfo(TChain* ntuple) {
       trigger.SetTrigInfo(&triginfo); // pointer to the underlying trigger data read in event-by-event
