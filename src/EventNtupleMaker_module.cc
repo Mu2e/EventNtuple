@@ -526,8 +526,15 @@ namespace mu2e {
     for(const auto& trk_fit_cfg : _conf.trk().fits()){
       const TrkFitBranchIndex i_trk_fit_branch = _allTrkFitBranches.size();
       for (const auto& trkQualConfig : trk_fit_cfg.trkQualLeaves()) {
+        std::string proposed_leafname = trk_fit_cfg.branchname() + "qual" + trkQualConfig.leafname();
+        // Check if leafname already exists
+        for (const auto& trkQualMetadata : _trkQualMetadata[i_trk_fit_branch]) {
+          if (proposed_leafname == trkQualMetadata.output_branch) {
+            throw cet::exception("EventNtuple") << "Proposed TrkQual leafname \"" << proposed_leafname << "\" already exists in _trkQualMetadata";
+          }
+        }
         _trkQualMetadata[i_trk_fit_branch].push_back({
-          trk_fit_cfg.branchname() + "qual" + trkQualConfig.leafname(),
+          proposed_leafname,
           trkQualConfig.inputTag(),
           trkQualConfig.modelVersion()
         });
