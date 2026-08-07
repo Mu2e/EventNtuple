@@ -289,6 +289,7 @@ De : { input : "MergeKKDe"
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualTags : ["TrkQualDe"]
   trkPIDTags : ["TrkPID:KKDe"]
+  trkDtDtTag : "TrkDtDt:MergeKKDe"
 }
 
 EventNtupleMaker : {
@@ -472,6 +473,7 @@ ENDeCalib.trk.fits : [
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
     trkQualTags : ["TrkQualDe"]
     trkPIDTags : ["TrkPIDDe"]
+    trkDtDtTag : "TrkDtDt:MergeKKDeCalib"
   }
 ]
 
