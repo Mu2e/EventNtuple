@@ -368,7 +368,8 @@ namespace rooutil {
         }
         trkqual_metadata[metadata.output_branch] = metadata;
       }
-      
+    }
+
     static const std::vector<std::string>& TotalNames() {
       static const std::vector<std::string> total_names{
         "n_gen_events", "n_proc_events", "cosmic_livetime"
