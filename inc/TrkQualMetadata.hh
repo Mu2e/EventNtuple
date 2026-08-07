@@ -1,5 +1,5 @@
-#ifndef EventNtuple_TrkQualMetadata_hh
-#define EventNtuple_TrkQualMetadata_hh
+#ifndef TrkQualMetadata_hh
+#define TrkQualMetadata_hh
 
 #include <string>
 
