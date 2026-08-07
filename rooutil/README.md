@@ -140,7 +140,7 @@ RooUtil can bind either output by name with `MakeTrackUserBranch<mu2e::MVAResult
 Analysis code can stop on unexpected provenance with:
 
 ```
-util.RequireTrkQualVersion("trkqual", "ANN2_v2");
+util.RequireTrkQualVersion("trkqual", "ANN1_v2.0");
 ```
 
 ### Branches not contained within a class

@@ -16,7 +16,7 @@ order of the configured algorithms:
 
 ```
 trkQualLeaves : [
-  { leafname : ""           inputTag : "TrkQualAll:ANN"       modelVersion : "TrkQual_ANN1_v2" },
+  { leafname : ""           inputTag : "TrkQualAll:ANN"       modelVersion : "TrkQual_ANN1_v2.0" },
   { leafname : "_candidate" inputTag : "TrkQualCandidate:ANN" modelVersion : "TrkQual_ANN1_v3_rc1" }
 ]
 ```

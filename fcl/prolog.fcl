@@ -274,8 +274,8 @@ All : { input : "MergeKKAll"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [
-    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2" },
-    { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2" }
+    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2.0" },
+    { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2.0" }
   ]
   trkPIDTags : ["TrkPID:MergeKKAll"]
   trkDtDtTag : "TrkDtDt:MergeKKAll"
