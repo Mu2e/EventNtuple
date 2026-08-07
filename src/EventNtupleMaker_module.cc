@@ -1270,6 +1270,9 @@ namespace mu2e {
       if(handle.isValid()) {
         const auto& dtdt = handle->at(i_kseedptr);
         _infoStructHelper.fillTrkDtDtInfo(dtdt, _allTDtDtIs.at(i_trk_fit_branch));
+      } else {
+        const KalSeedDtDt dtdt; // empty dt/dt object
+        _infoStructHelper.fillTrkDtDtInfo(dtdt, _allTDtDtIs.at(i_trk_fit_branch));
       }
     }
 
