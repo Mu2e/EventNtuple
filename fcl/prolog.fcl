@@ -9,7 +9,7 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.0.onnx"
   xgbFilename : "ArtAnalysis/TrkDiag/data/TrkQual_BDT1_v2.0.ubj"
   debugLevel : 0
 
