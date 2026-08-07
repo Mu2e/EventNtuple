@@ -42,6 +42,7 @@
 #include "EventNtuple/inc/MCStepInfo.hh"
 
 #include "EventNtuple/rooutil/inc/Track.hh"
+#include "EventNtuple/rooutil/inc/UserBranch.hh"
 #include "EventNtuple/rooutil/inc/TimeCluster.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
@@ -62,7 +63,6 @@ namespace rooutil {
       CheckForBranch(ntuple, "trksegs", &this->trksegs);
       CheckForBranch(ntuple, "trkcalohit", &this->trkcalohit);
       CheckForBranch(ntuple, "trkqual", &this->trkqual);
-      CheckForBranch(ntuple, "trkqual3", &this->trkqual_alt); // TODO: un-hardcode those
       CheckForBranch(ntuple, "crvcoincs", &this->crvcoincs);
       CheckForBranch(ntuple, "trkpid", &this->trkpid);
 
@@ -98,6 +98,10 @@ namespace rooutil {
       CheckForBranch(ntuple, "calomcsim", &this->calomcsim);
 
       CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
+    }
+
+    void SetUserBranches(const std::vector<std::shared_ptr<UserBranchBase>>& branches) {
+      user_branches = branches;
     }
 
     // Add trigger branches and store the path name information
@@ -136,8 +140,12 @@ namespace rooutil {
         UpdateObject(track.trkmats, trkmats, i_track, debug);
         UpdateObject(track.trkhitcalibs, trkhitcalibs, i_track, debug);
         UpdateObject(track.trkqual, trkqual, i_track, debug);
-        UpdateObject(track.trkqual_alt, trkqual_alt, i_track, debug);
         UpdateObject(track.trkpid, trkpid, i_track, debug);
+        for (const auto& user_branch : user_branches) {
+          if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
+            track.SetUserBranch(user_branch->name(), user_branch->TrackElementPtr(i_track));
+          }
+        }
 
         if (debug) { std::cout << "Event::Update(): Updating Track " << i_track << "... " << std::endl; }
         track.Update(debug);
@@ -282,8 +290,12 @@ namespace rooutil {
           if (trksegsmc) { trksegsmc->erase(trksegsmc->begin()+trks_to_remove[i_trk]); }
           if (trkcalohit) { trkcalohit->erase(trkcalohit->begin()+trks_to_remove[i_trk]); }
           if (trkqual) { trkqual->erase(trkqual->begin()+trks_to_remove[i_trk]); }
-          if (trkqual_alt) { trkqual_alt->erase(trkqual_alt->begin()+trks_to_remove[i_trk]); }
           if (trkpid) { trkpid->erase(trkpid->begin()+trks_to_remove[i_trk]); }
+          for (const auto& user_branch : user_branches) {
+            if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
+              user_branch->EraseTrack(trks_to_remove[i_trk]);
+            }
+          }
           if (trksegpars_lh) { trksegpars_lh->erase(trksegpars_lh->begin()+trks_to_remove[i_trk]); }
           if (trksegpars_ch) { trksegpars_ch->erase(trksegpars_ch->begin()+trks_to_remove[i_trk]); }
           if (trksegpars_kl) { trksegpars_kl->erase(trksegpars_kl->begin()+trks_to_remove[i_trk]); }
@@ -416,7 +428,6 @@ namespace rooutil {
     std::vector<mu2e::TrkCaloHitInfo>* trkcalohit = nullptr;
     std::vector<mu2e::CaloClusterInfoMC>* trkcalohitmc = nullptr;
     std::vector<mu2e::MVAResultInfo>* trkqual = nullptr;
-    std::vector<mu2e::MVAResultInfo>* trkqual_alt = nullptr; // an optional trkqual branch to also use
     std::vector<mu2e::MVAResultInfo>* trkpid = nullptr;
     std::vector<std::vector<mu2e::TrkSegInfo>>* trksegs = nullptr;
     std::vector<std::vector<mu2e::SurfaceStepInfo>>* trksegsmc = nullptr;
@@ -427,6 +438,7 @@ namespace rooutil {
     std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
     std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
     std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>* trkhitcalibs = nullptr;
+    std::vector<std::shared_ptr<UserBranchBase>> user_branches;
 
     std::vector<mu2e::EventNtupleTimeClusterInfo>* timeclusters = nullptr;
 

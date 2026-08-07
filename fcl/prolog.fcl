@@ -14,7 +14,8 @@ BEGIN_PROLOG
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.0.onnx"
+  xgbFilename : "ArtAnalysis/TrkDiag/data/TrkQual_BDT1_v2.0.ubj"
   debugLevel : 0
 
 }
@@ -202,77 +203,80 @@ DeM : { input : "MergeKKDeM"
   branchname : "dem"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDeM"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeM:ANN" modelVersion : "ANN1_v2.0" } ]
   trkPIDTags : ["TrkPIDDeM"]
 }
 UeM : { input : "MergeKKUeM"
   branchname : "uem"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DmuM : { input : "MergeKKDmuM"
   branchname : "dmm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UmuM : { input : "MergeKKUmuM"
   branchname : "umm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DeP : { input : "MergeKKDeP"
   branchname : "dep"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UeP : { input : "MergeKKUeP"
   branchname : "uep"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 DmuP : { input : "MergeKKDmuP"
   branchname : "dmp"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 UmuP : { input : "MergeKKUmuP"
   branchname : "ump"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualAll"]
+  trkQualLeaves : [
+    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2.0" },
+    { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2.0" }
+  ]
   trkPIDTags : ["TrkPID:MergeKKAll"]
   trkDtDtTag : "TrkDtDt:MergeKKAll"
 }
@@ -280,14 +284,14 @@ DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 De : { input : "MergeKKDe"
   branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDe"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
   trkPIDTags : ["TrkPID:KKDe"]
   trkDtDtTag : "TrkDtDt:MergeKKDe"
 }
@@ -332,7 +336,6 @@ EventNtupleMaker : {
     fill : true
     fillHits : true
     fillHitCalibs : false
-    fillTrkQual : true
     fillTrkPID : false
     fillTrkDtDt : true
     fits : [ @local::All ]
@@ -433,7 +436,7 @@ TTMCBranch : {
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 
@@ -471,7 +474,7 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualTags : ["TrkQualDe"]
+    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
     trkPIDTags : ["TrkPIDDe"]
     trkDtDtTag : "TrkDtDt:MergeKKDeCalib"
   }

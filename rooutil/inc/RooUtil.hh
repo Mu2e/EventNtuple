@@ -1,6 +1,7 @@
 #ifndef RooUtil_hh_
 #define RooUtil_hh_
 
+#include <algorithm>
 #include <fstream>
 #include <map>
 #include <optional>
@@ -11,10 +12,13 @@
 #include "TTree.h"
 #include "TH1I.h"
 
+#include "EventNtuple/inc/TrkQualMetadata.hh"
 #include "EventNtuple/rooutil/inc/Event.hh"
+#include "EventNtuple/rooutil/inc/UserBranch.hh"
 #include "EventNtuple/rooutil/inc/SubRun.hh"
 
 namespace rooutil {
+
   class RooUtil {
   public:
     RooUtil(std::string filename, bool debug = false, std::string treename = "EventNtuple/ntuple") : debug(debug) {
@@ -26,6 +30,7 @@ namespace rooutil {
       if (filename.size() >= root_suffix.size() && filename.compare(filename.size() - root_suffix.size(), root_suffix.size(), root_suffix) == 0) {
         AddFile(filename);
         SetVersionNumber(filename);
+        LoadTrkQualMetadata(filename);
       }
       else { //  assume its a file list
         std::ifstream filelist(filename);
@@ -41,6 +46,7 @@ namespace rooutil {
               SetVersionNumber(line);
               first_line = false;
             }
+            LoadTrkQualMetadata(line);
           }
           filelist.close();
         } else {
@@ -132,6 +138,29 @@ namespace rooutil {
       return count / *livetime;
     }
 
+    bool HasTrkQualMetadata(const std::string& output_branch) const {
+      return trkqual_metadata.find(output_branch) != trkqual_metadata.end();
+    }
+
+    const mu2e::TrkQualMetadata& GetTrkQualMetadata(const std::string& output_branch) const {
+      const auto metadata = trkqual_metadata.find(output_branch);
+      if (metadata == trkqual_metadata.end()) {
+        throw std::runtime_error(
+          "No TrkQual metadata is available for output branch " + output_branch);
+      }
+      return metadata->second;
+    }
+
+    void RequireTrkQualVersion(
+        const std::string& output_branch, const std::string& expected_model_version) const {
+      const auto& metadata = GetTrkQualMetadata(output_branch);
+      if (metadata.model_version != expected_model_version) {
+        throw std::runtime_error(
+          "Unexpected TrkQual version for " + output_branch + ": expected " +
+          expected_model_version + ", got " + metadata.model_version);
+      }
+    }
+
     Event& GetEvent(int i_event) {
       if (debug) { std::cout << "RooUtil::GetEvent(): Getting event " << i_event << std::endl; }
       ntuple->GetEntry(i_event);
@@ -205,6 +234,22 @@ namespace rooutil {
       TurnOnSubRunBranch("*");
     }
 
+    void SetUserBranches(const std::vector<std::shared_ptr<UserBranchBase>>& branches) {
+      for (const auto& branch : branches) {
+        branch->Bind(ntuple);
+        const auto existing = std::find_if(user_branches.begin(), user_branches.end(),
+          [&branch](const std::shared_ptr<UserBranchBase>& registered) {
+            return registered->name() == branch->name();
+          });
+        if (existing == user_branches.end()) {
+          user_branches.push_back(branch);
+        } else {
+          *existing = branch;
+        }
+      }
+      event->SetUserBranches(user_branches);
+    }
+
     void CreateOutputEventNtuple(TFile* outfile) {
       auto dir = outfile->GetDirectory("EventNtuple");
       if (dir == nullptr) dir = outfile->mkdir("EventNtuple");
@@ -222,7 +267,6 @@ namespace rooutil {
       if(event->trkcalohit) { output_ntuple->Branch("trkcalohit", event->trkcalohit); }
       if(event->trkcalohitmc) { output_ntuple->Branch("trkcalohitmc", event->trkcalohitmc); }
       if(event->trkqual) { output_ntuple->Branch("trkqual", event->trkqual); }
-      if(event->trkqual_alt) { output_ntuple->Branch("trkqual_alt", event->trkqual_alt); }
       if(event->trkpid) { output_ntuple->Branch("trkpid", event->trkpid); }
       if(event->trksegs) { output_ntuple->Branch("trksegs", event->trksegs); }
       if(event->trksegsmc) { output_ntuple->Branch("trksegsmc", event->trksegsmc); }
@@ -258,6 +302,11 @@ namespace rooutil {
       }
 
       if (event->mcsteps_virtualdetector) { output_ntuple->Branch("mcsteps_virtualdetector", event->mcsteps_virtualdetector); }
+      for (const auto& branch : user_branches) {
+        if (branch->is_bound()) {
+          branch->BranchOutput(output_ntuple);
+        }
+      }
 
       // Write out histograms from input to output
       if (hVersion != nullptr) hVersion->Write();
@@ -284,6 +333,43 @@ namespace rooutil {
     }
 
   private:
+    void LoadTrkQualMetadata(const std::string& filename) {
+      TFile file(filename.c_str(), "READ");
+      TH1I* metadata_histogram = nullptr;
+      file.GetObject("EventNtuple/trkqual_metadata", metadata_histogram);
+      if (metadata_histogram == nullptr) {
+        return;
+      }
+
+      const std::string input_tag_marker = ": input tag = ";
+      const std::string model_version_marker = "; model version = ";
+      for (int bin = 1; bin <= metadata_histogram->GetNbinsX(); ++bin) {
+        const std::string label = metadata_histogram->GetXaxis()->GetBinLabel(bin);
+        const auto input_tag_pos = label.find(input_tag_marker);
+        const auto model_version_pos = label.find(model_version_marker);
+        if (input_tag_pos == std::string::npos || model_version_pos == std::string::npos ||
+            input_tag_pos >= model_version_pos) {
+          throw std::runtime_error("Invalid TrkQual metadata in " + filename + ": " + label);
+        }
+
+        mu2e::TrkQualMetadata metadata{
+          label.substr(0, input_tag_pos),
+          label.substr(input_tag_pos + input_tag_marker.size(),
+                       model_version_pos - input_tag_pos - input_tag_marker.size()),
+          label.substr(model_version_pos + model_version_marker.size())
+        };
+        const auto existing = trkqual_metadata.find(metadata.output_branch);
+        if (existing != trkqual_metadata.end() &&
+            (existing->second.input_tag != metadata.input_tag ||
+             existing->second.model_version != metadata.model_version)) {
+          throw std::runtime_error(
+            "TrkQual metadata for " + metadata.output_branch +
+            " differs between input files");
+        }
+        trkqual_metadata[metadata.output_branch] = metadata;
+      }
+    }
+
     static const std::vector<std::string>& TotalNames() {
       static const std::vector<std::string> total_names{
         "n_gen_events", "n_proc_events", "cosmic_livetime"
@@ -311,6 +397,9 @@ namespace rooutil {
     bool debug;
 
     TH1I* hVersion = nullptr;
+    std::map<std::string, mu2e::TrkQualMetadata> trkqual_metadata;
+    std::vector<std::shared_ptr<UserBranchBase>> user_branches;
+
     std::map<std::string, double> totals;
     std::set<std::string> incomplete_totals;
     std::map<std::pair<int, int>, int> subrun_indices;
