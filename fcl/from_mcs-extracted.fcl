@@ -3,6 +3,5 @@
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
 physics.analyzers.EventNtuple.trk.fits : [ @local::Ext ]
 physics.analyzers.EventNtuple.FitType : KinematicLine
-physics.analyzers.EventNtuple.trk.fillTrkQual : false
 
 services.GeometryService.inputFile: "Production/JobConfig/cosmic/geom_cosmic_extracted.txt"

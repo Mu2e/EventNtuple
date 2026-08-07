@@ -324,7 +324,6 @@ EventNtupleMaker : {
     fill : true
     fillHits : true
     fillHitCalibs : false
-    fillTrkQual : true
     fillTrkPID : false
     fits : [ @local::All ]
     mc : {

@@ -159,7 +159,6 @@ namespace mu2e {
         fhicl::Atom<bool> fillHits{Name("fillHits"),
           Comment("Global enable for hit-level branches; per-branch options.fillHits also required")};
         fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
-        fhicl::Atom<bool> fillTrkQual{Name("fillTrkQual"), Comment("Fill TrkQual MVA branches")};
         fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
         // per-branch configurations
         fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
