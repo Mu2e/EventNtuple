@@ -47,8 +47,7 @@
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
 #include "EventNtuple/rooutil/inc/Trigger.hh"
 #include "EventNtuple/rooutil/inc/CaloHit.hh"
-
-#include "TChain.h"
+#include "EventNtuple/rooutil/inc/BranchUtils.hh"
 
 namespace rooutil {
   struct Event {
@@ -99,13 +98,6 @@ namespace rooutil {
       CheckForBranch(ntuple, "calomcsim", &this->calomcsim);
 
       CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
-    }
-
-    // Check if a branch exists in the TChain, and optionally set its address
-    bool CheckForBranch(TChain* ntuple, const char* branch_name, void* address = nullptr) {
-      if(ntuple->GetBranch(branch_name) == nullptr || ntuple->GetBranchStatus(branch_name) == 0) return false;
-      if(address != nullptr) ntuple->SetBranchAddress(branch_name, address);
-      return true;
     }
 
     // Add trigger branches and store the path name information

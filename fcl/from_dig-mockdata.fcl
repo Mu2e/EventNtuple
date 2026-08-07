@@ -36,7 +36,7 @@ physics.EventNtuplePath : [
   @sequence::Reconstruction.OnSpillPath,
   @sequence::EventNtuple.Path
 ]
-physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPathNoMC ]
+physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ]
 physics.analyzers.EventNtuple.SelectEvents : [ "EventNtuplePath" ]
 
 physics.trigger_paths : [ EventNtuplePath ]
@@ -54,3 +54,5 @@ services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 #include "Production/JobConfig/reco/drop_trigger.fcl"
 
 #include "Production/Validation/database.fcl"
+
+physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

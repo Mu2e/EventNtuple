@@ -4,4 +4,3 @@ physics.analyzers.EventNtuple.mc.fill : false
 physics.analyzers.EventNtuple.calo.mc.fill : false
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathNoMC ]
-physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPathNoMC ]

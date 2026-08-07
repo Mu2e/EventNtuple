@@ -10,6 +10,8 @@
 #include "Offline/MCDataProducts/inc/CaloClusterMC.hh"
 #include "Offline/MCDataProducts/inc/CaloHitMC.hh"
 #include "Offline/MCDataProducts/inc/ProtonBunchTimeMC.hh"
+#include "Offline/MCDataProducts/inc/GenEventCount.hh"
+#include "Offline/MCDataProducts/inc/CosmicLivetime.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedAssns.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedDtDt.hh"
@@ -87,6 +89,7 @@
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
 #include "EventNtuple/inc/CaloDigiMCInfo.hh"
 #include "Offline/MCDataProducts/inc/CaloShowerSim.hh"
+#include "EventNtuple/inc/SubRunInfo.hh"
 
 // C++ includes.
 #include <iostream>
@@ -267,6 +270,30 @@ namespace mu2e {
         fhicl::Table<MCConfig> mc{Name("mc"), Comment("CRV MC filling options")};
       };
 
+      // Configuration for specific subrun quantities
+      struct SubRunBranchConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<bool> include{Name("include"), Comment("True/false to include this quantity or not (master switch)")};
+        fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
+        fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
+        fhicl::Atom<bool> fillTotalsHistogram{Name("fillTotalsHistogram"), Comment("True/false to make a totals histogram for this quantity")};
+      };
+
+      // Overal configuration for subrun ntuple and histograms
+      struct SubRunConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+
+        fhicl::Atom<bool> makeNtuple{Name("makeNtuple"), Comment("True/false of whether to make the subrun ntuple")};
+        fhicl::Atom<bool> makeTotalsHistograms{Name("makeTotalsHistograms"), Comment("True/false of whether to make the totals histograms")};
+        fhicl::Table<SubRunBranchConfig> genEventCount{Name("genEventCount"), Comment("Number of generated events (MC)")};
+        fhicl::Table<SubRunBranchConfig> procEventCount{Name("procEventCount"), Comment("Number of processed events")};
+        fhicl::Table<SubRunBranchConfig> cosmicLivetime{Name("cosmicLivetime"), Comment("Cosmic livetime [s]")};
+      };
+
+
       struct Config {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
@@ -297,6 +324,7 @@ namespace mu2e {
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
         fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
+        fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
       };
       typedef art::EDAnalyzer::Table<Config> Parameters;
 
@@ -306,6 +334,7 @@ namespace mu2e {
       void beginJob() override;
       void beginSubRun(const art::SubRun & subrun ) override;
       void analyze(const art::Event& e) override;
+      void endSubRun(const art::SubRun & subrun ) override;
 
     private:
 
@@ -314,7 +343,11 @@ namespace mu2e {
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
-      TH1I* _hProcEvents;
+      // subrun quantities
+      TTree* _subrunNtuple;
+      TH1I* _hGenEventCount;
+      TH1I* _hProcEventCount;
+      TH1F* _hCosmicLivetime;
       // general event info branch
       EventInfo _einfo;
       EventInfoMC _einfomc;
@@ -446,6 +479,12 @@ namespace mu2e {
       // for trigger branch:
       bool firstEvent = true;
 
+      // For subrun ntuple
+      mu2e::SubRunInfo _srinfo;
+      long _genEventCount;
+      long _procEventCount;
+      float _cosmicLivetime;
+
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
       // Also gates tracker MC and CRV MC.
@@ -574,7 +613,6 @@ namespace mu2e {
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
     _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 12);
     _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 1);
-    _hProcEvents = tfs->make<TH1I>("n_proc_events", "number of processed events", 1,0,1);
     // event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
     if (fillEventMC()) {
@@ -721,10 +759,80 @@ namespace mu2e {
         _ntuple->Branch(("mcsteps_"+inst+".").c_str(),&_stepPointMCInfos[icoll],_buffsize,_splitlevel);
       }
     }
+
+    // Subrun tree
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple = tfs->make<TTree>("subrunNtuple","Mu2e SubRun Ntuple");
+      _subrunNtuple->Branch("srinfo", &_srinfo, _buffsize, _splitlevel);
+
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("genEventCount", &_genEventCount, _buffsize, _splitlevel);
+      }
+
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillNtuple()) {
+        _subrunNtuple->Branch("procEventCount", &_procEventCount, _buffsize, _splitlevel);
+      }
+
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillNtuple()) {
+        _subrunNtuple->Branch("cosmicLivetime", &_cosmicLivetime, _buffsize, _splitlevel);
+      }
+
+    }
+    if (_conf.subruns().makeTotalsHistograms()) {
+      if (_conf.subruns().genEventCount().include() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount = tfs->make<TH1I>("n_gen_events", "total number of generated events", 1,0,1);
+      }
+      if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount = tfs->make<TH1I>("n_proc_events", "total number of processed events", 1,0,1);
+      }
+      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime = tfs->make<TH1F>("cosmic_livetime", "total cosmic livetime [sec]", 1,0,1);
+      }
+
+    }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
     _infoStructHelper.updateSubRun();
+
+    _srinfo.run = subrun.run();
+    _srinfo.subrun = subrun.subRun();
+
+  }
+
+  void EventNtupleMaker::endSubRun(const art::SubRun & subrun ) {
+
+    if (_conf.subruns().genEventCount().include()) {
+      art::Handle<GenEventCount> genEventCountHandle;
+      subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
+
+      _genEventCount = genEventCountHandle->count();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+      }
+    }
+
+    if (_conf.subruns().cosmicLivetime().include()) {
+      art::Handle<CosmicLivetime> cosmicLivetimeHandle;
+      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
+
+      _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
+      }
+    }
+
+    if (_conf.subruns().makeNtuple()) {
+      _subrunNtuple->Fill();
+    }
+
+    if (_conf.subruns().procEventCount().include()) {
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
+        _hProcEventCount->Fill(0.0, _procEventCount);
+      }
+    }
+
+    _procEventCount = 0; // reset procEventCount every subrun
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
@@ -1188,7 +1296,7 @@ namespace mu2e {
     if(fill) {
       _ntuple->Fill();
     }
-    _hProcEvents->Fill(0);
+    _procEventCount++;
   }
 
 
