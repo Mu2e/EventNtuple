@@ -23,4 +23,3 @@ physics.end_paths : [ EventNtupleEndPath ]
 
 #include "Production/JobConfig/common/epilog.fcl"
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
-

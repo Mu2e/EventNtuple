@@ -25,6 +25,7 @@ physics :
     @sequence::Reconstruction.DeReco,
     @sequence::Reconstruction.CrvReco,
     KSFDeCalib,
+    SelectReco,
     MergeKKDeCalib,
     TrkQualDe,
     @sequence::Reconstruction.MCReco
