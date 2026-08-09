@@ -3,17 +3,18 @@
 ## Table of Contents
 1. [Introduction](#Introduction)
 2. [```RooUtil``` Class](#RooUtil-Class)
-3. [The ```Event``` Class](#The-Event-Class)
-4. [User-Friendly Classes](#User-Friendly-Classes)
-5. [Accessing User-Friendly Classes](#Accessing-User-Friendly-Classes)
-6. [Cut Functions](#Cut-Functions)
-7. [Common Cut Functions](#Common-Cut-Functions)
-8. [Combining Cut Function](#Combining-Cut-Functions)
-9. [Creating Ntuples From EventNtuple](#Creating-Ntuples-From-EventNtuple)
-10. [```roodask```](#roodask)
-11. [Speed Optimizations](#Speed-Optimizations)
-12. [Debugging](#Debugging)
-13. [For Developers](#For-Developers)
+3. [SubRun Data and Totals](#SubRun-Data-and-Totals)
+4. [The ```Event``` Class](#The-Event-Class)
+5. [User-Friendly Classes](#User-Friendly-Classes)
+6. [Accessing User-Friendly Classes](#Accessing-User-Friendly-Classes)
+7. [Cut Functions](#Cut-Functions)
+8. [Common Cut Functions](#Common-Cut-Functions)
+9. [Combining Cut Function](#Combining-Cut-Functions)
+10. [Creating Ntuples From EventNtuple](#Creating-Ntuples-From-EventNtuple)
+11. [```roodask```](#roodask)
+12. [Speed Optimizations](#Speed-Optimizations)
+13. [Debugging](#Debugging)
+14. [For Developers](#For-Developers)
 
 ## Introduction
 
@@ -28,6 +29,24 @@ This documentation contains quick references. For additional help:
 The constructor takes two arguments:
 * ```filename``` can be the name of a single ROOT file (ending in ```.root```) or a list of ROOT files
 * (optional) ```treename``` the name of the tree
+
+## SubRun Data and Totals
+
+RooUtil loads the optional ```EventNtuple/subrunNtuple``` independently of the event tree. Each entry is represented by a ```SubRun``` object with the ```srinfo``` run/subrun identifier and any configured ```genEventCount```, ```procEventCount```, and ```cosmicLivetime``` quantities.
+
+```
+RooUtil util(filename);
+for (int i_subrun = 0; i_subrun < util.GetNSubRuns(); ++i_subrun) {
+  const auto& subrun = util.GetSubRun(i_subrun);
+  std::cout << subrun.srinfo->run << ":" << subrun.srinfo->subrun << std::endl;
+}
+```
+
+Use ```FindSubRun(run, subrun)``` to retrieve the SubRun corresponding to an event. It returns ```nullptr``` when the requested run/subrun is unavailable. ```GetSubRunIndices(cut)``` returns the indices of entries passing a function with signature ```bool cut(const SubRun&)```. ```CreateOutputSubRunNtuple()``` and ```FillOutputSubRunNtuple()``` create a reduced SubRun tree.
+
+The one-bin totals histograms are summed across every input file. ```GetTotal(name)``` returns ```std::optional<double>```, so a missing or incomplete total is distinct from a valid zero. The available names are ```n_gen_events```, ```n_proc_events```, and ```cosmic_livetime```. ```GetGeneratedEvents()```, ```GetProcessedEvents()```, and ```GetCosmicLivetime()``` are convenience accessors; ```GetRate(count)``` returns ```count / cosmic_livetime``` when a nonzero livetime is available. ```GetNProcEvents()``` remains available for compatibility and returns ```-1``` when the processed-event total is unavailable.
+
+Examples: [SubRunCounting.C](./examples/SubRunCounting.C), [SelectSubRuns.C](./examples/SelectSubRuns.C) for selecting SubRuns and retrieving the SubRun for an event, and [PlotCosmicTrackCrvZResidual_LivetimeNormalized.C](./examples/PlotCosmicTrackCrvZResidual_LivetimeNormalized.C) for normalizing a histogram with ```GetRate()```.
 
 ## The Event Class
 All branches and leaves can be accessed through the ```Event``` class like so:
@@ -111,6 +130,18 @@ The ```CaloCluster``` class contains all information related to a single calorim
 
 Examples: [PlotCaloClusterEnergy.C](./examples/PlotCaloClusterEnergy.C), [PlotCaloClusterEnergy_RecoVsTrue.C](./examples/PlotCaloClusterEnergy_RecoVsTrue.C), [PlotCaloClusterAndHits.C](./examples/PlotCaloClusterAndHits.C), [PlotCaloCluster_SimParticles.C](./examples/PlotCaloCluster_SimParticles.C)
 
+### The ```UserBranch``` Class
+There are some branches in EventNtuple that can have their names defined at runtime. For example, additional ```trkqual``` branches can be added in order to compare different trainings or different algorithms. The ```UserBranch``` class handles these sorts of branches.
+
+Example: [CompareTrkQualTrainings_UserBranches.C](./examples/CompareTrkQualTrainings_UserBranches.C)
+
+#### TrkQual Branches
+RooUtil can bind either output by name with `MakeTrackUserBranch<mu2e::MVAResultInfo>`.
+Analysis code can stop on unexpected provenance with:
+
+```
+util.RequireTrkQualVersion("trkqual", "ANN1_v2.0");
+```
 
 ### Branches not contained within a class
 Some branches are not contained in any of the above classes:

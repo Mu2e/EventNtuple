@@ -4,4 +4,3 @@ physics.analyzers.EventNtuple.trk.fits : [ @local::De ]
 physics.analyzers.EventNtuple.trk.fits[0].branchname : "trk"
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkPIDDe ]
-physics.EventNtupleEndPath : [ EventNtuple, genCountLogger ]

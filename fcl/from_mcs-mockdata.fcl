@@ -16,10 +16,13 @@ physics :
 }
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.Path ]
-physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPathNoMC ]
+physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ]
 
 physics.trigger_paths : [ EventNtuplePath ]
 physics.end_paths : [ EventNtupleEndPath ]
 
 #include "Production/JobConfig/common/epilog.fcl"
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
+
+physics.analyzers.EventNtuple.subruns.genEventCount.include : false
+physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

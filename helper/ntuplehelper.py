@@ -3,11 +3,11 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
-    vector_object_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
-    trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkqual', 'trkpid']
+    trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkdtdt', 'trkqual', 'trkpid']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
     trk_mc_branches = [ 'trkmcsim' ]
@@ -67,6 +67,7 @@ class nthelper:
                            "crvcoincsmcplane" : "CrvPlaneInfoMC",
                            "trkqual" : "MVAResultInfo",
                            "trkpid" : "MVAResultInfo",
+                           "trkdtdt" : "TrkDtDtInfo",
                            "helices" : "HelixInfo",
                            "trksegsmc" : "SurfaceStepInfo",
                            "mcsteps" : "MCStepInfo",

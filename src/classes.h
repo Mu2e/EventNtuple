@@ -13,6 +13,7 @@
 #include "EventNtuple/inc/LoopHelixInfo.hh"
 #include "EventNtuple/inc/CentralHelixInfo.hh"
 #include "EventNtuple/inc/KinematicLineInfo.hh"
+#include "EventNtuple/inc/TrkDtDtInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
@@ -37,3 +38,4 @@
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
+#include "EventNtuple/inc/SubRunInfo.hh"
