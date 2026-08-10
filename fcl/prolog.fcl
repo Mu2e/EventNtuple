@@ -19,42 +19,27 @@ TrkQual : {
   debugLevel : 0
 
 }
-TrkQualDeM           : @local::TrkQual
-TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
-TrkQualUeM           : @local::TrkQual
-TrkQualUeM.KalSeedPtrCollection : "MergeKKUeM"
-TrkQualDmuM          : @local::TrkQual
-TrkQualDmuM.KalSeedPtrCollection : "MergeKKDmuM"
-TrkQualUmuM          : @local::TrkQual
-TrkQualUmuM.KalSeedPtrCollection : "MergeKKUmuM"
-TrkQualDeP           : @local::TrkQual
-TrkQualDeP.KalSeedPtrCollection : "MergeKKDeP"
-TrkQualUeP           : @local::TrkQual
-TrkQualUeP.KalSeedPtrCollection : "MergeKKUeP"
-TrkQualDmuP          : @local::TrkQual
-TrkQualDmuP.KalSeedPtrCollection : "MergeKKDmuP"
-TrkQualUmuP          : @local::TrkQual
-TrkQualUmuP.KalSeedPtrCollection : "MergeKKUmuP"
-TrkQualAll          : @local::TrkQual
-TrkQualAll.KalSeedPtrCollection : "MergeKKAll"
 TrkQualDe           : @local::TrkQual
 TrkQualDe.KalSeedPtrCollection : "MergeKKDe"
+TrkQualUe           : @local::TrkQual
+TrkQualUe.KalSeedPtrCollection : "MergeKKUe"
+TrkQualDmu          : @local::TrkQual
+TrkQualDmu.KalSeedPtrCollection : "MergeKKDmu"
+TrkQualUmu          : @local::TrkQual
+TrkQualUmu.KalSeedPtrCollection : "MergeKKUmu"
+TrkQualAll          : @local::TrkQual
+TrkQualAll.KalSeedPtrCollection : "MergeKKAll"
 
 
 TrkQualProducers : {
-  TrkQualDeM : @local::TrkQualDeM
-  TrkQualUeM : @local::TrkQualUeM
-  TrkQualDeP : @local::TrkQualDeP
-  TrkQualUeP : @local::TrkQualUeP
-  TrkQualDmuM : @local::TrkQualDmuM
-  TrkQualDmuP : @local::TrkQualDmuP
-  TrkQualUmuM : @local::TrkQualUmuM
-  TrkQualUmuP : @local::TrkQualUmuP
-  TrkQualAll : @local::TrkQualAll
   TrkQualDe : @local::TrkQualDe
+  TrkQualUe : @local::TrkQualUe
+  TrkQualDmu : @local::TrkQualDmu
+  TrkQualUmu : @local::TrkQualUmu
+  TrkQualAll : @local::TrkQualAll
 }
 
-TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQualUeP, TrkQualDmuP, TrkQualUmuM, TrkQualUmuP ]
+TrkQualProducersPath : [ TrkQualDe, TrkQualUe, TrkQualDmu, TrkQualUmu ]
 
 #################################
 # PID
@@ -82,6 +67,13 @@ TrkPIDProducers : {
 }
 
 TrkPIDPath : [ TrkDtDt, TrkPID ]
+
+# Modules for from_mcs-ceSimReco.fcl (only contains De fits)
+TrkDtDtDe : @local::TrkPIDProducers.TrkDtDt
+TrkDtDtDe.kalSeeds : [ "KKDe" ]
+TrkPIDDe : @local::TrkPIDProducers.TrkPID
+TrkPIDDe.KalSeeds : [ "KKDe" ]
+TrkPIDDe.KalSeedDtDts : ["TrkDtDtDe:KKDe"]
 
 #################################
 # Trigger
@@ -115,29 +107,20 @@ genCountLogger: { module_type: GenEventCountReader }
 
 # With move to using KalSeedPtr need to "merge" KalSeeds so that we get KalSeedPtr collections
 MergeKK : { module_type : MergeKalSeeds }
-MergeKKDeM           : @local::MergeKK
-MergeKKDeM.KalSeedCollections : [ "KKDeM" ]
-MergeKKUeM           : @local::MergeKK
-MergeKKUeM.KalSeedCollections : [ "KKUeM" ]
-MergeKKDmuM          : @local::MergeKK
-MergeKKDmuM.KalSeedCollections : [ "KKDmuM" ]
-MergeKKUmuM          : @local::MergeKK
-MergeKKUmuM.KalSeedCollections : [ "KKUmuM" ]
-MergeKKDeP           : @local::MergeKK
-MergeKKDeP.KalSeedCollections : [ "KKDeP" ]
-MergeKKUeP           : @local::MergeKK
-MergeKKUeP.KalSeedCollections : [ "KKUeP" ]
-MergeKKDmuP          : @local::MergeKK
-MergeKKDmuP.KalSeedCollections : [ "KKDmuP" ]
-MergeKKUmuP          : @local::MergeKK
-MergeKKUmuP.KalSeedCollections : [ "KKUmuP" ]
+MergeKKDe           : @local::MergeKK
+MergeKKDe.KalSeedCollections : [ "KKDe" ]
+MergeKKUe           : @local::MergeKK
+MergeKKUe.KalSeedCollections : [ "KKUe" ]
+MergeKKDmu          : @local::MergeKK
+MergeKKDmu.KalSeedCollections : [ "KKDmu" ]
+MergeKKUmu          : @local::MergeKK
+MergeKKUmu.KalSeedCollections : [ "KKUmu" ]
 MergeKKLine          : @local::MergeKK
 MergeKKLine.KalSeedCollections : [ "KKLine" ]
 MergeKKOff          : @local::MergeKK
 MergeKKOff.KalSeedCollections : [ "KKCHmu" ]
 MergeKKAll          : @local::MergeKK
-MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP", # will go when all new datasets are added
-  "KKDe", "KKUe", "KKDmu", "KKUmu" ] # these are the new APR outputs
+MergeKKAll.KalSeedCollections : [ "KKDe", "KKUe", "KKDmu", "KKUmu" ]
 MergeKKDe           : @local::MergeKK
 MergeKKDe.KalSeedCollections : [ "KKDe" ]
 
@@ -179,14 +162,10 @@ MergeKKDeCalib : {
 }
 
 MergeKKProducers : {
-  MergeKKDeM : @local::MergeKKDeM
-  MergeKKUeM : @local::MergeKKUeM
-  MergeKKDeP : @local::MergeKKDeP
-  MergeKKUeP : @local::MergeKKUeP
-  MergeKKDmuM : @local::MergeKKDmuM
-  MergeKKDmuP : @local::MergeKKDmuP
-  MergeKKUmuM : @local::MergeKKUmuM
-  MergeKKUmuP : @local::MergeKKUmuP
+  MergeKKDe : @local::MergeKKDe
+  MergeKKUe : @local::MergeKKUe
+  MergeKKDmu : @local::MergeKKDmu
+  MergeKKUmu : @local::MergeKKUmu
   MergeKKLine : @local::MergeKKLine
   MergeKKOff : @local::MergeKKOff
   MergeKKAll : @local::MergeKKAll
@@ -196,64 +175,40 @@ MergeKKProducers : {
 MergeKKProducersPath : [ MergeKKAll ]
 MergeKKNoFieldPath : [ MergeKKLine ]
 MergeKKOffSpillPath : [ MergeKKOff ]
-MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKKUeP, MergeKKDmuP, MergeKKUmuM, MergeKKUmuP ]
+MergeKKSeparatePath : [ MergeKKAll, MergeKKDe, MergeKKUe, MergeKKDmu, MergeKKUmu ]
 
 
-DeM : { input : "MergeKKDeM"
-  branchname : "dem"
+De : { input : "MergeKKDe"
+  branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeM:ANN" modelVersion : "ANN1_v2.0" } ]
-  trkPIDTags : ["TrkPIDDeM"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
+  trkPIDTags : ["TrkPIDDe"]
+  trkDtDtTag : "TrkDtDt:KKDe"
 }
-UeM : { input : "MergeKKUeM"
-  branchname : "uem"
+Ue : { input : "MergeKKUe"
+  branchname : "ue"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKUe"
 }
-DmuM : { input : "MergeKKDmuM"
-  branchname : "dmm"
+Dmu : { input : "MergeKKDmu"
+  branchname : "dm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKDmu"
 }
-UmuM : { input : "MergeKKUmuM"
-  branchname : "umm"
+Umu : { input : "MergeKKUmu"
+  branchname : "um"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
-}
-DeP : { input : "MergeKKDeP"
-  branchname : "dep"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
-}
-UeP : { input : "MergeKKUeP"
-  branchname : "uep"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
-}
-DmuP : { input : "MergeKKDmuP"
-  branchname : "dmp"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
-}
-UmuP : { input : "MergeKKUmuP"
-  branchname : "ump"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKUmu"
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
@@ -287,14 +242,6 @@ DeCalib : { input : "MergeKKDeCalib"
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
-}
-De : { input : "MergeKKDe"
-  branchname : "de"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
-  trkPIDTags : ["TrkPID:KKDe"]
-  trkDtDtTag : "TrkDtDt:MergeKKDe"
 }
 
 EventNtupleMaker : {
@@ -457,7 +404,7 @@ EventNtuple : {
   Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
-  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
+  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath ]
   PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll,  @sequence::TrkPIDPath ]
   EndPath : [ EventNtuple ]
 
