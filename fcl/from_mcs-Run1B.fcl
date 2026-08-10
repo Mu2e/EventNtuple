@@ -7,3 +7,5 @@ physics.analyzers.EventNtuple.timeclusters.tag  : "SimpleTimeCluster" # Store ti
 services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry
 
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ] # add back genCountLogger
+
+physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
