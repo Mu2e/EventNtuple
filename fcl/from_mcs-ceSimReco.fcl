@@ -2,5 +2,8 @@
 
 physics.analyzers.EventNtuple.trk.fits : [ @local::De ]
 physics.analyzers.EventNtuple.trk.fits[0].branchname : "trk"
+physics.analyzers.EventNtuple.trk.fits[0].trkDtDtTag : "TrkDtDtDe:KKDe"
 physics.analyzers.EventNtuple.FillTriggerInfo : false
-physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkPIDDe ]
+physics.producers.TrkDtDtDe : @local::TrkDtDtDe
+physics.producers.TrkPIDDe : @local::TrkPIDDe
+physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkDtDtDe, TrkPIDDe ]
