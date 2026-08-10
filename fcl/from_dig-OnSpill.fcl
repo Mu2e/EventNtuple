@@ -60,3 +60,8 @@ physics.analyzers.EventNtupleTTMCApr.subruns.cosmicLivetime.include : false
 physics.analyzers.EventNtupleTTMCTpr.subruns.cosmicLivetime.include : false
 physics.analyzers.EventNtupleTTMCCpr.subruns.cosmicLivetime.include : false
 physics.analyzers.EventNtupleTTMCMpr.subruns.cosmicLivetime.include : false
+
+physics.analyzers.EventNtupleTTMCApr.trk.fillTrkDtDt : false
+physics.analyzers.EventNtupleTTMCTpr.trk.fillTrkDtDt : false
+physics.analyzers.EventNtupleTTMCCpr.trk.fillTrkDtDt : false
+physics.analyzers.EventNtupleTTMCMpr.trk.fillTrkDtDt : false
