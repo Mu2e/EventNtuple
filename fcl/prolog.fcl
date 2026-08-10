@@ -261,6 +261,7 @@ Ext : { input : "MergeKKLine"
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : ""
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
