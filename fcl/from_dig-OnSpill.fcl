@@ -1,7 +1,9 @@
 #
 #  Run TrkAna on the output of the trigger, including MC truth matching
 #
+#include "Offline/fcl/standardProducers.fcl"
 #include "Offline/fcl/standardServices.fcl"
+#include "Production/JobConfig/recoMC/prolog.fcl"
 #include "EventNtuple/fcl/prolog.fcl"
 process_name : TrkAnaTriggerMC
 services : @local::Services.Reco
@@ -10,7 +12,10 @@ source : {
 }
 
 physics : {
-  producers : @local::TTProducers
+  producers : {
+    @table::TTProducers
+    @table::Reconstruction.producers
+  }
   analyzers : {
     # separate analyzers for each track trigger algorithm
     # apr
@@ -36,11 +41,15 @@ physics : {
       @table::EventNtupleMakerTTMC
       RecoCountTag : "TTMprDeKSFMC"
       SelectEvents : [ "Digitize:mprDe_highP*"  ]
-   }
-
+    }
   }
+
+  filters : { @table::Reconstruction.filters }
+
   EndPath : [EventNtupleTTMCApr, EventNtupleTTMCTpr, EventNtupleTTMCCpr, EventNtupleTTMCMpr]
-  TrigPath : [ @sequence::TTProducersPath]
+  TrigPath : [ @sequence::Reconstruction.OnSpillPath,
+    @sequence::Reconstruction.CaloReco,
+    @sequence::TTProducersPath]
 }
 #physics.analyzers.TAapr.InfoMCStructHelper.SimParticleCollectionTag: "compressDetStepMCs"
 
@@ -65,3 +74,7 @@ physics.analyzers.EventNtupleTTMCApr.trk.fillTrkDtDt : false
 physics.analyzers.EventNtupleTTMCTpr.trk.fillTrkDtDt : false
 physics.analyzers.EventNtupleTTMCCpr.trk.fillTrkDtDt : false
 physics.analyzers.EventNtupleTTMCMpr.trk.fillTrkDtDt : false
+
+#include "Production/JobConfig/common/epilog.fcl"
+#include "Production/JobConfig/recoMC/epilog.fcl"
+#include "Production/Validation/database.fcl"
