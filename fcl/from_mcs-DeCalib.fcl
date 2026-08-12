@@ -9,6 +9,13 @@ physics :
     @table::EventNtuple.producers
     DeMFilter : {
     }
+    TrkDtDtDeCalib : { @table::TrkDtDtDe
+      kalSeeds : [ "MergeKKDeCalib" ]
+    }
+    TrkPIDDeCalib : { @table::TrkPIDDe
+      KalSeeds : [ "MergeKKDeCalib" ]
+      KalSeedDtDts : ["TrkDtDtDeCalib:MergeKKDeCalib"]
+    }
   }
   filters : {
     KSFDeCalib : @local::KSFDeCalib
@@ -16,7 +23,7 @@ physics :
   analyzers : {
     EventNtuple : @local::ENDeCalib
   }
-  TriggerPath : [ KSFDeCalib, MergeKKDeCalib, TrkQualDe ]
+  TriggerPath : [ KSFDeCalib, MergeKKDeCalib, TrkQualDe, TrkDtDtDeCalib, TrkPIDDeCalib ]
   EndPath : [EventNtuple]
 }
 physics.trigger_paths : [ TriggerPath ]
@@ -25,3 +32,4 @@ physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
 physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
+physics.analyzers.EventNtuple.trk.fits[0].trkDtDtTag : "TrkDtDtDeCalib:MergeKKDeCalib"

@@ -1,5 +1,9 @@
+#
+# This fcl file demonstrates how to write out separate track branches
+# like in much older versions of TrkAna where the fits were separated
+# into separate branches (e.g. de, ue)
+#
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
-physics.analyzers.EventNtuple.trk.fits : [ @local::DeM, @local::DeP, @local::UeM, @local::UeP,
-  @local::DmuM, @local::DmuP, @local::UmuM, @local::UmuP ]
+physics.analyzers.EventNtuple.trk.fits : [ @local::De, @local::Ue, @local::Dmu, @local::Umu ]
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathSeparate ]

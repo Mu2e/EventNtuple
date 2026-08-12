@@ -2,6 +2,7 @@
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
 physics.analyzers.EventNtuple.trk.fits : [ @local::Ext ]
+physics.analyzers.EventNtuple.trk.fillTrkDtDt : false
 physics.analyzers.EventNtuple.FitType : KinematicLine
 physics.analyzers.EventNtuple.subruns.genEventCount.include : true
 physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : true
