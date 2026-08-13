@@ -27,7 +27,7 @@ This documentation contains quick references. For additional help:
 
 ## ```RooUtil``` Class
 The constructor takes two arguments:
-* ```filename``` can be the name of a single ROOT file (ending in ```.root```) or a list of ROOT files
+* ```filename``` can be the name of a single ROOT file (ending in ```.root```) or a list of ROOT files (either full path or xrootd)
 * (optional) ```treename``` the name of the tree
 
 ## SubRun Data and Totals
