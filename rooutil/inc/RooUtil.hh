@@ -61,7 +61,7 @@ namespace rooutil {
     void Debug(bool dbg) { debug = dbg; }
 
     void SetVersionNumber(std::string filename) {
-      TFile* file = new TFile(filename.c_str(), "READ");
+      auto file = std::unique_ptr<TFile>{TFile::Open(filename.c_str(), "READ")};
       TH1I* version = (TH1I*) file->Get("EventNtuple/version");
       if (!version) {
         std::cout << "Warning: this EventNtuple file does not contain a version number. It is either v06_02_00 or older. This is just a warning..." << std::endl;
@@ -77,20 +77,20 @@ namespace rooutil {
                   << std::setw(2) << std::setfill('0') << patchVer << std::endl;
       }
       file->Close();
-      delete file;
     }
 
     void AddFile(const std::string& filename) {
       ntuple->Add(filename.c_str());
-      TFile file(filename.c_str(), "READ");
-      if (!file.IsZombie() && file.Get("EventNtuple/subrunNtuple") != nullptr) {
+      auto file = std::unique_ptr<TFile>{TFile::Open(filename.c_str(), "READ")};
+      if (!file->IsZombie() && file->Get("EventNtuple/subrunNtuple") != nullptr) {
         subrun_ntuple->Add(filename.c_str());
       }
       SetTotals(filename);
+      file->Close();
     }
 
     void SetTotals(const std::string& filename) {
-      TFile* file = new TFile(filename.c_str(), "READ");
+      auto file = std::unique_ptr<TFile>{TFile::Open(filename.c_str(), "READ")};
       for (const auto& total_name : TotalNames()) {
         TH1* histogram = dynamic_cast<TH1*>(file->Get(("EventNtuple/" + total_name).c_str()));
         if (histogram == nullptr) {
@@ -100,7 +100,6 @@ namespace rooutil {
         totals[total_name] += histogram->GetBinContent(1);
       }
       file->Close();
-      delete file;
     }
 
     int GetNEvents() { return ntuple->GetEntries(); }
@@ -334,9 +333,9 @@ namespace rooutil {
 
   private:
     void LoadTrkQualMetadata(const std::string& filename) {
-      TFile file(filename.c_str(), "READ");
+      auto file = std::unique_ptr<TFile>{TFile::Open(filename.c_str(), "READ")};
       TH1I* metadata_histogram = nullptr;
-      file.GetObject("EventNtuple/trkqual_metadata", metadata_histogram);
+      file->GetObject("EventNtuple/trkqual_metadata", metadata_histogram);
       if (metadata_histogram == nullptr) {
         return;
       }
@@ -367,6 +366,7 @@ namespace rooutil {
             " differs between input files");
         }
         trkqual_metadata[metadata.output_branch] = metadata;
+	file->Close();
       }
     }
 
