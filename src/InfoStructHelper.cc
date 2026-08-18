@@ -512,6 +512,26 @@ namespace mu2e {
     fillTimeClusterInfo(*ptr, infos);
   }
 
+  void InfoStructHelper::fillLumiStreamInfo(IntensityInfoCalo const& info, LumiStreamInfo& lumi) {
+    lumi.nCaloHitsD0 = info.nCaloHitsD0();
+    lumi.nCaloHitsD1 = info.nCaloHitsD1();
+    lumi.caloEnergy  = info.caloEnergy ();
+    for(size_t hit = 0; hit < info.nCaphriHits(); ++hit) {
+      double energy; int ID;
+      info.getCaphriHit(hit, energy, ID);
+      lumi.caphriHitEnergies.emplace_back(energy);
+      lumi.caphriHitIDs     .emplace_back(ID);
+    }
+  }
+
+  void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi) {
+    lumi.nProtonTCs = info.nProtonTCs();
+  }
+
+  void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTrackerHits const& info, LumiStreamInfo& lumi) {
+    lumi.nTrackerHits = info.nTrackerHits();
+  }
+
   void InfoStructHelper::fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos) {
     CaloClusterInfo clusterinfo;
     clusterinfo.diskID_ = ccptr.diskID();

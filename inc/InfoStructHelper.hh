@@ -13,6 +13,9 @@
 #include "Offline/RecoDataProducts/inc/TimeCluster.hh"
 #include "Offline/RecoDataProducts/inc/CrvCoincidenceCluster.hh"
 #include "Offline/RecoDataProducts/inc/MVAResult.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoCalo.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoTimeCluster.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoTrackerHits.hh"
 #include "Offline/BFieldGeom/inc/BFieldManager.hh"
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
 #include "Offline/GeometryService/inc/GeomHandle.hh"
@@ -38,6 +41,7 @@
 #include "EventNtuple/inc/CaloHitInfo.hh"
 #include "EventNtuple/inc/CaloRecoDigiInfo.hh"
 #include "EventNtuple/inc/CaloDigiInfo.hh"
+#include "EventNtuple/inc/LumiStreamInfo.hh"
 #include "art/Framework/Principal/Handle.h"
 #include <vector>
 #include <functional>
@@ -76,6 +80,9 @@ namespace mu2e {
     void fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos);
     void fillTimeClusterInfo(TimeCluster const& tc, std::vector<EventNtupleTimeClusterInfo>& infos);
     void fillTimeClusterInfo(art::Ptr<TimeCluster> const& ptr, std::vector<EventNtupleTimeClusterInfo>& infos);
+    void fillLumiStreamInfo(IntensityInfoCalo const& info, LumiStreamInfo& lumi);
+    void fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi);
+    void fillLumiStreamInfo(IntensityInfoTrackerHits const& info, LumiStreamInfo& lumi);
 
     void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
     void fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1);

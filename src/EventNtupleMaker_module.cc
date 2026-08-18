@@ -20,6 +20,10 @@
 #include "Offline/RecoDataProducts/inc/CaloRecoDigi.hh"
 #include "Offline/RecoDataProducts/inc/TrkCaloHitPID.hh"
 #include "Offline/RecoDataProducts/inc/ProtonBunchTime.hh"
+#include "Offline/RecoDataProducts/inc/TimeCluster.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoCalo.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoTimeCluster.hh"
+#include "Offline/RecoDataProducts/inc/IntensityInfoTrackerHits.hh"
 #include "Offline/TrkReco/inc/TrkUtilities.hh"
 #include "Offline/CalorimeterGeom/inc/DiskCalorimeter.hh"
 #include "Offline/GeometryService/inc/VirtualDetector.hh"
@@ -75,6 +79,7 @@
 #include "EventNtuple/inc/CaloHitInfoMC.hh"
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
+#include "EventNtuple/inc/LumiStreamInfo.hh"
 #include "EventNtuple/inc/InfoStructHelper.hh"
 #include "EventNtuple/inc/CrvInfoHelper.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
@@ -192,6 +197,16 @@ namespace mu2e {
         using Comment=fhicl::Comment;
         fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill time cluster branch")};
         fhicl::Atom<art::InputTag> tag {Name("tag"),  Comment("Tag for time cluster collection")};
+      };
+
+      // ── Lumi stream config (independent of per-branch track config) ───────
+      struct LumiStreamConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill lumi stream branch")};
+        fhicl::Atom<art::InputTag> calo {Name("calo"),  Comment("Tag the calo intensity info")};
+        fhicl::Atom<art::InputTag> tc   {Name("tc"),  Comment("Tag the time cluster intensity info")};
+        fhicl::Atom<art::InputTag> trk  {Name("trk"),  Comment("Tag the tracker intensity info")};
       };
 
       // ── MC step collections config (independent of per-branch track config) ─
@@ -332,6 +347,7 @@ namespace mu2e {
         fhicl::Table<CRVConfig>         crv         {Name("crv"),         Comment("CRV subsystem config")};
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
         fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
+        fhicl::Table<LumiStreamConfig>  lumistream  {Name("lumistream")  ,Comment("Lumi stream branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
         fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
       };
@@ -424,6 +440,11 @@ namespace mu2e {
       // time cluster branch
       art::Handle<TimeClusterCollection> _tcsHandle;
       std::vector<EventNtupleTimeClusterInfo> _tcIs;
+      // lumi stream branch
+      art::Handle<IntensityInfoCalo> _iiCaloHandle;
+      art::Handle<IntensityInfoTimeCluster> _iiTCHandle;
+      art::Handle<IntensityInfoTrackerHits> _iiTrkHandle;
+      LumiStreamInfo _lumiStreamI;
       // event weights
       std::vector<art::Handle<EventWeight> > _wtHandles;
       EventWeightInfo _wtinfo;
@@ -733,6 +754,11 @@ namespace mu2e {
     // Time clusters
     if(_conf.timeclusters().fill()) {
       _ntuple->Branch("timeclusters.",&_tcIs,_buffsize,_splitlevel);
+    }
+
+    // Lumi stream
+    if(_conf.lumistream().fill()) {
+      _ntuple->Branch("lumistream.",&_lumiStreamI,_buffsize,_splitlevel);
     }
 
     // ── Calorimeter reco branches ──────────────────────────────────────────
@@ -1129,6 +1155,20 @@ namespace mu2e {
           _infoStructHelper.fillTimeClusterInfo(tc, _tcIs);
         }
       }
+    }
+
+    // Lumi stream
+    if(_conf.lumistream().fill()) {
+      _lumiStreamI.reset();
+      // Calo info
+      event.getByLabel(_conf.lumistream().calo(),_iiCaloHandle);
+      if(_iiCaloHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiCaloHandle, _lumiStreamI);
+      // Time cluster info
+      event.getByLabel(_conf.lumistream().tc(),_iiTCHandle);
+      if(_iiTCHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTCHandle, _lumiStreamI);
+      // Tracker info
+      event.getByLabel(_conf.lumistream().trk(),_iiTrkHandle);
+      if(_iiTrkHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTrkHandle, _lumiStreamI);
     }
 
     // ── Calorimeter ────────────────────────────────────────────────────────
