@@ -9,13 +9,14 @@
 namespace mu2e
 {
   struct LumiStreamInfo {
-    int nCaloHitsD0                       =  0; // N(calorimeter hits) in disk 0
-    int nCaloHitsD1                       =  0; // N(calorimeter hits) in disk 1
-    int caloEnergy                        =  0; // Total energy in the calorimeter (stored as an integer)
-    std::vector<double> caphriHitEnergies = {}; // List of CAPHRI hit energies
-    std::vector<int>    caphriHitIDs      = {}; // List of CAPHRI hit crystal IDs
-    int nTrackerHits                      =  0; // N(tracker hits) in the event
-    int nProtonTCs                        =  0; // N(proton time clusters) in the event
+    int nCaloHitsD0                       = -1;    // N(calorimeter hits) in disk 0
+    int nCaloHitsD1                       = -1;    // N(calorimeter hits) in disk 1
+    int caloEnergy                        = -1;    // Total energy in the calorimeter (stored as an integer) in MeV
+    std::vector<double> caphriHitEnergies = {};    // List of CAPHRI hit energies in MeV
+    std::vector<int>    caphriHitIDs      = {};    // List of CAPHRI hit crystal IDs
+    bool                caphriIsValid     = false; // Flag for the CAPHRI list being valid
+    int nTrackerHits                      = -1;    // N(tracker hits) in the event
+    int nProtonTCs                        = -1;    // N(proton time clusters) in the event
     void reset() { *this = LumiStreamInfo(); }
   };
 }

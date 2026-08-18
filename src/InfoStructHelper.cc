@@ -522,6 +522,7 @@ namespace mu2e {
       lumi.caphriHitEnergies.emplace_back(energy);
       lumi.caphriHitIDs     .emplace_back(ID);
     }
+    lumi.caphriIsValid = true;
   }
 
   void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi) {
