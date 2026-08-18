@@ -259,7 +259,7 @@ namespace rooutil {
     }
 
 
-    Tracks GetTracks() { return tracks; }
+    const Tracks& GetTracks() { return tracks; }
     Tracks GetTracks(TrackCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
         Tracks select_tracks;
@@ -310,7 +310,7 @@ namespace rooutil {
       }
     }
 
-    CrvCoincs GetCrvCoincs() { return crv_coincs; }
+    const CrvCoincs& GetCrvCoincs() { return crv_coincs; }
     CrvCoincs GetCrvCoincs(CrvCoincCut cut) {
       CrvCoincs select_crv_coincs;
       for (auto& crv_coinc : crv_coincs) {
@@ -321,7 +321,7 @@ namespace rooutil {
       return select_crv_coincs;
     }
 
-    TimeClusters GetTimeClusters() { return time_clusters; }
+    const TimeClusters& GetTimeClusters() { return time_clusters; }
     TimeClusters GetTimeClusters(TimeClusterCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
         TimeClusters select_time_clusters;
