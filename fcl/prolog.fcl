@@ -349,6 +349,13 @@ EventNtupleMaker : {
     fill : false
     tag  : "MHDe"
   }
+  # -- Lumi stream -----------------------------------------------------------
+  lumistream : {
+    fill : true
+    calo : "CaloHitMakerFast"
+    tc   : "TrigFlagPH"
+    trk  : "TrigMakeSH"
+  }
   # -- MC step collections ---------------------------------------------------
   mcsteps : {
     surfaceStepsTag : "compressRecoMCs"

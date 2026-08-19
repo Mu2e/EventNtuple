@@ -15,6 +15,7 @@
 #include "EventNtuple/inc/KinematicLineInfo.hh"
 #include "EventNtuple/inc/TrkDtDtInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
+#include "EventNtuple/inc/LumiStreamInfo.hh"
 #include "EventNtuple/inc/SimInfo.hh"
 #include "EventNtuple/inc/MCStepInfo.hh"
 #include "EventNtuple/inc/MCStepSummaryInfo.hh"
