@@ -1,0 +1,159 @@
+#
+# Script to regrow, make final selection, and tuple reflecting cosmic ray particles starting with the coarse output from Production/JobConfig/reco/RefSelect.fcl
+# original author: D. Brown, 6/25/26
+#
+#include "Offline/TrkReco/fcl/prolog.fcl"
+#include "Offline/TrkHitReco/fcl/prolog.fcl"
+#include "Offline/Mu2eKinKal/fcl/prolog.fcl"
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+services : @local::Services.Reco
+process_name: ENRefSelect
+source : { module_type : RootInput }
+
+physics.filters : {
+
+  RegrowKKe : {
+    @table::Mu2eKinKal.RegrowLH
+    ExtrapolationSettings :{
+      @table::Mu2eKinKal.LHDRIFTXTRAP
+      BackToTracker : true
+    }
+    KalSeedMCAssns : "SelectReco"
+    CopyKalSeedMCs : true
+    KalSeedPtrCollection : Reflecte
+    ComboHitCollection : RegrowSH
+    MustRegrow : "All"
+  }
+
+  RegrowKKmu : {
+    @table::Mu2eKinKal.RegrowLH
+    ExtrapolationSettings :{
+      @table::Mu2eKinKal.LHDRIFTXTRAP
+      BackToTracker : true
+    }
+    KalSeedMCAssns : "SelectReco"
+    CopyKalSeedMCs : true
+    KalSeedPtrCollection : Reflectmu
+    ComboHitCollection : RegrowSH
+    MustRegrow : "All"
+  }
+
+  RegrowReflecte : {
+    @table::TrkReco.filters.SelectReflections
+    UpstreamKalSeedCollection : "RegrowKKe"
+    DownstreamKalSeedCollection : "RegrowKKe"
+    ReflectionTestDirection : "Both" # Require both direction to have a reflection match
+  }
+
+  RegrowReflectmu : {
+    @table::TrkReco.filters.SelectReflections
+    UpstreamKalSeedCollection : "RegrowKKmu"
+    DownstreamKalSeedCollection : "RegrowKKmu"
+    ReflectionTestDirection : "Both" # Require both direction to have a reflection match
+  }
+
+}
+
+physics.producers : {
+  RegrowSH : {
+    @table::TrkHitReco.makeSH
+    StrawDigiCollectionTag  : "SelectReco"
+    StrawDigiADCWaveformCollectionTag : "SelectReco"
+  }
+
+  TrkQuale : {
+    @table::TrkQual
+    KalSeedPtrCollection : "RegrowReflecte"
+  }
+
+  TrkQualmu : {
+    @table::TrkQual
+    KalSeedPtrCollection : "RegrowReflectmu"
+  }
+
+  TrkDtDte : {
+    @table::TrkPIDProducers.TrkDtDt
+    kalSeeds : [ "RegrowReflecte" ]
+  }
+
+  TrkDtDtmu : {
+    @table::TrkPIDProducers.TrkDtDt
+    kalSeeds : [ "RegrowReflectmu" ]
+  }
+
+  TrkPIDe : {
+    @table::TrkPIDProducers.TrkPID
+    KalSeeds : [ "RegrowReflecte" ]
+    KalSeedDtDts : [ "TrkDtDte:RegrowReflecte" ]
+
+  }
+
+  TrkPIDmu : {
+    @table::TrkPIDProducers.TrkPID
+    KalSeeds : [ "RegrowReflectmu" ]
+    KalSeedDtDts : [ "TrkDtDtmu:RegrowReflectmu" ]
+  }
+
+  PBIWeight : @local::PBIWeight
+}
+
+physics.RePath : [ RegrowSH, PBIWeight, RegrowKKe, RegrowReflecte, TrkQuale, TrkDtDte, TrkPIDe ]
+physics.RmuPath : [ RegrowSH, PBIWeight, RegrowKKmu, RegrowReflectmu, TrkQualmu, TrkDtDtmu, TrkPIDmu ]
+
+physics.trigger_paths : [ RePath, RmuPath ]
+
+physics.analyzers : {
+  ENRefe : {
+    @table::physics.analyzers.EventNtuple
+    SelectEvents: [ RePath ]
+    trk : {
+      @table::EventNtupleMaker.trk
+      fillTrkDtDt: true
+      fillTrkPID: true
+      mc : {
+        fill : true
+        kalSeedMCAssns: "RegrowKKe"
+      }
+      fits : [
+        { @table::All
+          input : "RegrowReflecte"
+          trkPIDTags : ["TrkPIDe:RegrowReflecte"]
+          trkDtDtTag : "TrkDtDte:RegrowReflecte"
+          trkQualLeaves : [ { leafname : "" inputTag : "TrkQuale:ANN" modelVersion : "ANN1_v2.0" } ]
+        }
+      ]
+    }
+  }
+
+  ENRefmu : {
+    @table::physics.analyzers.EventNtuple
+    SelectEvents: [ RmuPath ]
+    trk : {
+      @table::EventNtupleMaker.trk
+      fillTrkDtDt: true
+      fillTrkPID: true
+      mc : {
+        fill : true
+        kalSeedMCAssns: "RegrowKKmu"
+      }
+      fits : [
+        { @table::All
+          input : "RegrowReflectmu"
+          trkPIDTags : ["TrkPIDmu:RegrowReflectmu"]
+          trkDtDtTag : "TrkDtDtmu:RegrowReflectmu"
+          trkQualLeaves : [ { leafname : "" inputTag : "TrkQualmu:ANN" modelVersion : "ANN1_v2.0" } ]
+        }
+      ]
+    }
+  }
+}
+
+physics.Refe : [ ENRefe ]
+physics.Refmu : [ ENRefmu ]
+
+physics.end_paths : [ Refe, Refmu ]
+
+#update and uncomment to run
+#services.DbService.purpose: Sim_best
+#services.DbService.version: v1_4
+#services.DbService.verbose: 2
