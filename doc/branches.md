@@ -10,6 +10,7 @@ These branches contain one element per event.
 | evtinfomc |  Single objects branch |   MC-truth event-level information| [see EventInfoMC.hh](../inc/EventInfoMC.hh)
 | hitcount |  Single objects branch |   counts of different hit types in an event| [see HitCount.hh](../inc/HitCount.hh)
 | tcnt |  Single objects branch |   counts track types and track-related quantities in an event (MARKED FOR REMOVAL)| [see TrkCount.hh](../inc/TrkCount.hh)
+| lumistream |  Single objects branch |   basic information available in the lumi stream| [see LumiStreamInfo.hh](../inc/LumiStreamInfo.hh)
 ## Track Branches
 
 Each element in these branch corresponds to a different Kalman fit hypotheses to reconstruct the track:

@@ -2,11 +2,11 @@ import os
 
 class nthelper:
 
-    single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc']
+    single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc', 'lumistream']
     vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
-    evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt']
+    evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt', 'lumistream']
     trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkdtdt', 'trkqual', 'trkpid']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
@@ -33,6 +33,7 @@ class nthelper:
     branch_struct_dict = { 'evtinfo' : "EventInfo",
                            'evtinfomc' : "EventInfoMC",
                            'hitcount' : "HitCount",
+                           'lumistream' : 'LumiStreamInfo',
                            'tcnt' : "TrkCount", # TODO: leaves can't be retrieved because they are runtime made
                            'trk' : "TrkInfo",
                            'trksegs' : "TrkSegInfo",
