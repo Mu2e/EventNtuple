@@ -80,6 +80,7 @@
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
 #include "EventNtuple/inc/LumiStreamInfo.hh"
+#include "EventNtuple/inc/LineSeedInfo.hh"
 #include "EventNtuple/inc/InfoStructHelper.hh"
 #include "EventNtuple/inc/CrvInfoHelper.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
@@ -198,6 +199,15 @@ namespace mu2e {
         fhicl::Atom<bool>              fill {Name("fill") , Comment("Fill time cluster branch")};
         fhicl::Sequence<art::InputTag> tags {Name("tags") ,  Comment("Tags for time cluster collections")};
         fhicl::Sequence<std::string>   names{Name("names"),  Comment("Names for output time cluster collections")};
+      };
+
+      // ── Line seed config (independent of per-branch track config) ───────
+      struct LineSeedConfig {
+        using Name=fhicl::Name;
+        using Comment=fhicl::Comment;
+        fhicl::Atom<bool>              fill {Name("fill") , Comment("Fill line seed branches")};
+        fhicl::Sequence<art::InputTag> tags {Name("tags") ,  Comment("Tags for line seed collections")};
+        fhicl::Sequence<std::string>   names{Name("names"),  Comment("Names for output line seed collections")};
       };
 
       // ── Lumi stream config (independent of per-branch track config) ───────
@@ -348,6 +358,7 @@ namespace mu2e {
         fhicl::Table<CRVConfig>         crv         {Name("crv"),         Comment("CRV subsystem config")};
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
         fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branches config")};
+        fhicl::Table<LineSeedConfig>    lineseeds   {Name("lineseeds")   ,Comment("Line seed branches config")};
         fhicl::Table<LumiStreamConfig>  lumistream  {Name("lumistream")  ,Comment("Lumi stream branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
         fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
@@ -438,10 +449,14 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitCalibInfo>>> _allTSHCIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
-      // time cluster branch
+      // time cluster branches
       std::map<size_t, art::Handle<TimeClusterCollection>> _tcsHandles;
       std::map<size_t, std::vector<EventNtupleTimeClusterInfo>> _tcIs;
       std::map<size_t, std::string> _tcsNames;
+      // line seed branches
+      std::map<size_t, art::Handle<CosmicTrackSeedCollection>> _lsHandles;
+      std::map<size_t, std::vector<LineSeedInfo>> _lsIs;
+      std::map<size_t, std::string> _lsNames;
       // lumi stream branch
       art::Handle<IntensityInfoCalo> _iiCaloHandle;
       art::Handle<IntensityInfoTimeCluster> _iiTCHandle;
@@ -585,6 +600,18 @@ namespace mu2e {
         _tcIs[index] = std::vector<EventNtupleTimeClusterInfo>();
         _tcsHandles[index] = art::Handle<TimeClusterCollection>();
         _tcsNames[index] = _conf.timeclusters().names().at(index) + std::string(".");
+      }
+    }
+
+    // Setup the line seed collection list if requested
+    if(_conf.lineseeds().fill()) {
+      const size_t n = _conf.lineseeds().tags().size();
+      if(_conf.lineseeds().names().size() != n)
+        throw cet::exception("EventNtuple") << "Line seed input tags and output names must match in size";
+      for(size_t index = 0; index < n; ++index) { // add collections for each
+        _lsIs[index] = std::vector<LineSeedInfo>();
+        _lsHandles[index] = art::Handle<CosmicTrackSeedCollection>();
+        _lsNames[index] = _conf.lineseeds().names().at(index) + std::string(".");
       }
     }
 
@@ -771,6 +798,15 @@ namespace mu2e {
       for(size_t index = 0; index < ntcs; ++index) {
         const std::string& branch_name = _tcsNames[index];
         _ntuple->Branch(branch_name.c_str(),&_tcIs[index],_buffsize,_splitlevel);
+      }
+    }
+
+    // line seeds
+    if(_conf.lineseeds().fill()) {
+      const size_t n = _conf.lineseeds().tags().size();
+      for(size_t index = 0; index < n; ++index) {
+        const std::string& branch_name = _lsNames[index];
+        _ntuple->Branch(branch_name.c_str(),&_lsIs[index],_buffsize,_splitlevel);
       }
     }
 
@@ -1173,6 +1209,20 @@ namespace mu2e {
         if(_tcsHandles[index].isValid()) {
           for(const auto& tc : *(_tcsHandles[index])) {
             _infoStructHelper.fillTimeClusterInfo(tc, _tcIs.at(index));
+          }
+        }
+      }
+    }
+
+    // Line seeds
+    if(_conf.lineseeds().fill()) {
+      const size_t n = _conf.lineseeds().tags().size();
+      for(size_t index = 0; index < n; ++index) {
+        _lsIs.at(index).clear();
+        event.getByLabel(_conf.lineseeds().tags().at(index),_lsHandles.at(index));
+        if(_lsHandles[index].isValid()) {
+          for(const auto& seed : *(_lsHandles[index])) {
+            _infoStructHelper.fillLineSeedInfo(seed, _lsIs.at(index));
           }
         }
       }

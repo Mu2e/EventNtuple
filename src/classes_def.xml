@@ -36,6 +36,8 @@
   <class name="std::vector<mu2e::EventNtupleTimeClusterInfo>" />
   <class name="std::map<size_t, std::vector<mu2e::EventNtupleTimeClusterInfo>>" />
   <class name="mu2e::LumiStreamInfo" />
+  <class name="mu2e::LineSeedInfo" />
+  <class name="std::vector<mu2e::LineSeedInfo>" />
   <class name="mu2e::SimInfo" />
   <class name="std::vector<mu2e::SimInfo>" />
   <class name="std::vector<std::vector<mu2e::SimInfo>>" />
