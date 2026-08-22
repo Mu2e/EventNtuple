@@ -346,8 +346,9 @@ EventNtupleMaker : {
   }
   # -- Time clusters ---------------------------------------------------------
   timeclusters : {
-    fill : false
-    tag  : "MHDe"
+    fill : true
+    tags  : ["MHDe"]
+    names : ["timeclusters"]
   }
   # -- Lumi stream -----------------------------------------------------------
   lumistream : {

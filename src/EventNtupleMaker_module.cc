@@ -195,8 +195,9 @@ namespace mu2e {
       struct TimeClusterConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
-        fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill time cluster branch")};
-        fhicl::Atom<art::InputTag> tag {Name("tag"),  Comment("Tag for time cluster collection")};
+        fhicl::Atom<bool>              fill {Name("fill") , Comment("Fill time cluster branch")};
+        fhicl::Sequence<art::InputTag> tags {Name("tags") ,  Comment("Tags for time cluster collections")};
+        fhicl::Sequence<std::string>   names{Name("names"),  Comment("Names for output time cluster collections")};
       };
 
       // ── Lumi stream config (independent of per-branch track config) ───────
@@ -346,7 +347,7 @@ namespace mu2e {
         fhicl::Table<CaloConfig>        calo        {Name("calo"),        Comment("Calorimeter subsystem config")};
         fhicl::Table<CRVConfig>         crv         {Name("crv"),         Comment("CRV subsystem config")};
         fhicl::Table<HelixConfig>       helices     {Name("helices"),     Comment("Helix seed branches config")};
-        fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branch config")};
+        fhicl::Table<TimeClusterConfig> timeclusters{Name("timeclusters"),Comment("Time cluster branches config")};
         fhicl::Table<LumiStreamConfig>  lumistream  {Name("lumistream")  ,Comment("Lumi stream branch config")};
         fhicl::Table<MCStepsConfig>     mcsteps     {Name("mcsteps"),     Comment("MC step collection branches config")};
         fhicl::Table<SubRunConfig>      subruns     {Name("subruns"),     Comment("SubRun ntuple/histogram config")};
@@ -438,8 +439,9 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawMatInfo>>> _allTSMIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkStrawHitInfoMC>>> _allTSHIMCs;
       // time cluster branch
-      art::Handle<TimeClusterCollection> _tcsHandle;
-      std::vector<EventNtupleTimeClusterInfo> _tcIs;
+      std::map<size_t, art::Handle<TimeClusterCollection>> _tcsHandles;
+      std::map<size_t, std::vector<EventNtupleTimeClusterInfo>> _tcIs;
+      std::map<size_t, std::string> _tcsNames;
       // lumi stream branch
       art::Handle<IntensityInfoCalo> _iiCaloHandle;
       art::Handle<IntensityInfoTimeCluster> _iiTCHandle;
@@ -573,6 +575,18 @@ namespace mu2e {
     _splitlevel(conf().splitlevel())
   {
     _fillCrvInference = conf().crv().inferenceTag(_crvInferenceTag);
+
+    // Setup the time cluster collection list if requested
+    if(_conf.timeclusters().fill()) {
+      const size_t ntcs = _conf.timeclusters().tags().size();
+      if(_conf.timeclusters().names().size() != ntcs)
+        throw cet::exception("EventNtuple") << "Time cluster input tags and output names must match in size";
+      for(size_t index = 0; index < ntcs; ++index) { // add collections for each
+        _tcIs[index] = std::vector<EventNtupleTimeClusterInfo>();
+        _tcsHandles[index] = art::Handle<TimeClusterCollection>();
+        _tcsNames[index] = _conf.timeclusters().names().at(index) + std::string(".");
+      }
+    }
 
     // decode fit type
     for(size_t ifit = 0; ifit < fitNames.size(); ++ifit){
@@ -753,7 +767,11 @@ namespace mu2e {
     }
     // Time clusters
     if(_conf.timeclusters().fill()) {
-      _ntuple->Branch("timeclusters.",&_tcIs,_buffsize,_splitlevel);
+      const size_t ntcs = _conf.timeclusters().tags().size();
+      for(size_t index = 0; index < ntcs; ++index) {
+        const std::string& branch_name = _tcsNames[index];
+        _ntuple->Branch(branch_name.c_str(),&_tcIs[index],_buffsize,_splitlevel);
+      }
     }
 
     // Lumi stream
@@ -1148,11 +1166,14 @@ namespace mu2e {
     }
     // Time clusters
     if(_conf.timeclusters().fill()) {
-      _tcIs.clear();
-      event.getByLabel(_conf.timeclusters().tag(),_tcsHandle);
-      if(_tcsHandle.isValid()) {
-        for(const auto& tc : *(_tcsHandle)) {
-          _infoStructHelper.fillTimeClusterInfo(tc, _tcIs);
+      const size_t ntcs = _conf.timeclusters().tags().size();
+      for(size_t index = 0; index < ntcs; ++index) {
+        _tcIs.at(index).clear();
+        event.getByLabel(_conf.timeclusters().tags().at(index),_tcsHandles.at(index));
+        if(_tcsHandles[index].isValid()) {
+          for(const auto& tc : *(_tcsHandles[index])) {
+            _infoStructHelper.fillTimeClusterInfo(tc, _tcIs.at(index));
+          }
         }
       }
     }

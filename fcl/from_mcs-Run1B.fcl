@@ -3,7 +3,18 @@
 
 physics.analyzers.EventNtuple.mcsteps.stepPointMCTags : [ "compressRecoMCs:virtualdetector" ] # we add the mcsteps_virtualdetector branch
 physics.analyzers.EventNtuple.timeclusters.fill : true
-physics.analyzers.EventNtuple.timeclusters.tag  : "SimpleTimeCluster" # Store time clusters for straight line track finding
+physics.analyzers.EventNtuple.timeclusters.tags  : [  # Store time clusters for straight line track finding
+  "CalTimeClusterFinder",
+  "ProtonCalTimeClusterFinder",
+  "TZClusterFinder",
+  "TimeAndPhiClusterFinder"
+]
+physics.analyzers.EventNtuple.timeclusters.names  : [  # Output branch names
+  "timeclusters",
+  "protontimeclusters",
+  "tztimeclusters",
+  "tphitimeclusters"
+]
 services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry
 
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ] # add back genCountLogger
