@@ -6,11 +6,22 @@ physics.analyzers.EventNtuple.mcsteps.stepPointMCTags : [ "compressRecoMCs:virtu
 # Update the track collections
 physics.producers.MergeKKLines : {
   @table::MergeKK
-  KalSeedCollections : [ "KKLine", "KKProtonLine", "KKCosmicLine" ]
+  KalSeedCollections : [ "KKLine", "ProtonKKLine", "CosmicKKLine" ]
+  debugLevel : 0
 }
-physics.analyzers.EventNtupleMaker.trk.fits[0].input : "MergeKKLines"
-physics.analyzers.EventNtupleMaker.trk.fillTrkPID : false
-physics.analyzers.EventNtupleMaker.trk.fillTrkDtDt : false
+physics.analyzers.EventNtuple.trk.fits : [
+  {
+    input : "MergeKKLines"
+    branchname : "trk"
+    fill : true
+    options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
+    trkQualLeaves : []
+    trkPIDTags : ["TrkPID:MergeKKLines"]
+    trkDtDtTag : "TrkDtDt:MergeKKLines"
+  }
+]
+physics.analyzers.EventNtuple.trk.fillTrkPID : false # Not yet implemented
+physics.analyzers.EventNtuple.trk.fillTrkDtDt : false # Not yet added
 physics.EventNtuplePath : [ MergeKKLines, @sequence::physics.EventNtuplePath ]
 
 # Store time clusters for straight line track finding
