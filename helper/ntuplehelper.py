@@ -3,7 +3,7 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc', 'lumistream']
-    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
+    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'lineseeds', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'trkqual', 'trkpid', 'mcsteps']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt', 'lumistream']
@@ -12,7 +12,7 @@ class nthelper:
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
     trk_mc_branches = [ 'trkmcsim' ]
     general_mc_branches = [ 'mcsteps' ]
-    basic_branches = [ 'timeclusters' ]
+    basic_branches = [ 'timeclusters', 'lineseeds' ]
     calo_branches = ['caloclusters', 'calohits', 'calorecodigis', 'calodigis']
     calo_mc_branches = ['caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim']
     crv_branches = ['crvsummary','crvsummarymc','crvcoincs','crvcoincsmc','crvcoincsmcplane','crvpulses','crvdigis','crvpulsesmc']
@@ -51,6 +51,7 @@ class nthelper:
                            'trkmcsci' : "MCStepInfo",
                            'trkmcssi' : "MCStepSummaryInfo",
                            'timeclusters' : "TimeClusterInfo",
+                           'lineseeds' : "LineSeedInfo",
                            'caloclustersmc': "CaloClusterInfoMC",
                            'calohitmc' : "CaloHitInfoMC",
                            'calohitsmc' : "CaloHitInfoMC",

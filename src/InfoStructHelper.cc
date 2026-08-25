@@ -511,6 +511,28 @@ namespace mu2e {
     if(ptr.isNull()) return;
     fillTimeClusterInfo(*ptr, infos);
   }
+  void InfoStructHelper::fillLineSeedInfo(CosmicTrackSeed const& seed, std::vector<LineSeedInfo>& infos) {
+    LineSeedInfo info;
+    const auto& track = seed.track();
+    info.status = (seed.status().hasAnyProperty(TrkFitFlag::hitsOK)) ? 1 : -1;
+    info.nhits = seed.hits().size();
+    info.nStrawHits = seed.hits().nStrawHits();
+    info.t0 = seed.t0().t0();
+    info.d0 = track.d0();
+    info.phi0 = track.phi0();
+    info.z0 = track.z0();
+    info.cos = track.cost();
+    info.A0 = track.FitParams.A0;
+    info.B0 = track.FitParams.B0;
+    info.A1 = track.FitParams.A1;
+    info.B1 = track.FitParams.B1;
+    if(seed.hasCaloCluster()) { // only defined if a calo cluster is associated with the seed
+      info.ecalo = seed.caloCluster()->energyDep();
+      info.tcalo = seed.caloCluster()->time();
+    }
+    infos.emplace_back(info);
+
+  }
 
   void InfoStructHelper::fillLumiStreamInfo(IntensityInfoCalo const& info, LumiStreamInfo& lumi) {
     lumi.nCaloHitsD0 = info.nCaloHitsD0();

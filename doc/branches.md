@@ -88,6 +88,7 @@ The branch is empty if there are no time clusters during the event.
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | timeclusters |  Vector branch |   Information in a reconstructed time cluster| [see TimeClusterInfo.hh](../inc/TimeClusterInfo.hh)
+| lineseeds |  Vector branch |   Information in a reconstructed line seed (cosmic track seed)| [see LineSeedInfo.hh](../inc/LineSeedInfo.hh)
 ## Calorimeter Branches
 
 These branches are vectors of calorimeter clusters/hits/recodigis/digis that happened during the event.

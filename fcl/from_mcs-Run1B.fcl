@@ -2,8 +2,56 @@
 #include "EventNtuple/fcl/from_mcs-extracted.fcl"
 
 physics.analyzers.EventNtuple.mcsteps.stepPointMCTags : [ "compressRecoMCs:virtualdetector" ] # we add the mcsteps_virtualdetector branch
+
+# Update the track collections
+physics.producers.MergeKKLines : {
+  @table::MergeKK
+  KalSeedCollections : [ "KKLine", "ProtonKKLine", "CosmicKKLine" ]
+  debugLevel : 0
+}
+physics.analyzers.EventNtuple.trk.fits : [
+  {
+    input : "MergeKKLines"
+    branchname : "trk"
+    fill : true
+    options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
+    trkQualLeaves : []
+    trkPIDTags : ["TrkPID:MergeKKLines"]
+    trkDtDtTag : "TrkDtDt:MergeKKLines"
+  }
+]
+physics.analyzers.EventNtuple.trk.fillTrkPID : false # Not yet implemented
+physics.analyzers.EventNtuple.trk.fillTrkDtDt : false # Not yet added
+physics.EventNtuplePath : [ MergeKKLines, @sequence::physics.EventNtuplePath ]
+
+# Store time clusters for straight line track finding
 physics.analyzers.EventNtuple.timeclusters.fill : true
-physics.analyzers.EventNtuple.timeclusters.tag  : "SimpleTimeCluster" # Store time clusters for straight line track finding
+physics.analyzers.EventNtuple.timeclusters.tags  : [
+  "CalTimeClusterFinder",
+  "ProtonCalTimeClusterFinder",
+  "TZClusterFinder",
+  "TimeAndPhiClusterFinder"
+]
+physics.analyzers.EventNtuple.timeclusters.names  : [  # Output branch names
+  "timeclusters",
+  "protontimeclusters",
+  "tztimeclusters",
+  "tphitimeclusters"
+]
+
+# Store track seeds for straight line track finding
+physics.analyzers.EventNtuple.lineseeds.fill : true
+physics.analyzers.EventNtuple.lineseeds.tags  : [
+  "LineFinder",
+  "ProtonLineFinder",
+  "CosmicLineFinder"
+]
+physics.analyzers.EventNtuple.lineseeds.names  : [  # Output branch names
+  "lineseeds",
+  "protonlineseeds",
+  "cosmiclineseeds"
+]
+
 services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry
 
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ] # add back genCountLogger

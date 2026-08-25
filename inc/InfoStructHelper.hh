@@ -11,6 +11,8 @@
 #include "Offline/RecoDataProducts/inc/RecoCount.hh"
 #include "Offline/RecoDataProducts/inc/HelixSeed.hh"
 #include "Offline/RecoDataProducts/inc/TimeCluster.hh"
+#include "Offline/RecoDataProducts/inc/CosmicTrackSeed.hh"
+#include "Offline/RecoDataProducts/inc/CosmicTrack.hh"
 #include "Offline/RecoDataProducts/inc/CrvCoincidenceCluster.hh"
 #include "Offline/RecoDataProducts/inc/MVAResult.hh"
 #include "Offline/RecoDataProducts/inc/IntensityInfoCalo.hh"
@@ -35,6 +37,7 @@
 #include "EventNtuple/inc/TrkCaloHitInfo.hh"
 #include "EventNtuple/inc/HelixInfo.hh"
 #include "EventNtuple/inc/TimeClusterInfo.hh"
+#include "EventNtuple/inc/LineSeedInfo.hh"
 #include "EventNtuple/inc/MVAResultInfo.hh"
 #include "EventNtuple/inc/CrvHitInfoReco.hh"
 #include "EventNtuple/inc/CaloClusterInfo.hh"
@@ -83,6 +86,7 @@ namespace mu2e {
     void fillLumiStreamInfo(IntensityInfoCalo const& info, LumiStreamInfo& lumi);
     void fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi);
     void fillLumiStreamInfo(IntensityInfoTrackerHits const& info, LumiStreamInfo& lumi);
+    void fillLineSeedInfo(CosmicTrackSeed const& seed, std::vector<LineSeedInfo>& infos);
 
     void fillCaloClusterInfo(const CaloCluster& ccptr, std::vector<CaloClusterInfo>& clusterinfos);
     void fillCaloHitInfo(const CaloHit& chptr, std::vector<CaloHitInfo>& hitinfos, int clusterIdx = -1);
