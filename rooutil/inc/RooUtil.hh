@@ -366,8 +366,8 @@ namespace rooutil {
             " differs between input files");
         }
         trkqual_metadata[metadata.output_branch] = metadata;
-	file->Close();
       }
+      file->Close();
     }
 
     static const std::vector<std::string>& TotalNames() {

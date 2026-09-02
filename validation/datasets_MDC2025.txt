@@ -1,7 +1,7 @@
 # Test Datasets for Validating EventNtuple with MDC2025
-{mock} mcs.mu2e.ensembleMDS3aOnSpillTriggered.MDC2025af_best_v1_3.art
-{primary} mcs.mu2e.CeEndpointOnSpillTriggered.MDC2025ae_best_v1_3.art
-{mixed} mcs.mu2e.CeMLeadingLogMix1BBTriggered.MDC2025af_best_v1_1.art
-{extracted} mcs.mu2e.CosmicCRYExtractedTriggered.MDC2025ae_best_v1_3.art
-{digi} dig.mu2e.FlatGammaMix1BBTriggered.MDC2025af_best_v1_1.art
+{mock} mcs.mu2e.ensembleMDS3cOnSpill.MDC2025au_best_v1_5.art
+{primary} mcs.mu2e.CeMLeadingLogOnSpill.MDC2025au_best_v1_5.art
+{mixed} mcs.mu2e.CeMLeadingLogMix1BB.MDC2025au_best_v1_1.art
+{extracted} mcs.mu2e.CosmicCRYExtracted.MDC2025au_best_v1_5.art
+{digi} dig.mu2e.FlatGammaMix1BB.MDC2025au_best_v1_3.art
 {crv_kpp} N/A
