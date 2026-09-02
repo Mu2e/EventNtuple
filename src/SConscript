@@ -36,7 +36,8 @@ mainlib = helper.make_mainlib ( [
     'KinKal_Geometry',
     'KinKal_Trajectory',
     'KinKal_General',
-    'cetlib'
+    'cetlib',
+    'MF_MessageLogger'
     ] )
 
 # Fixme: split into link lists for each module.
