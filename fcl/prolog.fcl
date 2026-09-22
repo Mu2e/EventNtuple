@@ -312,6 +312,7 @@ EventNtupleMaker : {
       clusterMCTag : "compressRecoMCs"
       fillHits : true
       hitMCTag : "compressRecoMCs"
+      entrantTag : "" # optional CaloHitEntrantCollection; empty leaves entrantSimIds unfilled
       fillSim : true
       fillDigis : false
       fillDigiSim : false

@@ -25,6 +25,39 @@ This writes `trkqual` and `trkqual_candidate`. EventNtuple also records the
 track branch, output branch, input tag, and model version in
 `EventNtuple/trkqual_metadata`; `checkEventNtuple` prints this metadata.
 
+## Calorimeter entrant truth
+
+`calohitsmc.entrantSimIds` records the calo-entrant SimParticle ID for each
+energy deposit, in the same order as `calohitsmc.simParticleIds`. A value of
+`-1` means the producer could not resolve an entrant. The column is empty by
+default; existing configurations do not need an entrant product.
+
+To fill it, use an Offline release containing `CaloEntrantTruthMaker`
+([Offline #1911](https://github.com/Mu2e/Offline/pull/1911)) and configure:
+
+```fcl
+physics.producers.CaloEntrantTruthMaker : {
+  module_type : CaloEntrantTruthMaker
+  caloHitMCTag : "compressRecoMCs"
+  # These two tags support legacy inputs without CaloHitMC crystal IDs.
+  caloClusterTag : "CaloClusterMaker"
+  caloClusterMCTag : "compressRecoMCs"
+}
+physics.analyzers.EventNtuple.calo.mc.entrantTag : "CaloEntrantTruthMaker"
+```
+
+Add `CaloEntrantTruthMaker` to the job's producer path before the EventNtuple
+analyzer runs. Its `caloHitMCTag` must select the same collection as
+`EventNtuple.calo.mc.hitMCTag`. Both the global `mc.fill` switch and
+calorimeter MC hit filling must be enabled.
+If the input already contains the entrant product, set `entrantTag` to that
+product's input tag instead of scheduling another producer.
+
+When enabled, missing products, collection-size or deposit-count mismatches,
+and entries referring to a different MC hit cause an exception. The alignment
+is within `calohitsmc`; matching reconstructed `calohits` rows to MC rows is a
+separate operation.
+
 ## Table of Fcl Files
 
 | fcl file | runs on | additional info |
