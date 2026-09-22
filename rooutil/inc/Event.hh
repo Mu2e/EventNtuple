@@ -42,13 +42,13 @@
 #include "EventNtuple/inc/MCStepInfo.hh"
 
 #include "EventNtuple/rooutil/inc/Track.hh"
+#include "EventNtuple/rooutil/inc/UserBranch.hh"
 #include "EventNtuple/rooutil/inc/TimeCluster.hh"
 #include "EventNtuple/rooutil/inc/CrvCoinc.hh"
 #include "EventNtuple/rooutil/inc/CaloCluster.hh"
 #include "EventNtuple/rooutil/inc/Trigger.hh"
 #include "EventNtuple/rooutil/inc/CaloHit.hh"
-
-#include "TChain.h"
+#include "EventNtuple/rooutil/inc/BranchUtils.hh"
 
 namespace rooutil {
   struct Event {
@@ -59,15 +59,16 @@ namespace rooutil {
       AddTriggerInfo(ntuple);
 
       CheckForBranch(ntuple, "trk", &this->trk);
+      CheckForBranch(ntuple, "trkdtdt", &this->trkdtdt);
       CheckForBranch(ntuple, "trksegs", &this->trksegs);
       CheckForBranch(ntuple, "trkcalohit", &this->trkcalohit);
       CheckForBranch(ntuple, "trkqual", &this->trkqual);
-      CheckForBranch(ntuple, "trkqual3", &this->trkqual_alt); // TODO: un-hardcode those
       CheckForBranch(ntuple, "crvcoincs", &this->crvcoincs);
       CheckForBranch(ntuple, "trkpid", &this->trkpid);
 
       // Check if the MC branches exist
       CheckForBranch(ntuple, "evtinfomc", &this->evtinfomc);
+      CheckForBranch(ntuple, "primary", &this->primary);
       CheckForBranch(ntuple, "crvsummarymc", &this->crvsummarymc);
       CheckForBranch(ntuple, "trkmc", &this->trkmc);
       CheckForBranch(ntuple, "trksegsmc", &this->trksegsmc);
@@ -88,6 +89,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "trkhitcalibs", &this->trkhitcalibs);
 
       CheckForBranch(ntuple, "timeclusters", &this->timeclusters);
+      CheckForBranch(ntuple, "timeclustershits", &this->timeclustershits);
 
       CheckForBranch(ntuple, "caloclusters", &this->caloclusters);
       CheckForBranch(ntuple, "calohits", &this->calohits);
@@ -100,11 +102,8 @@ namespace rooutil {
       CheckForBranch(ntuple, "mcsteps_virtualdetector", &this->mcsteps_virtualdetector);
     }
 
-    // Check if a branch exists in the TChain, and optionally set its address
-    bool CheckForBranch(TChain* ntuple, const char* branch_name, void* address = nullptr) {
-      if(ntuple->GetBranch(branch_name) == nullptr || ntuple->GetBranchStatus(branch_name) == 0) return false;
-      if(address != nullptr) ntuple->SetBranchAddress(branch_name, address);
-      return true;
+    void SetUserBranches(const std::vector<std::shared_ptr<UserBranchBase>>& branches) {
+      user_branches = branches;
     }
 
     // Add trigger branches and store the path name information
@@ -132,6 +131,7 @@ namespace rooutil {
         if (debug) { std::cout << "Event::Update(): Creating Track " << i_track << "... " << std::endl; }
         Track track(&(trk->at(i_track)), &(trksegs->at(i_track)), &(trkcalohit->at(i_track))); // passing the addresses of the underlying structs
         UpdateObject(track.trkmc, trkmc, i_track, debug);
+        UpdateObject(track.trkdtdt, trkdtdt, i_track, debug);
         UpdateObject(track.trksegsmc, trksegsmc, i_track, debug);
         UpdateObject(track.trksegpars_lh, trksegpars_lh, i_track, debug);
         UpdateObject(track.trksegpars_ch, trksegpars_ch, i_track, debug);
@@ -142,8 +142,12 @@ namespace rooutil {
         UpdateObject(track.trkmats, trkmats, i_track, debug);
         UpdateObject(track.trkhitcalibs, trkhitcalibs, i_track, debug);
         UpdateObject(track.trkqual, trkqual, i_track, debug);
-        UpdateObject(track.trkqual_alt, trkqual_alt, i_track, debug);
         UpdateObject(track.trkpid, trkpid, i_track, debug);
+        for (const auto& user_branch : user_branches) {
+          if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
+            track.SetUserBranch(user_branch->name(), user_branch->TrackElementPtr(i_track));
+          }
+        }
 
         if (debug) { std::cout << "Event::Update(): Updating Track " << i_track << "... " << std::endl; }
         track.Update(debug);
@@ -169,6 +173,7 @@ namespace rooutil {
         for (int i_cluster = 0; i_cluster < nTimeClusters(); ++i_cluster) {
           if (debug) { std::cout << "Event::Update(): Creating TimeCluster " << i_cluster << "... " << std::endl; }
           TimeCluster time_cluster(&(timeclusters->at(i_cluster))); // passing the addresses of the underlying structs
+          if (timeclustershits != nullptr) { time_cluster.hits = &(timeclustershits->at(i_cluster)); }
           time_clusters.emplace_back(time_cluster);
         }
       }
@@ -257,7 +262,7 @@ namespace rooutil {
     }
 
 
-    Tracks GetTracks() { return tracks; }
+    const Tracks& GetTracks() { return tracks; }
     Tracks GetTracks(TrackCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
         Tracks select_tracks;
@@ -283,12 +288,17 @@ namespace rooutil {
         for (int i_trk = trks_to_remove.size()-1; i_trk >= 0; --i_trk) {
           trk->erase(trk->begin()+trks_to_remove[i_trk]);
           if (trkmc) { trkmc->erase(trkmc->begin()+trks_to_remove[i_trk]); }
+          if (trkdtdt) { trkdtdt->erase(trkdtdt->begin()+trks_to_remove[i_trk]); }
           if (trksegs) { trksegs->erase(trksegs->begin()+trks_to_remove[i_trk]); }
           if (trksegsmc) { trksegsmc->erase(trksegsmc->begin()+trks_to_remove[i_trk]); }
           if (trkcalohit) { trkcalohit->erase(trkcalohit->begin()+trks_to_remove[i_trk]); }
           if (trkqual) { trkqual->erase(trkqual->begin()+trks_to_remove[i_trk]); }
-          if (trkqual_alt) { trkqual_alt->erase(trkqual_alt->begin()+trks_to_remove[i_trk]); }
           if (trkpid) { trkpid->erase(trkpid->begin()+trks_to_remove[i_trk]); }
+          for (const auto& user_branch : user_branches) {
+            if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
+              user_branch->EraseTrack(trks_to_remove[i_trk]);
+            }
+          }
           if (trksegpars_lh) { trksegpars_lh->erase(trksegpars_lh->begin()+trks_to_remove[i_trk]); }
           if (trksegpars_ch) { trksegpars_ch->erase(trksegpars_ch->begin()+trks_to_remove[i_trk]); }
           if (trksegpars_kl) { trksegpars_kl->erase(trksegpars_kl->begin()+trks_to_remove[i_trk]); }
@@ -303,7 +313,7 @@ namespace rooutil {
       }
     }
 
-    CrvCoincs GetCrvCoincs() { return crv_coincs; }
+    const CrvCoincs& GetCrvCoincs() { return crv_coincs; }
     CrvCoincs GetCrvCoincs(CrvCoincCut cut) {
       CrvCoincs select_crv_coincs;
       for (auto& crv_coinc : crv_coincs) {
@@ -314,7 +324,7 @@ namespace rooutil {
       return select_crv_coincs;
     }
 
-    TimeClusters GetTimeClusters() { return time_clusters; }
+    const TimeClusters& GetTimeClusters() { return time_clusters; }
     TimeClusters GetTimeClusters(TimeClusterCut cut, bool inplace = false) {
       if (!inplace) { // if we are not changing inplace, then just create a new vector to return
         TimeClusters select_time_clusters;
@@ -339,6 +349,7 @@ namespace rooutil {
         }
         for (int i_cluster = time_clusters_to_remove.size()-1; i_cluster >= 0; --i_cluster) {
           timeclusters->erase(timeclusters->begin()+time_clusters_to_remove[i_cluster]);
+          if (timeclustershits) { timeclustershits->erase(timeclustershits->begin()+time_clusters_to_remove[i_cluster]); }
         }
 
         time_clusters.erase(newEnd, time_clusters.end()); // remove only rearranges and returns the new end
@@ -409,6 +420,7 @@ namespace rooutil {
     // Pointers to the data
     mu2e::EventInfo* evtinfo = nullptr;
     mu2e::EventInfoMC* evtinfomc = nullptr;
+    std::vector<mu2e::SimInfo>* primary = nullptr;
     mu2e::HitCount* hitcount = nullptr;
     mu2e::CrvSummaryReco* crvsummary = nullptr;
     mu2e::CrvSummaryMC* crvsummarymc = nullptr;
@@ -417,10 +429,10 @@ namespace rooutil {
 
     std::vector<mu2e::TrkInfo>* trk = nullptr;
     std::vector<mu2e::TrkInfoMC>* trkmc = nullptr;
+    std::vector<mu2e::TrkDtDtInfo>* trkdtdt = nullptr;
     std::vector<mu2e::TrkCaloHitInfo>* trkcalohit = nullptr;
     std::vector<mu2e::CaloClusterInfoMC>* trkcalohitmc = nullptr;
     std::vector<mu2e::MVAResultInfo>* trkqual = nullptr;
-    std::vector<mu2e::MVAResultInfo>* trkqual_alt = nullptr; // an optional trkqual branch to also use
     std::vector<mu2e::MVAResultInfo>* trkpid = nullptr;
     std::vector<std::vector<mu2e::TrkSegInfo>>* trksegs = nullptr;
     std::vector<std::vector<mu2e::SurfaceStepInfo>>* trksegsmc = nullptr;
@@ -431,8 +443,10 @@ namespace rooutil {
     std::vector<std::vector<mu2e::TrkStrawHitInfoMC>>* trkhitsmc = nullptr;
     std::vector<std::vector<mu2e::TrkStrawMatInfo>>* trkmats = nullptr;
     std::vector<std::vector<mu2e::TrkStrawHitCalibInfo>>* trkhitcalibs = nullptr;
+    std::vector<std::shared_ptr<UserBranchBase>> user_branches;
 
     std::vector<mu2e::EventNtupleTimeClusterInfo>* timeclusters = nullptr;
+    std::vector<std::vector<mu2e::EventNtupleComboHitInfo>>* timeclustershits = nullptr;
 
     std::vector<mu2e::CaloClusterInfo>* caloclusters = nullptr;
     std::vector<mu2e::CaloHitInfo>* calohits = nullptr;

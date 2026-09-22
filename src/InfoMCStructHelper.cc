@@ -375,7 +375,9 @@ namespace mu2e {
         ccimc.tavg += edep.time();
         auto simid = edep.sim()->id().asInt();
         ccimc.simParticleIds.push_back(simid);
-        ccimc.simRels.push_back(MCRelationship(edep.sim(),edeps.front().sim()));
+        MCRelationship simRel(edep.sim(),edeps.front().sim());
+        ccimc.simRelRels.push_back(simRel.relationship());
+        ccimc.simRelRems.push_back(simRel.removal());
       }
       ccimc.tavg /= ccimc.nsim;
     }
@@ -405,7 +407,10 @@ namespace mu2e {
         chimc.eDeps.push_back(edep.energyDep());
         chimc.momentumIns.push_back(edep.momentumIn());
         chimc.simParticleIds.push_back(simid);
-        chimc.simRels.push_back(MCRelationship(edep.sim(),edeps.front().sim()));
+        MCRelationship simRel(edep.sim(),edeps.front().sim());
+        chimc.simRelRels.push_back(simRel.relationship());
+        chimc.simRelRems.push_back(simRel.removal());
+
         // entrantSimIds aligned with simParticleIds; -1 marks a deposit the
         // upstream CaloEntrantTruthMaker could not resolve
         if (entrant != nullptr) {
@@ -452,7 +457,10 @@ namespace mu2e {
           calodigimc.eDeps.push_back(step->energyDepG4());
           calodigimc.momentumIns.push_back(step->momentumIn());
           calodigimc.simParticleIds.push_back(simid);
-          calodigimc.simRels.push_back(MCRelationship(step->simParticle(),steps.front()->simParticle()));
+          MCRelationship simRel(step->simParticle(),steps.front()->simParticle());
+          calodigimc.simRelRels.push_back(simRel.relationship());
+          calodigimc.simRelRems.push_back(simRel.removal());
+
         }
       }
     }

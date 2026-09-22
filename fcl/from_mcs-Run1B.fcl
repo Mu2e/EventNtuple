@@ -2,8 +2,70 @@
 #include "EventNtuple/fcl/from_mcs-extracted.fcl"
 
 physics.analyzers.EventNtuple.mcsteps.stepPointMCTags : [ "compressRecoMCs:virtualdetector" ] # we add the mcsteps_virtualdetector branch
+
+# Update the track collections
+physics.producers.MergeKKLines : {
+  @table::MergeKK
+  KalSeedCollections : [ "KKLine", "ProtonKKLine", "CosmicKKLine" ]
+  debugLevel : 0
+}
+physics.analyzers.EventNtuple.trk.fits : [
+  {
+    input : "MergeKKLines"
+    branchname : "trk"
+    fill : true
+    options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
+    trkQualLeaves : []
+    # TrkPID isn't computed for MergeKKLines (neither TrkDtDt nor TrkPID run over it in this
+    # path -- fillTrkPID below doesn't gate branch creation, only trkPIDTags does), so leave it
+    # empty rather than declare a tag that resolves to nothing and produces an always-empty
+    # "trkpid" branch.
+    trkPIDTags : []
+    trkDtDtTag : "TrkDtDt:MergeKKLines"
+  }
+]
+physics.analyzers.EventNtuple.trk.fillTrkPID : false # Not yet implemented
+physics.analyzers.EventNtuple.trk.fillTrkDtDt : false # Not yet added
+physics.EventNtuplePath : [ MergeKKLines, @sequence::physics.EventNtuplePath ]
+
+# Store time clusters for straight line track finding
 physics.analyzers.EventNtuple.timeclusters.fill : true
-physics.analyzers.EventNtuple.timeclusters.tag  : "SimpleTimeCluster" # Store time clusters for straight line track finding
+physics.analyzers.EventNtuple.timeclusters.tags  : [
+  "CalTimeClusterFinder",
+  "ProtonCalTimeClusterFinder",
+  "TZClusterFinder",
+  "TimeAndPhiClusterFinder"
+]
+physics.analyzers.EventNtuple.timeclusters.names  : [  # Output branch names
+  "timeclusters",
+  "protontimeclusters",
+  "tztimeclusters",
+  "tphitimeclusters"
+]
+
+# All of the time cluster finders run over makePH in Run-1B reco, which the -KL mcs files keep in full
+physics.analyzers.EventNtuple.timeclusters.comboHitTags : [ "makePH" ]
+# Store the hits of the target-origin electron and proton time clusters
+physics.analyzers.EventNtuple.timeclusters.fillHitsFor : [ "timeclusters", "protontimeclusters" ]
+# The other hit branches are off; they can be turned on per collection by output name, e.g.:
+#   physics.analyzers.EventNtuple.lineseeds.fillHitsFor : [ "lineseeds", "protonlineseeds" ]
+# tphitimeclusters has ~20x the clusters of the others and dominates the ntuple size if its hits are stored
+
+# Store track seeds for straight line track finding
+physics.analyzers.EventNtuple.lineseeds.fill : true
+physics.analyzers.EventNtuple.lineseeds.tags  : [
+  "LineFinder",
+  "ProtonLineFinder",
+  "CosmicLineFinder"
+]
+physics.analyzers.EventNtuple.lineseeds.names  : [  # Output branch names
+  "lineseeds",
+  "protonlineseeds",
+  "cosmiclineseeds"
+]
+
 services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we can use the standard geometry
 
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ] # add back genCountLogger
+
+physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

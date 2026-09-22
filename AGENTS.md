@@ -87,7 +87,7 @@ DeM : {
     genealogyDepth : -1         # MC genealogy depth (-1 = all)
     matchDepth     : -1         # MC match depth (-1 = all)
   }
-  trkQualTags : ["TrkQualDeM"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeM:ANN" modelVersion : "ANN1_v2" } ]
   trkPIDTags  : ["TrkPIDDeM"]
 }
 ```

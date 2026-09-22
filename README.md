@@ -24,6 +24,8 @@ A [list of branches is available](./doc/branches.md)
 
 The help understand what all the branches and leaves mean, we have an [```ntuplehelper```](doc/ntuplehelper.md) tool
 
+Alongside the EventNtuple itself we have a SubRunNtuple that contains subrun-level quantities. These quantites are also summed into the "totals histograms".
+
 ## How to Check the EventNtuple
 You can get some basic information about the EventNtuple file useing ```checkEventNtuple``` like so:
 
@@ -31,7 +33,9 @@ You can get some basic information about the EventNtuple file useing ```checkEve
 checkEventNtuple file1.root file2.root
 ```
 
-This will print the version number (for versions after v6.3.0) and the trigger branches in the file (for versions after v6.8.0)
+This will print the version number (for versions after v6.3.0), configured
+TrkQual model metadata when available (for versions after v6.13.0), and the trigger branches in the file
+(for versions after v6.8.0). It will also print the number of entries in the "totals histograms" if any exist (for versions after v6.13.0)
 
 
 ## How to Analyze an EventNtuple

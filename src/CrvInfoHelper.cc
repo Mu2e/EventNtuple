@@ -16,6 +16,7 @@
 #include "Offline/DataProducts/inc/PDGCode.hh"
 #include "art/Framework/Principal/Handle.h"
 #include "cetlib_except/exception.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "Offline/CRVResponse/inc/CrvMCHelper.hh"
 #include "Offline/CRVReco/inc/CrvHelper.hh"
 #include "Offline/GeometryService/inc/DetectorSystem.hh"
@@ -242,7 +243,14 @@ namespace mu2e
     if(!crvRecoPulses.isValid()) return;
     pulseHitIndices.assign(crvRecoPulses->size(), -1);
 
-    if(!crvCoincidences.isValid()) return;
+    // no coincidences leaves every crvHitIndex at -1, which reads as "nothing clustered"
+    if(!crvCoincidences.isValid())
+    {
+      mf::LogWarning("EventNtuple")
+        << "No valid CrvCoincidenceClusterCollection: every crvpulses.crvHitIndex will be -1, "
+        << "so every pulse will look unclustered. Check crv.coincidencesTag.";
+      return;
+    }
 
     for(size_t hitIndex=0; hitIndex<crvCoincidences->size(); ++hitIndex)
     {
@@ -251,6 +259,20 @@ namespace mu2e
       for(const auto &crvRecoPulse : cluster.GetCrvRecoPulses())
       {
         if(!crvRecoPulse) continue;
+
+        // key() only indexes the collection the Ptr was made against; the checks below cannot
+        // catch a mismatched (e.g. SelectReco-compressed) collection, since its keys stay in range
+        if(crvRecoPulse.id() != crvRecoPulses.id())
+        {
+          throw cet::exception("EventNtuple")
+            << "CRV coincidence clusters and CrvRecoPulses come from different collections: "
+            << "the cluster's art::Ptr<CrvRecoPulse> has ProductID " << crvRecoPulse.id()
+            << " but the CrvRecoPulse collection being indexed has ProductID "
+            << crvRecoPulses.id() << ". Set crv.coincidencesTag and crv.recoPulsesTag to the same "
+            << "producer (note crv.keepUnclusteredPulses only works with the finder's own "
+            << "uncompressed CrvRecoPulses, so the coincidences must come from the finder too).\n";
+        }
+
         const size_t pulseIndex = crvRecoPulse.key();
         if(pulseIndex >= pulseHitIndices.size())
         {

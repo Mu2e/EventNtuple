@@ -27,6 +27,14 @@ void PrintEvents(std::string filename) {
       std::cout << "evtinfomc: " << event.evtinfomc->nprotons << "," << event.evtinfomc->pbtime << std::endl;
     }
 
+    // primary branch
+    if (event.primary != nullptr) {
+      for (const auto& sim : *(event.primary)) {
+        std::cout << "primary: " << sim.id << " " << sim.pdg << " " << sim.startCode << " " << sim.mom.r()
+                  << std::endl;
+      }
+    }
+
     // trk branch
     if (event.trk != nullptr) {
       for (const auto& trk : *(event.trk)) {

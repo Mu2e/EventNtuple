@@ -6,75 +6,78 @@
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
 BEGIN_PROLOG
+
+#################################
+# Track quality
+#################################
+
 # Track quality module
 TrkQual : {
   module_type : TrackQuality
-  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.onnx"
+  onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.0.onnx"
+  xgbFilename : "ArtAnalysis/TrkDiag/data/TrkQual_BDT1_v2.0.ubj"
   debugLevel : 0
 
 }
-TrkQualDeM           : @local::TrkQual
-TrkQualDeM.KalSeedPtrCollection : "MergeKKDeM"
-TrkQualUeM           : @local::TrkQual
-TrkQualUeM.KalSeedPtrCollection : "MergeKKUeM"
-TrkQualDmuM          : @local::TrkQual
-TrkQualDmuM.KalSeedPtrCollection : "MergeKKDmuM"
-TrkQualUmuM          : @local::TrkQual
-TrkQualUmuM.KalSeedPtrCollection : "MergeKKUmuM"
-TrkQualDeP           : @local::TrkQual
-TrkQualDeP.KalSeedPtrCollection : "MergeKKDeP"
-TrkQualUeP           : @local::TrkQual
-TrkQualUeP.KalSeedPtrCollection : "MergeKKUeP"
-TrkQualDmuP          : @local::TrkQual
-TrkQualDmuP.KalSeedPtrCollection : "MergeKKDmuP"
-TrkQualUmuP          : @local::TrkQual
-TrkQualUmuP.KalSeedPtrCollection : "MergeKKUmuP"
-TrkQualAll          : @local::TrkQual
-TrkQualAll.KalSeedPtrCollection : "MergeKKAll"
 TrkQualDe           : @local::TrkQual
 TrkQualDe.KalSeedPtrCollection : "MergeKKDe"
+TrkQualUe           : @local::TrkQual
+TrkQualUe.KalSeedPtrCollection : "MergeKKUe"
+TrkQualDmu          : @local::TrkQual
+TrkQualDmu.KalSeedPtrCollection : "MergeKKDmu"
+TrkQualUmu          : @local::TrkQual
+TrkQualUmu.KalSeedPtrCollection : "MergeKKUmu"
+TrkQualAll          : @local::TrkQual
+TrkQualAll.KalSeedPtrCollection : "MergeKKAll"
 
 
 TrkQualProducers : {
-  TrkQualDeM : @local::TrkQualDeM
-  TrkQualUeM : @local::TrkQualUeM
-  TrkQualDeP : @local::TrkQualDeP
-  TrkQualUeP : @local::TrkQualUeP
-  TrkQualDmuM : @local::TrkQualDmuM
-  TrkQualDmuP : @local::TrkQualDmuP
-  TrkQualUmuM : @local::TrkQualUmuM
-  TrkQualUmuP : @local::TrkQualUmuP
-  TrkQualAll : @local::TrkQualAll
   TrkQualDe : @local::TrkQualDe
+  TrkQualUe : @local::TrkQualUe
+  TrkQualDmu : @local::TrkQualDmu
+  TrkQualUmu : @local::TrkQualUmu
+  TrkQualAll : @local::TrkQualAll
 }
 
-TrkQualProducersPath : [ TrkQualDeM, TrkQualUeM, TrkQualDmuM, TrkQualDeP, TrkQualUeP, TrkQualDmuP, TrkQualUmuM, TrkQualUmuP ]
+TrkQualProducersPath : [ TrkQualDe, TrkQualUe, TrkQualDmu, TrkQualUmu ]
 
-# track PID module
-TrkPID : {
-  module_type : TrackPID
-  MaxDE : 500.0 # MeV
-  DeltaTOffset : -1.15 # specific to MDC2018h
-  datFilename : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
-}
-# this module only makes sense for downstream electron fits
-TrkPIDDeM          : @local::TrkPID
-TrkPIDDeM.KalSeedPtrCollection : "MergeKKDeM"
-TrkPIDDeP          : @local::TrkPID
-TrkPIDDeP.KalSeedPtrCollection : "MergeKKDeP"
-TrkPIDDe           : @local::TrkPID
-TrkPIDDe.KalSeedPtrCollection : "MergeKKDe"
-TrkPIDAll          : @local::TrkPID
-TrkPIDAll.KalSeedPtrCollection : "MergeKKAll"
+#################################
+# PID
+#################################
+
 TrkPIDProducers : {
-  TrkPIDDeM : @local::TrkPIDDeM
-  TrkPIDDeP : @local::TrkPIDDeP
-  TrkPIDDe : @local::TrkPIDDe
-  TrkPIDAll : @local::TrkPIDAll
-}
-TrkPIDProducersPath : [ TrkPIDDeM, TrkPIDDeP ]
+  # Reconstruct track dt_hit/dt_fit
+  TrkDtDt : {
+    module_type  : TrackDtDt
+    doHistograms : false
+    diagLevel    : 0
+    kalSeeds     : [ "KKDe", "KKUe", "KKDmu", "KKUmu", "MergeKKAll" ]
+  }
 
-# trigger
+  # Track PID module
+  TrkPID : {
+    module_type  : TrackPID
+    MaxDE        : 500.0 # MeV
+    KalSeeds     : [ "KKDe"       , "KKUe"        , "KKDmu"        , "KKUmu"        , "MergeKKAll"        ]
+    KalSeedDtDts : ["TrkDtDt:KKDe", "TrkDtDt:KKUe", "TrkDtDt:KKDmu", "TrkDtDt:KKUmu", "TrkDtDt:MergeKKAll"]
+    MVAVersion   : 1
+    DatFilename  : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
+    DebugLevel   : 0
+  }
+}
+
+TrkPIDPath : [ TrkDtDt, TrkPID ]
+
+# Modules for from_mcs-ceSimReco.fcl (only contains De fits)
+TrkDtDtDe : @local::TrkPIDProducers.TrkDtDt
+TrkDtDtDe.kalSeeds : [ "KKDe" ]
+TrkPIDDe : @local::TrkPIDProducers.TrkPID
+TrkPIDDe.KalSeeds : [ "KKDe" ]
+TrkPIDDe.KalSeedDtDts : ["TrkDtDtDe:KKDe"]
+
+#################################
+# Trigger
+#################################
 
 TTProducers : {
   MergeTTApr : {
@@ -104,29 +107,20 @@ genCountLogger: { module_type: GenEventCountReader }
 
 # With move to using KalSeedPtr need to "merge" KalSeeds so that we get KalSeedPtr collections
 MergeKK : { module_type : MergeKalSeeds }
-MergeKKDeM           : @local::MergeKK
-MergeKKDeM.KalSeedCollections : [ "KKDeM" ]
-MergeKKUeM           : @local::MergeKK
-MergeKKUeM.KalSeedCollections : [ "KKUeM" ]
-MergeKKDmuM          : @local::MergeKK
-MergeKKDmuM.KalSeedCollections : [ "KKDmuM" ]
-MergeKKUmuM          : @local::MergeKK
-MergeKKUmuM.KalSeedCollections : [ "KKUmuM" ]
-MergeKKDeP           : @local::MergeKK
-MergeKKDeP.KalSeedCollections : [ "KKDeP" ]
-MergeKKUeP           : @local::MergeKK
-MergeKKUeP.KalSeedCollections : [ "KKUeP" ]
-MergeKKDmuP          : @local::MergeKK
-MergeKKDmuP.KalSeedCollections : [ "KKDmuP" ]
-MergeKKUmuP          : @local::MergeKK
-MergeKKUmuP.KalSeedCollections : [ "KKUmuP" ]
+MergeKKDe           : @local::MergeKK
+MergeKKDe.KalSeedCollections : [ "KKDe" ]
+MergeKKUe           : @local::MergeKK
+MergeKKUe.KalSeedCollections : [ "KKUe" ]
+MergeKKDmu          : @local::MergeKK
+MergeKKDmu.KalSeedCollections : [ "KKDmu" ]
+MergeKKUmu          : @local::MergeKK
+MergeKKUmu.KalSeedCollections : [ "KKUmu" ]
 MergeKKLine          : @local::MergeKK
 MergeKKLine.KalSeedCollections : [ "KKLine" ]
 MergeKKOff          : @local::MergeKK
 MergeKKOff.KalSeedCollections : [ "KKCHmu" ]
 MergeKKAll          : @local::MergeKK
-MergeKKAll.KalSeedCollections : ["KKDeM", "KKDeP", "KKUeM", "KKUeP", "KKDmuM", "KKDmuP", "KKUmuM", "KKUmuP", # will go when all new datasets are added
-  "KKDe", "KKUe", "KKDmu", "KKUmu" ] # these are the new APR outputs
+MergeKKAll.KalSeedCollections : [ "KKDe", "KKUe", "KKDmu", "KKUmu" ]
 MergeKKDe           : @local::MergeKK
 MergeKKDe.KalSeedCollections : [ "KKDe" ]
 
@@ -168,14 +162,10 @@ MergeKKDeCalib : {
 }
 
 MergeKKProducers : {
-  MergeKKDeM : @local::MergeKKDeM
-  MergeKKUeM : @local::MergeKKUeM
-  MergeKKDeP : @local::MergeKKDeP
-  MergeKKUeP : @local::MergeKKUeP
-  MergeKKDmuM : @local::MergeKKDmuM
-  MergeKKDmuP : @local::MergeKKDmuP
-  MergeKKUmuM : @local::MergeKKUmuM
-  MergeKKUmuP : @local::MergeKKUmuP
+  MergeKKDe : @local::MergeKKDe
+  MergeKKUe : @local::MergeKKUe
+  MergeKKDmu : @local::MergeKKDmu
+  MergeKKUmu : @local::MergeKKUmu
   MergeKKLine : @local::MergeKKLine
   MergeKKOff : @local::MergeKKOff
   MergeKKAll : @local::MergeKKAll
@@ -185,99 +175,73 @@ MergeKKProducers : {
 MergeKKProducersPath : [ MergeKKAll ]
 MergeKKNoFieldPath : [ MergeKKLine ]
 MergeKKOffSpillPath : [ MergeKKOff ]
-MergeKKSeparatePath : [ MergeKKDeM, MergeKKUeM, MergeKKDmuM, MergeKKDeP, MergeKKUeP, MergeKKDmuP, MergeKKUmuM, MergeKKUmuP ]
+MergeKKSeparatePath : [ MergeKKAll, MergeKKDe, MergeKKUe, MergeKKDmu, MergeKKUmu ]
 
 
-DeM : { input : "MergeKKDeM"
-  branchname : "dem"
+De : { input : "MergeKKDe"
+  branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDeM"]
-  trkPIDTags : ["TrkPIDDeM"]
+  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
+  trkPIDTags : ["TrkPIDDe"]
+  trkDtDtTag : "TrkDtDt:KKDe"
 }
-UeM : { input : "MergeKKUeM"
-  branchname : "uem"
+Ue : { input : "MergeKKUe"
+  branchname : "ue"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKUe"
 }
-DmuM : { input : "MergeKKDmuM"
-  branchname : "dmm"
+Dmu : { input : "MergeKKDmu"
+  branchname : "dm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKDmu"
 }
-UmuM : { input : "MergeKKUmuM"
-  branchname : "umm"
+Umu : { input : "MergeKKUmu"
+  branchname : "um"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
-}
-DeP : { input : "MergeKKDeP"
-  branchname : "dep"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
-  trkPIDTags : [ ]
-}
-UeP : { input : "MergeKKUeP"
-  branchname : "uep"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
-  trkPIDTags : [ ]
-}
-DmuP : { input : "MergeKKDmuP"
-  branchname : "dmp"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
-  trkPIDTags : [ ]
-}
-UmuP : { input : "MergeKKUmuP"
-  branchname : "ump"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
-  trkPIDTags : [ ]
+  trkDtDtTag : "TrkDtDt:KKUmu"
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : ""
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
 All : { input : "MergeKKAll"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualAll"]
-  trkPIDTags : ["TrkPIDAll"]
+  trkQualLeaves : [
+    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2.0" },
+    { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2.0" }
+  ]
+  trkPIDTags : ["TrkPID:MergeKKAll"]
+  trkDtDtTag : "TrkDtDt:MergeKKAll"
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
-}
-De : { input : "MergeKKDe"
-  branchname : "de"
-  fill : true
-  options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : ["TrkQualDe"]
-  trkPIDTags : ["TrkPIDDe"]
 }
 
 EventNtupleMaker : {
@@ -320,8 +284,8 @@ EventNtupleMaker : {
     fill : true
     fillHits : true
     fillHitCalibs : false
-    fillTrkQual : true
     fillTrkPID : false
+    fillTrkDtDt : true
     fits : [ @local::All ]
     mc : {
       fill : true
@@ -383,11 +347,37 @@ EventNtupleMaker : {
   # -- Time clusters ---------------------------------------------------------
   timeclusters : {
     fill : false
-    tag  : "MHDe"
+    tags  : ["MHDe"]
+    names : ["timeclusters"]
+    comboHitTags : [] # combo hit collection(s) the time clusters index; needed for fillHitsFor and the edep leaf
+    fillHitsFor : [] # entries of names to fill a <name>hits branch for
+  }
+  # -- Line seeds ------------------------------------------------------------
+  lineseeds : {
+    fill : false
+    tags  : ["LineFinder"]
+    names : ["lineseeds"]
+    fillHitsFor : [] # entries of names to fill a <name>hits branch for
+  }
+  # -- Lumi stream -----------------------------------------------------------
+  lumistream : {
+    fill : true
+    calo : "CaloHitMakerFast"
+    tc   : "TrigFlagPH"
+    trk  : "TrigMakeSH"
   }
   # -- MC step collections ---------------------------------------------------
   mcsteps : {
     surfaceStepsTag : "compressRecoMCs"
+  }
+
+  # -- SubRun quantities ---------------------------------------------------
+  subruns : {
+    makeNtuple : true
+    makeTotalsHistograms : true
+    genEventCount : { include : true inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
+    procEventCount : { include : true inputTag : "" fillNtuple : true fillTotalsHistogram : true }
+    cosmicLivetime : { include : true inputTag : "generate" fillNtuple : true fillTotalsHistogram : true }
   }
 }
 # instance for processing trigger (digitization) output from simulation
@@ -411,8 +401,9 @@ TTMCBranch : {
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualTags : [ ]
+  trkQualLeaves : [ ]
   trkPIDTags : [ ]
+  trkDtDtTag : ""
 }
 
 EventNtuple : {
@@ -425,17 +416,15 @@ EventNtuple : {
 
   analyzers : {
     EventNtuple : { @table::EventNtupleMaker  }
-    genCountLogger : @local::genCountLogger
   }
 
-  #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDProducersPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, TrkPIDAll ]
+  #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath]
+  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
-  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll, TrkPIDAll ]
-  EndPath : [ EventNtuple, genCountLogger ]
-  EndPathNoMC : [ EventNtuple ]
+  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll,  @sequence::TrkPIDPath ]
+  EndPath : [ EventNtuple ]
 
 }
 
@@ -451,8 +440,9 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualTags : ["TrkQualDe"]
+    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
     trkPIDTags : ["TrkPIDDe"]
+    trkDtDtTag : "TrkDtDt:MergeKKDeCalib"
   }
 ]
 

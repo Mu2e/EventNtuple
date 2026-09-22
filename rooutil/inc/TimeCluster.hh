@@ -3,6 +3,7 @@
 
 #include <functional>
 #include "EventNtuple/inc/TimeClusterInfo.hh"
+#include "EventNtuple/inc/ComboHitInfo.hh"
 
 namespace rooutil {
   struct TimeCluster {
@@ -15,6 +16,7 @@ namespace rooutil {
 
     // Pointers to the data
     mu2e::EventNtupleTimeClusterInfo* timecluster = nullptr;
+    std::vector<mu2e::EventNtupleComboHitInfo>* hits = nullptr; // only set if the timeclustershits branch is in the ntuple
   };
 
   typedef std::function<bool(TimeCluster&)> TimeClusterCut;

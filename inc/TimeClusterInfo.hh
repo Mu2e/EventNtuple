@@ -13,6 +13,7 @@ namespace mu2e
     int nhits = 0; // N(combo hits)
     int nStrawHits = 0; //N(straw hits)
     float t0 = 0.; // T0 time
+    float edep = -1.f; // straw-hit-weighted average hit energy deposition, in MeV; only defined if the combo hit collection is configured
     XYZVectorF pos = XYZVectorF(0.f, 0.f, 0.f); // position (x, y, z) in mm, in the tracker system
     float ecalo = -1.f; // energy of the associated calo cluster
     float tcalo = 0.f; // time of the associated calo cluster

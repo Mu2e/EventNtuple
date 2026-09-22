@@ -21,6 +21,7 @@ usage:
 
 #include "TH1.h"
 
+#include <cmath>
 #include <format>
 namespace rooutil {
   // Structure to hold cutflow data

@@ -40,7 +40,7 @@ physics :
         MinDeltaNHitFraction : 0.0
         MinActiveHits : 15
       }
-      SelectBestPair : 0 # select highest-momentum match
+      SelectBestPair : "HitFraction" # select best match based on hit overlap
       debugLevel : 0
     }
   }

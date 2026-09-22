@@ -20,8 +20,10 @@ namespace mu2e
     std::vector<float> tDeps; // list of times of energy deposits
     std::vector<float> momentumIns; // list of the momentum of the SimParticle when entering in the disk
     std::vector<int> simParticleIds; // list of simparticle ids
-    std::vector<MCRelationship> simRels; // relationship to the particle that deposited the most energy in the calo Hit
-    std::vector<int> entrantSimIds; // calo-entrant (shower originator) SimParticle id per deposit, aligned with simParticleIds; filled only when calo.mc.entrantTag is configured
+    std::vector<int8_t> simRelRels; // relationship to the particle that deposited the most energy in the calo hit (see MCRelationship for more details)
+    std::vector<int8_t> simRelRems; // distance of relationship to the particle that deposited the most energy in the calo hit (see MCRelationship for more details)
+    std::vector<int> entrantSimIds; // calo-entrant SimParticle id per deposit, aligned with simParticleIds; -1 if unresolved; empty when calo.mc.entrantTag is empty
+
     int clusterIdx_; // Cluster index
     int caloHitIdx_; // index into calohits branch, -1 if unset; calohitsmc is NOT index-aligned with calohits
 

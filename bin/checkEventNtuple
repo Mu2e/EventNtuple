@@ -3,6 +3,14 @@
 import argparse
 import ROOT
 
+ROOT.gInterpreter.Declare("""
+void printTrkQualMetadata(TH1* metadata) {
+  for (int bin = 1; bin <= metadata->GetNbinsX(); ++bin) {
+    std::cout << " - " << metadata->GetXaxis()->GetBinLabel(bin) << std::endl;
+  }
+}
+""")
+
 # A main function so that this can be run on the command line
 def main():
     parser = argparse.ArgumentParser(
@@ -16,6 +24,7 @@ def main():
     foldername = "EventNtuple"
     histname = "version"
     treename = "ntuple"
+    trkqualmetadataname = "trkqual_metadata"
     for filename in args.filenames:
         try:
             f = ROOT.TFile(filename, "READ");
@@ -28,6 +37,12 @@ def main():
                 else:
                     print("{} histogram does not exist in {} (it is either v06_02_00 or older)".format(histname, filename))
 
+                # Print configured track-quality algorithms, if available.
+                if folder.GetListOfKeys().Contains(trkqualmetadataname):
+                    metadata = f.Get(foldername+"/"+trkqualmetadataname)
+                    print("\nIt contains the following trkqual branches:", flush=True)
+                    ROOT.printTrkQualMetadata(metadata)
+
                 # Print triggers
                 if (folder.GetListOfKeys().Contains(treename)):
                     t = f.Get(foldername+"/"+treename)
@@ -38,6 +53,19 @@ def main():
                     print("For trigger definitions, please contact the Trigger group.")
                 else:
                     print("{} tree does not exist in {}...".format(treename, filename))
+
+                # Print totals histograms
+                print("\nTotals histograms:")
+                totals_histnames = ["n_gen_events", "n_proc_events", "cosmic_livetime"]
+                any_found = False
+                for totals_histname in totals_histnames:
+                    if (folder.GetListOfKeys().Contains(totals_histname)):
+                        h = f.Get(foldername+"/"+totals_histname)
+                        print(" - {} contains {:.02f} entries".format(totals_histname, h.GetBinContent(1)))
+                        any_found = True
+                if not any_found:
+                    print(" - no totals histograms (e.g. n_proc_events) found")
+
             else:
                 print("{}/ folder does not exist in {}".format(foldername, filename))
         except OSError:

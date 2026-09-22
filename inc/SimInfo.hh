@@ -22,7 +22,7 @@ namespace mu2e
     int stopCode = -1; // stop process code
     int gen = -1; // generator code
     float time = -1.0;  // Origin time of the SimParticle [ns]
-    int index; // index into the SimInfo vector
+    int index = -1; // index into the SimInfo vector
     XYZVectorF mom = XYZVectorF();  // origin momentumof the SimParticle [MeV/c]
     XYZVectorF pos = XYZVectorF();  // origin position of the SimParticle [mm, in detector coords]
     XYZVectorF endmom = XYZVectorF();  // end momentumof the SimParticle [MeV/c]

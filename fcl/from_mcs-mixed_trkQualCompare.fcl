@@ -1,17 +1,25 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
-# Add another TrackQuality module
+# TODO: the v1.0 and v1.1 trainings pre-date our used of ONNX files
+# We will update this file at the next training to show comparison of v2.0 and v3.0
+
+# Compare explicitly named TrackQuality branches.  The v1.0 and v1.1 ONNX
+# files must be installed beside the v2 model before running this example.
 physics.producers.TrkQualAllV10 : @local::TrkQualAll
-physics.producers.TrkQualAllV10.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.dat"
+physics.producers.TrkQualAllV10.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v1.onnx"
 
 physics.producers.TrkQualAllV11 : @local::TrkQualAll
-physics.producers.TrkQualAllV11.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v1.1.dat"
+physics.producers.TrkQualAllV11.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v1.1.onnx"
 physics.producers.TrkQualAllV2 : @local::TrkQualAll
-physics.producers.TrkQualAllV2.datFilename : "Offline/TrkDiag/data/TrkQual_ANN1_v2.dat"
+physics.producers.TrkQualAllV2.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.0.onnx"
 physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
 
-# Add it to the EventNtuple output
-physics.analyzers.EventNtuple.branches[0].trkQualTags : [ "TrkQualAllV10", "TrkQualAllV11", "TrkQualAllV2" ]
+# Add explicitly named results and record their model versions in the output.
+physics.analyzers.EventNtuple.trk.fits[0].trkQualLeaves : [
+  { leafname : "_v1_0" inputTag : "TrkQualAllV10:ANN" modelVersion : "TrkQual_ANN1_v1.0" },
+  { leafname : "_v1_1" inputTag : "TrkQualAllV11:ANN" modelVersion : "TrkQual_ANN1_v1.1" },
+  { leafname : "_v2_0"   inputTag : "TrkQualAllV2:ANN"  modelVersion : "TrkQual_ANN1_v2" }
+]
 
-# Removin hits
+# Remove hits
 physics.analyzers.EventNtuple.trk.fillHits : false

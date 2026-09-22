@@ -15,6 +15,7 @@ cet_make_library(
     LIBRARIES PUBLIC
       KinKal_Trajectory
       
+      Offline::CaloCluster
       Offline::CRVReco
       Offline::CRVResponse
       Offline::MCDataProducts
@@ -25,6 +26,7 @@ cet_make_library(
       Offline::TrackerConditions
       Offline::Mu2eUtilities
       Offline::GeneralUtilities
+      messagefacility::MF_MessageLogger
 
     LIBRARY_NAME eventntuple
 )

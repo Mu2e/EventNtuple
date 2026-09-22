@@ -51,9 +51,6 @@ namespace mu2e {
       // map VirtualDetectorIds to the equivalen SurfaceIds
       std::map<VirtualDetectorId,SurfaceId> _vdmap;
 
-      void fillSimInfo(const art::Ptr<SimParticle>& sp, SimInfo& siminfo);
-      void fillSimInfo(const SimParticle& sp, SimInfo& siminfo);
-
     public:
 
       struct Config {
@@ -84,6 +81,8 @@ namespace mu2e {
                                 std::vector<MCStepInfos>& mcsics, std::vector<MCStepSummaryInfo>& mcssis);
       void fillSurfaceStepInfos(KalSeedMC const& kseedmc, SurfaceStepCollection const& surfsteps,std::vector<SurfaceStepInfo>& ssic);
       void fillStepPointMCInfo(StepPointMCCollection const& mcsteps, MCStepInfos& mcstepinfos);
+      void fillSimInfo(const art::Ptr<SimParticle>& sp, SimInfo& siminfo);
+      void fillSimInfo(const SimParticle& sp, SimInfo& siminfo);
   };
 }
 
