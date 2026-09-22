@@ -11,6 +11,7 @@ namespace mu2e
     bool hashit = false;    // was there a hit assocated with this straw?
     bool activehit = false;    // was the hit assocated active
     bool drifthit = false;    // was the hit assocated using drift information
+    bool dead = false; // do we expect no hits on this straw
     int plane = -1, panel = -1, layer = -1, straw = -1; // StrawId fields of the straw
     int pcalc; // flag for how the path length was calculated
     float doca = -1000.0;    // DOCA between the track fit and the straw axis
@@ -24,6 +25,7 @@ namespace mu2e
     float upos = 0.0;  // distance of the POCA along the straw WRT the straw middle
     float udist = -1000.0;  // distance of the POCA along the straw past the end of the straw
     XYZVectorF poca; // point of closest approach
+    float phi =0.0; // angle around wire WRT z axis in range -pi,pi, where +pi/2 is in +v direction
   };
 }
 #endif
