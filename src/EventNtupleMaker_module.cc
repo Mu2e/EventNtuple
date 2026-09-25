@@ -1409,15 +1409,6 @@ namespace mu2e {
       }
     }
 
-    // WARNING: calohits (CaloHitMaker) and calohitsmc (compressRecoMCs) are not index-aligned.
-    // Record the legacy positional index RooUtil used (calohitsmc[i] <-> calohits[i]) in caloHitIdx_.
-    if (fillCaloHitsMC() && _conf.calo().fillHits()) {
-      for (uint mcIdx = 0; mcIdx < _caloHIMCs.size(); ++mcIdx) {
-        _caloHIMCs[mcIdx].caloHitIdx_ =
-          (mcIdx < _caloHIs.size()) ? static_cast<int>(mcIdx) : -1;
-      }
-    }
-
     if(_conf.calo().fill() && _conf.calo().fillClusters()){
       event.getByLabel(_conf.calo().clustersTag(),_caloClusters);
       for(const auto& cluster : *_caloClusters.product()){
@@ -1434,6 +1425,45 @@ namespace mu2e {
           }
           if(_caloCIs.back().hits_.size() != _caloCIs.back().size_){
             throw cet::exception("EventNtuple") << "Could not find one or all CaloHits linked to CaloCluster " << _caloCIs.size()-1 << "\n";
+          }
+        }
+      }
+    }
+
+    // Link calohitsmc to calohits (caloHitIdx_). The two are different art products and are
+    // NOT index-aligned: compressRecoMCs keeps only the CaloHitMCs of clusters, in cluster
+    // order, with each cluster's hits sorted by energy. Pair them through the clusters instead:
+    // CaloClusterTruthMatch makes one CaloClusterMC per CaloCluster, in the same order, and a
+    // crystal appears at most once in a cluster, so the crystal ID identifies the hit.
+    if(fillCaloHitsMC() && _conf.calo().fillHits()){
+      if(fillCaloClsMC() && _conf.calo().fillClusters()){
+        if(_caloCIMCs.size() != _caloCIs.size()){
+          throw cet::exception("EventNtuple") << "CaloClusterMC count " << _caloCIMCs.size()
+            << " differs from CaloCluster count " << _caloCIs.size() << "; cannot link calohitsmc to calohits\n";
+        }
+        for(uint clIdx = 0; clIdx < _caloCIs.size(); ++clIdx){
+          for(int mcIdx : _caloCIMCs[clIdx].hits_){
+            auto& hitmc = _caloHIMCs[mcIdx];
+            for(int hitIdx : _caloCIs[clIdx].hits_){
+              if(_caloHIs[hitIdx].crystalId_ == hitmc.crystalID_){
+                hitmc.caloHitIdx_ = hitIdx;
+                break;
+              }
+            }
+            if(hitmc.caloHitIdx_ < 0){
+              throw cet::exception("EventNtuple") << "CaloHitMC " << mcIdx << " (crystal " << hitmc.crystalID_
+                << ") of CaloClusterMC " << clIdx << " has no CaloHit in the same crystal in CaloCluster " << clIdx << "\n";
+            }
+          }
+        }
+      }
+      // Hits outside clusters: only an uncompressed CaloHitTruthMatch collection has them, and it
+      // holds one CaloHitMC per CaloHit in the same order. Link by position only in that case,
+      // and only where the crystal agrees.
+      if(_caloHIMCs.size() == _caloHIs.size()){
+        for(uint idx = 0; idx < _caloHIMCs.size(); ++idx){
+          if(_caloHIMCs[idx].caloHitIdx_ < 0 && _caloHIMCs[idx].crystalID_ == _caloHIs[idx].crystalId_){
+            _caloHIMCs[idx].caloHitIdx_ = idx;
           }
         }
       }
