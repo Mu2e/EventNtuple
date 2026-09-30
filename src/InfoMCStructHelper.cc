@@ -6,6 +6,7 @@
 #include "Offline/MCDataProducts/inc/StepPointMC.hh"
 #include "Offline/MCDataProducts/inc/SimParticle.hh"
 #include "Offline/MCDataProducts/inc/MCRelationship.hh"
+#include "cetlib_except/exception.h"
 
 #include "Offline/TrackerGeom/inc/Tracker.hh"
 #include "Offline/Mu2eUtilities/inc/TwoLinePCA.hh"
@@ -383,9 +384,13 @@ namespace mu2e {
     ccimcs.push_back(ccimc);
   }
 
-  void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx) {
+  void InfoMCStructHelper::fillCaloHitInfoMC(CaloHitMC const& chmc, std::vector<CaloHitInfoMC>& chimcs, int clusterIdx, const CaloHitEntrant* entrant) {
     CaloHitInfoMC chimc;
     auto const& edeps = chmc.energyDeposits();
+    if (entrant != nullptr && entrant->entrants().size() != edeps.size()) {
+      throw cet::exception("EventNtuple") << "CaloHitEntrant has " << entrant->entrants().size()
+          << " entrants but CaloHitMC has " << edeps.size() << " energy deposits\n";
+    }
     chimc.crystalID_ = chmc.crystalID();
     chimc.nsim = edeps.size();
     chimc.eDep = chmc.totalEnergyDep();
@@ -395,6 +400,7 @@ namespace mu2e {
     if (chimc.nsim > 0){
       chimc.eprimary = edeps.front().energyDep();
       chimc.tprimary = edeps.front().time();
+      size_t iedep = 0;
       for (auto const& edep : edeps){
         auto simid = edep.sim()->id().asInt();
         chimc.tDeps.push_back(edep.time());
@@ -405,6 +411,13 @@ namespace mu2e {
         chimc.simRelRels.push_back(simRel.relationship());
         chimc.simRelRems.push_back(simRel.removal());
 
+        // entrantSimIds aligned with simParticleIds; -1 marks a deposit the
+        // upstream CaloEntrantTruthMaker could not resolve
+        if (entrant != nullptr) {
+          const auto& ep = entrant->entrants()[iedep];
+          chimc.entrantSimIds.push_back(ep.isNonnull() ? ep->id().asInt() : -1);
+        }
+        ++iedep;
       }
     }
     chimcs.push_back(chimc);
