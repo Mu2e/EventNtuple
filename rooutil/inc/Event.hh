@@ -280,6 +280,8 @@ namespace rooutil {
         for (size_t i_track = 0; i_track < tracks.size(); ++i_track) {
           if (!cut(tracks[i_track])) { trks_to_remove.emplace_back(i_track); }
         }
+        // trkcalohitmc only has entries for tracks with a calo hit, so it is index-aligned with trk only when the sizes match
+        const bool trkcalohitmc_aligned = trkcalohitmc && trkcalohitmc->size() == trk->size();
         for (int i_trk = trks_to_remove.size()-1; i_trk >= 0; --i_trk) {
           trk->erase(trk->begin()+trks_to_remove[i_trk]);
           if (trkmc) { trkmc->erase(trkmc->begin()+trks_to_remove[i_trk]); }
@@ -301,6 +303,8 @@ namespace rooutil {
           if (trkhitsmc) { trkhitsmc->erase(trkhitsmc->begin()+trks_to_remove[i_trk]); }
           if (trkmats) { trkmats->erase(trkmats->begin()+trks_to_remove[i_trk]); }
           if (trkhitcalibs) { trkhitcalibs->erase(trkhitcalibs->begin()+trks_to_remove[i_trk]); }
+          if (trkmcsim) { trkmcsim->erase(trkmcsim->begin()+trks_to_remove[i_trk]); }
+          if (trkcalohitmc_aligned) { trkcalohitmc->erase(trkcalohitmc->begin()+trks_to_remove[i_trk]); }
         }
 
         Update(); // erasing shifted the backing vectors, so rebuild the wrappers
@@ -371,6 +375,7 @@ namespace rooutil {
         }
         for (int i_calocluster = caloclusters_to_remove.size()-1; i_calocluster >= 0; --i_calocluster) {
           caloclusters->erase(caloclusters->begin()+caloclusters_to_remove[i_calocluster]);
+          if (caloclustersmc) { caloclustersmc->erase(caloclustersmc->begin()+caloclusters_to_remove[i_calocluster]); }
         }
 
         Update(); // erasing shifted the backing vector, so rebuild the wrappers

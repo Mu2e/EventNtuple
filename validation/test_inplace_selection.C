@@ -25,7 +25,7 @@ int test_inplace_selection(std::string filename, int max_events = 1000) {
     auto& event = util.GetEvent(i_event);
 
     // expected: identifying values of the tracks/clusters that pass, in order
-    std::vector<int> exp_trk; std::vector<double> exp_calo;
+    std::vector<int> exp_trk; std::vector<double> exp_calo, exp_calo_mc;
     bool seen_reject = false, reject_before_keep = false;
     for (auto t : event.GetTracks()) {
       if (trk_cut(t)) { exp_trk.push_back(t.trk->nactive); if (seen_reject) reject_before_keep = true; }
@@ -33,7 +33,7 @@ int test_inplace_selection(std::string filename, int max_events = 1000) {
     }
     bool calo_seen_reject = false, calo_rbk = false;
     for (auto c : event.GetCaloClusters()) {
-      if (calo_cut(c)) { exp_calo.push_back(c.calocluster->energyDep_); if (calo_seen_reject) calo_rbk = true; }
+      if (calo_cut(c)) { exp_calo.push_back(c.calocluster->energyDep_); if (c.caloclustermc) exp_calo_mc.push_back(c.caloclustermc->etot); if (calo_seen_reject) calo_rbk = true; }
       else { calo_seen_reject = true; }
     }
 
@@ -52,6 +52,7 @@ int test_inplace_selection(std::string filename, int max_events = 1000) {
       if (tracks[i].trk != &(event.trk->at(i))) ok = false; // wrapper points into the vector
     }
     if (event.trkhits && event.trkhits->size() != exp_trk.size()) ok = false;
+    if (event.trkmcsim && event.trkmcsim->size() != exp_trk.size()) ok = false;
     if (event.trksegs && event.trksegs->size() != exp_trk.size()) ok = false;
 
     auto clusters = event.GetCaloClusters();
@@ -61,6 +62,15 @@ int test_inplace_selection(std::string filename, int max_events = 1000) {
       else for (size_t i = 0; i < exp_calo.size(); ++i) {
         if (clusters[i].calocluster->energyDep_ != exp_calo[i]) ok = false;
         if (event.caloclusters->at(i).energyDep_ != exp_calo[i]) ok = false;
+      }
+      // MC truth must follow the kept clusters (per-cluster MC branch is index-aligned)
+      if (event.caloclustersmc) {
+        if (event.caloclustersmc->size() != exp_calo.size() || exp_calo_mc.size() != exp_calo.size()) ok = false;
+        else for (size_t i = 0; i < exp_calo.size(); ++i) {
+          if (event.caloclustersmc->at(i).etot != exp_calo_mc[i]) ok = false;
+          if (clusters[i].caloclustermc != &(event.caloclustersmc->at(i))) ok = false;
+          if (clusters[i].caloclustermc && clusters[i].caloclustermc->etot != exp_calo_mc[i]) ok = false;
+        }
       }
     }
 
@@ -73,5 +83,10 @@ int test_inplace_selection(std::string filename, int max_events = 1000) {
             << " with a rejected track before a kept one, " << n_calo_checked << " with calo clusters, "
             << n_calo_rbk << " with a rejected cluster before a kept one), "
             << n_fail << " failures" << std::endl;
+  // A file with no reject-then-keep event would pass vacuously, so treat that as a failure
+  if (n_reject_before_keep + n_calo_rbk == 0) {
+    std::cout << "FAIL: no event had a rejected entry before a kept one; the test did not exercise the fix" << std::endl;
+    ++n_fail;
+  }
   return n_fail;
 }
