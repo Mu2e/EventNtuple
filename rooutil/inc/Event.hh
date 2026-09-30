@@ -274,16 +274,11 @@ namespace rooutil {
         return select_tracks;
       }
       else {
-        auto newEnd = std::remove_if(tracks.begin(), tracks.end(), [cut](Track& track) { return !cut(track); });
-
+        // Evaluate the cut once per track; wrappers are index-aligned with the backing branch vectors.
+        // (std::remove_if can't be used: it leaves the tail in an unspecified state, so the tail is not the rejected tracks)
         std::vector<size_t> trks_to_remove;
-        for (std::vector<Track>::iterator i_track = newEnd; i_track != tracks.end(); ++i_track) { // now need to remove from event
-          for (size_t i_trk = 0; i_trk < trk->size(); ++i_trk) {
-            if (&(trk->at(i_trk))  == i_track->trk) {
-              trks_to_remove.emplace_back(i_trk);
-              // flag i_trk for remoavel
-            }
-          }
+        for (size_t i_track = 0; i_track < tracks.size(); ++i_track) {
+          if (!cut(tracks[i_track])) { trks_to_remove.emplace_back(i_track); }
         }
         for (int i_trk = trks_to_remove.size()-1; i_trk >= 0; --i_trk) {
           trk->erase(trk->begin()+trks_to_remove[i_trk]);
@@ -308,7 +303,7 @@ namespace rooutil {
           if (trkhitcalibs) { trkhitcalibs->erase(trkhitcalibs->begin()+trks_to_remove[i_trk]); }
         }
 
-        tracks.erase(newEnd, tracks.end()); // remove only rearranges and returns the new end
+        Update(); // erasing shifted the backing vectors, so rebuild the wrappers
         return tracks;
       }
     }
@@ -369,22 +364,16 @@ namespace rooutil {
         return select_calo_clusters;
       }
       else {
-        auto newEnd = std::remove_if(calo_clusters.begin(), calo_clusters.end(), [cut](CaloCluster& calo_cluster) { return !cut(calo_cluster); });
-
+        // Evaluate the cut once per cluster (see GetTracks for why std::remove_if is not used)
         std::vector<size_t> caloclusters_to_remove;
-        for (std::vector<CaloCluster>::iterator i_calo_cluster = newEnd; i_calo_cluster != calo_clusters.end(); ++i_calo_cluster) { // now need to remove from event
-          for (size_t i_calocluster = 0; i_calocluster < caloclusters->size(); ++i_calocluster) {
-            if (&(caloclusters->at(i_calocluster))  == i_calo_cluster->calocluster) {
-              caloclusters_to_remove.emplace_back(i_calocluster);
-              // flag i_calocluster for remoavel
-            }
-          }
+        for (size_t i_calocluster = 0; i_calocluster < calo_clusters.size(); ++i_calocluster) {
+          if (!cut(calo_clusters[i_calocluster])) { caloclusters_to_remove.emplace_back(i_calocluster); }
         }
         for (int i_calocluster = caloclusters_to_remove.size()-1; i_calocluster >= 0; --i_calocluster) {
           caloclusters->erase(caloclusters->begin()+caloclusters_to_remove[i_calocluster]);
         }
 
-        calo_clusters.erase(newEnd, calo_clusters.end()); // remove only rearranges and returns the new end
+        Update(); // erasing shifted the backing vector, so rebuild the wrappers
         return calo_clusters;
       }
     }
