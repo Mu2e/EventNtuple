@@ -409,6 +409,7 @@ namespace mu2e {
       tminfo.hashit = i_straw.hasHit();
       tminfo.activehit = i_straw.activeHit();
       tminfo.drifthit = i_straw.driftHit();
+      tminfo.dead = i_straw.dead();
       tminfo.dp = i_straw._dmom;
       tminfo.radlen = i_straw._radlen;
       tminfo.doca = i_straw._doca;
@@ -419,6 +420,7 @@ namespace mu2e {
       tminfo.wirepath = i_straw._wirepath;
       tminfo.poca = i_straw._poca;
       tminfo.pcalc = i_straw._pcalc;
+      tminfo.phi = i_straw._phi;
       // translate the position to local 'U' coordinates. nominal geometry is good enough for this
       GeomHandle<Tracker> nominalTracker_h;
       auto const& tracker = *nominalTracker_h;
