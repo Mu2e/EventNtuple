@@ -38,6 +38,19 @@ Note that the ```before``` file is created before any changes, and the ```after`
 
 We expect perfect matches between all histograms. However, in some rare instances, we may expect differences. If you see any non-perfect matches, then discuss with the EventNtuple L4.
 
+### Validating ```RooUtil``` Collection Discovery
+```RooUtil``` discovers the time cluster and line seed collections in an ntuple by branch class, so
+that a job writing several of them under different names (e.g. ```tztimeclusters```,
+```cosmiclineseeds```) can be read without any configuration. This is covered by a self-contained
+test that writes its own small ntuple, so it needs no input dataset:
+
+```
+root -l -b -q EventNtuple/validation/test_collection_discovery.C+
+```
+
+It prints one line per check and returns the number of failures (0 if everything passed). It is
+also run by ```validation/test_rooutil.sh```.
+
 ### Validating ```roodask``` Runs
 To make sure ```roodask``` is working, you can run the following calidation script:
 

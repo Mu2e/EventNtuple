@@ -1,3 +1,10 @@
+# Self-contained test of the time cluster / line seed collection discovery and named access
+# (writes its own small ntuple, so it needs no input dataset)
+root -l -b -q validation/test_collection_discovery.C+
+if [ $? != 0 ]; then
+    echo "test_collection_discovery.C failed"
+fi
+
 #root -l -b -q rooutil/examples/PrintEvents.C++\(\"nts.ntuple.mock.root\",true\)
 #root -l -b -q rooutil/examples/PrintEvents.C++\(\"../data/nts.mu2e.MDS1f.MDC2020ai_perfect_v1_3.root\",true\)
 # root -l rooutil/examples/PlotEntranceMomentum.C++\(\"../data/nts.mu2e.MDS1f.MDC2020ai_perfect_v1_3.root\"\)

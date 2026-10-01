@@ -19,7 +19,7 @@ namespace rooutil {
     }
 
     int nHits() const { return hits.size(); }
-    CaloHits GetHits() { return hits; }
+    const CaloHits& GetHits() const { return hits; }
     CaloHits GetHits(CaloHitCut cut) {
       CaloHits select_hits;
       for (auto& hit : hits) {
@@ -32,7 +32,7 @@ namespace rooutil {
     CaloHits hits;
 
     int nMCParticles() const { return mc_particles.size();  }
-    MCParticles GetMCParticles() { return mc_particles; }
+    const MCParticles& GetMCParticles() const { return mc_particles; }
     MCParticles GetMCParticles(MCParticleCut cut) {
       MCParticles select_mc_particles;
       for (auto& mc_particle : mc_particles) {
