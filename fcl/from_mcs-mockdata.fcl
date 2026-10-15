@@ -15,7 +15,7 @@ physics :
   analyzers : { @table::EventNtuple.analyzers }
 }
 
-physics.EventNtuplePath : [ @sequence::EventNtuple.Path ]
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathOnline ]
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ]
 
 physics.trigger_paths : [ EventNtuplePath ]
@@ -26,3 +26,11 @@ services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 
 physics.analyzers.EventNtuple.subruns.genEventCount.include : false
 physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
+# Store the online (trigger) tracks next to the offline tracks
+physics.analyzers.EventNtuple.trk.fits : [ @local::All, @local::TrigApr, @local::TrigAprUe, @local::TrigCalDe ]
+
+# Store the offline and online helix seeds; the helix hit branches are off, turn them on per collection by output name, e.g.:
+#   physics.analyzers.EventNtuple.helices.fillHitsFor : [ "calhelicesde", "trigcalhelicesde" ]
+physics.analyzers.EventNtuple.helices.fill : true
+physics.analyzers.EventNtuple.helices.tags : @local::HelixTags
+physics.analyzers.EventNtuple.helices.names : @local::HelixNames

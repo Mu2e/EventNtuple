@@ -91,6 +91,8 @@ The branch is empty if there are no time clusters during the event.
 |--------|-----------|-------------|------------------|
 | timeclusters |  Vector branch |   Information in a reconstructed time cluster| [see TimeClusterInfo.hh](../inc/TimeClusterInfo.hh)
 | lineseeds |  Vector branch |   Information in a reconstructed line seed (cosmic track seed)| [see LineSeedInfo.hh](../inc/LineSeedInfo.hh)
+| helices |  Vector branch |   Information in a reconstructed helix seed; one branch per configured collection (`helices.names`), e.g. Offline and Online results| [see HelixInfo.hh](../inc/HelixInfo.hh)
+| helixhits |  Vector-of-vector branch |   Combo hits of each helix seed in the matching `<name>` branch, named `<name>hits`; optional (`helices.fillHitsFor`), off by default| [see ComboHitInfo.hh](../inc/ComboHitInfo.hh)
 | timeclustershits |  Vector-of-vector branch |   Basic information about a combo hit associated with a time cluster or a line seed| [see ComboHitInfo.hh](../inc/ComboHitInfo.hh)
 | lineseedshits |  Vector-of-vector branch |   Basic information about a combo hit associated with a time cluster or a line seed| [see ComboHitInfo.hh](../inc/ComboHitInfo.hh)
 ## Calorimeter Branches

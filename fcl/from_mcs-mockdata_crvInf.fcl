@@ -8,5 +8,5 @@ physics.producers.CrvInference : {
   KalSeedPtrCollection : "MergeKKAll"
 }
 
-physics.EventNtuplePath : [ @sequence::EventNtuple.Path, CrvInference ]
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathOnline, CrvInference ]
 physics.analyzers.EventNtuple.crv.inferenceTag : "CrvInference"

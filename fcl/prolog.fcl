@@ -161,7 +161,18 @@ MergeKKDeCalib : {
     } ]
 }
 
+# Online (trigger) tracks, merged into pointer collections for field-on running
+MergeKKTrigApr : @local::MergeKK
+MergeKKTrigApr.KalSeedCollections : [ "TrigAprKSF" ]
+MergeKKTrigAprUe : @local::MergeKK
+MergeKKTrigAprUe.KalSeedCollections : [ "TrigAprUeKSF" ]
+MergeKKTrigCalDe : @local::MergeKK
+MergeKKTrigCalDe.KalSeedCollections : [ "TrigCalSeedFitDe" ]
+
 MergeKKProducers : {
+  MergeKKTrigApr : @local::MergeKKTrigApr
+  MergeKKTrigAprUe : @local::MergeKKTrigAprUe
+  MergeKKTrigCalDe : @local::MergeKKTrigCalDe
   MergeKKDe : @local::MergeKKDe
   MergeKKUe : @local::MergeKKUe
   MergeKKDmu : @local::MergeKKDmu
@@ -175,6 +186,7 @@ MergeKKProducers : {
 MergeKKProducersPath : [ MergeKKAll ]
 MergeKKNoFieldPath : [ MergeKKLine ]
 MergeKKOffSpillPath : [ MergeKKOff ]
+MergeKKOnlinePath : [ MergeKKTrigApr, MergeKKTrigAprUe, MergeKKTrigCalDe ]
 MergeKKSeparatePath : [ MergeKKAll, MergeKKDe, MergeKKUe, MergeKKDmu, MergeKKUmu ]
 
 
@@ -243,6 +255,42 @@ DeCalib : { input : "MergeKKDeCalib"
   trkQualLeaves : [ ]
   trkPIDTags : [ ]
 }
+
+# Online (trigger) track branches. No MC truth, quality, PID or DtDt is used for them
+TrigApr : { input : "MergeKKTrigApr"
+  branchname : "trigapr"
+  fill : true
+  options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
+  trkQualLeaves : [ ]
+  trkPIDTags : [ ]
+  trkDtDtTag : ""
+}
+TrigAprUe : { input : "MergeKKTrigAprUe"
+  branchname : "trigaprue"
+  fill : true
+  options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
+  trkQualLeaves : [ ]
+  trkPIDTags : [ ]
+  trkDtDtTag : ""
+}
+TrigCalDe : { input : "MergeKKTrigCalDe"
+  branchname : "trigcalde"
+  fill : true
+  options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
+  trkQualLeaves : [ ]
+  trkPIDTags : [ ]
+  trkDtDtTag : ""
+}
+
+# Helix seed collections stored for field-on running (merged helix collections kept in the mcs files): offline then online, with their output branch names
+HelixTags : [
+  "MHDe", "MHUe", # offline
+  "TrigAprHelixMerger", "TrigCalHelixMergerDe" # online
+]
+HelixNames : [
+  "helicesde", "helicesue",
+  "trigaprhelices", "trigcalhelicesde"
+]
 
 EventNtupleMaker : {
   module_type : EventNtupleMaker
@@ -345,6 +393,9 @@ EventNtupleMaker : {
   # -- Helix seeds -----------------------------------------------------------
   helices : {
     fill : false
+    tags  : ["MHDe"] # helix seed collections, e.g. Offline and Online reconstruction results
+    names : ["helices"] # output branch name for each tag
+    fillHitsFor : [] # entries of names to fill a <name>hits branch for with the combo hits of each helix; off by default
   }
   # -- Time clusters ---------------------------------------------------------
   timeclusters : {
@@ -431,6 +482,10 @@ EventNtuple : {
   PathOff : [ @sequence::MergeKKOffSpillPath ]
   PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath ]
   PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll,  @sequence::TrkPIDPath ]
+  # Field-on paths that also make the online track collections (not available in from_dig-* jobs)
+  PathOnline : [ @sequence::MergeKKProducersPath, @sequence::MergeKKOnlinePath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
+  PathNoMCOnline : [ @sequence::MergeKKProducersPath, @sequence::MergeKKOnlinePath, TrkQualAll,  @sequence::TrkPIDPath ]
+  PathOffOnline : [ @sequence::MergeKKOffSpillPath, @sequence::MergeKKOnlinePath ]
   EndPath : [ EventNtuple ]
 
 }

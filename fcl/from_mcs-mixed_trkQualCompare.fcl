@@ -12,7 +12,7 @@ physics.producers.TrkQualAllV11 : @local::TrkQualAll
 physics.producers.TrkQualAllV11.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v1.1.onnx"
 physics.producers.TrkQualAllV2 : @local::TrkQualAll
 physics.producers.TrkQualAllV2.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_ANN1_v2.0.onnx"
-physics.EventNtuplePath : [ @sequence::EventNtuple.Path, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathOnline, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
 
 # Add explicitly named results and record their model versions in the output.
 physics.analyzers.EventNtuple.trk.fits[0].trkQualLeaves : [

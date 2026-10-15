@@ -1,5 +1,5 @@
 #include "EventNtuple/fcl/from_mcs-mockdata.fcl"
 
-physics.EventNtuplePath : [ @sequence::EventNtuple.PathOff ] # path for OffSpill (central helix)
-physics.analyzers.EventNtuple.branches : [ @local::Off ]
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathOffOnline ] # path for OffSpill (central helix)
+physics.analyzers.EventNtuple.trk.fits : [ @local::Off, @local::TrigApr, @local::TrigAprUe, @local::TrigCalDe ]
 physics.analyzers.EventNtuple.FitType : CentralHelix

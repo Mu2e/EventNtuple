@@ -464,37 +464,52 @@ namespace mu2e {
   }
 
 
-  void InfoStructHelper::fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos) {
+  void InfoStructHelper::fillHelixInfo(HelixSeed const& hseed, std::vector<HelixInfo>& all_hinfos) {
     HelixInfo hinfo;
-    if(hptr.isNonnull()){
-      // count hits, active and not
-      for(size_t ihit=0;ihit < hptr->hits().size(); ihit++){
-        auto const& hh = hptr->hits()[ihit];
-        hinfo.nch++;
-        hinfo.nsh += hh.nStrawHits();
-        if(!hh.flag().hasAnyProperty(StrawHitFlag::outlier)){
-          hinfo.ncha++;
-          hinfo.nsha += hh.nStrawHits();
-        }
-
-        if(hptr->status().hasAnyProperty(TrkFitFlag::MPRHelix))
-          hinfo.flag = 3;
-        else if(hptr->status().hasAnyProperty(TrkFitFlag::APRHelix))
-          hinfo.flag = 2;
-        else if(hptr->status().hasAnyProperty(TrkFitFlag::CPRHelix))
-          hinfo.flag = 1;
-        else if(hptr->status().hasAnyProperty(TrkFitFlag::TPRHelix))
-          hinfo.flag = 0;
-
-        hinfo.t0err = hptr->t0().t0Err();
-        hinfo.mom = 0.299792*hptr->helix().momentum()*_bz0; //FIXME!
-        hinfo.chi2xy = hptr->helix().chi2dXY();
-        hinfo.chi2fz = hptr->helix().chi2dZPhi();
-        if(hptr->caloCluster().isNonnull())
-          hinfo.ecalo  = hptr->caloCluster()->energyDep();
+    // count hits, active and not
+    hinfo.nch = hinfo.ncha = hinfo.nsh = hinfo.nsha = 0;
+    for(auto const& hh : hseed.hits()) {
+      hinfo.nch++;
+      hinfo.nsh += hh.nStrawHits();
+      if(!hh.flag().hasAnyProperty(StrawHitFlag::outlier)) {
+        hinfo.ncha++;
+        hinfo.nsha += hh.nStrawHits();
       }
-      all_hinfos.emplace_back(hinfo);
     }
+    if(hseed.status().hasAnyProperty(TrkFitFlag::MPRHelix))
+      hinfo.flag = 3;
+    else if(hseed.status().hasAnyProperty(TrkFitFlag::APRHelix))
+      hinfo.flag = 2;
+    else if(hseed.status().hasAnyProperty(TrkFitFlag::CPRHelix))
+      hinfo.flag = 1;
+    else if(hseed.status().hasAnyProperty(TrkFitFlag::TPRHelix))
+      hinfo.flag = 0;
+
+    hinfo.t0 = hseed.t0().t0();
+    hinfo.t0err = hseed.t0().t0Err();
+    hinfo.mom = 0.299792*hseed.helix().momentum()*_bz0; //FIXME!
+    hinfo.radius = hseed.helix().radius();
+    hinfo.lambda = hseed.helix().lambda();
+    hinfo.rcent = hseed.helix().rcent();
+    hinfo.fcent = hseed.helix().fcent();
+    hinfo.fz0 = hseed.helix().fz0();
+    hinfo.chi2xy = hseed.helix().chi2dXY();
+    hinfo.chi2fz = hseed.helix().chi2dZPhi();
+    // the calo cluster is reached through the time cluster, which may be absent
+    if(hseed.timeCluster().isNonnull() && hseed.caloCluster().isNonnull())
+      hinfo.ecalo = hseed.caloCluster()->energyDep();
+    all_hinfos.emplace_back(hinfo);
+  }
+
+  void InfoStructHelper::fillHelixInfo(art::Ptr<HelixSeed> const& hptr, std::vector<HelixInfo>& all_hinfos) {
+    if(hptr.isNonnull()) fillHelixInfo(*hptr, all_hinfos);
+  }
+
+  void InfoStructHelper::fillHelixHitInfo(HelixSeed const& hseed, std::vector<std::vector<EventNtupleComboHitInfo>>& all_infos) {
+    std::vector<EventNtupleComboHitInfo> infos;
+    infos.reserve(hseed.hits().size());
+    for(auto const& hit : hseed.hits()) fillComboHitInfo(hit, infos);
+    all_infos.emplace_back(std::move(infos));
   }
 
   namespace {
