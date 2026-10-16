@@ -225,7 +225,8 @@ namespace mu2e {
         using Comment=fhicl::Comment;
         fhicl::Atom<bool>          fill{Name("fill"), Comment("Fill lumi stream branch")};
         fhicl::Atom<art::InputTag> calo {Name("calo"),  Comment("Tag the calo intensity info")};
-        fhicl::Atom<art::InputTag> tc   {Name("tc"),  Comment("Tag the time cluster intensity info")};
+        fhicl::Atom<art::InputTag> proton_tc{Name("proton_tc"),  Comment("Tag the proton time cluster intensity info")};
+        fhicl::Atom<art::InputTag> electron_tc{Name("electron_tc"),  Comment("Tag the electron time cluster intensity info")};
         fhicl::Atom<art::InputTag> trk  {Name("trk"),  Comment("Tag the tracker intensity info")};
       };
 
@@ -483,7 +484,8 @@ namespace mu2e {
       std::map<size_t, std::vector<std::vector<EventNtupleComboHitInfo>>> _lsHitIs;
       // lumi stream branch
       art::Handle<IntensityInfoCalo> _iiCaloHandle;
-      art::Handle<IntensityInfoTimeCluster> _iiTCHandle;
+      art::Handle<IntensityInfoTimeCluster> _iiTCpHandle; // protons
+      art::Handle<IntensityInfoTimeCluster> _iiTCeHandle; // electrons
       art::Handle<IntensityInfoTrackerHits> _iiTrkHandle;
       LumiStreamInfo _lumiStreamI;
       // MSD hit branch
@@ -1319,9 +1321,12 @@ namespace mu2e {
       // Calo info
       event.getByLabel(_conf.lumistream().calo(),_iiCaloHandle);
       if(_iiCaloHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiCaloHandle, _lumiStreamI);
-      // Time cluster info
-      event.getByLabel(_conf.lumistream().tc(),_iiTCHandle);
-      if(_iiTCHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTCHandle, _lumiStreamI);
+      // Proton time cluster info
+      event.getByLabel(_conf.lumistream().proton_tc(),_iiTCpHandle);
+      if(_iiTCpHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTCpHandle, _lumiStreamI, true);
+      // Electron time cluster info
+      event.getByLabel(_conf.lumistream().electron_tc(),_iiTCeHandle);
+      if(_iiTCeHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTCeHandle, _lumiStreamI, false);
       // Tracker info
       event.getByLabel(_conf.lumistream().trk(),_iiTrkHandle);
       if(_iiTrkHandle.isValid()) _infoStructHelper.fillLumiStreamInfo(*_iiTrkHandle, _lumiStreamI);

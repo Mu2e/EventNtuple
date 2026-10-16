@@ -90,7 +90,7 @@ namespace mu2e {
     void fillTimeClusterInfo(art::Ptr<TimeCluster> const& ptr, std::vector<EventNtupleTimeClusterInfo>& infos, ComboHitCollection const* chcol = nullptr);
     void fillTimeClusterHitInfo(TimeCluster const& tc, ComboHitCollection const& chcol, std::vector<std::vector<EventNtupleComboHitInfo>>& all_infos);
     void fillLumiStreamInfo(IntensityInfoCalo const& info, LumiStreamInfo& lumi);
-    void fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi);
+    void fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi, const bool is_protons);
     void fillLumiStreamInfo(IntensityInfoTrackerHits const& info, LumiStreamInfo& lumi);
     void fillLineSeedInfo(CosmicTrackSeed const& seed, std::vector<LineSeedInfo>& infos);
     void fillLineSeedHitInfo(CosmicTrackSeed const& seed, std::vector<std::vector<EventNtupleComboHitInfo>>& all_infos);

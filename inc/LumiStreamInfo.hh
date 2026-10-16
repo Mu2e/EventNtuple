@@ -17,6 +17,7 @@ namespace mu2e
     bool                caphriIsValid     = false; // Flag for the CAPHRI list being valid
     int nTrackerHits                      = -1;    // N(tracker hits) in the event
     int nProtonTCs                        = -1;    // N(proton time clusters) in the event
+    int nElectronTCs                      = -1;    // N(electron time clusters) in the event
     void reset() { *this = LumiStreamInfo(); }
   };
 }

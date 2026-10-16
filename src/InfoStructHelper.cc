@@ -621,8 +621,9 @@ namespace mu2e {
     lumi.caphriIsValid = true;
   }
 
-  void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi) {
-    lumi.nProtonTCs = info.nProtonTCs();
+  void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTimeCluster const& info, LumiStreamInfo& lumi, const bool is_protons) {
+    if(is_protons) lumi.nProtonTCs   = info.nTCs();
+    else           lumi.nElectronTCs = info.nTCs();
   }
 
   void InfoStructHelper::fillLumiStreamInfo(IntensityInfoTrackerHits const& info, LumiStreamInfo& lumi) {

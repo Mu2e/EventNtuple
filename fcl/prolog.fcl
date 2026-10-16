@@ -363,10 +363,12 @@ EventNtupleMaker : {
   }
   # -- Lumi stream -----------------------------------------------------------
   lumistream : {
-    fill : true
-    calo : "CaloHitMakerFast"
-    tc   : "TrigFlagPH"
-    trk  : "TrigMakeSH"
+    fill        : true
+    calo        : "CaloHitMakerFast"
+    proton_tc   : "TrigFlagPH"
+    # proton_tc   : "TrigTZClusterFinder:proton"
+    electron_tc : "TrigTZClusterFinder:electron"
+    trk         : "TrigMakeSH"
   }
   # -- Mobile synchronization detector -------------------------------------
   msd : {
