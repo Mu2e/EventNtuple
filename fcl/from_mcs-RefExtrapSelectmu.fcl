@@ -49,6 +49,7 @@ physics.analyzers : {
       }
       fits : [
         { @table::All
+          trkGroupTag : "" # GroupSameTracks is made from MergeKKAll, not this input
           input : "SelectReflectmu"
           trkPIDTags : ["TrkPIDe:SelectReflectmu"]
           trkDtDtTag : "TrkDtDte:SelectReflectmu"

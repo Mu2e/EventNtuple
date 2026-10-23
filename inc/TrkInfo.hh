@@ -48,6 +48,8 @@ namespace mu2e
     float maxgap = -1; // maximum gap between active hits in fit trajectory [mm]
     float avggap = -1; // average gap between active hits in fit trajectory [mm]
     float avgedep = 0; // average energy deposit of active hits [MeV/c]
+    int id = -1; // index of the group of fits in this event made from the same hits, any direction or particle hypothesis (-1 if grouping not run)
+    float rank = -1; // ranking of this fit hypothesis within its group (fit consistency normalised to sum to 1 over the group; -1 if grouping not run)
 
     void reset() { *this = TrkInfo(); }
   };

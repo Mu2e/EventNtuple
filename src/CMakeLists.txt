@@ -72,4 +72,12 @@ cet_build_plugin(BestCrvHitDeltaT art::module
       ROOT::Postscript
 )
 
+cet_build_plugin(GroupSameTracks art::module
+    REG_SOURCE GroupSameTracks_module.cc
+    LIBRARIES REG
+      event-ntuple::eventntuple
+      Offline::RecoDataProducts
+      Offline::DataProducts
+)
+
 install_source(SUBDIRS src)

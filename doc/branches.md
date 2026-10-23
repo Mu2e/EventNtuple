@@ -46,6 +46,8 @@ The trigger fits carry no surface intersections, so only the ```<name>``` and ``
 
 ```trkdtdt``` and ```trkpid``` are controlled by ```trk.fillTrkDtDt``` and ```trk.fillTrkPID```. The TrkPID MVA uses the dt_hit / dt_trk fit as an input, so the ```TrkPID``` producer needs ```TrkDtDt``` even when ```trkdtdt``` is not stored. To run without either, set both flags to false and remove ```TrkPIDPath``` (```TrkDtDt```, ```TrkPID```) from the path.
 
+```trk.id``` groups the fit hypotheses made from the same hits (upstream and downstream, electron and muon): fits with the same ```id``` in an event are the same track. ```trk.rank``` ranks the hypotheses within each group (currently fit consistency normalised to sum to 1 over the group, so the highest is the preferred hypothesis). Both are filled from the ```GroupSameTracks``` producer through the branch's ```trkGroupTag```, and are -1 when no ```trkGroupTag``` is set.
+
 ## Track segments Branches
 
 These branches contain 4 elements per event corresponding to different Kalman fit hypotheses (see Track branches).

@@ -91,4 +91,7 @@
   <class name="mu2e::TrigInfo" />
   <class name="std::vector<mu2e::TrigInfo>" />
   <class name="mu2e::SubRunInfo" />
+  <class name="mu2e::KalSeedGroup" />
+  <class name="std::vector<mu2e::KalSeedGroup>" />
+  <class name="art::Wrapper<std::vector<mu2e::KalSeedGroup> >" />
 </lcgdict>

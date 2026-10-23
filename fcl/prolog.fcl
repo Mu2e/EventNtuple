@@ -184,6 +184,18 @@ MergeKKProducers : {
   MergeKKDeCalib : @local::MergeKKDeCalib
 }
 MergeKKProducersPath : [ MergeKKAll ]
+
+# Group the fits in MergeKKAll made from the same hits (any direction or particle hypothesis): fills <branch>.id and <branch>.rank
+GroupSameTracks : {
+  module_type : GroupSameTracks
+  KalSeedPtrCollection : "MergeKKAll"
+  MinHitFrac : 0.6 # fraction of shared active hits (relative to the fit with fewer active hits) to be the same track
+  RankMethod : "FitConsistency"
+}
+TrkGroupProducers : {
+  GroupSameTracks : @local::GroupSameTracks
+}
+TrkGroupPath : [ GroupSameTracks ]
 MergeKKNoFieldPath : [ MergeKKLine ]
 MergeKKOffSpillPath : [ MergeKKOff ]
 MergeKKOnlinePath : [ MergeKKTrigApr, MergeKKTrigAprUe, MergeKKTrigCalDe ]
@@ -242,6 +254,7 @@ All : { input : "MergeKKAll"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
+  trkGroupTag : "GroupSameTracks" # must be made from the same collection as input
   trkQualLeaves : [
     { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2.0" },
     { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2.0" }
@@ -475,6 +488,7 @@ EventNtuple : {
     @table::TrkQualProducers
     @table::TrkPIDProducers
     @table::MergeKKProducers
+    @table::TrkGroupProducers
   }
 
   analyzers : {
@@ -482,14 +496,14 @@ EventNtuple : {
   }
 
   #  TrigSequence : [ PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath]
-  Path : [ @sequence::MergeKKProducersPath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
+  Path : [ @sequence::MergeKKProducersPath, @sequence::TrkGroupPath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
   PathExt : [ @sequence::MergeKKNoFieldPath ]
   PathOff : [ @sequence::MergeKKOffSpillPath ]
-  PathSeparate : [ @sequence::MergeKKSeparatePath, PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath ]
-  PathNoMC : [ @sequence::MergeKKProducersPath, TrkQualAll,  @sequence::TrkPIDPath ]
+  PathSeparate : [ @sequence::MergeKKSeparatePath, @sequence::TrkGroupPath, PBIWeight, @sequence::TrkQualProducersPath, @sequence::TrkPIDPath ]
+  PathNoMC : [ @sequence::MergeKKProducersPath, @sequence::TrkGroupPath, TrkQualAll,  @sequence::TrkPIDPath ]
   # Field-on paths that also make the online track collections (not available in from_dig-* jobs)
-  PathOnline : [ @sequence::MergeKKProducersPath, @sequence::MergeKKOnlinePath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
-  PathNoMCOnline : [ @sequence::MergeKKProducersPath, @sequence::MergeKKOnlinePath, TrkQualAll,  @sequence::TrkPIDPath ]
+  PathOnline : [ @sequence::MergeKKProducersPath, @sequence::TrkGroupPath, @sequence::MergeKKOnlinePath, PBIWeight, TrkQualAll, @sequence::TrkPIDPath ]
+  PathNoMCOnline : [ @sequence::MergeKKProducersPath, @sequence::TrkGroupPath, @sequence::MergeKKOnlinePath, TrkQualAll,  @sequence::TrkPIDPath ]
   PathOffOnline : [ @sequence::MergeKKOffSpillPath, @sequence::MergeKKOnlinePath ]
   EndPath : [ EventNtuple ]
 
