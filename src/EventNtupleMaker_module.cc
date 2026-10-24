@@ -990,28 +990,28 @@ namespace mu2e {
   }
 
   void EventNtupleMaker::endSubRun(const art::SubRun & subrun ) {
-
-    if (_conf.subruns().genEventCount().include()) {
-      art::Handle<GenEventCount> genEventCountHandle;
-      subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
-
-      _genEventCount = genEventCountHandle->count();
-      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
-        _hGenEventCount->Fill(0.0, genEventCountHandle->count());
-      }
-    }
-
-    if (_conf.subruns().cosmicLivetime().include()) {
-      art::Handle<CosmicLivetime> cosmicLivetimeHandle;
-      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
-
-      _cosmicLivetime = cosmicLivetimeHandle->liveTime();
-      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
-        _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
-      }
-    }
-
     if (_conf.subruns().makeNtuple()) {
+
+      if (_conf.subruns().genEventCount().include()) {
+        art::Handle<GenEventCount> genEventCountHandle;
+        subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
+
+        _genEventCount = genEventCountHandle->count();
+        if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+          _hGenEventCount->Fill(0.0, genEventCountHandle->count());
+        }
+      }
+
+      if (_conf.subruns().cosmicLivetime().include()) {
+        art::Handle<CosmicLivetime> cosmicLivetimeHandle;
+        subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
+
+        _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+        if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+          _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
+        }
+      }
+
       _subrunNtuple->Fill();
     }
 
@@ -1020,7 +1020,6 @@ namespace mu2e {
         _hProcEventCount->Fill(0.0, _procEventCount);
       }
     }
-
     _procEventCount = 0; // reset procEventCount every subrun
   }
 

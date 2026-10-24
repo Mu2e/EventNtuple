@@ -7,8 +7,6 @@ physics :
 {
   producers : {
     @table::EventNtuple.producers
-    DeMFilter : {
-    }
     TrkDtDtDeCalib : { @table::TrkDtDtDe
       kalSeeds : [ "MergeKKDeCalib" ]
     }
@@ -28,6 +26,7 @@ physics :
 }
 physics.trigger_paths : [ TriggerPath ]
 physics.end_paths : [ EndPath ]
+physics.analyzers.EventNtuple.subruns.makeNtuple : false
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"

@@ -15,6 +15,18 @@ physics :
   producers : {
     @table::Reconstruction.producers
     @table::EventNtuple.producers
+    TrkQualDeCalib : {
+      @table::TrkQual
+      KalSeedPtrCollection : "MergeKKDeCalib"
+    }
+    TrkDtDtDeCalib : {
+      @table::TrkPIDProducers.TrkDtDt
+      kalSeeds : [ "MergeKKDeCalib" ]
+    }
+    TrkPIDDeCalib : { @table::TrkPIDDe
+      KalSeeds : [ "MergeKKDeCalib" ]
+      KalSeedDtDts : ["TrkDtDtDeCalib:MergeKKDeCalib"]
+    }
   }
   filters : {
     KSFDeCalib : @local::KSFDeCalib
@@ -26,12 +38,30 @@ physics :
     @sequence::Reconstruction.CrvReco,
     KSFDeCalib,
     SelectReco,
+    @sequence::RecoMC.MCReco,
     MergeKKDeCalib,
-    TrkQualDe,
-    @sequence::Reconstruction.MCReco
+    TrkQualDeCalib,
+    TrkDtDtDeCalib,
+    TrkPIDDeCalib
   ]
   analyzers : {
-    EventNtuple : @local::ENDeCalib
+    EventNtuple : {
+      @table::ENDeCalib
+      SelectEvents: [ TriggerPath ]
+      trk : {
+        @table::EventNtupleMaker.trk
+        fillTrkDtDt: true
+        fillTrkPID: true
+        fits : [
+          { @table::All
+            input : "MergeKKDeCalib"
+            trkPIDTags : ["TrkPIDeDeCalib:MergeKKDeCalib"]
+            trkDtDtTag : "TrkDtDtDeCalib:MergeKKDeCalib"
+            trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeCalib:ANN" modelVersion : "ANN1_v2.0" } ]
+          }
+        ]
+      }
+    }
   }
   EndPath : [EventNtuple]
 }
@@ -40,7 +70,7 @@ physics :
 #
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ TriggerPath ]
-
+physics.analyzers.EventNtuple.subruns.makeNtuple : false
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
