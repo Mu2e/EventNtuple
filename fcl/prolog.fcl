@@ -316,6 +316,7 @@ EventNtupleMaker : {
   EventHeaderTag : "ProcessCFOData" # EventHeader for the event window tag; empty to disable
   FillTriggerInfo : true
   TriggerProcessName : "Digitize"
+  TriggerProcessNameTag : false
   TriggerPathSuffix : "DigitizePath"
   FitType : LoopHelix
   # -- Event-level MC (gates tracker MC, CRV MC, and evtinfomc branch) ------
