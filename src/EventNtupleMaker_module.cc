@@ -370,6 +370,7 @@ namespace mu2e {
         // Trigger
         fhicl::Atom<bool> filltrig{Name("FillTriggerInfo")};
         fhicl::Atom<std::string> trigProcessName{Name("TriggerProcessName"), Comment("Process name for Trigger")};
+        fhicl::Atom<bool> trigProcessNameTag{Name("TriggerProcessNameTag"), Comment("Whether to use tag matching on trigger results with the given process name")};
         fhicl::Atom<std::string> trigpathsuffix{Name("TriggerPathSuffix"), "_trigger"};
         // Fit type
         fhicl::Atom<std::string> fittype{Name("FitType"), Comment("Type of track fit: LoopHelix, CentralHelix, KinematicLine, or Unknown"), "Unknown"};
@@ -606,7 +607,7 @@ namespace mu2e {
 
       // helper functions
       void fillEventInfo(const art::Event& event);
-      void fillTriggerBranch(const art::Event& event, std::string const& process, bool firstEvent);
+      void fillTriggerBranch(const art::Event& event, const art::TriggerResults* trigResults);
       void resetTrackBranches();
       void fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, TrkFitBranchIndex i_trk_fit_branch, size_t i_kseedptr);
       // Resolve each configured CRV truth plane (by sector name) into a coordinate
@@ -1202,8 +1203,22 @@ namespace mu2e {
 
     // trigger information
     if(_conf.filltrig()){
-      fillTriggerBranch(event, process, firstEvent);
-      firstEvent=false;
+      const art::TriggerResults* trigResults = nullptr;
+      if(_conf.trigProcessNameTag()) {
+        for(auto const& triggerResultsHandle : event.getMany<art::TriggerResults>()) {
+          if(!triggerResultsHandle.isValid()) continue;
+          if(triggerResultsHandle.provenance()->processName().find(process) == std::string::npos)
+            continue;
+          trigResults = triggerResultsHandle.product();
+          break;
+        }
+      } else {
+        art::InputTag const tag{Form("TriggerResults::%s", process.c_str())};
+        auto trigResultsH = event.getValidHandle<art::TriggerResults>(tag);
+        trigResults = trigResultsH.product();
+      }
+      if(!trigResults) throw cet::exception("CONFIG") << "No trigger process with name tag " << process;
+      fillTriggerBranch(event, trigResults);
     }
 
     // load event-level MC products (tracker + CRV MC)
@@ -1696,10 +1711,8 @@ namespace mu2e {
     _wtinfo.setWeights(weights);
   }
 
-  void EventNtupleMaker::fillTriggerBranch(const art::Event& event,std::string const& process, bool firstEvent) {
-    art::InputTag const tag{Form("TriggerResults::%s", process.c_str())};
-    auto trigResultsH = event.getValidHandle<art::TriggerResults>(tag);
-    const art::TriggerResults* trigResults = trigResultsH.product();
+  void EventNtupleMaker::fillTriggerBranch(const art::Event& event, const art::TriggerResults* trigResults) {
+    if(!trigResults) throw cet::exception("EventNtuple") << "TriggerResults object is not defined";
     TriggerResultsNavigator tnav(trigResults);
 
     if(firstEvent) {
@@ -1710,6 +1723,7 @@ namespace mu2e {
         const std::string name = "trig_"+tnav.getTrigPathNameByIndex(i);
         _ntuple->Branch(name.c_str(), &_triggerResults._triggerArray[i], _buffsize,_splitlevel);
       }
+      firstEvent = false; // ensure these branches are not recreated
     }
     for(unsigned int i = 0; i < tnav.getTrigPaths().size(); ++i) {
       _triggerResults._triggerArray[i] = tnav.accepted(tnav.getTrigPathNameByIndex(i));
