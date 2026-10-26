@@ -55,7 +55,7 @@ physics :
         fits : [
           { @table::All
             input : "MergeKKDeCalib"
-            trkPIDTags : ["TrkPIDeDeCalib:MergeKKDeCalib"]
+            trkPIDTags : ["TrkPIDeCalib:MergeKKDeCalib"]
             trkDtDtTag : "TrkDtDtDeCalib:MergeKKDeCalib"
             trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeCalib:ANN" modelVersion : "ANN1_v2.0" } ]
           }
