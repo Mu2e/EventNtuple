@@ -559,9 +559,9 @@ namespace mu2e {
 
       // For subrun ntuple
       mu2e::SubRunInfo _srinfo;
-      long _genEventCount;
-      long _procEventCount;
-      float _cosmicLivetime;
+      long _genEventCount = -1;
+      long _procEventCount = -1;
+      float _cosmicLivetime = -1.0;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
@@ -990,28 +990,25 @@ namespace mu2e {
   }
 
   void EventNtupleMaker::endSubRun(const art::SubRun & subrun ) {
+    if (_conf.subruns().genEventCount().include()) {
+      art::Handle<GenEventCount> genEventCountHandle;
+      subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
+      if(genEventCountHandle.isValid())_genEventCount = genEventCountHandle->count();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
+        _hGenEventCount->Fill(0.0, _genEventCount);
+      }
+    }
+
+    if (_conf.subruns().cosmicLivetime().include()) {
+      art::Handle<CosmicLivetime> cosmicLivetimeHandle;
+      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
+      if(cosmicLivetimeHandle.isValid()) _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+        _hCosmicLivetime->Fill(0.0, _cosmicLivetime);
+      }
+    }
+
     if (_conf.subruns().makeNtuple()) {
-
-      if (_conf.subruns().genEventCount().include()) {
-        art::Handle<GenEventCount> genEventCountHandle;
-        subrun.getByLabel<GenEventCount>(_conf.subruns().genEventCount().inputTag(), genEventCountHandle);
-
-        _genEventCount = genEventCountHandle->count();
-        if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().genEventCount().fillTotalsHistogram()) {
-          _hGenEventCount->Fill(0.0, genEventCountHandle->count());
-        }
-      }
-
-      if (_conf.subruns().cosmicLivetime().include()) {
-        art::Handle<CosmicLivetime> cosmicLivetimeHandle;
-        subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
-
-        _cosmicLivetime = cosmicLivetimeHandle->liveTime();
-        if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
-          _hCosmicLivetime->Fill(0.0, cosmicLivetimeHandle->liveTime());
-        }
-      }
-
       _subrunNtuple->Fill();
     }
 
