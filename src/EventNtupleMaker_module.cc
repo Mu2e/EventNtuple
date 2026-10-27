@@ -560,7 +560,7 @@ namespace mu2e {
       // For subrun ntuple
       mu2e::SubRunInfo _srinfo;
       long _genEventCount = -1;
-      long _procEventCount = -1;
+      long _procEventCount = 0;
       float _cosmicLivetime = -1.0;
 
       // ── Gating helpers ─────────────────────────────────────────────────────
