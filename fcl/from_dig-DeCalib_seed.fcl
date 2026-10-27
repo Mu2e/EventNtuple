@@ -41,6 +41,7 @@ physics :
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ TriggerPath ]
 physics.analyzers.EventNtuple.trk.fillTrkDtDt: false
+physics.analyzers.EventNtuple.trk.fillTrkPID: false
 
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs

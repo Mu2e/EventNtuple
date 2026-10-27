@@ -47,7 +47,6 @@ physics :
   analyzers : {
     EventNtuple : {
       @table::ENDeCalib
-      SelectEvents: [ TriggerPath ]
       trk : {
         @table::EventNtupleMaker.trk
         fillTrkDtDt: true
@@ -71,7 +70,6 @@ physics :
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ TriggerPath ]
 physics.analyzers.EventNtuple.subruns.makeNtuple : false
-physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
 physics.producers.CaloHitTruthMatch.primaryParticle : "compressDigiMCs"
 physics.producers.CaloHitTruthMatch.caloShowerSimCollection : "compressDigiMCs"
