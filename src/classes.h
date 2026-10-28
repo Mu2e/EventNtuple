@@ -43,3 +43,5 @@
 #include "EventNtuple/inc/SurfaceStepInfo.hh"
 #include "EventNtuple/inc/TrigInfo.hh"
 #include "EventNtuple/inc/SubRunInfo.hh"
+#include "Offline/RecoDataProducts/inc/KalSeed.hh"
+#include "canvas/Persistency/Common/Wrapper.h"

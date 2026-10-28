@@ -105,6 +105,8 @@
 #include "EventNtuple/inc/SubRunInfo.hh"
 
 // C++ includes.
+#include <map>
+#include <vector>
 #include <iostream>
 #include <string>
 #include <cstdio>
@@ -148,6 +150,7 @@ namespace mu2e {
         fhicl::Atom<std::string> input{Name("input"), Comment("KalSeedCollection input tag")};
         fhicl::Atom<std::string> branchname{Name("branchname"), Comment("Name of output branch")};
         fhicl::Atom<std::string> trkDtDtTag{Name("trkDtDtTag"), Comment("Input tag for KalSeedDtDtCollection")};
+        fhicl::Atom<std::string> trkGroupTag{Name("trkGroupTag"), Comment("Input tag for KalSeedClusterCollection (from TrackMatching) used to fill the id and rank leaves; empty to disable"), ""};
         fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
         fhicl::Sequence<fhicl::Table<TrkQualLeafConfig>> trkQualLeaves{Name("trkQualLeaves"), Comment("TrkQual output branch names, input tags, and model provenance")};
         fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
@@ -425,6 +428,12 @@ namespace mu2e {
       // track branches (inputs)
       std::vector<art::Handle<KalSeedPtrCollection> > _allKSPCHs;
       std::vector<art::Handle<KalSeedDtDtCollection>> _allKSDtDtHs;
+      // track grouping (id and rank leaves) of each fit, built from the KalSeedClusterCollection
+      struct TrkGroup {
+        int id = -1; // index of the cluster of fits made from the same hits
+        float rank = -1; // fit consistency normalised to sum to 1 over the cluster
+      };
+      std::vector<std::map<KalSeedPtr, TrkGroup>> _allTrkGroups;
       // track branches (outputs)
       std::map<TrkFitBranchIndex, std::vector<TrkInfo>> _allTIs;
       std::map<TrkFitBranchIndex, std::vector<std::vector<TrkSegInfo>>> _allTSIs;
@@ -584,6 +593,14 @@ namespace mu2e {
       bool fillTrkDtDt(TrkFitBranchIndex i_trk_fit_branch) const {
         return _conf.trk().fillTrkDtDt() && !_allTrkFitBranches.at(i_trk_fit_branch).trkDtDtTag().empty();
       }
+
+      // Track grouping (id and rank leaves): filled when a KalSeedCluster collection is configured for this fit
+      bool fillTrkGroup(TrkFitBranchIndex i_trk_fit_branch) const {
+        return !_allTrkFitBranches.at(i_trk_fit_branch).trkGroupTag().empty();
+      }
+
+      // assign each fit the id of its cluster and its rank (fit consistency normalised within the cluster)
+      std::map<KalSeedPtr, TrkGroup> makeTrkGroups(const KalSeedClusterCollection& clusters) const;
 
       // TrkPID: the global flag gates the trkPIDTags of every fit. The TrackPID producer itself needs the
       // KalSeedDtDt collection, so turning this off (and dropping TrkPIDPath) removes the TrkDtDt dependency
@@ -1142,6 +1159,7 @@ namespace mu2e {
     _allTrkQualCHs.clear();
     _allTrkPIDCHs.clear();
     _allKSDtDtHs.clear();
+    _allTrkGroups.clear();
 
     if (_conf.trk().fill()) {
       for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
@@ -1153,6 +1171,7 @@ namespace mu2e {
           _allRQCHs.push_back({});
           _allTrkPIDCHs.emplace_back();
           _allKSDtDtHs.push_back(art::Handle<KalSeedDtDtCollection>());
+          _allTrkGroups.emplace_back();
           continue;
         }
         art::Handle<KalSeedPtrCollection> kalSeedPtrCollHandle;
@@ -1166,6 +1185,13 @@ namespace mu2e {
           event.getByLabel(kalSeedDtDtInputTag,kalSeedDtDtCollHandle);
         }
         _allKSDtDtHs.push_back(kalSeedDtDtCollHandle);
+
+        if(fillTrkGroup(i_trk_fit_branch)) { // if not filling, leave the map empty
+          auto kalSeedClusterCollHandle = event.getValidHandle<KalSeedClusterCollection>(i_trkFitConfig.trkGroupTag());
+          _allTrkGroups.push_back(makeTrkGroups(*kalSeedClusterCollHandle));
+        } else {
+          _allTrkGroups.emplace_back();
+        }
 
         std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
         for (const auto& i_trkQual : i_trkFitConfig.trkQualLeaves()) {
@@ -1726,12 +1752,45 @@ namespace mu2e {
     }
   }
 
+  std::map<KalSeedPtr, EventNtupleMaker::TrkGroup> EventNtupleMaker::makeTrkGroups(const KalSeedClusterCollection& clusters) const {
+    std::map<KalSeedPtr, TrkGroup> groups;
+    for (size_t i_cluster = 0; i_cluster < clusters.size(); ++i_cluster) {
+      const auto& cluster = clusters[i_cluster];
+      // failed fits can report negative or NaN fit consistency; treat these as the worst possible score
+      std::vector<float> scores;
+      float sumScore = 0;
+      for (const auto& kseedptr : cluster) {
+        float score = kseedptr->fitConsistency();
+        if (!std::isfinite(score) || score < 0) score = 0;
+        scores.push_back(score);
+        sumScore += score;
+      }
+      // share the rank equally if no fit in the cluster has a positive score
+      for (size_t i_fit = 0; i_fit < cluster.size(); ++i_fit) {
+        auto& group = groups[cluster[i_fit]];
+        group.id = i_cluster;
+        group.rank = sumScore > 0 ? scores[i_fit]/sumScore : 1.0/cluster.size();
+      }
+    }
+    return groups;
+  }
+
   void EventNtupleMaker::fillTrackBranches(const art::Handle<KalSeedPtrCollection>& kspch, TrkFitBranchIndex i_trk_fit_branch, size_t i_kseedptr) {
 
     const auto& kseedptr = (kspch->at(i_kseedptr));
     const auto& kseed = *kseedptr;
     // general info
     _infoStructHelper.fillTrkInfo(kseed,_allTIs.at(i_trk_fit_branch));
+    if(fillTrkGroup(i_trk_fit_branch)) {
+      const auto& groups = _allTrkGroups.at(i_trk_fit_branch);
+      auto group = groups.find(kseedptr);
+      // the clustering must have been made from the KalSeedCollections behind this branch's input
+      if(group == groups.end()) throw cet::exception("EventNtuple")
+                                  << "Track at index " << i_kseedptr << " of branch " << i_trk_fit_branch
+                                  << " is not in any KalSeedCluster: was trkGroupTag made from different KalSeedCollections than this branch's input?";
+      _allTIs.at(i_trk_fit_branch).back().id = group->second.id;
+      _allTIs.at(i_trk_fit_branch).back().rank = group->second.rank;
+    }
     _infoStructHelper.fillTrkSegInfo(kseed,_allTSIs.at(i_trk_fit_branch));
     if(_ftype == LoopHelix    && kseed.loopHelixFit())    _infoStructHelper.fillLoopHelixInfo(kseed,_allLHIs.at(i_trk_fit_branch));
     if(_ftype == CentralHelix && kseed.centralHelixFit()) _infoStructHelper.fillCentralHelixInfo(kseed,_allCHIs.at(i_trk_fit_branch));

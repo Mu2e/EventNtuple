@@ -49,6 +49,7 @@ physics.analyzers : {
       }
       fits : [
         { @table::All
+          trkGroupTag : "" # TrackMatchingAll is made from the MergeKKAll inputs, not this input
           input : "SelectReflectmu"
           trkPIDTags : ["TrkPIDe:SelectReflectmu"]
           trkDtDtTag : "TrkDtDte:SelectReflectmu"
