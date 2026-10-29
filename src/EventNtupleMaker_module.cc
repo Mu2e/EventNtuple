@@ -1830,12 +1830,20 @@ namespace mu2e {
       }
     }
 
+    // every configured MVA collection must be in the event and have one result per track
     const auto& mvaHandles = _allMVACHs.at(i_trk_fit_branch);
     for(size_t i_mvaHandle = 0; i_mvaHandle < mvaHandles.size(); ++i_mvaHandle) {
       const auto& mvaHandle = mvaHandles.at(i_mvaHandle);
-      if(mvaHandle.isValid()) {
-        _infoStructHelper.fillMVAResultInfo(mvaHandle->at(i_kseedptr), _allMVAResults.at(i_trk_fit_branch).at(i_mvaHandle));
+      const auto& metadata = _mvaMetadata.at(i_trk_fit_branch).at(i_mvaHandle);
+      if(!mvaHandle.isValid()) {
+        throw cet::exception("EventNtuple") << "MVAResultCollection " << metadata.input_tag << " for branch "
+                                            << metadata.output_branch << " isn't in the event";
       }
+      if(i_kseedptr >= mvaHandle->size()) {
+        throw cet::exception("EventNtuple") << "Index " << i_kseedptr << " out of range of MVAResultCollection "
+                                            << metadata.input_tag << " size = " << mvaHandle->size();
+      }
+      _infoStructHelper.fillMVAResultInfo(mvaHandle->at(i_kseedptr), _allMVAResults.at(i_trk_fit_branch).at(i_mvaHandle));
     }
 
     std::vector<Float_t> recoQuals;

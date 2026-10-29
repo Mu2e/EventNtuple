@@ -24,6 +24,9 @@ mvaModelVersions : [ "TrkQual_ANN1_v2.0", "TrkQual_ANN1_v3_rc1",  "TrackPID_v1" 
 ```
 
 With `branchname : "trk"` this writes `trkqual`, `trkqual_candidate` and `trkpid`.
+Each tag must name the collection itself, including its instance: `TrackPID` and
+`TrackOnlyPID` name each output after their input collection (e.g. `TrkPID:MergeKKAll`).
+The job stops if a configured collection is missing from an event that has tracks to fill.
 
 ## Calorimeter entrant truth
 

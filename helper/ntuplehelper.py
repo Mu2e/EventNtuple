@@ -3,11 +3,11 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc', 'lumistream']
-    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'lineseeds', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'msdhits', 'helices', 'trkqual', 'trkpid', 'mcsteps', 'primary']
+    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'lineseeds', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'msdhits', 'helices', 'trkqual', 'trkpid', 'trkpid_trk', 'mcsteps', 'primary']
     vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc', 'timeclustershits', 'lineseedshits', 'heliceshits' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt', 'lumistream', 'msdhits', 'primary']
-    trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkdtdt', 'trkqual', 'trkpid']
+    trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkdtdt', 'trkqual', 'trkpid', 'trkpid_trk']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
     trk_mc_branches = [ 'trkmcsim' ]
@@ -76,6 +76,7 @@ class nthelper:
                            "crvcoincsmcplane" : "CrvPlaneInfoMC",
                            "trkqual" : "MVAResultInfo",
                            "trkpid" : "MVAResultInfo",
+                           "trkpid_trk" : "MVAResultInfo",
                            "trkdtdt" : "TrkDtDtInfo",
                            "helices" : "HelixInfo",
                            "trksegsmc" : "SurfaceStepInfo",

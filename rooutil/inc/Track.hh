@@ -204,6 +204,7 @@ namespace rooutil {
     std::vector<mu2e::SimInfo>* trkmcsim = nullptr;
     mu2e::MVAResultInfo* trkqual = nullptr;
     mu2e::MVAResultInfo* trkpid = nullptr;
+    mu2e::MVAResultInfo* trkpid_trk = nullptr; // tracker-only PID
 
   private:
     std::unordered_map<std::string, void*> user_branches;

@@ -53,6 +53,10 @@ physics :
 physics.trigger_paths : [ TriggerPath ]
 physics.end_paths : [ EndPath ]
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
+# No TrkPID is run here: store only the TrkQual result
+physics.analyzers.EventNtuple.trk.fits[0].mvaTags : [ "TrkQualDe:ANN" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaBranches : [ "qual" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaModelVersions : [ "ANN1_v2.0" ]
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
 physics.analyzers.EventNtuple.trk.mc.kalSeedMCAssns : @nil # module which created the MC truth matching (KalSeedMC). including both primary and 2ndary tracks.

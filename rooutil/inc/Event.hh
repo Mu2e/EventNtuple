@@ -70,6 +70,7 @@ namespace rooutil {
       CheckForBranch(ntuple, "trkqual", &this->trkqual);
       CheckForBranch(ntuple, "crvcoincs", &this->crvcoincs);
       CheckForBranch(ntuple, "trkpid", &this->trkpid);
+      CheckForBranch(ntuple, "trkpid_trk", &this->trkpid_trk);
 
       // Check if the MC branches exist
       CheckForBranch(ntuple, "evtinfomc", &this->evtinfomc);
@@ -195,6 +196,7 @@ namespace rooutil {
         UpdateObject(track.trkhitcalibs, trkhitcalibs, i_track, debug);
         UpdateObject(track.trkqual, trkqual, i_track, debug);
         UpdateObject(track.trkpid, trkpid, i_track, debug);
+        UpdateObject(track.trkpid_trk, trkpid_trk, i_track, debug);
         for (const auto& user_branch : user_branches) {
           if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
             track.SetUserBranch(user_branch->name(), user_branch->TrackElementPtr(i_track));
@@ -339,6 +341,7 @@ namespace rooutil {
           if (trkcalohit) { trkcalohit->erase(trkcalohit->begin()+trks_to_remove[i_trk]); }
           if (trkqual) { trkqual->erase(trkqual->begin()+trks_to_remove[i_trk]); }
           if (trkpid) { trkpid->erase(trkpid->begin()+trks_to_remove[i_trk]); }
+          if (trkpid_trk) { trkpid_trk->erase(trkpid_trk->begin()+trks_to_remove[i_trk]); }
           for (const auto& user_branch : user_branches) {
             if (user_branch->is_bound() && user_branch->scope() == UserBranchScope::Track) {
               user_branch->EraseTrack(trks_to_remove[i_trk]);
@@ -638,6 +641,7 @@ namespace rooutil {
     std::vector<mu2e::CaloClusterInfoMC>* trkcalohitmc = nullptr;
     std::vector<mu2e::MVAResultInfo>* trkqual = nullptr;
     std::vector<mu2e::MVAResultInfo>* trkpid = nullptr;
+    std::vector<mu2e::MVAResultInfo>* trkpid_trk = nullptr; // tracker-only PID
     std::vector<std::vector<mu2e::TrkSegInfo>>* trksegs = nullptr;
     std::vector<std::vector<mu2e::SurfaceStepInfo>>* trksegsmc = nullptr;
     std::vector<std::vector<mu2e::LoopHelixInfo>>* trksegpars_lh = nullptr;
