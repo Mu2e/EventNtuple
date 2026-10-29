@@ -106,6 +106,7 @@
 
 // C++ includes.
 #include <map>
+#include <set>
 #include <vector>
 #include <iostream>
 #include <string>
@@ -746,6 +747,10 @@ namespace mu2e {
       }
       auto& mvaMetadata = _mvaMetadata[i_trk_fit_branch];
       for (size_t i_mva = 0; i_mva < mvaTags.size(); ++i_mva) {
+        if (mvaBranches.at(i_mva).empty()) {
+          throw cet::exception("EventNtuple") << "Track branch \"" << trk_fit_cfg.branchname() << "\" has an empty mvaBranches entry (for "
+                                              << mvaTags.at(i_mva) << "), which would collide with the track branch itself";
+        }
         std::string proposed_branch = trk_fit_cfg.branchname() + mvaBranches.at(i_mva);
         // Check if the output branch already exists
         for (const auto& metadata : mvaMetadata) {
@@ -1049,6 +1054,14 @@ namespace mu2e {
         _hCosmicLivetime = tfs->make<TH1F>("cosmic_livetime", "total cosmic livetime [sec]", 1,0,1);
       }
 
+    }
+
+    // Configurable names (e.g. mvaBranches) can repeat another branch's name, which makes lookup by name ambiguous
+    std::set<std::string> branchNames;
+    for (const auto* branch : *_ntuple->GetListOfBranches()) {
+      if (!branchNames.insert(branch->GetName()).second) {
+        throw cet::exception("EventNtuple") << "Output branch \"" << branch->GetName() << "\" is booked more than once: check the mvaBranches of the track fits";
+      }
     }
   }
 

@@ -218,9 +218,9 @@ De : { input : "MergeKKDe"
   branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  mvaTags          : [ "TrkQualDe:ANN", "TrkPIDDe",    "TrkOnlyPIDDe:KKDe" ]
-  mvaBranches      : [ "qual",          "pid",         "pid_trk"           ]
-  mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1", "TrkOnlyPID_v0"     ]
+  mvaTags          : [ "TrkQualDe:ANN", "TrkPID:KKDe", "TrkOnlyPID:KKDe" ] # MergeKKDe keeps the KKDe order
+  mvaBranches      : [ "qual",          "pid",         "pid_trk"         ]
+  mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1", "TrkOnlyPID_v0"   ]
   trkDtDtTag : "TrkDtDt:KKDe"
 }
 Ue : { input : "MergeKKUe"
@@ -535,9 +535,9 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    mvaTags          : [ "TrkQualDe:ANN", "TrkPIDDe" ]
-    mvaBranches      : [ "qual",          "pid"      ]
-    mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1" ]
+    mvaTags          : [ "TrkQualDe:ANN", "TrkPIDDeCalib:MergeKKDeCalib" ]
+    mvaBranches      : [ "qual",          "pid"                          ]
+    mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1"                  ]
     trkDtDtTag : "TrkDtDt:MergeKKDeCalib"
   }
 ]
