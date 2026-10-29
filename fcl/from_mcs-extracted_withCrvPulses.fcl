@@ -3,7 +3,8 @@
 #
 # That reconstruction keeps every CRV digi and pulse, with their truth. This config writes every pulse,
 # including the pulses in no coincidence, such as the delayed hits of decay electrons from muons that
-# stop in the CRV. It also adds truth planes for the three KPP CRV sectors.
+# stop in the CRV. It also adds truth planes for the T1, EX and T2 CRV sectors and the muon taggers.
+# The eight muon taggers (M1-M8) sit side by side at one height, so the single "M" plane covers them all.
 #
 #include "EventNtuple/fcl/from_mcs-extracted.fcl"
 
@@ -12,5 +13,6 @@ physics.analyzers.EventNtuple.crv.keepUnclusteredPulses : true
 physics.analyzers.EventNtuple.crv.planes : [
   { sector : "T1" branchName : "t1" },
   { sector : "EX" branchName : "ex" },
-  { sector : "T2" branchName : "t2" }
+  { sector : "T2" branchName : "t2" },
+  { sector : "M"  branchName : "m" }
 ]
