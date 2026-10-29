@@ -65,6 +65,7 @@ separate operation.
 | from_mcs-mockdata.fcl | mock datasets | removes ```genCountLogger``` which does not apply to mock datasets|
 | from_mcs-mockdata_noMC.fcl | mock datasets | doesn't include MC in output |
 | from_mcs-extracted.fcl | reconstructed extracted position datasets | |
+| from_mcs-extracted_withCrvPulses.fcl | all-events stream of reconstructed extracted position datasets | as above but with every CRV pulse in ```crvpulses``` and ```crvpulsesmc```, and truth planes for the T1, EX and T2 CRV sectors and the muon taggers |
 | from_mcs-primary.fcl | reconstructed primary (i.e. no background hits) datasets | |
 | from_mcs-mixed.fcl | reconstructed mixed (i.e. primary+background hits) datasets | |
 | from_mcs-ceSimReco.fcl | output of Production/Validation/ceSimReco.fcl | |
