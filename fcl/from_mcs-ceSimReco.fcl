@@ -6,4 +6,5 @@ physics.analyzers.EventNtuple.trk.fits[0].trkDtDtTag : "TrkDtDtDe:KKDe"
 physics.analyzers.EventNtuple.FillTriggerInfo : false
 physics.producers.TrkDtDtDe : @local::TrkDtDtDe
 physics.producers.TrkPIDDe : @local::TrkPIDDe
-physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkDtDtDe, TrkPIDDe ]
+physics.producers.TrkOnlyPIDDe : @local::TrkOnlyPIDDe
+physics.EventNtuplePath : [ MergeKKDe, PBIWeight, TrkQualDe, TrkDtDtDe, TrkPIDDe, TrkOnlyPIDDe ]

@@ -15,11 +15,9 @@ physics.producers.TrkQualAllV2.onnxFilename : "ArtAnalysis/TrkDiag/data/TrkQual_
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathOnline, TrkQualAllV10, TrkQualAllV11, TrkQualAllV2 ]
 
 # Add explicitly named results and record their model versions in the output.
-physics.analyzers.EventNtuple.trk.fits[0].trkQualLeaves : [
-  { leafname : "_v1_0" inputTag : "TrkQualAllV10:ANN" modelVersion : "TrkQual_ANN1_v1.0" },
-  { leafname : "_v1_1" inputTag : "TrkQualAllV11:ANN" modelVersion : "TrkQual_ANN1_v1.1" },
-  { leafname : "_v2_0"   inputTag : "TrkQualAllV2:ANN"  modelVersion : "TrkQual_ANN1_v2" }
-]
+physics.analyzers.EventNtuple.trk.fits[0].mvaTags          : [ "TrkQualAllV10:ANN", "TrkQualAllV11:ANN", "TrkQualAllV2:ANN", "TrkPID:MergeKKAll", "TrkOnlyPID:MergeKKAll" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaBranches      : [ "qual_v1_0",         "qual_v1_1",         "qual_v2_0",        "pid",               "pid_trk" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaModelVersions : [ "TrkQual_ANN1_v1.0", "TrkQual_ANN1_v1.1", "TrkQual_ANN1_v2",  "TrackPID_v1",       "TrkOnlyPID_v0" ]
 
 # Remove hits
 physics.analyzers.EventNtuple.trk.fillHits : false

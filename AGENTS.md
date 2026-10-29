@@ -87,8 +87,9 @@ DeM : {
     genealogyDepth : -1         # MC genealogy depth (-1 = all)
     matchDepth     : -1         # MC match depth (-1 = all)
   }
-  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeM:ANN" modelVersion : "ANN1_v2" } ]
-  trkPIDTags  : ["TrkPIDDeM"]
+  mvaTags          : [ "TrkQualDeM:ANN", "TrkPIDDeM" ] # MVAResultCollections, one result per track
+  mvaBranches      : [ "qual",           "pid" ]       # output branches <branch>qual, <branch>pid
+  mvaModelVersions : [ "ANN1_v2",        "TrackPID_v1" ] # optional, recorded in trkqual_metadata
 }
 ```
 

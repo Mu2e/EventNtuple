@@ -64,9 +64,19 @@ TrkPIDProducers : {
     DatFilename  : "ArtAnalysis/TrkDiag/data/TrackPID_v1.dat"
     DebugLevel   : 0
   }
+
+  # Tracker-only PID module (no calorimeter information)
+  TrkOnlyPID : {
+    module_type  : TrackOnlyPID
+    KalSeeds     : [ "KKDe"       , "KKUe"        , "KKDmu"        , "KKUmu"        , "MergeKKAll"        ]
+    KalSeedDtDts : ["TrkDtDt:KKDe", "TrkDtDt:KKUe", "TrkDtDt:KKDmu", "TrkDtDt:KKUmu", "TrkDtDt:MergeKKAll"]
+    MVAVersion   : 0
+    DatFilename  : "ArtAnalysis/TrkDiag/data/TrkOnlyPID_v0.dat"
+    DebugLevel   : 0
+  }
 }
 
-TrkPIDPath : [ TrkDtDt, TrkPID ]
+TrkPIDPath : [ TrkDtDt, TrkPID, TrkOnlyPID ]
 
 # Modules for from_mcs-ceSimReco.fcl (only contains De fits)
 TrkDtDtDe : @local::TrkPIDProducers.TrkDtDt
@@ -74,6 +84,9 @@ TrkDtDtDe.kalSeeds : [ "KKDe" ]
 TrkPIDDe : @local::TrkPIDProducers.TrkPID
 TrkPIDDe.KalSeeds : [ "KKDe" ]
 TrkPIDDe.KalSeedDtDts : ["TrkDtDtDe:KKDe"]
+TrkOnlyPIDDe : @local::TrkPIDProducers.TrkOnlyPID
+TrkOnlyPIDDe.KalSeeds : [ "KKDe" ]
+TrkOnlyPIDDe.KalSeedDtDts : ["TrkDtDtDe:KKDe"]
 
 #################################
 # Trigger
@@ -205,48 +218,49 @@ De : { input : "MergeKKDe"
   branchname : "de"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
-  trkPIDTags : ["TrkPIDDe"]
+  mvaTags          : [ "TrkQualDe:ANN", "TrkPIDDe",    "TrkOnlyPIDDe:KKDe" ]
+  mvaBranches      : [ "qual",          "pid",         "pid_trk"           ]
+  mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1", "TrkOnlyPID_v0"     ]
   trkDtDtTag : "TrkDtDt:KKDe"
 }
 Ue : { input : "MergeKKUe"
   branchname : "ue"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : "TrkDtDt:KKUe"
 }
 Dmu : { input : "MergeKKDmu"
   branchname : "dm"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : "TrkDtDt:KKDmu"
 }
 Umu : { input : "MergeKKUmu"
   branchname : "um"
   fill : true
   options : { fillMC : true  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : "TrkDtDt:KKUmu"
 }
 Ext : { input : "MergeKKLine"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 Off : { input : "MergeKKOff"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 All : { input : "MergeKKAll"
@@ -254,47 +268,48 @@ All : { input : "MergeKKAll"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
   trkGroupTag : "TrackMatchingAll" # must be made from the KalSeedCollections behind input
-  trkQualLeaves : [
-    { leafname : ""        inputTag : "TrkQualAll:ANN" modelVersion : "ANN1_v2.0" },
-    { leafname : "_bdt" inputTag : "TrkQualAll:BDT" modelVersion : "BDT1_v2.0" }
-  ]
-  trkPIDTags : ["TrkPID:MergeKKAll"]
+  # MVAResultCollections stored per track: <branchname><mvaBranches[i]> is filled from mvaTags[i].
+  # A non-empty mvaModelVersions[i] is recorded in the trkqual_metadata histogram
+  # pid uses the tracker and calorimeter, pid_trk only the tracker
+  mvaTags          : [ "TrkQualAll:ANN", "TrkQualAll:BDT", "TrkPID:MergeKKAll", "TrkOnlyPID:MergeKKAll" ]
+  mvaBranches      : [ "qual",           "qual_bdt",       "pid",               "pid_trk"               ]
+  mvaModelVersions : [ "ANN1_v2.0",      "BDT1_v2.0",      "TrackPID_v1",       "TrkOnlyPID_v0"         ]
   trkDtDtTag : "TrkDtDt:MergeKKAll"
 }
 DeCalib : { input : "MergeKKDeCalib"
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 
-# Online (trigger) track branches. No MC truth, quality, PID or DtDt is used for them.
+# Online (trigger) track branches. No MC truth, MVA (quality, PID) or DtDt is used for them.
 # The trigger fits carry no surface intersections, so their <name>segs and <name>segpars_* branches are always empty:
 # only the <name> (TrkInfo) and <name>calohit branches are filled
 TrigApr : { input : "MergeKKTrigApr"
   branchname : "trigapr"
   fill : true
   options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 TrigAprUe : { input : "MergeKKTrigAprUe"
   branchname : "trigaprue"
   fill : true
   options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 TrigCalDe : { input : "MergeKKTrigCalDe"
   branchname : "trigcalde"
   fill : true
   options : { fillMC : false  fillHits : false genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 
@@ -349,8 +364,7 @@ EventNtupleMaker : {
     fill : true
     fillHits : true
     fillHitCalibs : false
-    # TrkPID needs TrkDtDt: to run without either, set both false and drop TrkPIDPath from the path
-    fillTrkPID : true
+    # TrkPID and TrkOnlyPID need TrkDtDt: to run without them, set this false, drop "pid" and "pid_trk" from the fits' mvaTags/mvaBranches and TrkPIDPath from the path
     fillTrkDtDt : true
     fits : [ @local::All ]
     mc : {
@@ -477,8 +491,8 @@ TTMCBranch : {
   branchname : "trk"
   fill : true
   options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-  trkQualLeaves : [ ]
-  trkPIDTags : [ ]
+  mvaTags : [ ]
+  mvaBranches : [ ]
   trkDtDtTag : ""
 }
 
@@ -521,8 +535,9 @@ ENDeCalib.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDe:ANN" modelVersion : "ANN1_v2.0" } ]
-    trkPIDTags : ["TrkPIDDe"]
+    mvaTags          : [ "TrkQualDe:ANN", "TrkPIDDe" ]
+    mvaBranches      : [ "qual",          "pid"      ]
+    mvaModelVersions : [ "ANN1_v2.0",     "TrackPID_v1" ]
     trkDtDtTag : "TrkDtDt:MergeKKDeCalib"
   }
 ]
