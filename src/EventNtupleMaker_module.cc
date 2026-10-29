@@ -114,6 +114,20 @@
 
 using namespace std;
 
+namespace {
+  // Branch index of the object a Ptr points to, where `infos` were filled from the collection `coll`, one per element
+  // and in its order. A Ptr into that collection gives the index by its key. A Ptr into another collection falls back
+  // to the first info that compares equal to the object, which fails for NaN values. Returns -1 if not found.
+  template <class INFO, class PTR, class HANDLE>
+  int linkedIndex(const PTR& ptr, const HANDLE& coll, const std::vector<INFO>& infos) {
+    if(ptr.id() == coll.id()) return ptr.key() < infos.size() ? int(ptr.key()) : -1;
+    for(size_t index = 0; index < infos.size(); ++index) {
+      if(infos[index] == *ptr) return int(index);
+    }
+    return -1;
+  }
+}
+
 namespace mu2e {
   // Need this for the BaBar headers.
   using CLHEP::Hep3Vector;
@@ -1520,13 +1534,10 @@ namespace mu2e {
       for(const auto& recodigi : *_caloRecoDigis.product()){
         _infoStructHelper.fillCaloRecoDigiInfo(recodigi,_caloRDIs);
         if(_conf.calo().fillDigis()){
-          const auto& digi = recodigi.caloDigiPtr();
-          for(uint digiIdx = 0; digiIdx < _caloDIs.size(); digiIdx++){
-            if(_caloDIs[digiIdx] == *digi){
-              _caloDIs[digiIdx].caloRecoDigiIdx_ = _caloRDIs.size()-1;
-              _caloRDIs.back().caloDigiIdx_ = digiIdx;
-              break;
-            }
+          const int digiIdx = linkedIndex(recodigi.caloDigiPtr(), _caloDigis, _caloDIs);
+          if(digiIdx >= 0){
+            _caloDIs[digiIdx].caloRecoDigiIdx_ = _caloRDIs.size()-1;
+            _caloRDIs.back().caloDigiIdx_ = digiIdx;
           }
           if(_caloRDIs.back().caloDigiIdx_ < 0){
             throw cet::exception("EventNtuple") << "Could not find CaloDigi linked to CaloRecoDigi " << _caloRDIs.size()-1 << "\n";
@@ -1540,12 +1551,10 @@ namespace mu2e {
         _infoStructHelper.fillCaloHitInfo(hit,_caloHIs);
         if(_conf.calo().fillRecoDigis()){
           for(const auto& recodigi : hit.recoCaloDigis()){
-            for(uint recoDigiIdx = 0; recoDigiIdx < _caloRDIs.size(); recoDigiIdx++){
-              if(_caloRDIs[recoDigiIdx] == *recodigi){
-                _caloRDIs[recoDigiIdx].caloHitIdx_ = _caloHIs.size()-1;
-                _caloHIs.back().recoDigis_.push_back(recoDigiIdx);
-                break;
-              }
+            const int recoDigiIdx = linkedIndex(recodigi, _caloRecoDigis, _caloRDIs);
+            if(recoDigiIdx >= 0){
+              _caloRDIs[recoDigiIdx].caloHitIdx_ = _caloHIs.size()-1;
+              _caloHIs.back().recoDigis_.push_back(recoDigiIdx);
             }
           }
           if(int(_caloHIs.back().recoDigis_.size()) != _caloHIs.back().nSiPMs_){
@@ -1561,12 +1570,10 @@ namespace mu2e {
         _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs);
         if(_conf.calo().fillHits()){
           for(const auto& hit : cluster.caloHitsPtrVector()){
-            for(uint hitIdx = 0; hitIdx < _caloHIs.size(); hitIdx++){
-              if(_caloHIs[hitIdx] == *hit){
-                _caloHIs[hitIdx].clusterIdx_ = _caloCIs.size()-1;
-                _caloCIs.back().hits_.push_back(hitIdx);
-                break;
-              }
+            const int hitIdx = linkedIndex(hit, _caloHits, _caloHIs);
+            if(hitIdx >= 0){
+              _caloHIs[hitIdx].clusterIdx_ = _caloCIs.size()-1;
+              _caloCIs.back().hits_.push_back(hitIdx);
             }
           }
           if(_caloCIs.back().hits_.size() != _caloCIs.back().size_){
