@@ -1,0 +1,16 @@
+# EventNtuple of the all-events stream of the extracted-position cosmic MC
+# (Production/JobConfig/digitize/ExtractedAllEvents.fcl, then recoMC/ExtractedAllEvents.fcl).
+#
+# That reconstruction keeps every CRV digi and pulse, with their truth. This config writes every pulse,
+# including the pulses in no coincidence, such as the delayed hits of decay electrons from muons that
+# stop in the CRV. It also adds truth planes for the three KPP CRV sectors.
+#
+#include "EventNtuple/fcl/from_mcs-extracted.fcl"
+
+physics.analyzers.EventNtuple.crv.fillPulses : true
+physics.analyzers.EventNtuple.crv.keepUnclusteredPulses : true
+physics.analyzers.EventNtuple.crv.planes : [
+  { sector : "T1" branchName : "t1" },
+  { sector : "EX" branchName : "ex" },
+  { sector : "T2" branchName : "t2" }
+]
