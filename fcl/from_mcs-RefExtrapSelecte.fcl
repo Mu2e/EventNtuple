@@ -42,7 +42,6 @@ physics.analyzers : {
     trk : {
       @table::EventNtupleMaker.trk
       fillTrkDtDt: true
-      fillTrkPID: true
       mc : {
         fill : true
         kalSeedMCAssns: "RegrowKKe"
@@ -51,9 +50,10 @@ physics.analyzers : {
         { @table::All
           trkGroupTag : "" # TrackMatchingAll is made from the MergeKKAll inputs, not this input
           input : "SelectReflecte"
-          trkPIDTags : ["TrkPIDe:SelectReflecte"]
           trkDtDtTag : "TrkDtDte:SelectReflecte"
-          trkQualLeaves : [ { leafname : "" inputTag : "TrkQuale:ANN" modelVersion : "ANN1_v2.0" } ]
+          mvaTags          : [ "TrkQuale:ANN", "TrkPIDe:SelectReflecte" ]
+          mvaBranches      : [ "qual",         "pid" ]
+          mvaModelVersions : [ "ANN1_v2.0",    "TrackPID_v1" ]
         }
       ]
     }

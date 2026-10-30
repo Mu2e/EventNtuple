@@ -213,19 +213,12 @@ namespace mu2e {
     all_klis.push_back(klis);
  }
 
- void InfoStructHelper::fillTrkQualInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
-    MVAResultInfo temp_result;
-    temp_result.result = mva._value;
-    temp_result.valid = true;
-    all_mvas.push_back(temp_result);
+ void InfoStructHelper::fillMVAResultInfo(const MVAResult& mva, std::vector<MVAResultInfo>& all_mvas) {
+    MVAResultInfo result;
+    result.result = mva._value;
+    result.valid = true;
+    all_mvas.push_back(result);
  }
-
-  void InfoStructHelper::fillTrkPIDInfo(const KalSeed& kseed, MVAResult mva, std::vector<MVAResultInfo>& all_mvas) {
-    MVAResultInfo result_TrkPID;
-    result_TrkPID.result = mva._value;
-    result_TrkPID.valid = true;
-    all_mvas.push_back(result_TrkPID);
-  }
 
   void InfoStructHelper::fillTrkDtDtInfo(const KalSeedDtDt& dtdt,std::vector<TrkDtDtInfo>& trkinfo) {
     TrkDtDtInfo info;

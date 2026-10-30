@@ -10,7 +10,6 @@ EN : {
   FillTriggerInfo : false
 }
 EN.trk.fillHits : false
-EN.trk.fillTrkPID : false
 ENBranch : {
   branch : "trk"
 }
@@ -81,15 +80,17 @@ physics.trigger_paths : [ "eTrig", "muTrig"]
 physics.end_paths : [ "eEnd", "muEnd", "CLPrint" ]
 physics.analyzers.ENe.trk.fits : [
   { @table::ENBranch
-    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualReflecte:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
-    trkPIDTags : ["TrkPIDReflecte"]
+    mvaTags : [ "TrkQualReflecte:ANN" ]
+    mvaBranches : [ "qual" ]
+    mvaModelVersions : [ "TrkQual_ANN1_v2" ]
     input: "Reflecte"
   }
 ]
 physics.analyzers.ENmu.trk.fits : [
   { @table::ENBranch
-    trkQualLeaves : [ { leafname : "" inputTag : "TrkQualReflectmu:ANN" modelVersion : "TrkQual_ANN1_v2" } ]
-    trkPIDTags : ["TrkPIDReflectmu"]
+    mvaTags : [ "TrkQualReflectmu:ANN" ]
+    mvaBranches : [ "qual" ]
+    mvaModelVersions : [ "TrkQual_ANN1_v2" ]
     input: "Reflectmu"
   }
 ]

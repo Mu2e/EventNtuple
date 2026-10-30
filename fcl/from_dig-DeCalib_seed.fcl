@@ -41,7 +41,10 @@ physics :
 physics.end_paths : [ EndPath ]
 physics.trigger_paths : [ TriggerPath ]
 physics.analyzers.EventNtuple.trk.fillTrkDtDt: false
-physics.analyzers.EventNtuple.trk.fillTrkPID: false
+# No TrkPID (it needs TrkDtDt): store only the TrkQual result
+physics.analyzers.EventNtuple.trk.fits[0].mvaTags : [ "TrkQualDe:ANN" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaBranches : [ "qual" ]
+physics.analyzers.EventNtuple.trk.fits[0].mvaModelVersions : [ "ANN1_v2.0" ]
 
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 # Override provenance of some objects since this job doesn't run CompressRecoMCs
