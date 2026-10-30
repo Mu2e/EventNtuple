@@ -11,6 +11,7 @@ namespace mu2e
 {
   struct TrkInfo {
     int status = -1; // Kalman fit status
+    unsigned fitflag = 0; // KalSeed TrkFitFlag bitmask (Offline/RecoDataProducts/inc/TrkFitFlag.hh), e.g. ExtrapolationFailed, RangedOut
     int goodfit = 0; // true if fit is geometrically consistent
     int seedalg = -1; // pattern recognition algorithm used
     int fitalg = -1; // final fit algorithm used

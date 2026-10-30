@@ -15,6 +15,7 @@
 #include "Offline/DataProducts/inc/CaloConst.hh"
 #include <cmath>
 #include <limits>
+#include <string>
 
 namespace mu2e {
   // TODO: Propose to delete this function since it is unused
@@ -46,6 +47,7 @@ namespace mu2e {
       trkinfo.status = 2;
     else
       trkinfo.status = -1;
+    trkinfo.fitflag = static_cast<unsigned>(std::stoul(kseed.status().hex(),nullptr,16)); // BitMap exposes its value only as hex
 
     if(kseed.status().hasAnyProperty(TrkFitFlag::FitOK)){
       trkinfo.goodfit = 1;
