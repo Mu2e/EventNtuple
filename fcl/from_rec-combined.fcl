@@ -1,0 +1,28 @@
+#include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
+
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
+physics.analyzers.EventNtuple.FillTriggerInfo: false
+physics.analyzers.EventNtuple.FitType : "KinematicLine"
+physics.analyzers.EventNtuple.trk.fillTrkDtDt : false
+physics.analyzers.EventNtuple.trk.fillHitCalibs : false
+# Only the extracted line fit: from_mcs-mockdata.fcl also stores the online tracks and helices, which are not made on this path
+physics.analyzers.EventNtuple.trk.fits : [ @local::Ext ]
+physics.analyzers.EventNtuple.helices.fill : false
+#physics.producers.MergeKKLine.KalSeedCollections: [ "RegrowKL" ]
+physics.analyzers.EventNtuple.mc.fill : false
+
+physics.analyzers.EventNtuple.crv.fill : false
+
+services.GeometryService.inputFile: "Production/JobConfig/cosmic/geom_cosmic_extracted.txt"
+physics.analyzers.EventNtuple.crv.fill : true
+physics.analyzers.EventNtuple.crv.fillDigis : true
+physics.analyzers.EventNtuple.crv.digisTag : "CrvDigi"
+physics.analyzers.EventNtuple.crv.coincidencesTag: "CrvCoincidenceClusterFinder"
+physics.analyzers.EventNtuple.crv.recoPulsesTag: "CrvRecoPulses"
+
+physics.analyzers.EventNtuple.calo.fill : true
+physics.analyzers.EventNtuple.calo.fillDigis : false
+
+# MSD info
+physics.analyzers.EventNtuple.msd.fill : true
+physics.analyzers.EventNtuple.msd.hitsTag : "MSDHitMaker"
