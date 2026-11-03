@@ -27,8 +27,7 @@ physics.analyzers.EventNtuple.lineseeds.fillHitsFor : [ "lineseeds" ]
 
 physics.analyzers.EventNtuple.crv.fill : false
 
-# same geometry as the reconstruction (PassN Combined_Pass1.fcl)
-services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common_extracted_v06.txt"
+services.GeometryService.inputFile: "Production/JobConfig/cosmic/geom_cosmic_extracted.txt"
 physics.analyzers.EventNtuple.crv.fill : true
 physics.analyzers.EventNtuple.crv.fillDigis : true
 physics.analyzers.EventNtuple.crv.digisTag : "CrvDigi"
