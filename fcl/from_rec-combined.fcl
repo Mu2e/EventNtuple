@@ -1,7 +1,10 @@
 #include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
-physics.analyzers.EventNtuple.FillTriggerInfo: false
+physics.analyzers.EventNtuple.FillTriggerInfo: true
+# trigger results of the event builder process (e.g. to identify calo laser events)
+physics.analyzers.EventNtuple.TriggerProcessName : "EvB"
+physics.analyzers.EventNtuple.TriggerProcessNameTag : true
 physics.analyzers.EventNtuple.FitType : "KinematicLine"
 physics.analyzers.EventNtuple.trk.fillTrkDtDt : false
 physics.analyzers.EventNtuple.trk.fillHitCalibs : false
@@ -10,6 +13,17 @@ physics.analyzers.EventNtuple.trk.fits : [ @local::Ext ]
 physics.analyzers.EventNtuple.helices.fill : false
 #physics.producers.MergeKKLine.KalSeedCollections: [ "RegrowKL" ]
 physics.analyzers.EventNtuple.mc.fill : false
+
+# Time clusters, and the subset that passes CosmicShowerFilter (not used by the line finding). No hit branches: the
+# makeSH combo hits they index are not kept in the pass 1 output
+physics.analyzers.EventNtuple.timeclusters.fill : true
+physics.analyzers.EventNtuple.timeclusters.tags  : [ "SimpleTimeCluster", "CosmicShowerFilter" ]
+physics.analyzers.EventNtuple.timeclusters.names  : [ "timeclusters", "showerfilteredtimeclusters" ]
+# Line seeds and their hits, for the events with more than one line per time cluster
+physics.analyzers.EventNtuple.lineseeds.fill : true
+physics.analyzers.EventNtuple.lineseeds.tags  : [ "LineFinder" ]
+physics.analyzers.EventNtuple.lineseeds.names  : [ "lineseeds" ]
+physics.analyzers.EventNtuple.lineseeds.fillHitsFor : [ "lineseeds" ]
 
 physics.analyzers.EventNtuple.crv.fill : false
 
