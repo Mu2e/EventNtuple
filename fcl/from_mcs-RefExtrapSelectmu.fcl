@@ -11,32 +11,32 @@ process_name: ENRefExtrapSelect
 source : { module_type : RootInput }
 
 physics.producers : {
-  TrkQuale : {
+  TrkQualmu : {
     @table::TrkQual
     KalSeedPtrCollection : "SelectReflectmu"
   }
 
-  TrkDtDte : {
+  TrkDtDtmu : {
     @table::TrkPIDProducers.TrkDtDt
     kalSeeds : [ "SelectReflectmu" ]
   }
 
-  TrkPIDe : {
+  TrkPIDmu : {
     @table::TrkPIDProducers.TrkPID
     KalSeeds : [ "SelectReflectmu" ]
-    KalSeedDtDts : [ "TrkDtDte:SelectReflectmu" ]
+    KalSeedDtDts : [ "TrkDtDtmu:SelectReflectmu" ]
 
   }
 
   PBIWeight : @local::PBIWeight
 }
 
-physics.RePath : [ PBIWeight, TrkQuale, TrkDtDte, TrkPIDe ]
+physics.RePath : [ PBIWeight, TrkQualmu, TrkDtDtmu, TrkPIDmu ]
 
 physics.trigger_paths : [ RePath ]
 
 physics.analyzers : {
-  ENRefe : {
+  ENRefmu : {
     @table::physics.analyzers.EventNtuple
     SelectEvents: [ RePath ]
     trk : {
@@ -51,15 +51,15 @@ physics.analyzers : {
         { @table::All
           trkGroupTag : "" # TrackMatchingAll is made from the MergeKKAll inputs, not this input
           input : "SelectReflectmu"
-          trkPIDTags : ["TrkPIDe:SelectReflectmu"]
-          trkDtDtTag : "TrkDtDte:SelectReflectmu"
-          trkQualLeaves : [ { leafname : "" inputTag : "TrkQuale:ANN" modelVersion : "ANN1_v2.0" } ]
+          trkPIDTags : ["TrkPIDmu:SelectReflectmu"]
+          trkDtDtTag : "TrkDtDtmu:SelectReflectmu"
+          trkQualLeaves : [ { leafname : "" inputTag : "TrkQualmu:ANN" modelVersion : "ANN1_v2.0" } ]
         }
       ]
     }
   }
 }
 
-physics.Refe : [ ENRefe ]
+physics.Refe : [ ENRefmu ]
 
 physics.end_paths : [ Refe ]
