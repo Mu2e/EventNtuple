@@ -60,6 +60,6 @@ physics.analyzers : {
   }
 }
 
-physics.Refe : [ ENRefmu ]
+physics.Refmu : [ ENRefmu ]
 
-physics.end_paths : [ Refe ]
+physics.end_paths : [ Refmu ]
