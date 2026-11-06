@@ -10,7 +10,8 @@ namespace mu2e
   struct TrkCrvTrueXingInfoMC {
     int   sid = -1; // SurfaceId of the sector
     int   sector = -1; // CRV sector (CRSScintillatorShield index)
-    int   generation = 0; // 0 the track's particle, 1 its parent, ...
+    int   rel = -1; // MCRelationship of the crossing particle to the track's particle: 0 same, 2 mother (its parent), 5 umother (further up)
+    int   rem = -1; // generations between them (0 for same), simulation-stage copies not counted
     int   pdg = 0; // PDG code of the crossing particle
     bool  geom = false; // the trajectory crosses the sector mid-plane rectangle (gap-inclusive); pos, dir, time, mom are valid
     XYZVectorF pos; // mid-plane crossing, detector frame (mm)

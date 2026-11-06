@@ -639,7 +639,8 @@ namespace mu2e {
       TrkCrvTrueXingInfoMC ti;
       ti.sid = x.sid_.id().id();
       ti.sector = x.sector_;
-      ti.generation = x.generation_;
+      ti.rel = x.rel_.relationship();
+      ti.rem = x.rel_.removal();
       if(x.sim_.isNonnull() && x.sim_.isAvailable()) ti.pdg = x.sim_->pdgId();
       ti.geom = x.geom_;
       ti.pos = XYZVectorF(x.pos_.X(), x.pos_.Y(), x.pos_.Z());
