@@ -609,4 +609,50 @@ namespace mu2e {
       mcstepinfos.emplace_back(mcstepinfo);
     }
   }
+
+  void InfoMCStructHelper::fillTrkCrvInfoMC(const TrkCrvMatchMC* mc, const art::ProductID& crvPid, std::vector<std::vector<TrkCrvCandInfoMC>>& cands,
+                                            std::vector<std::vector<TrkCrvXingInfoMC>>& xings, std::vector<std::vector<TrkCrvTrueXingInfoMC>>& trues) {
+    cands.emplace_back();
+    xings.emplace_back();
+    trues.emplace_back();
+    if(mc == nullptr) return;
+    for(auto const& c : mc->cands_) {
+      TrkCrvCandInfoMC ci;
+      ci.rel = c.rel_;
+      ci.edep_same = c.edepSame_;
+      ci.edep_family = c.edepFamily_;
+      ci.edep_total = c.edepTotal_;
+      cands.back().push_back(ci);
+    }
+    for(size_t ir = 0; ir < mc->recoXingTruth_.size(); ++ir) {
+      TrkCrvXingInfoMC xi;
+      xi.truexing = mc->recoXingTruth_[ir];
+      if(ir < mc->recoXingNeighbor_.size()) xi.nbrxing = mc->recoXingNeighbor_[ir];
+      xings.back().push_back(xi);
+    }
+    // the matcher's cluster collection, from any candidate of the reco record
+    art::ProductID clusterPid;
+    if(mc->match_.isNonnull() && mc->match_.isAvailable() && !mc->match_->cands_.empty()) clusterPid = mc->match_->cands_.front().cluster_.id();
+    for(auto const& x : mc->xings_) {
+      TrkCrvTrueXingInfoMC ti;
+      ti.sid = x.sid_.id().id();
+      ti.sector = x.sector_;
+      ti.generation = x.generation_;
+      if(x.sim_.isNonnull() && x.sim_.isAvailable()) ti.pdg = x.sim_->pdgId();
+      ti.geom = x.geom_;
+      ti.pos = XYZVectorF(x.pos_.X(), x.pos_.Y(), x.pos_.Z());
+      ti.dir = XYZVectorF(x.dir_.X(), x.dir_.Y(), x.dir_.Z());
+      ti.time = x.time_;
+      ti.mom = x.mom_;
+      ti.dedgeu = x.dEdgeU_;
+      ti.dedgev = x.dEdgeV_;
+      ti.edep = x.edep_;
+      ti.nlayers = x.nLayers_;
+      ti.deppos = XYZVectorF(x.depPos_.X(), x.depPos_.Y(), x.depPos_.Z());
+      ti.crvcoinc = (x.trueCluster_ >= 0 && crvPid.isValid() && clusterPid == crvPid) ? x.trueCluster_ : -1;
+      ti.cand = x.trueCand_;
+      ti.recoxing = x.recoXing_;
+      trues.back().push_back(ti);
+    }
+  }
 }

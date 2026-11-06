@@ -2,6 +2,7 @@
 #include "Offline/Compression/fcl/prolog.fcl"
 #include "Offline/CommonMC/fcl/prolog.fcl"
 #include "Offline/fcl/TrkCaloDt.fcl"
+#include "Offline/CRVResponse/fcl/prolog.fcl"
 
 #include "EventNtuple/fcl/prolog_mc_reweighters.fcl"
 
@@ -197,6 +198,37 @@ MergeKKProducers : {
   MergeKKDeCalib : @local::MergeKKDeCalib
 }
 MergeKKProducersPath : [ MergeKKAll ]
+
+#################################
+# Track-CRV association (Offline TrkCrvMatcher and TrkCrvMatchMCMaker), run on existing reco in the ntuple job.
+# One matcher per KalSeedCollection; a fit branch lists the matchers behind its input in trkCrvMatchTags.
+# Reco output keeps only the clustered CRV pulses (SelectReco), so there the layer probe sees no unclustered pulses.
+#################################
+TrkCrvMatchNtuple : { @table::TrkCrvMatcher CrvRecoPulseCollection : "SelectReco" }
+TrkCrvMatchLH : { @table::TrkCrvMatchNtuple DoGeometric : false LayerProbe : false } # LoopHelix fits do not reach the CRV: time only
+TrkCrvMatchProducers : {
+  TrkCrvMatchLine : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKLine" }
+  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" }
+  TrkCrvMatchDe : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" }
+  TrkCrvMatchUe : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" }
+  TrkCrvMatchDmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" }
+  TrkCrvMatchUmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKUmu" }
+  TrkCrvMatchLineMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchLine" }
+  TrkCrvMatchCHmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchCHmu" }
+  TrkCrvMatchDeMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchDe" }
+  TrkCrvMatchUeMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchUe" }
+  TrkCrvMatchDmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchDmu" }
+  TrkCrvMatchUmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchUmu" }
+}
+TrkCrvMatchNoFieldPath : [ TrkCrvMatchLine ]
+TrkCrvMatchNoFieldMCPath : [ TrkCrvMatchLine, TrkCrvMatchLineMC ]
+TrkCrvMatchOffSpillPath : [ TrkCrvMatchCHmu ]
+TrkCrvMatchOffSpillMCPath : [ TrkCrvMatchCHmu, TrkCrvMatchCHmuMC ]
+TrkCrvMatchAllPath : [ TrkCrvMatchDe, TrkCrvMatchUe, TrkCrvMatchDmu, TrkCrvMatchUmu ]
+TrkCrvMatchAllMCPath : [ @sequence::TrkCrvMatchAllPath, TrkCrvMatchDeMC, TrkCrvMatchUeMC, TrkCrvMatchDmuMC, TrkCrvMatchUmuMC ]
+# trkCrvMatchTags / trkCrvMatchMCTags for the fit branches whose input is made from these collections
+TrkCrvMatchTagsAll : [ "TrkCrvMatchDe", "TrkCrvMatchUe", "TrkCrvMatchDmu", "TrkCrvMatchUmu" ]
+TrkCrvMatchMCTagsAll : [ "TrkCrvMatchDeMC", "TrkCrvMatchUeMC", "TrkCrvMatchDmuMC", "TrkCrvMatchUmuMC" ]
 
 # Cluster the fits behind MergeKKAll made from the same hits (any direction or particle hypothesis): fills <branch>.id and <branch>.rank
 TrackMatchingAll : {
@@ -503,6 +535,7 @@ EventNtuple : {
     @table::TrkPIDProducers
     @table::MergeKKProducers
     @table::TrkGroupProducers
+    @table::TrkCrvMatchProducers
   }
 
   analyzers : {

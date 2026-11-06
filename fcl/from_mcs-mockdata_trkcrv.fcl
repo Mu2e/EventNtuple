@@ -1,0 +1,7 @@
+# from_mcs-mockdata.fcl plus the track-CRV association of the "trk" branch (MergeKKAll: KKDe, KKUe, KKDmu, KKUmu).
+# LoopHelix fits do not extrapolate to the CRV, so the association is time only (trkcrvcands.time, dtref, dtreftof).
+#include "EventNtuple/fcl/from_mcs-mockdata.fcl"
+
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathOnline, @sequence::TrkCrvMatchAllMCPath ]
+physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchTags : @local::TrkCrvMatchTagsAll
+physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchMCTags : @local::TrkCrvMatchMCTagsAll

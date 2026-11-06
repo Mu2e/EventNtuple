@@ -1,6 +1,6 @@
 #include "EventNtuple/fcl/from_mcs-mockdata_noMC.fcl"
 
-physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt ] # path for extracted position cosmics
+physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt, @sequence::TrkCrvMatchNoFieldPath ] # path for extracted position cosmics, with the track-CRV association
 physics.analyzers.EventNtuple.FillTriggerInfo: true
 # trigger results of the event builder process (e.g. to identify calo laser events)
 physics.analyzers.EventNtuple.TriggerProcessName : "EvB"
@@ -40,3 +40,8 @@ physics.analyzers.EventNtuple.calo.fillDigis : false
 # MSD info
 physics.analyzers.EventNtuple.msd.fill : true
 physics.analyzers.EventNtuple.msd.hitsTag : "MSDHitMaker"
+
+# Track-CRV association of the line fits (<trk>crv, <trk>crvxings, <trk>crvcands); pass 1 keeps every CRV pulse, so the layer probe is complete
+physics.producers.TrkCrvMatchLine.CrvCoincidenceClusterCollection : "CrvCoincidenceClusterFinder"
+physics.producers.TrkCrvMatchLine.CrvRecoPulseCollection : "CrvRecoPulses"
+physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchTags : [ "TrkCrvMatchLine" ]

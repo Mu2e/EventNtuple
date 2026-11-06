@@ -17,6 +17,9 @@
 #include <limits>
 #include <string>
 
+#include <algorithm>
+#include <cstdint>
+
 namespace mu2e {
   // TODO: Propose to delete this function since it is unused
   void InfoStructHelper::fillHitCount(StrawHitFlagCollection const& shfC, HitCount& hitcount) {
@@ -722,5 +725,88 @@ namespace mu2e {
     msdhitinfo.time = hit.time();
     msdhitinfo.tot = hit.tot();
     msdhitinfos.push_back(msdhitinfo);
+  }
+
+  void InfoStructHelper::fillTrkCrvInfo(const TrkCrvMatch* match, const art::ProductID& crvPid, std::vector<TrkCrvInfo>& infos,
+                                        std::vector<std::vector<TrkCrvXingInfo>>& xings, std::vector<std::vector<TrkCrvCandInfo>>& cands) {
+    infos.emplace_back();
+    xings.emplace_back();
+    cands.emplace_back();
+    if(match == nullptr) return;
+    auto const& m = *match;
+    auto& info = infos.back();
+    info.matched = true;
+    info.nxings = m.xings_.size();
+    info.ncands = m.cands_.size();
+    info.bestgeom = m.bestGeom_;
+    info.besttime = m.bestTime_;
+    info.refsid = m.refSurface_.id().id() == SurfaceIdDetail::unknown ? -1 : static_cast<int>(m.refSurface_.id().id());
+    info.tref = m.tRef_;
+    info.tfront = m.tFront_;
+    info.tmid = m.tMid_;
+    info.hasfront = m.hasFront_;
+    info.hasmid = m.hasMid_;
+    info.timeoffset = m.timeOffset_;
+    for(auto const& x : m.xings_) {
+      TrkCrvXingInfo xi;
+      xi.sid = x.sid_.id().id();
+      xi.sector = x.sector_;
+      xi.pos = XYZVectorF(x.pos_.X(), x.pos_.Y(), x.pos_.Z());
+      xi.dir = XYZVectorF(x.dir_.X(), x.dir_.Y(), x.dir_.Z());
+      xi.time = x.time_;
+      xi.sigu = x.sigU_;
+      xi.sigv = x.sigV_;
+      xi.sigt = x.sigT_;
+      xi.mom = x.mom_;
+      xi.momerr = x.momErr_;
+      xi.inbounds = x.inBounds_;
+      xi.dedgeu = x.dEdgeU_;
+      xi.dedgev = x.dEdgeV_;
+      xi.edgesig = x.edgeSig_;
+      xi.best = x.best_;
+      xi.nlayers = std::min<size_t>(x.layers_.size(), CRVId::nLayers);
+      for(int L = 0; L < xi.nlayers; ++L) {
+        auto const& p = x.layers_[L];
+        xi.probe_bar[L] = p.bar_;
+        xi.probe_dbar[L] = p.dBar_ == INT8_MAX ? 127 : p.dBar_;
+        xi.probe_upred[L] = p.uPred_;
+        xi.probe_tpred[L] = p.tPred_;
+        xi.probe_pe[L] = p.pe_;
+        xi.probe_dt[L] = p.dt_;
+        xi.probe_incluster[L] = p.inCluster_;
+        xi.probe_utdiv[L] = p.uTdiv_;
+      }
+      xings.back().push_back(xi);
+    }
+    for(auto const& c : m.cands_) {
+      TrkCrvCandInfo ci;
+      ci.crvcoinc = (crvPid.isValid() && c.cluster_.id() == crvPid) ? static_cast<int>(c.cluster_.key()) : -1;
+      ci.xing = c.xing_;
+      ci.sector = c.sector_;
+      ci.dtref = c.dtRef_;
+      ci.dtreftof = c.dtRefToF_;
+      ci.dtxing = c.dtXing_;
+      ci.du = c.du_;
+      ci.dv = c.dv_;
+      ci.sigu = c.sigU_;
+      ci.sigv = c.sigV_;
+      ci.chi2 = c.chi2_;
+      ci.ndof = c.ndof_;
+      ci.nshare = c.nShare_;
+      ci.flags = c.flags_;
+      ci.geom = c.hasFlag(TrkCrvCandidate::geomCand);
+      ci.time = c.hasFlag(TrkCrvCandidate::timeCand);
+      ci.best = c.hasFlag(TrkCrvCandidate::bestForTrack);
+      ci.bestforcluster = c.hasFlag(TrkCrvCandidate::bestForCluster);
+      ci.exclusive = c.hasFlag(TrkCrvCandidate::exclusive);
+      ci.bestinsector = c.hasFlag(TrkCrvCandidate::bestInSector);
+      ci.samesector = c.hasFlag(TrkCrvCandidate::sameSector);
+      ci.outofbounds = c.hasFlag(TrkCrvCandidate::outOfBounds);
+      ci.singleended = c.hasFlag(TrkCrvCandidate::singleEnded);
+      ci.multisector = c.hasFlag(TrkCrvCandidate::multiSector);
+      ci.usedinfit = c.hasFlag(TrkCrvCandidate::usedInFit);
+      if(ci.geom) ++info.ngeom;
+      cands.back().push_back(ci);
+    }
   }
 }

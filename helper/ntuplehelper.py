@@ -3,12 +3,13 @@ import os
 class nthelper:
 
     single_object_branches = ['evtinfo', 'evtinfomc', 'hitcount', 'tcnt', 'crvsummary', 'crvsummarymc', 'lumistream']
-    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'lineseeds', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'msdhits', 'helices', 'trkqual', 'trkpid', 'trkpid_trk', 'mcsteps', 'primary']
-    vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc', 'timeclustershits', 'lineseedshits', 'heliceshits' ]
+    vector_object_branches = ['trk', 'trkmc', 'trkdtdt', 'trkcalohit', 'trkcalohitmc', 'timeclusters', 'lineseeds', 'caloclustersmc', 'calohitsmc', 'calodigismc', 'calomcsim', 'calodigisim', 'caloclusters', 'calohits', 'calorecodigis', 'calodigis', 'crvcoincs', 'crvcoincsmc', 'crvcoincsmcplane', 'crvpulses', 'crvdigis', 'crvpulsesmc', 'msdhits', 'helices', 'trkqual', 'trkpid', 'trkpid_trk', 'mcsteps', 'primary', 'trkcrv']
+    vector_vector_object_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trkmcsim', 'trkhits', 'trkhitsmc', 'trkmats', 'trkhitcalibs', 'trkmcsci', 'trkmcssi', 'trksegsmc', 'timeclustershits', 'lineseedshits', 'heliceshits', 'trkcrvxings', 'trkcrvcands', 'trkcrvcandsmc', 'trkcrvxingsmc', 'trkcrvtruexingsmc' ]
 
     evt_branches = ['evtinfo','evtinfomc','hitcount','tcnt', 'lumistream', 'msdhits', 'primary']
     trk_branches = ['trk', 'trkmc', 'trkcalohit', 'trkcalohitmc', 'trkdtdt', 'trkqual', 'trkpid', 'trkpid_trk']
     trksegs_branches = ['trksegs', 'trksegpars_lh', 'trksegpars_ch', 'trksegpars_kl', 'trksegsmc']
+    trkcrv_branches = ['trkcrv', 'trkcrvxings', 'trkcrvcands', 'trkcrvcandsmc', 'trkcrvxingsmc', 'trkcrvtruexingsmc']
     straw_branches = ['trkhits', 'trkmats', 'trkhitsmc', 'trkhitcalibs']
     trk_mc_branches = [ 'trkmcsim' ]
     general_mc_branches = [ 'mcsteps' ]
@@ -83,7 +84,13 @@ class nthelper:
                            "mcsteps" : "MCStepInfo",
                            "crvpulses" : "CrvPulseInfoReco",
                            "crvdigis" : "CrvWaveformInfo",
-                           "crvpulsesmc" : "CrvPulseInfoReco"
+                           "crvpulsesmc" : "CrvPulseInfoReco",
+                           "trkcrv" : "TrkCrvInfo",
+                           "trkcrvxings" : "TrkCrvXingInfo",
+                           "trkcrvcands" : "TrkCrvCandInfo",
+                           "trkcrvcandsmc" : "TrkCrvCandInfoMC",
+                           "trkcrvxingsmc" : "TrkCrvXingInfoMC",
+                           "trkcrvtruexingsmc" : "TrkCrvTrueXingInfoMC"
                           }
 
     # Map a configured helix seed branch name (and its <name>hits branch) onto the default helices branches
@@ -177,6 +184,27 @@ class nthelper:
             print("| branch | structure | explanation | leaf information |")
             print("|--------|-----------|-------------|------------------|")
         for branch in self.trksegs_branches:
+            explanation = self.get_branch_explanation(branch)
+            struct = self.branch_struct_dict[branch]
+            struct_file = struct + ".hh";
+            if not export_to_md:
+                print(explanation)
+            else:
+                tokens=explanation.split(":")
+                print("| " + tokens[0] + " | " + tokens[1] + " | " + tokens[2] + "| [see " + struct_file + "](../inc/"+struct_file+")")
+
+        if not export_to_md:
+            print("\nTrack-CRV association Branches")
+            print("================")
+        else:
+            print("## Track-CRV association Branches\n")
+            print("These branches hold the association of each track with CRV coincidence clusters (Offline ```TrkCrvMatch```, and ```TrkCrvMatchMC``` for MC).")
+            print("They are filled for track branches configured with ```trkCrvMatchTags``` (and ```trkCrvMatchMCTags```), and are named after the track branch, e.g. ```trkcrv``` for ```trk```.\n")
+            print("```<trk>crv``` has one element per track. The other branches hold, per track, a vector of CRV sector crossings (```crvxings```, with the per-layer probe) or of associated clusters (```crvcands```).")
+            print("```crvcands.crvcoinc``` is the index of the cluster in ```crvcoincs```; ```crvcandsmc``` and ```crvxingsmc``` are parallel to ```crvcands``` and ```crvxings```. See ```utils/trkcrv_example.py```.\n")
+            print("| branch | structure | explanation | leaf information |")
+            print("|--------|-----------|-------------|------------------|")
+        for branch in self.trkcrv_branches:
             explanation = self.get_branch_explanation(branch)
             struct = self.branch_struct_dict[branch]
             struct_file = struct + ".hh";
