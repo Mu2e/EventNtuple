@@ -50,13 +50,13 @@ physics :
       trk : {
         @table::EventNtupleMaker.trk
         fillTrkDtDt: true
-        fillTrkPID: true
         fits : [
           { @table::All
             input : "MergeKKDeCalib"
-            trkPIDTags : ["TrkPIDDeCalib:MergeKKDeCalib"]
             trkDtDtTag : "TrkDtDtDeCalib:MergeKKDeCalib"
-            trkQualLeaves : [ { leafname : "" inputTag : "TrkQualDeCalib:ANN" modelVersion : "ANN1_v2.0" } ]
+            mvaTags          : [ "TrkQualDeCalib:ANN", "TrkPIDDeCalib:MergeKKDeCalib" ]
+            mvaBranches      : [ "qual",               "pid" ]
+            mvaModelVersions : [ "ANN1_v2.0",          "TrackPID_v1" ]
           }
         ]
       }

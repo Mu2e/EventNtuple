@@ -106,6 +106,7 @@
 
 // C++ includes.
 #include <map>
+#include <set>
 #include <vector>
 #include <iostream>
 #include <string>
@@ -113,6 +114,20 @@
 #include <cmath>
 
 using namespace std;
+
+namespace {
+  // Branch index of the object a Ptr points to, where `infos` were filled from the collection `coll`, one per element
+  // and in its order. A Ptr into that collection gives the index by its key. A Ptr into another collection falls back
+  // to the first info that compares equal to the object, which fails for NaN values. Returns -1 if not found.
+  template <class INFO, class PTR, class HANDLE>
+  int linkedIndex(const PTR& ptr, const HANDLE& coll, const std::vector<INFO>& infos) {
+    if(ptr.id() == coll.id()) return ptr.key() < infos.size() ? int(ptr.key()) : -1;
+    for(size_t index = 0; index < infos.size(); ++index) {
+      if(infos[index] == *ptr) return int(index);
+    }
+    return -1;
+  }
+}
 
 namespace mu2e {
   // Need this for the BaBar headers.
@@ -136,14 +151,6 @@ namespace mu2e {
         fhicl::Atom<int> matchDepth{Name("matchDepth"), Comment("Depth of MC truth matching to keep (-1 = all)")};
       };
 
-      struct TrkQualLeafConfig {
-        using Name=fhicl::Name;
-        using Comment=fhicl::Comment;
-        fhicl::Atom<std::string> leafname{Name("leafname"), Comment("Suffix appended to <branchname>qual; use an empty string for the canonical TrkQual branch")};
-        fhicl::Atom<std::string> modelVersion{Name("modelVersion"), Comment("TrkQual ML model version recorded in trkqual_metadata")};
-        fhicl::Atom<std::string> inputTag{Name("inputTag"), Comment("Input tag for the TrkQual MVAResultCollection")};
-      };
-
       struct TrkFitConfig {
         using Name=fhicl::Name;
         using Comment=fhicl::Comment;
@@ -152,8 +159,9 @@ namespace mu2e {
         fhicl::Atom<std::string> trkDtDtTag{Name("trkDtDtTag"), Comment("Input tag for KalSeedDtDtCollection")};
         fhicl::Atom<std::string> trkGroupTag{Name("trkGroupTag"), Comment("Input tag for KalSeedClusterCollection (from TrackMatching) used to fill the id and rank leaves; empty to disable"), ""};
         fhicl::Atom<bool> fill{Name("fill"), Comment("Set false to skip this branch entirely (no collection reads, no output branches)")};
-        fhicl::Sequence<fhicl::Table<TrkQualLeafConfig>> trkQualLeaves{Name("trkQualLeaves"), Comment("TrkQual output branch names, input tags, and model provenance")};
-        fhicl::Sequence<std::string> trkPIDTags{Name("trkPIDTags"), Comment("Input tags for MVAResultCollection to use for TrkPID")};
+        fhicl::Sequence<std::string> mvaTags{Name("mvaTags"), Comment("Input tags of the MVAResultCollections (one result per track, e.g. TrkQual or TrkPID) to store for this fit"), std::vector<std::string>{}};
+        fhicl::Sequence<std::string> mvaBranches{Name("mvaBranches"), Comment("Output branch for each entry of mvaTags, appended to branchname (e.g. \"qual\" writes <branchname>qual)"), std::vector<std::string>{}};
+        fhicl::Sequence<std::string> mvaModelVersions{Name("mvaModelVersions"), Comment("Model version for each entry of mvaTags, recorded in trkqual_metadata; an empty string (or an empty list) records nothing"), std::vector<std::string>{}};
         fhicl::Table<TrkFitOptConfig> options{Name("options"), Comment("Per-branch fill options")};
       };
 
@@ -180,7 +188,6 @@ namespace mu2e {
         fhicl::Atom<bool> fillHits{Name("fillHits"),
           Comment("Global enable for hit-level branches; per-branch options.fillHits also required")};
         fhicl::Atom<bool> fillHitCalibs{Name("fillHitCalibs"), Comment("Fill hit calibration branches")};
-        fhicl::Atom<bool> fillTrkPID{Name("fillTrkPID"), Comment("Fill TrkPID MVA branches")};
         fhicl::Atom<bool> fillTrkDtDt{Name("fillTrkDtDt"), Comment("Fill TrkDtDt branches")};
         // per-branch configurations
         fhicl::Sequence<fhicl::Table<TrkFitConfig>> fits{Name("fits"), Comment("KalSeed collections to write into a single track branch")};
@@ -404,7 +411,7 @@ namespace mu2e {
 
       Config _conf;
       std::vector<TrkFitConfig> _allTrkFitBranches; // configurations for all track fit branches
-      std::map<TrkFitBranchIndex, std::vector<TrkQualMetadata>> _trkQualMetadata;
+      std::map<TrkFitBranchIndex, std::vector<TrkQualMetadata>> _mvaMetadata; // output branch, input tag and model version of each mvaTags entry
       // main TTree
       TTree* _ntuple;
       TH1I* _hVersion;
@@ -444,12 +451,10 @@ namespace mu2e {
       std::map<TrkFitBranchIndex, std::vector<TrkDtDtInfo>> _allTDtDtIs;
       // quality branches (inputs)
       std::vector<std::vector<art::Handle<RecoQualCollection> > > _allRQCHs;
-      std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkQualCHs;
-      std::vector<std::vector<art::Handle<MVAResultCollection> >> _allTrkPIDCHs;
+      std::vector<std::vector<art::Handle<MVAResultCollection> >> _allMVACHs;
       // quality branches (outputs)
       std::vector<RecoQualInfo> _allRQIs;
-      std::map<TrkFitBranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkQualResults;
-      std::map<TrkFitBranchIndex, std::vector<std::vector<MVAResultInfo>>> _allTrkPIDResults;
+      std::map<TrkFitBranchIndex, std::vector<std::vector<MVAResultInfo>>> _allMVAResults;
       // trigger information
       unsigned _trigbits;
       std::map<size_t,unsigned> _tmap; // map between path and trigger ID.  ID should come from trigger itself FIXME!
@@ -602,10 +607,6 @@ namespace mu2e {
       // assign each fit the id of its cluster and its rank (fit consistency normalised within the cluster)
       std::map<KalSeedPtr, TrkGroup> makeTrkGroups(const KalSeedClusterCollection& clusters) const;
 
-      // TrkPID: the global flag gates the trkPIDTags of every fit. The TrackPID producer itself needs the
-      // KalSeedDtDt collection, so turning this off (and dropping TrkPIDPath) removes the TrkDtDt dependency
-      bool fillTrkPID() const { return _conf.trk().fillTrkPID(); }
-
       // Calorimeter MC: independent of fillEventMC() — calo MC products do not
       // require simParticles/primaryParticle so calo-only jobs can enable this
       // while keeping mc.fill false.
@@ -733,18 +734,34 @@ namespace mu2e {
     // populate branch list from trk.branches
     for(const auto& trk_fit_cfg : _conf.trk().fits()){
       const TrkFitBranchIndex i_trk_fit_branch = _allTrkFitBranches.size();
-      for (const auto& trkQualConfig : trk_fit_cfg.trkQualLeaves()) {
-        std::string proposed_leafname = trk_fit_cfg.branchname() + "qual" + trkQualConfig.leafname();
-        // Check if leafname already exists
-        for (const auto& trkQualMetadata : _trkQualMetadata[i_trk_fit_branch]) {
-          if (proposed_leafname == trkQualMetadata.output_branch) {
-            throw cet::exception("EventNtuple") << "Proposed TrkQual leafname \"" << proposed_leafname << "\" already exists in _trkQualMetadata";
+      const auto mvaTags = trk_fit_cfg.mvaTags();
+      const auto mvaBranches = trk_fit_cfg.mvaBranches();
+      const auto mvaModelVersions = trk_fit_cfg.mvaModelVersions();
+      if (mvaBranches.size() != mvaTags.size()) {
+        throw cet::exception("EventNtuple") << "Track branch \"" << trk_fit_cfg.branchname() << "\" has " << mvaTags.size()
+                                            << " mvaTags but " << mvaBranches.size() << " mvaBranches";
+      }
+      if (!mvaModelVersions.empty() && mvaModelVersions.size() != mvaTags.size()) {
+        throw cet::exception("EventNtuple") << "Track branch \"" << trk_fit_cfg.branchname() << "\" has " << mvaTags.size()
+                                            << " mvaTags but " << mvaModelVersions.size() << " mvaModelVersions (give one per tag or none)";
+      }
+      auto& mvaMetadata = _mvaMetadata[i_trk_fit_branch];
+      for (size_t i_mva = 0; i_mva < mvaTags.size(); ++i_mva) {
+        if (mvaBranches.at(i_mva).empty()) {
+          throw cet::exception("EventNtuple") << "Track branch \"" << trk_fit_cfg.branchname() << "\" has an empty mvaBranches entry (for "
+                                              << mvaTags.at(i_mva) << "), which would collide with the track branch itself";
+        }
+        std::string proposed_branch = trk_fit_cfg.branchname() + mvaBranches.at(i_mva);
+        // Check if the output branch already exists
+        for (const auto& metadata : mvaMetadata) {
+          if (proposed_branch == metadata.output_branch) {
+            throw cet::exception("EventNtuple") << "MVA output branch \"" << proposed_branch << "\" is configured more than once";
           }
         }
-        _trkQualMetadata[i_trk_fit_branch].push_back({
-          proposed_leafname,
-          trkQualConfig.inputTag(),
-          trkQualConfig.modelVersion()
+        mvaMetadata.push_back({
+          proposed_branch,
+          mvaTags.at(i_mva),
+          mvaModelVersions.empty() ? "" : mvaModelVersions.at(i_mva)
         });
       }
       _allTrkFitBranches.push_back(trk_fit_cfg);
@@ -776,8 +793,7 @@ namespace mu2e {
       _allTSMIs[i_trk_fit_branch]   = {};
       _allTSHIMCs[i_trk_fit_branch] = {};
 
-      _allTrkQualResults[i_trk_fit_branch].resize(i_trkFitConfig.trkQualLeaves().size());
-      _allTrkPIDResults[i_trk_fit_branch].resize(i_trkFitConfig.trkPIDTags().size());
+      _allMVAResults[i_trk_fit_branch].resize(_mvaMetadata.at(i_trk_fit_branch).size());
 
       for (StepCollIndex ixt = 0; ixt < _extraMCStepTags.size(); ++ixt) {
         _extraMCStepInfos[i_trk_fit_branch][ixt]        = {};
@@ -800,20 +816,24 @@ namespace mu2e {
     _ntuple=tfs->make<TTree>("ntuple","Mu2e Event Ntuple");
     _hVersion = tfs->make<TH1I>("version", "version number",3,0,3);
     _hVersion->GetXaxis()->SetBinLabel(1, "major"); _hVersion->SetBinContent(1, 6);
-    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 15);
-    _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 2);
-    size_t nTrkQualAlgorithms = 0;
+    _hVersion->GetXaxis()->SetBinLabel(2, "minor"); _hVersion->SetBinContent(2, 16);
+    _hVersion->GetXaxis()->SetBinLabel(3, "patch"); _hVersion->SetBinContent(3, 0);
+    // MVA results configured with a model version are recorded in trkqual_metadata
+    size_t nMVAModels = 0;
     if (_conf.trk().fill()) {
-      for (const auto& trkFitConfig : _allTrkFitBranches) {
-        if (trkFitConfig.fill()) nTrkQualAlgorithms += trkFitConfig.trkQualLeaves().size();
+      for (TrkFitBranchIndex i_trk_fit_branch = 0; i_trk_fit_branch < _allTrkFitBranches.size(); ++i_trk_fit_branch) {
+        if (!_allTrkFitBranches.at(i_trk_fit_branch).fill()) continue;
+        for (const auto& metadata : _mvaMetadata.at(i_trk_fit_branch)) {
+          if (!metadata.model_version.empty()) ++nMVAModels;
+        }
       }
     }
-    TH1I* hTrkQualMetadata = nullptr;
-    if (nTrkQualAlgorithms > 0) {
-      hTrkQualMetadata = tfs->make<TH1I>(
-        "trkqual_metadata", "Configured TrkQual ML algorithms", nTrkQualAlgorithms, 0, nTrkQualAlgorithms);
+    TH1I* hMVAMetadata = nullptr;
+    if (nMVAModels > 0) {
+      hMVAMetadata = tfs->make<TH1I>(
+        "trkqual_metadata", "Configured track MVA algorithms", nMVAModels, 0, nMVAModels);
     }
-    size_t iTrkQualAlgorithm = 0;
+    size_t iMVAModel = 0;
 
     // event info branch
     _ntuple->Branch("evtinfo",&_einfo,_buffsize,_splitlevel);
@@ -848,22 +868,19 @@ namespace mu2e {
 
         // TrkCaloHit: currently only 1
         _ntuple->Branch((branch+"calohit.").c_str(),&_allTCHIs.at(i_trk_fit_branch));
-        for (size_t i_trkQual = 0; i_trkQual < i_trkFitConfig.trkQualLeaves().size(); ++i_trkQual) {
-          const auto& trkQualMetadata = _trkQualMetadata.at(i_trk_fit_branch).at(i_trkQual);
-          const std::string& outputBranch = trkQualMetadata.output_branch;
-          _ntuple->Branch((outputBranch+".").c_str(),&_allTrkQualResults.at(i_trk_fit_branch).at(i_trkQual),_buffsize,_splitlevel);
+        const auto& mvaMetadata = _mvaMetadata.at(i_trk_fit_branch);
+        for (size_t i_mva = 0; i_mva < mvaMetadata.size(); ++i_mva) {
+          const auto& metadata = mvaMetadata.at(i_mva);
+          const std::string& outputBranch = metadata.output_branch;
+          _ntuple->Branch((outputBranch+".").c_str(),&_allMVAResults.at(i_trk_fit_branch).at(i_mva),_buffsize,_splitlevel);
+          if (metadata.model_version.empty()) continue;
           char metadataLabel[1024];
           std::snprintf(
             metadataLabel, sizeof(metadataLabel),
             "%s: input tag = %s; model version = %s",
-            outputBranch.c_str(), trkQualMetadata.input_tag.c_str(), trkQualMetadata.model_version.c_str());
-          hTrkQualMetadata->GetXaxis()->SetBinLabel(++iTrkQualAlgorithm, metadataLabel);
-          hTrkQualMetadata->SetBinContent(iTrkQualAlgorithm, 1);
-        }
-        for (size_t i_trkPIDTag = 0; fillTrkPID() && i_trkPIDTag < i_trkFitConfig.trkPIDTags().size(); ++i_trkPIDTag) {
-          std::string branchname = "pid";
-          if (i_trkPIDTag > 0) branchname += std::to_string(i_trkPIDTag+1);
-          _ntuple->Branch((branch+branchname+'.').c_str(),&_allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDTag),_buffsize,_splitlevel);
+            outputBranch.c_str(), metadata.input_tag.c_str(), metadata.model_version.c_str());
+          hMVAMetadata->GetXaxis()->SetBinLabel(++iMVAModel, metadataLabel);
+          hMVAMetadata->SetBinContent(iMVAModel, 1);
         }
         // hit-level branches (global trk.fillHits AND per-branch options.fillHits both required)
         if(_conf.trk().fillHits() && i_trkFitConfig.options().fillhits()){
@@ -1038,6 +1055,14 @@ namespace mu2e {
       }
 
     }
+
+    // Configurable names (e.g. mvaBranches) can repeat another branch's name, which makes lookup by name ambiguous
+    std::set<std::string> branchNames;
+    for (const auto* branch : *_ntuple->GetListOfBranches()) {
+      if (!branchNames.insert(branch->GetName()).second) {
+        throw cet::exception("EventNtuple") << "Output branch \"" << branch->GetName() << "\" is booked more than once: check the mvaBranches of the track fits";
+      }
+    }
   }
 
   void EventNtupleMaker::beginSubRun(const art::SubRun & subrun ) {
@@ -1156,8 +1181,7 @@ namespace mu2e {
     _allKSPCHs.clear();
     _allRQCHs.clear();
     _allBestCrvAssns.clear();
-    _allTrkQualCHs.clear();
-    _allTrkPIDCHs.clear();
+    _allMVACHs.clear();
     _allKSDtDtHs.clear();
     _allTrkGroups.clear();
 
@@ -1167,9 +1191,8 @@ namespace mu2e {
         if (!i_trkFitConfig.fill()) {
           // push empty placeholders to keep index alignment
           _allKSPCHs.push_back(art::Handle<KalSeedPtrCollection>());
-          _allTrkQualCHs.emplace_back();
+          _allMVACHs.emplace_back();
           _allRQCHs.push_back({});
-          _allTrkPIDCHs.emplace_back();
           _allKSDtDtHs.push_back(art::Handle<KalSeedDtDtCollection>());
           _allTrkGroups.emplace_back();
           continue;
@@ -1193,13 +1216,13 @@ namespace mu2e {
           _allTrkGroups.emplace_back();
         }
 
-        std::vector<art::Handle<MVAResultCollection>> trkQualCollHandles;
-        for (const auto& i_trkQual : i_trkFitConfig.trkQualLeaves()) {
-          art::Handle<MVAResultCollection> trkQualCollHandle;
-          event.getByLabel(i_trkQual.inputTag(),trkQualCollHandle);
-          trkQualCollHandles.push_back(trkQualCollHandle);
+        std::vector<art::Handle<MVAResultCollection>> mvaCollHandles;
+        for (const auto& metadata : _mvaMetadata.at(i_trk_fit_branch)) {
+          art::Handle<MVAResultCollection> mvaCollHandle;
+          event.getByLabel(art::InputTag(metadata.input_tag),mvaCollHandle);
+          mvaCollHandles.push_back(mvaCollHandle);
         }
-        _allTrkQualCHs.emplace_back(trkQualCollHandles);
+        _allMVACHs.emplace_back(mvaCollHandles);
 
         std::vector<art::Handle<RecoQualCollection> > recoQualCollHandles;
         std::vector<art::Handle<RecoQualCollection> > selectedRQCHs;
@@ -1210,16 +1233,6 @@ namespace mu2e {
           }
         }
         _allRQCHs.push_back(selectedRQCHs);
-
-        std::vector<art::Handle<MVAResultCollection>> trkPIDCollHandles;
-        if(fillTrkPID()) { // if not filling, pass no handles
-          for (const auto& i_trkPIDTag : i_trkFitConfig.trkPIDTags()) {
-            art::Handle<MVAResultCollection> trkPIDCollHandle;
-            event.getByLabel(i_trkPIDTag,trkPIDCollHandle);
-            trkPIDCollHandles.push_back(trkPIDCollHandle);
-          }
-        }
-        _allTrkPIDCHs.emplace_back(trkPIDCollHandles);
       }
     }
 
@@ -1320,11 +1333,8 @@ namespace mu2e {
       _allMCVDInfos.at(i_trk_fit_branch).clear();
       _allMCSimTIs.at(i_trk_fit_branch).clear();
 
-      for (size_t i_trkQual = 0; i_trkQual < i_trkFitConfig.trkQualLeaves().size(); ++i_trkQual) {
-        _allTrkQualResults.at(i_trk_fit_branch).at(i_trkQual).clear();
-      }
-      for (size_t i_trkPIDTag = 0; i_trkPIDTag < i_trkFitConfig.trkPIDTags().size(); ++i_trkPIDTag) {
-        _allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDTag).clear();
+      for (auto& mvaResults : _allMVAResults.at(i_trk_fit_branch)) {
+        mvaResults.clear();
       }
       for (StepCollIndex ixt = 0; ixt < _extraMCStepTags.size(); ++ixt) {
         _extraMCStepInfos.at(i_trk_fit_branch).at(ixt).clear();
@@ -1520,13 +1530,10 @@ namespace mu2e {
       for(const auto& recodigi : *_caloRecoDigis.product()){
         _infoStructHelper.fillCaloRecoDigiInfo(recodigi,_caloRDIs);
         if(_conf.calo().fillDigis()){
-          const auto& digi = recodigi.caloDigiPtr();
-          for(uint digiIdx = 0; digiIdx < _caloDIs.size(); digiIdx++){
-            if(_caloDIs[digiIdx] == *digi){
-              _caloDIs[digiIdx].caloRecoDigiIdx_ = _caloRDIs.size()-1;
-              _caloRDIs.back().caloDigiIdx_ = digiIdx;
-              break;
-            }
+          const int digiIdx = linkedIndex(recodigi.caloDigiPtr(), _caloDigis, _caloDIs);
+          if(digiIdx >= 0){
+            _caloDIs[digiIdx].caloRecoDigiIdx_ = _caloRDIs.size()-1;
+            _caloRDIs.back().caloDigiIdx_ = digiIdx;
           }
           if(_caloRDIs.back().caloDigiIdx_ < 0){
             throw cet::exception("EventNtuple") << "Could not find CaloDigi linked to CaloRecoDigi " << _caloRDIs.size()-1 << "\n";
@@ -1540,12 +1547,10 @@ namespace mu2e {
         _infoStructHelper.fillCaloHitInfo(hit,_caloHIs);
         if(_conf.calo().fillRecoDigis()){
           for(const auto& recodigi : hit.recoCaloDigis()){
-            for(uint recoDigiIdx = 0; recoDigiIdx < _caloRDIs.size(); recoDigiIdx++){
-              if(_caloRDIs[recoDigiIdx] == *recodigi){
-                _caloRDIs[recoDigiIdx].caloHitIdx_ = _caloHIs.size()-1;
-                _caloHIs.back().recoDigis_.push_back(recoDigiIdx);
-                break;
-              }
+            const int recoDigiIdx = linkedIndex(recodigi, _caloRecoDigis, _caloRDIs);
+            if(recoDigiIdx >= 0){
+              _caloRDIs[recoDigiIdx].caloHitIdx_ = _caloHIs.size()-1;
+              _caloHIs.back().recoDigis_.push_back(recoDigiIdx);
             }
           }
           if(int(_caloHIs.back().recoDigis_.size()) != _caloHIs.back().nSiPMs_){
@@ -1561,12 +1566,10 @@ namespace mu2e {
         _infoStructHelper.fillCaloClusterInfo(cluster,_caloCIs);
         if(_conf.calo().fillHits()){
           for(const auto& hit : cluster.caloHitsPtrVector()){
-            for(uint hitIdx = 0; hitIdx < _caloHIs.size(); hitIdx++){
-              if(_caloHIs[hitIdx] == *hit){
-                _caloHIs[hitIdx].clusterIdx_ = _caloCIs.size()-1;
-                _caloCIs.back().hits_.push_back(hitIdx);
-                break;
-              }
+            const int hitIdx = linkedIndex(hit, _caloHits, _caloHIs);
+            if(hitIdx >= 0){
+              _caloHIs[hitIdx].clusterIdx_ = _caloCIs.size()-1;
+              _caloCIs.back().hits_.push_back(hitIdx);
             }
           }
           if(_caloCIs.back().hits_.size() != _caloCIs.back().size_){
@@ -1827,12 +1830,20 @@ namespace mu2e {
       }
     }
 
-    const auto& trkQualHandles = _allTrkQualCHs.at(i_trk_fit_branch);
-    for(size_t i_trkQualHandle = 0; i_trkQualHandle < trkQualHandles.size(); ++i_trkQualHandle) {
-      const auto& trkQualHandle = trkQualHandles.at(i_trkQualHandle);
-      if(trkQualHandle.isValid()) {
-        _infoStructHelper.fillTrkQualInfo(kseed, trkQualHandle->at(i_kseedptr), _allTrkQualResults.at(i_trk_fit_branch).at(i_trkQualHandle));
+    // every configured MVA collection must be in the event and have one result per track
+    const auto& mvaHandles = _allMVACHs.at(i_trk_fit_branch);
+    for(size_t i_mvaHandle = 0; i_mvaHandle < mvaHandles.size(); ++i_mvaHandle) {
+      const auto& mvaHandle = mvaHandles.at(i_mvaHandle);
+      const auto& metadata = _mvaMetadata.at(i_trk_fit_branch).at(i_mvaHandle);
+      if(!mvaHandle.isValid()) {
+        throw cet::exception("EventNtuple") << "MVAResultCollection " << metadata.input_tag << " for branch "
+                                            << metadata.output_branch << " isn't in the event";
       }
+      if(i_kseedptr >= mvaHandle->size()) {
+        throw cet::exception("EventNtuple") << "Index " << i_kseedptr << " out of range of MVAResultCollection "
+                                            << metadata.input_tag << " size = " << mvaHandle->size();
+      }
+      _infoStructHelper.fillMVAResultInfo(mvaHandle->at(i_kseedptr), _allMVAResults.at(i_trk_fit_branch).at(i_mvaHandle));
     }
 
     std::vector<Float_t> recoQuals;
@@ -1841,14 +1852,6 @@ namespace mu2e {
       recoQuals.push_back(i_recoQualHandle->at(i_kseedptr)._calib);
     }
     _allRQIs.at(i_trk_fit_branch).setQuals(recoQuals);
-
-    const auto& trkPIDHandles = _allTrkPIDCHs.at(i_trk_fit_branch);
-    for(size_t i_trkPIDHandle = 0; i_trkPIDHandle < trkPIDHandles.size(); ++i_trkPIDHandle) {
-      const auto& trkPIDHandle = trkPIDHandles.at(i_trkPIDHandle);
-      if(trkPIDHandle.isValid()) {
-        _infoStructHelper.fillTrkPIDInfo(kseed, trkPIDHandle->at(i_kseedptr), _allTrkPIDResults.at(i_trk_fit_branch).at(i_trkPIDHandle));
-      }
-    }
 
     // fill tracker MC info
     if(fillTrkMC(trkFitConfig.options())) {

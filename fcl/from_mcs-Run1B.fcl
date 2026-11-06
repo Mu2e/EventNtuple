@@ -15,13 +15,12 @@ physics.analyzers.EventNtuple.trk.fits : [
     branchname : "trk"
     fill : true
     options : { fillMC : true  fillHits : true genealogyDepth : -1 matchDepth : -1 }
-    trkQualLeaves : []
-    # TrkPID isn't computed for MergeKKLines (neither TrkDtDt nor TrkPID run over it in this path)
-    trkPIDTags : []
+    # No TrkQual or TrkPID is computed for MergeKKLines (neither TrkDtDt nor TrkPID run over it in this path)
+    mvaTags : []
+    mvaBranches : []
     trkDtDtTag : "TrkDtDt:MergeKKLines"
   }
 ]
-physics.analyzers.EventNtuple.trk.fillTrkPID : false # Not yet implemented
 physics.analyzers.EventNtuple.trk.fillTrkDtDt : false # Not yet added
 physics.EventNtuplePath : [ MergeKKLines, @sequence::physics.EventNtuplePath ]
 

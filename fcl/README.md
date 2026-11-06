@@ -8,22 +8,25 @@ from_tier-type_extra.fcl
 
 where ```tier``` is the data tier of the input dataset, ```type``` is the type of dataset (e.g. primary-only, extracted position), and ```extra``` gives some extra information (optional)
 
-## Multiple TrkQual outputs
+## Track MVA outputs (TrkQual, TrkPID, ...)
 
-Configure each TrkQual result in a track fit with `trkQualLeaves`. `leafname` is
-appended to `<branchname>qual`, so stable output names do not depend on the
-order of the configured algorithms:
+Each track fit stores any number of per-track `MVAResultCollection`s. List the
+input tags in `mvaTags` and the output branch for each in `mvaBranches`; the
+branch name is appended to the fit's `branchname`. `mvaModelVersions` is
+optional (one entry per tag, or an empty list; use an empty string to skip one): entries with a non-empty model
+version are recorded in `EventNtuple/trkqual_metadata` with the output branch
+and input tag, and `checkEventNtuple` prints this metadata.
 
 ```
-trkQualLeaves : [
-  { leafname : ""           inputTag : "TrkQualAll:ANN"       modelVersion : "TrkQual_ANN1_v2.0" },
-  { leafname : "_candidate" inputTag : "TrkQualCandidate:ANN" modelVersion : "TrkQual_ANN1_v3_rc1" }
-]
+mvaTags          : [ "TrkQualAll:ANN",    "TrkQualCandidate:ANN", "TrkPID:MergeKKAll" ]
+mvaBranches      : [ "qual",              "qual_candidate",       "pid" ]
+mvaModelVersions : [ "TrkQual_ANN1_v2.0", "TrkQual_ANN1_v3_rc1",  "TrackPID_v1" ]
 ```
 
-This writes `trkqual` and `trkqual_candidate`. EventNtuple also records the
-track branch, output branch, input tag, and model version in
-`EventNtuple/trkqual_metadata`; `checkEventNtuple` prints this metadata.
+With `branchname : "trk"` this writes `trkqual`, `trkqual_candidate` and `trkpid`.
+Each tag must name the collection itself, including its instance: `TrackPID` and
+`TrackOnlyPID` name each output after their input collection (e.g. `TrkPID:MergeKKAll`).
+The job stops if a configured collection is missing from an event that has tracks to fill.
 
 ## Calorimeter entrant truth
 
@@ -65,6 +68,7 @@ separate operation.
 | from_mcs-mockdata.fcl | mock datasets | removes ```genCountLogger``` which does not apply to mock datasets|
 | from_mcs-mockdata_noMC.fcl | mock datasets | doesn't include MC in output |
 | from_mcs-extracted.fcl | reconstructed extracted position datasets | |
+| from_mcs-extracted_withCrvPulses.fcl | all-events stream of reconstructed extracted position datasets | as above but with every CRV pulse in ```crvpulses``` and ```crvpulsesmc```, and truth planes for the T1, EX and T2 CRV sectors and the muon taggers |
 | from_mcs-primary.fcl | reconstructed primary (i.e. no background hits) datasets | |
 | from_mcs-mixed.fcl | reconstructed mixed (i.e. primary+background hits) datasets | |
 | from_mcs-ceSimReco.fcl | output of Production/Validation/ceSimReco.fcl | |
