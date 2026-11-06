@@ -203,22 +203,24 @@ MergeKKProducersPath : [ MergeKKAll ]
 # Track-CRV association (Offline TrkCrvMatcher and TrkCrvMatchMCMaker), run on existing reco in the ntuple job.
 # One matcher per KalSeedCollection; a fit branch lists the matchers behind its input in trkCrvMatchTags.
 # Reco output keeps only the clustered CRV pulses (SelectReco), so there the layer probe sees no unclustered pulses.
+# DtRefCenter per fit: the values of Production JobConfig/reco/prolog.fcl (KKLine uses the Offline default).
 #################################
-TrkCrvMatchNtuple : { @table::TrkCrvMatcher CrvRecoPulseCollection : "SelectReco" }
+TrkCrvMatchNtuple : { @table::TrkCrvMatcher CrvRecoPulseCollection : "SelectReco" ProbeAllPulses : false }
+TrkCrvMatchMCNtuple : { @table::TrkCrvMatchMC RequireCrvSteps : false } # reco output drops the digi-stage CrvSteps: no deposits
 TrkCrvMatchLH : { @table::TrkCrvMatchNtuple DoGeometric : false LayerProbe : false } # LoopHelix fits do not reach the CRV: time only
 TrkCrvMatchProducers : {
   TrkCrvMatchLine : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKLine" }
-  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" }
-  TrkCrvMatchDe : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" }
-  TrkCrvMatchUe : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" }
-  TrkCrvMatchDmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" }
-  TrkCrvMatchUmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKUmu" }
-  TrkCrvMatchLineMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchLine" }
-  TrkCrvMatchCHmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchCHmu" }
-  TrkCrvMatchDeMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchDe" }
-  TrkCrvMatchUeMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchUe" }
-  TrkCrvMatchDmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchDmu" }
-  TrkCrvMatchUmuMC : { @table::TrkCrvMatchMC TrkCrvMatchCollection : "TrkCrvMatchUmu" }
+  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" DtRefCenter : 27 }
+  TrkCrvMatchDe : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" DtRefCenter : 32 }
+  TrkCrvMatchUe : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" DtRefCenter : 28 }
+  TrkCrvMatchDmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" DtRefCenter : 30 }
+  TrkCrvMatchUmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKUmu" DtRefCenter : 26 }
+  TrkCrvMatchLineMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchLine" }
+  TrkCrvMatchCHmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchCHmu" }
+  TrkCrvMatchDeMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDe" }
+  TrkCrvMatchUeMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUe" }
+  TrkCrvMatchDmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDmu" }
+  TrkCrvMatchUmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUmu" }
 }
 TrkCrvMatchNoFieldPath : [ TrkCrvMatchLine ]
 TrkCrvMatchNoFieldMCPath : [ TrkCrvMatchLine, TrkCrvMatchLineMC ]

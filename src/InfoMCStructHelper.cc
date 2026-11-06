@@ -618,9 +618,11 @@ namespace mu2e {
     if(mc == nullptr) return;
     for(auto const& c : mc->cands_) {
       TrkCrvCandInfoMC ci;
-      ci.rel = c.rel_;
+      ci.hasmc = c.hasMC_;
+      ci.rel = c.rel_.relationship();
+      ci.rem = c.rel_.removal();
       ci.edep_same = c.edepSame_;
-      ci.edep_family = c.edepFamily_;
+      ci.edep_related = c.edepRelated_;
       ci.edep_total = c.edepTotal_;
       cands.back().push_back(ci);
     }
@@ -646,6 +648,7 @@ namespace mu2e {
       ti.mom = x.mom_;
       ti.dedgeu = x.dEdgeU_;
       ti.dedgev = x.dEdgeV_;
+      ti.hasdeposits = mc->hasDeposits_;
       ti.edep = x.edep_;
       ti.nlayers = x.nLayers_;
       ti.deppos = XYZVectorF(x.depPos_.X(), x.depPos_.Y(), x.depPos_.Z());

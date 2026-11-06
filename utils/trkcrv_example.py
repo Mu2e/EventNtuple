@@ -25,7 +25,7 @@ import awkward as ak
 import numpy as np
 import uproot
 
-REL_NAMES = ["same particle", "same family", "same primary", "unrelated", "background", "no MC"]
+REL_NAMES = ["no MC", "unrelated", "same", "daughter", "mother", "sibling", "udaughter", "umother", "usibling"]  # rel + 2, or no MC
 
 
 def load(path, trk, entries):
@@ -138,14 +138,14 @@ def main():
     # --- 5. truth of the best candidate ---------------------------------------------------------------------------
     rel_counts = None
     if has_mc:
-        rel = pick(leaf(a, args.trk + "crvcandsmc", "rel"), bestgeom)
-        r = ak.to_numpy(ak.flatten(ak.drop_none(rel), axis=None))
+        relbin = ak.where(leaf(a, args.trk + "crvcandsmc", "hasmc"), leaf(a, args.trk + "crvcandsmc", "rel") + 2, 0)
+        r = ak.to_numpy(ak.flatten(ak.drop_none(pick(relbin, bestgeom)), axis=None))
         if len(r):
-            rel_counts = np.bincount(r.astype(int), minlength=6)[:6]
+            rel_counts = np.bincount(r.astype(int), minlength=len(REL_NAMES))[:len(REL_NAMES)]
             print("best geometric candidate truth: " + ", ".join("%s %.3f" % (n, c / len(r)) for n, c in zip(REL_NAMES, rel_counts)))
-        rt = ak.to_numpy(ak.flatten(ak.drop_none(pick(leaf(a, args.trk + "crvcandsmc", "rel"), besttime)), axis=None))
+        rt = ak.to_numpy(ak.flatten(ak.drop_none(pick(relbin, besttime)), axis=None))
         if len(rt):
-            counts = np.bincount(rt.astype(int), minlength=6)[:6]
+            counts = np.bincount(rt.astype(int), minlength=len(REL_NAMES))[:len(REL_NAMES)]
             print("best time candidate truth: " + ", ".join("%s %.3f" % (n, c / len(rt)) for n, c in zip(REL_NAMES, counts)))
 
     if args.plots:

@@ -7,9 +7,11 @@
 namespace mu2e
 {
   struct TrkCrvCandInfoMC {
-    int   rel = 5; // relation of the cluster's deposits to the track's particle: 0 same particle, 1 same family, 2 same primary, 3 unrelated, 4 background, 5 no MC
-    float edep_same = 0; // cluster energy from the track's particle and its descendants (MeV)
-    float edep_family = 0; // cluster energy from the particle's ancestors and their other descendants (MeV)
+    bool  hasmc = false; // the cluster has MC information (false: background or no MC)
+    int   rel = -1; // closest MCRelationship of the cluster's deposit particles to the track's particle: -1 none, 0 same, 1 daughter, 2 mother, 3 sibling, 4 udaughter, 5 umother, 6 usibling
+    int   rem = -1; // generational removal of that relation (0 for same)
+    float edep_same = 0; // cluster energy from the track's particle (MeV)
+    float edep_related = 0; // cluster energy from any related particle, the track's particle included (MeV)
     float edep_total = 0; // cluster energy with MC information (MeV)
 
     void reset() { *this = TrkCrvCandInfoMC(); }

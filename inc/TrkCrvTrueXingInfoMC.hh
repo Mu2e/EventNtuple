@@ -19,6 +19,7 @@ namespace mu2e
     float mom = 0; // momentum at the crossing (MeV/c)
     float dedgeu = 0; // distance inside the sector edge along the bars (mm)
     float dedgev = 0; // distance inside the sector edge across the bars (mm)
+    bool  hasdeposits = false; // CrvSteps were available, so edep, nlayers and deppos are filled
     float edep = 0; // visible energy deposited by the particle in the sector's bars (MeV)
     int   nlayers = 0; // layers with a deposit from the particle
     XYZVectorF deppos; // energy-weighted position of those deposits, detector frame (mm)

@@ -18,6 +18,7 @@ namespace mu2e
     float time = 0; // crossing time (ns)
     float sigu = 0; // track position error along the bars, error model applied (mm)
     float sigv = 0; // track position error across the bars, error model applied (mm)
+    float rhouv = 0; // correlation of the track position errors along and across the bars
     float sigt = 0; // track time error (ns)
     float mom = 0; // track momentum at the crossing (MeV/c)
     float momerr = 0; // its error (MeV/c)

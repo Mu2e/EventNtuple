@@ -742,10 +742,7 @@ namespace mu2e {
     info.besttime = m.bestTime_;
     info.refsid = m.refSurface_.id().id() == SurfaceIdDetail::unknown ? -1 : static_cast<int>(m.refSurface_.id().id());
     info.tref = m.tRef_;
-    info.tfront = m.tFront_;
-    info.tmid = m.tMid_;
-    info.hasfront = m.hasFront_;
-    info.hasmid = m.hasMid_;
+    info.probe = m.probe_;
     info.timeoffset = m.timeOffset_;
     for(auto const& x : m.xings_) {
       TrkCrvXingInfo xi;
@@ -754,8 +751,9 @@ namespace mu2e {
       xi.pos = XYZVectorF(x.pos_.X(), x.pos_.Y(), x.pos_.Z());
       xi.dir = XYZVectorF(x.dir_.X(), x.dir_.Y(), x.dir_.Z());
       xi.time = x.time_;
-      xi.sigu = x.sigU_;
-      xi.sigv = x.sigV_;
+      xi.sigu = x.sigU();
+      xi.sigv = x.sigV();
+      xi.rhouv = (xi.sigu > 0 && xi.sigv > 0) ? x.cov_(0,1) / (xi.sigu * xi.sigv) : 0.f;
       xi.sigt = x.sigT_;
       xi.mom = x.mom_;
       xi.momerr = x.momErr_;
@@ -788,8 +786,9 @@ namespace mu2e {
       ci.dtxing = c.dtXing_;
       ci.du = c.du_;
       ci.dv = c.dv_;
-      ci.sigu = c.sigU_;
-      ci.sigv = c.sigV_;
+      ci.sigu = c.sigU();
+      ci.sigv = c.sigV();
+      ci.rhouv = (ci.sigu > 0 && ci.sigv > 0) ? c.cov_(0,1) / (ci.sigu * ci.sigv) : 0.f;
       ci.chi2 = c.chi2_;
       ci.ndof = c.ndof_;
       ci.nshare = c.nShare_;

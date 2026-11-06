@@ -17,6 +17,7 @@ namespace mu2e
     float dv = 0; // cluster - track across the bars at the cluster plane (mm), geometric candidates only
     float sigu = 0; // track error on du (mm)
     float sigv = 0; // track error on dv (mm)
+    float rhouv = 0; // correlation of the track errors on du and dv
     float chi2 = -1; // space + time chi2, -1 for time-only candidates
     int   ndof = 0; // chi2 degrees of freedom (2 single-ended, 3 two-ended)
     int   nshare = 0; // tracks of the same collection holding this cluster as a candidate

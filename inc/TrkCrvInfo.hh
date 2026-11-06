@@ -14,11 +14,8 @@ namespace mu2e
     int   bestgeom = -1; // index into <trk>crvcands of the lowest-chi2 geometric candidate, -1 if none
     int   besttime = -1; // index into <trk>crvcands of the time candidate closest to the configured dtref centre, -1 if none
     int   refsid = -1; // SurfaceId of the surface that defined tref, -1 if the KalSeed t0 was used
-    float tref = 0; // track reference time used by dtref (ns)
-    float tfront = 0; // track time at TT_Front (ns), valid if hasfront
-    float tmid = 0; // track time at TT_Mid (ns), valid if hasmid
-    bool  hasfront = false; // the fit has a TT_Front intersection
-    bool  hasmid = false; // the fit has a TT_Mid intersection
+    float tref = 0; // track reference time used by dtref: by default the track's entry into the tracker (ns)
+    int   probe = 0; // pulses the layer probe saw: 0 not run, 1 none (predicted bars only), 2 clustered pulses only, 3 all pulses
     float timeoffset = 0; // CRV - tracker time offset the matcher applied to cluster times (ns)
 
     void reset() { *this = TrkCrvInfo(); }
