@@ -84,6 +84,7 @@ namespace mu2e {
       void fillStepPointMCInfo(StepPointMCCollection const& mcsteps, MCStepInfos& mcstepinfos);
       void fillSimInfo(const art::Ptr<SimParticle>& sp, SimInfo& siminfo);
       void fillSimInfo(const SimParticle& sp, SimInfo& siminfo);
+      void fillSimInfoEnd(const SimParticle& sp, SimInfo& siminfo);
   };
 }
 

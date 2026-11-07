@@ -203,6 +203,14 @@ namespace mu2e {
 
         SimInfo sim_info;
         fillSimInfo(current_sim_particle, sim_info);
+        // In staged MC a particle is split into one SimParticle per stage.
+        // current_sim_particle is the first stage, so the start values above
+        // describe where the particle was created. Take the end values from
+        // current_sim_particle_ptr instead: the stage that made the track hits
+        // (generation 0) or that produced the previous generation (e.g. the
+        // muon at the point where it decayed), not the first stage, which may
+        // end at a stage boundary such as a killer volume.
+        fillSimInfoEnd(*current_sim_particle_ptr, sim_info);
         sim_info.trkrel = MCRelationship(current_sim_particle_ptr, trkprimaryptr);
         sim_info.rank = imatch;
 
@@ -288,6 +296,13 @@ namespace mu2e {
     siminfo.time = sp.startGlobalTime();
     siminfo.mom = XYZVectorF(sp.startMomentum());
     siminfo.pos = XYZVectorF(det->toDetector(sp.startPosition()));
+    siminfo.endpos = XYZVectorF(det->toDetector(sp.endPosition()));
+    siminfo.endmom = XYZVectorF(sp.endMomentum());
+  }
+
+  void InfoMCStructHelper::fillSimInfoEnd(const SimParticle& sp, SimInfo& siminfo) {
+    GeomHandle<DetectorSystem> det;
+    siminfo.stopCode = sp.stoppingCode();
     siminfo.endpos = XYZVectorF(det->toDetector(sp.endPosition()));
     siminfo.endmom = XYZVectorF(sp.endMomentum());
   }
