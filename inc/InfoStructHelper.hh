@@ -7,6 +7,7 @@
 #include "Offline/RecoDataProducts/inc/StrawHitIndex.hh"
 #include "Offline/RecoDataProducts/inc/KalSeed.hh"
 #include "Offline/RecoDataProducts/inc/KalSeedDtDt.hh"
+#include "Offline/RecoDataProducts/inc/TrkCrvMatch.hh"
 #include "Offline/RecoDataProducts/inc/StrawHitFlag.hh"
 #include "Offline/RecoDataProducts/inc/RecoCount.hh"
 #include "Offline/RecoDataProducts/inc/HelixSeed.hh"
@@ -32,6 +33,9 @@
 #include "EventNtuple/inc/CentralHelixInfo.hh"
 #include "EventNtuple/inc/KinematicLineInfo.hh"
 #include "EventNtuple/inc/TrkDtDtInfo.hh"
+#include "EventNtuple/inc/TrkCrvInfo.hh"
+#include "EventNtuple/inc/TrkCrvXingInfo.hh"
+#include "EventNtuple/inc/TrkCrvCandInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitInfo.hh"
 #include "EventNtuple/inc/TrkStrawHitCalibInfo.hh"
 #include "EventNtuple/inc/TrkStrawMatInfo.hh"
@@ -80,6 +84,9 @@ namespace mu2e {
     void fillKinematicLineInfo(const KalSeed& kseed, std::vector<std::vector<KinematicLineInfo>>& klis);
     void fillMVAResultInfo(const MVAResult& mva, std::vector<MVAResultInfo>& all_mvas);
     void fillTrkDtDtInfo(const KalSeedDtDt& dtdt,std::vector<TrkDtDtInfo>& trkinfo);
+    // track-CRV association of one track (null: no record); crvPid is the collection crvcoincs is filled from
+    void fillTrkCrvInfo(const TrkCrvMatch* match, const art::ProductID& crvPid, std::vector<TrkCrvInfo>& infos,
+                        std::vector<std::vector<TrkCrvXingInfo>>& xings, std::vector<std::vector<TrkCrvCandInfo>>& cands);
     void fillHitInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawHitInfo>>& all_tshinfos, std::vector<std::vector<TrkStrawHitCalibInfo>>& all_tshcinfos, bool saveCalib );
     void fillMatInfo(const KalSeed& kseed, std::vector<std::vector<TrkStrawMatInfo>>& tminfos );
     void fillTrkCaloHitInfo(const KalSeed& kseed, std::vector<TrkCaloHitInfo>& tchinfo );
