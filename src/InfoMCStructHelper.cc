@@ -29,6 +29,18 @@
 
 namespace mu2e {
 
+  namespace {
+    // id of the first simulation-stage piece of this particle, as in
+    // SimParticle::originParticle(), but stopping at a parent piece that was not kept
+    int originId(SimParticle const& sp) {
+      SimParticle const* piece = &sp;
+      while (piece->selfParent() && piece->parent().isAvailable()) {
+        piece = piece->parent().get();
+      }
+      return piece->id().asInt();
+    }
+  }
+
   InfoMCStructHelper::InfoMCStructHelper(const Config& conf) :
     _spctag(conf.spctag()), _mingood(conf.mingood()),
     _maxdt(conf.maxvddt()),
@@ -291,17 +303,16 @@ namespace mu2e {
     siminfo.id = sp.id().asInt();
     if(sp.genParticle().isNonnull()) { siminfo.gen = sp.genParticle()->generatorId().id(); }
     siminfo.startCode = sp.creationCode();
-    siminfo.stopCode = sp.stoppingCode();
     siminfo.pdg = sp.pdgId();
     siminfo.time = sp.startGlobalTime();
     siminfo.mom = XYZVectorF(sp.startMomentum());
     siminfo.pos = XYZVectorF(det->toDetector(sp.startPosition()));
-    siminfo.endpos = XYZVectorF(det->toDetector(sp.endPosition()));
-    siminfo.endmom = XYZVectorF(sp.endMomentum());
+    fillSimInfoEnd(sp, siminfo);
   }
 
   void InfoMCStructHelper::fillSimInfoEnd(const SimParticle& sp, SimInfo& siminfo) {
     GeomHandle<DetectorSystem> det;
+    siminfo.endid = sp.id().asInt();
     siminfo.stopCode = sp.stoppingCode();
     siminfo.endpos = XYZVectorF(det->toDetector(sp.endPosition()));
     siminfo.endmom = XYZVectorF(sp.endMomentum());
@@ -577,6 +588,7 @@ namespace mu2e {
           mcsi.mom = mcstep.momentum();
           mcsi.pos = spos;
           mcsi.simid = mcstep.simParticle()->id().asInt();
+          mcsi.originid = originId(*mcstep.simParticle());
           mcsi.pdg = mcstep.simParticle()->pdgId();
           mcsi.startCode = mcstep.simParticle()->creationCode();
           mcsi.stopCode = mcstep.simParticle()->stoppingCode();
@@ -618,6 +630,7 @@ namespace mu2e {
       mcstepinfo.pos = XYZVectorF(det->toDetector(mcstep.position()));
       const auto& simParticle = mcstep.simParticle();
       mcstepinfo.simid = simParticle->id().asInt();
+      mcstepinfo.originid = originId(*simParticle);
       mcstepinfo.pdg = simParticle->pdgId();
       mcstepinfo.startCode = simParticle->creationCode();
       mcstepinfo.stopCode = simParticle->stoppingCode();

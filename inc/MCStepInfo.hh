@@ -20,7 +20,8 @@ namespace mu2e {
     XYZVectorF pos;  // particle position at the start of this step
     void reset() {*this = MCStepInfo(); }
     bool valid() { return vid>=0; }
-    int simid = -1; // SimParticle id
+    int simid = -1; // SimParticle id (the simulation-stage piece that made this step)
+    int originid = -1; // id of the first simulation-stage piece of this SimParticle, matching <trk>mcsim id; equals simid unless the particle crossed a simulation stage boundary
     int pdg = -1; // true PDG code
     int startCode = -1; // creation process code
     int stopCode = -1; // stop process code
