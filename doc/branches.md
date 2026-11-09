@@ -145,6 +145,7 @@ The branch is empty if there are no CRV hit during the event.
 | crvcoincs |  Vector branch |   information about a cluster of CRV coincidence triplets| [see CrvHitInfoReco.hh](../inc/CrvHitInfoReco.hh)
 | crvcoincsmc |  Vector branch |   information about the MC track which most likely caused the CRV coincidence triplets| [see CrvHitInfoMC.hh](../inc/CrvHitInfoMC.hh)
 | crvcoincsmcplane |  Vector branch |   information about the point where the MC trajectory crosses the xz plane of CRV-T| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
+| crvcoincsmcplane_&lt;branchName&gt; |  Vector branch |   the same for each further plane in `crv.planes`; by default `crvcoincsmcplane_nominalT`, a fixed plane at the nominal Run 1 CRV-T face (y = 2653.2 mm) in every geometry| [see CrvPlaneInfoMC.hh](../inc/CrvPlaneInfoMC.hh)
 | crvpulses |  Vector branch |  | [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
 | crvdigis |  Vector branch |  | [see CrvWaveformInfo.hh](../inc/CrvWaveformInfo.hh)
 | crvpulsesmc |  Vector branch |  | [see CrvPulseInfoReco.hh](../inc/CrvPulseInfoReco.hh)
