@@ -343,7 +343,7 @@ namespace mu2e {
         using Comment=fhicl::Comment;
 
         fhicl::Atom<bool> include{Name("include"), Comment("True/false to include this quantity or not (master switch)")};
-        fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity")};
+        fhicl::Atom<art::InputTag> inputTag{Name("inputTag"), Comment("InputTag for subrun quantity (cosmicLivetime: empty to find it by type)")};
         fhicl::Atom<bool> fillNtuple{Name("fillNtuple"), Comment("True/false to add this quantity to the ntuple")};
         fhicl::Atom<bool> fillTotalsHistogram{Name("fillTotalsHistogram"), Comment("True/false to make a totals histogram for this quantity")};
       };
@@ -587,6 +587,9 @@ namespace mu2e {
       // Event-level MC gate (simParticles, mcTrajectories, primaryParticle).
       // Also gates tracker MC and CRV MC.
       bool fillEventMC() const { return _conf.mc().fill(); }
+
+      // Cosmic livetime is MC-only: gated by the event-level MC flag as well as its own switch
+      bool fillCosmicLivetime() const { return _conf.subruns().cosmicLivetime().include() && fillEventMC(); }
 
       // Tracker MC: both the global event MC gate and the tracker MC gate must
       // be true, plus the per-branch flag.
@@ -1038,7 +1041,7 @@ namespace mu2e {
         _subrunNtuple->Branch("procEventCount", &_procEventCount, _buffsize, _splitlevel);
       }
 
-      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillNtuple()) {
+      if (fillCosmicLivetime() && _conf.subruns().cosmicLivetime().fillNtuple()) {
         _subrunNtuple->Branch("cosmicLivetime", &_cosmicLivetime, _buffsize, _splitlevel);
       }
 
@@ -1050,7 +1053,7 @@ namespace mu2e {
       if (_conf.subruns().procEventCount().include() && _conf.subruns().procEventCount().fillTotalsHistogram()) {
         _hProcEventCount = tfs->make<TH1I>("n_proc_events", "total number of processed events", 1,0,1);
       }
-      if (_conf.subruns().cosmicLivetime().include() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+      if (fillCosmicLivetime() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
         _hCosmicLivetime = tfs->make<TH1F>("cosmic_livetime", "total cosmic livetime [sec]", 1,0,1);
       }
 
@@ -1083,12 +1086,31 @@ namespace mu2e {
       }
     }
 
-    if (_conf.subruns().cosmicLivetime().include()) {
+    if (fillCosmicLivetime()) {
+      _cosmicLivetime = -1.0; // reset so a subrun without a CosmicLivetime doesn't inherit the previous value
+      // The producer depends on how the sample was made (e.g. "generate" for extracted, "CosmicResampler:mixed" for mixed),
+      // so an empty inputTag takes the single CosmicLivetime found in the subrun
+      const art::InputTag& tag = _conf.subruns().cosmicLivetime().inputTag();
       art::Handle<CosmicLivetime> cosmicLivetimeHandle;
-      subrun.getByLabel<CosmicLivetime>(_conf.subruns().cosmicLivetime().inputTag(), cosmicLivetimeHandle);
-      if(cosmicLivetimeHandle.isValid()) _cosmicLivetime = cosmicLivetimeHandle->liveTime();
-      if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
-        _hCosmicLivetime->Fill(0.0, _cosmicLivetime);
+      if (tag.empty()) {
+        std::vector<art::Handle<CosmicLivetime>> handles = subrun.getMany<CosmicLivetime>();
+        if (handles.size() > 1) {
+          cet::exception ex("EventNtuple");
+          ex << "Found " << handles.size() << " CosmicLivetime products in subrun " << subrun.id() << ", set subruns.cosmicLivetime.inputTag to one of:";
+          for (const auto& handle : handles) {
+            ex << " " << handle.provenance()->moduleLabel() << ":" << handle.provenance()->productInstanceName();
+          }
+          throw ex;
+        }
+        if (handles.size() == 1) cosmicLivetimeHandle = handles.front();
+      } else {
+        subrun.getByLabel<CosmicLivetime>(tag, cosmicLivetimeHandle);
+      }
+      if (cosmicLivetimeHandle.isValid()) {
+        _cosmicLivetime = cosmicLivetimeHandle->liveTime();
+        if (_conf.subruns().makeTotalsHistograms() && _conf.subruns().cosmicLivetime().fillTotalsHistogram()) {
+          _hCosmicLivetime->Fill(0.0, _cosmicLivetime);
+        }
       }
     }
 

@@ -106,8 +106,6 @@ physics.analyzers : {
   }
 }
 
-physics.analyzers.ENRefe.subruns.cosmicLivetime.inputTag : "CosmicResampler:mixed"
-physics.analyzers.ENRefmu.subruns.cosmicLivetime.inputTag : "CosmicResampler:mixed"
 
 physics.Refe : [ ENRefe ]
 physics.Refmu : [ ENRefmu ]

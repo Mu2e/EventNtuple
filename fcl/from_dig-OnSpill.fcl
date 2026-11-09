@@ -65,10 +65,6 @@ physics.analyzers.EventNtupleTTMCMpr.trk.mc.kalSeedMCAssns : "TTMprDeKSFMC"
 end_paths : [ EndPath ]
 physics.trigger_paths : [ "TrigPath" ]
 services.TFileService.fileName: "nts.owner.trkana-triggerMC.version.sequencer.root"
-physics.analyzers.EventNtupleTTMCApr.subruns.cosmicLivetime.include : false
-physics.analyzers.EventNtupleTTMCTpr.subruns.cosmicLivetime.include : false
-physics.analyzers.EventNtupleTTMCCpr.subruns.cosmicLivetime.include : false
-physics.analyzers.EventNtupleTTMCMpr.subruns.cosmicLivetime.include : false
 
 physics.analyzers.EventNtupleTTMCApr.trk.fillTrkDtDt : false
 physics.analyzers.EventNtupleTTMCTpr.trk.fillTrkDtDt : false

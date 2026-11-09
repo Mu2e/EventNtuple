@@ -30,5 +30,4 @@ physics.analyzers.EventNtuple.subruns.makeNtuple : false
 physics.producers.TrkQualDe.KalSeedPtrCollection : "MergeKKDeCalib"
 services.TimeTracker.printSummary: true
 services.TFileService.fileName: "nts.owner.EventNtupleDeCalib.version.sequence.root"
-physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
 physics.analyzers.EventNtuple.trk.fits[0].trkDtDtTag : "TrkDtDtDeCalib:MergeKKDeCalib"

@@ -64,4 +64,3 @@ services.GeometryService.inputFile : "Offline/Mu2eG4/geom/geom_common.txt" # we 
 
 physics.EventNtupleEndPath : [ @sequence::EventNtuple.EndPath ] # add back genCountLogger
 
-physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
