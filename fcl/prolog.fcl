@@ -410,10 +410,17 @@ EventNtupleMaker : {
     keepUnclusteredPulses : false
     fillDigis : false
     digisTag : "SelectReco"
-    # Default: a single truth plane at the detector-facing scintillator face of the
-    # CRV-T sectors. Position and orientation are read from the GeometryService, so
-    # this tracks the loaded geometry version automatically.
-    planes : [ { sector : "T" branchName : "" } ]
+    # Default truth planes:
+    # - crvcoincsmcplane: the detector-facing scintillator face of the CRV-T sectors
+    #   of the loaded geometry. Position and orientation are read from the
+    #   GeometryService, so this tracks the loaded geometry version automatically
+    #   (Run 1A: y = 4736.0 mm, the modules on the DS hatch blocks).
+    # - crvcoincsmcplane_nominalT: a fixed horizontal plane at the nominal Run 1 CRV-T
+    #   face, y = 2653.2 mm (Mu2e frame; crv_counters_v10.txt: first counter at
+    #   y = 2663.13 mm minus half of the 19.80 mm bar), at that height in every
+    #   geometry, so samples without the nominal CRV-T can be studied there.
+    planes : [ { sector : "T" branchName : "" },
+               { axis : 1 coordinate : 2653.2 branchName : "nominalT" } ]
     mc : {
       fill : true
       coincidenceMCsTag : "compressRecoMCs:CrvCoincidenceClusterMatchMC"
