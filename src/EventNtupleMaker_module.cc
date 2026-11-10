@@ -318,17 +318,20 @@ namespace mu2e {
         fhicl::Atom<bool>          keepUnclusteredPulses {Name("keepUnclusteredPulses"), Comment("If false, crvpulses stores only pulses assigned to CRV coincidence clusters"), false};
         fhicl::Atom<bool>          fillDigis             {Name("fillDigis"),             Comment("Fill CRV digi branch")};
         fhicl::Atom<art::InputTag> digisTag       {Name("digisTag"),        Comment("Tag for CrvDigi collection")};
-        // CRV MC truth planes. Each plane names a CRV sector; its position and
-        // orientation (the detector-facing face and the perpendicular axis) are
-        // taken from the GeometryService, so no coordinates or axis integers live
-        // in fhicl.
+        // CRV MC truth planes. A plane either names a CRV sector, and its position
+        // and orientation (the detector-facing face and the perpendicular axis) are
+        // taken from the GeometryService, or gives a fixed axis and coordinate, for
+        // a plane where the loaded geometry has no sector (e.g. the nominal CRV-T
+        // height in a geometry without the nominal CRV-T).
         struct CrvPlaneConfig {
           using Name=fhicl::Name;
           using Comment=fhicl::Comment;
-          fhicl::Atom<std::string> sector    {Name("sector"),     Comment("CRV sector name (e.g. \"T\", \"R\", \"L\", \"T1\", \"EX\"); the truth plane is placed at this sector's detector-facing scintillator face, with position and orientation read from the GeometryService")};
+          fhicl::OptionalAtom<std::string> sector{Name("sector"), Comment("CRV sector name (e.g. \"T\", \"R\", \"L\", \"T1\", \"EX\"); the truth plane is placed at this sector's detector-facing scintillator face, with position and orientation read from the GeometryService. Give either sector, or axis and coordinate")};
+          fhicl::OptionalAtom<int>         axis{Name("axis"), Comment("Fixed plane: the axis perpendicular to the plane (0=x, 1=y, 2=z); give together with coordinate, instead of sector")};
+          fhicl::OptionalAtom<double>      coordinate{Name("coordinate"), Comment("Fixed plane: its coordinate along axis, in mm, Mu2e frame; give together with axis, instead of sector")};
           fhicl::Atom<std::string> branchName{Name("branchName"), Comment("Branch-name suffix for this plane; branch is crvcoincsmcplane_<branchName> (or crvcoincsmcplane for an empty string)"), ""};
         };
-        fhicl::Sequence<fhicl::Table<CrvPlaneConfig>> planes{Name("planes"), Comment("CRV MC truth planes: one entry per CRV sector whose trajectory crossings should be recorded")};
+        fhicl::Sequence<fhicl::Table<CrvPlaneConfig>> planes{Name("planes"), Comment("CRV MC truth planes: one entry per plane (a CRV sector, or a fixed axis and coordinate) whose trajectory crossings should be recorded")};
         fhicl::OptionalAtom<art::InputTag> inferenceTag{Name("inferenceTag"), Comment("Tag for CrvInference Assns (art::Assns<KalSeed,CrvCoincidenceCluster,MVAResult>); omit to disable")};
         // MC sub-config (requires mc.fill also be true)
         struct MCConfig {
@@ -1147,12 +1150,13 @@ namespace mu2e {
   }
 
   void EventNtupleMaker::resolveCrvPlanes() {
-    // Resolve each configured CRV truth plane (named by sector) into a plane
-    // coordinate and perpendicular axis, reading both from the GeometryService.
-    // The plane sits at the sector's detector-facing scintillator face: the inner
-    // face (toward the detector axis) of the innermost scintillator layer. This is
-    // the first CRV surface a track extrapolated outward from the detector reaches,
-    // matching the historical hard-coded default.
+    // Resolve each configured CRV truth plane into a plane coordinate and
+    // perpendicular axis. A fixed plane (axis and coordinate) is used as given.
+    // A plane named by sector reads both from the GeometryService: it sits at the
+    // sector's detector-facing scintillator face, the inner face (toward the
+    // detector axis) of the innermost scintillator layer. This is the first CRV
+    // surface a track extrapolated outward from the detector reaches, matching the
+    // historical hard-coded default.
     GeomHandle<CosmicRayShield> CRS;
     GeomHandle<DetectorSystem>  tdet;
     const CLHEP::Hep3Vector& detOrigin = tdet->getOrigin(); // detector axis, Mu2e frame
@@ -1161,7 +1165,26 @@ namespace mu2e {
     _crvPlaneCoords.clear();
     _crvPlaneAxes.clear();
     for(auto const& plane : _conf.crv().planes()) {
-      const std::string& sector = plane.sector();
+      std::string sector;
+      int         fixedAxis  = -1;
+      double      fixedCoord = 0.0;
+      const bool  hasSector  = plane.sector(sector);
+      const bool  hasAxis    = plane.axis(fixedAxis);
+      const bool  hasCoord   = plane.coordinate(fixedCoord);
+      if(hasAxis != hasCoord)
+        throw cet::exception("EventNtuple")
+          << "crv.planes: axis and coordinate must be given together (branchName \"" << plane.branchName() << "\")\n";
+      if(hasSector == hasAxis)
+        throw cet::exception("EventNtuple")
+          << "crv.planes: give either sector, or axis and coordinate (branchName \"" << plane.branchName() << "\")\n";
+      if(hasAxis) {
+        if(fixedAxis < 0 || fixedAxis > 2)
+          throw cet::exception("EventNtuple")
+            << "crv.planes: axis must be 0 (x), 1 (y) or 2 (z), not " << fixedAxis << "\n";
+        _crvPlaneCoords.push_back(fixedCoord);
+        _crvPlaneAxes.push_back(fixedAxis);
+        continue;
+      }
       // Sector names are "CRV_<sector>" (e.g. CRV_T1); match like CosmicRayShield does.
       const CRSScintillatorShield* rep = nullptr;
       for(auto const& s : shields) {
