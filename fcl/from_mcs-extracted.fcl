@@ -11,5 +11,5 @@ services.GeometryService.inputFile: "Production/JobConfig/cosmic/geom_cosmic_ext
 
 # Track-CRV association of the line fits, with truth: <trk>crv, <trk>crvxings, <trk>crvcands and their mc branches
 physics.EventNtuplePath : [ @sequence::EventNtuple.PathExt, @sequence::TrkCrvMatchNoFieldMCPath ]
-physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchTags : [ "TrkCrvMatchLine" ]
-physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchMCTags : [ "TrkCrvMatchLineMC" ]
+physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchTags : [ "TrkCrvMatchLineNtuple" ]
+physics.analyzers.EventNtuple.trk.fits[0].trkCrvMatchMCTags : [ "TrkCrvMatchLineNtupleMC" ]

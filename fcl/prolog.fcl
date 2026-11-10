@@ -204,34 +204,38 @@ MergeKKProducersPath : [ MergeKKAll ]
 # One matcher per KalSeedCollection; a fit branch lists the matchers behind its input in trkCrvMatchTags.
 # Reco output keeps only the clustered CRV pulses (SelectReco), so there the layer probe sees no unclustered pulses.
 # DtRefCenter per fit: the values of Production JobConfig/reco/prolog.fcl (KKLine uses the Offline default).
+# Labels end in Ntuple so they never shadow the reco products (TrkCrvMatchLine, ...): files with those set the tags alone.
 #################################
 TrkCrvMatchNtuple : { @table::TrkCrvMatcher CrvRecoPulseCollection : "SelectReco" ProbeAllPulses : false }
 TrkCrvMatchMCNtuple : { @table::TrkCrvMatchMC RequireCrvSteps : false } # reco output drops the digi-stage CrvSteps: no deposits
 TrkCrvMatchLH : { @table::TrkCrvMatchNtuple DoGeometric : false LayerProbe : false } # LoopHelix fits do not reach the CRV: time only
 TrkCrvMatchProducers : {
-  TrkCrvMatchLine : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKLine" }
+  TrkCrvMatchLineNtuple : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKLine" }
   # KKCHmu runs on the Run1 geometries, whose T1 and T2 are both CRV sector type 1: SigmaV of Production JobConfig/reco/prolog.fcl
-  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" DtRefCenter : 27 SigmaV : [ 13 ] }
-  TrkCrvMatchDe : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" DtRefCenter : 32 }
-  TrkCrvMatchUe : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" DtRefCenter : 28 }
-  TrkCrvMatchDmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" DtRefCenter : 30 }
-  TrkCrvMatchUmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKUmu" DtRefCenter : 26 }
-  TrkCrvMatchLineMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchLine" }
-  TrkCrvMatchCHmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchCHmu" }
-  TrkCrvMatchDeMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDe" }
-  TrkCrvMatchUeMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUe" }
-  TrkCrvMatchDmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDmu" }
-  TrkCrvMatchUmuMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUmu" }
+  TrkCrvMatchCHmuNtuple : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" DtRefCenter : 27 SigmaV : [ 13 ] }
+  TrkCrvMatchDeNtuple : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" DtRefCenter : 32 }
+  TrkCrvMatchUeNtuple : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" DtRefCenter : 28 }
+  TrkCrvMatchDmuNtuple : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" DtRefCenter : 30 }
+  TrkCrvMatchUmuNtuple : { @table::TrkCrvMatchLH KalSeedCollection : "KKUmu" DtRefCenter : 26 }
+  TrkCrvMatchLineNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchLineNtuple" }
+  TrkCrvMatchCHmuNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchCHmuNtuple" }
+  TrkCrvMatchDeNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDeNtuple" }
+  TrkCrvMatchUeNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUeNtuple" }
+  TrkCrvMatchDmuNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchDmuNtuple" }
+  TrkCrvMatchUmuNtupleMC : { @table::TrkCrvMatchMCNtuple TrkCrvMatchCollection : "TrkCrvMatchUmuNtuple" }
 }
-TrkCrvMatchNoFieldPath : [ TrkCrvMatchLine ]
-TrkCrvMatchNoFieldMCPath : [ TrkCrvMatchLine, TrkCrvMatchLineMC ]
-TrkCrvMatchOffSpillPath : [ TrkCrvMatchCHmu ]
-TrkCrvMatchOffSpillMCPath : [ TrkCrvMatchCHmu, TrkCrvMatchCHmuMC ]
-TrkCrvMatchAllPath : [ TrkCrvMatchDe, TrkCrvMatchUe, TrkCrvMatchDmu, TrkCrvMatchUmu ]
-TrkCrvMatchAllMCPath : [ @sequence::TrkCrvMatchAllPath, TrkCrvMatchDeMC, TrkCrvMatchUeMC, TrkCrvMatchDmuMC, TrkCrvMatchUmuMC ]
+TrkCrvMatchNoFieldPath : [ TrkCrvMatchLineNtuple ]
+TrkCrvMatchNoFieldMCPath : [ TrkCrvMatchLineNtuple, TrkCrvMatchLineNtupleMC ]
+TrkCrvMatchOffSpillPath : [ TrkCrvMatchCHmuNtuple ]
+TrkCrvMatchOffSpillMCPath : [ TrkCrvMatchCHmuNtuple, TrkCrvMatchCHmuNtupleMC ]
+TrkCrvMatchAllPath : [ TrkCrvMatchDeNtuple, TrkCrvMatchUeNtuple, TrkCrvMatchDmuNtuple, TrkCrvMatchUmuNtuple ]
+TrkCrvMatchAllMCPath : [ @sequence::TrkCrvMatchAllPath, TrkCrvMatchDeNtupleMC, TrkCrvMatchUeNtupleMC, TrkCrvMatchDmuNtupleMC, TrkCrvMatchUmuNtupleMC ]
 # trkCrvMatchTags / trkCrvMatchMCTags for the fit branches whose input is made from these collections
-TrkCrvMatchTagsAll : [ "TrkCrvMatchDe", "TrkCrvMatchUe", "TrkCrvMatchDmu", "TrkCrvMatchUmu" ]
-TrkCrvMatchMCTagsAll : [ "TrkCrvMatchDeMC", "TrkCrvMatchUeMC", "TrkCrvMatchDmuMC", "TrkCrvMatchUmuMC" ]
+TrkCrvMatchTagsAll : [ "TrkCrvMatchDeNtuple", "TrkCrvMatchUeNtuple", "TrkCrvMatchDmuNtuple", "TrkCrvMatchUmuNtuple" ]
+TrkCrvMatchMCTagsAll : [ "TrkCrvMatchDeNtupleMC", "TrkCrvMatchUeNtupleMC", "TrkCrvMatchDmuNtupleMC", "TrkCrvMatchUmuNtupleMC" ]
+# the same for files whose reco ran the association (Production JobConfig/reco): no producers needed
+TrkCrvMatchRecoTagsAll : [ "TrkCrvMatchDe", "TrkCrvMatchUe", "TrkCrvMatchDmu", "TrkCrvMatchUmu" ]
+TrkCrvMatchRecoMCTagsAll : [ "TrkCrvMatchDeMC", "TrkCrvMatchUeMC", "TrkCrvMatchDmuMC", "TrkCrvMatchUmuMC" ]
 
 # Cluster the fits behind MergeKKAll made from the same hits (any direction or particle hypothesis): fills <branch>.id and <branch>.rank
 TrackMatchingAll : {
