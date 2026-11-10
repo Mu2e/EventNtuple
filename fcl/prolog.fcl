@@ -210,7 +210,8 @@ TrkCrvMatchMCNtuple : { @table::TrkCrvMatchMC RequireCrvSteps : false } # reco o
 TrkCrvMatchLH : { @table::TrkCrvMatchNtuple DoGeometric : false LayerProbe : false } # LoopHelix fits do not reach the CRV: time only
 TrkCrvMatchProducers : {
   TrkCrvMatchLine : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKLine" }
-  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" DtRefCenter : 27 }
+  # KKCHmu runs on the Run1 geometries, whose T1 and T2 are both CRV sector type 1: SigmaV of Production JobConfig/reco/prolog.fcl
+  TrkCrvMatchCHmu : { @table::TrkCrvMatchNtuple KalSeedCollection : "KKCHmu" DtRefCenter : 27 SigmaV : [ 13 ] }
   TrkCrvMatchDe : { @table::TrkCrvMatchLH KalSeedCollection : "KKDe" DtRefCenter : 32 }
   TrkCrvMatchUe : { @table::TrkCrvMatchLH KalSeedCollection : "KKUe" DtRefCenter : 28 }
   TrkCrvMatchDmu : { @table::TrkCrvMatchLH KalSeedCollection : "KKDmu" DtRefCenter : 30 }
