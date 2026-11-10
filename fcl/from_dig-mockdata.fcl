@@ -55,4 +55,3 @@ services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 
 #include "Production/Validation/database.fcl"
 
-physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

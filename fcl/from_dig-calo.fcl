@@ -55,4 +55,3 @@ physics.analyzers.EventNtuple.calo.mc.fillDigis : true
 
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 
-physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false

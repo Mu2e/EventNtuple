@@ -475,7 +475,7 @@ EventNtupleMaker : {
     makeTotalsHistograms : true
     genEventCount : { include : true inputTag : "genCounter" fillNtuple : true fillTotalsHistogram : true}
     procEventCount : { include : true inputTag : "" fillNtuple : true fillTotalsHistogram : true }
-    cosmicLivetime : { include : true inputTag : "generate" fillNtuple : true fillTotalsHistogram : true }
+    cosmicLivetime : { include : true inputTag : "" fillNtuple : true fillTotalsHistogram : true }
   }
 }
 # instance for processing trigger (digitization) output from simulation

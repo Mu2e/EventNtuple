@@ -25,7 +25,6 @@ physics.end_paths : [ EventNtupleEndPath ]
 services.TFileService.fileName: "nts.owner.description.version.sequencer.root"
 
 physics.analyzers.EventNtuple.subruns.genEventCount.include : false
-physics.analyzers.EventNtuple.subruns.cosmicLivetime.include : false
 # Store the online (trigger) tracks next to the offline tracks
 physics.analyzers.EventNtuple.trk.fits : [ @local::All, @local::TrigApr, @local::TrigAprUe, @local::TrigCalDe ]
 
