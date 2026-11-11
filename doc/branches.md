@@ -62,6 +62,24 @@ Within each Kalman fit element, there is a vector describing the track segment p
 | trksegpars_ch |  Vector-of-vector branch |   CentralHelix track parameters at each trkseg surface (used for field-on cosmic tracks)| [see CentralHelixInfo.hh](../inc/CentralHelixInfo.hh)
 | trksegpars_kl |  Vector-of-vector branch |   KinematicLine track parameters for each trkseg surface (used for field-off cosmics)| [see KinematicLineInfo.hh](../inc/KinematicLineInfo.hh)
 | trksegsmc |  Vector-of-vector branch |   MC-truth information of the SurfaceSteps taken by a particle through passive elements, or virtual detectors| [see SurfaceStepInfo.hh](../inc/SurfaceStepInfo.hh)
+## Track-CRV association Branches
+
+These branches hold the association of each track with CRV coincidence clusters (Offline ```TrkCrvMatch```, and ```TrkCrvMatchMC``` for MC).
+They are filled for track branches configured with ```trkCrvMatchTags``` (and ```trkCrvMatchMCTags```), and are named after the track branch, e.g. ```trkcrv``` for ```trk```.
+
+Reco files made with the association in Production's reco paths already hold these collections: there, set the tags to the reco labels (```TrkCrvMatchLine```, ```TrkCrvMatchCHmu```, ```TrkCrvMatchDe```, ... and their ```...MC```; ```TrkCrvMatchRecoTagsAll``` and ```TrkCrvMatchRecoMCTagsAll``` in ```fcl/prolog.fcl``` for the LoopHelix fits) and run no producer. Older files need the ntuple job to make them, with the ```TrkCrvMatchProducers``` and paths of ```fcl/prolog.fcl```, labelled ```TrkCrvMatch<fit>Ntuple``` (```TrkCrvMatchTagsAll```), as ```from_mcs-extracted.fcl``` does. The stored records are the better ones: their layer probe saw every CRV pulse (```probe``` 3), and their truth has the CRV deposits, which reco output drops.
+
+```<trk>crv``` has one element per track. The other branches hold, per track, a vector of CRV sector crossings (```crvxings```, with the per-layer probe) or of associated clusters (```crvcands```).
+```crvcands.crvcoinc``` is the index of the cluster in ```crvcoincs```; ```crvcandsmc``` and ```crvxingsmc``` are parallel to ```crvcands``` and ```crvxings```. See ```utils/trkcrv_example.py```.
+
+| branch | structure | explanation | leaf information |
+|--------|-----------|-------------|------------------|
+| trkcrv |  Vector branch |   track-CRV association summary of one track, from Offline TrkCrvMatch| [see TrkCrvInfo.hh](../inc/TrkCrvInfo.hh)
+| trkcrvxings |  Vector-of-vector branch |   one CRV sector crossing of a track's extrapolation, with the layer probe of that sector| [see TrkCrvXingInfo.hh](../inc/TrkCrvXingInfo.hh)
+| trkcrvcands |  Vector-of-vector branch |   one CRV coincidence cluster associated with a track (candidates ordered geometric by chi2, then time-only)| [see TrkCrvCandInfo.hh](../inc/TrkCrvCandInfo.hh)
+| trkcrvcandsmc |  Vector-of-vector branch |   truth of one track-CRV candidate, parallel to <trk>crvcands| [see TrkCrvCandInfoMC.hh](../inc/TrkCrvCandInfoMC.hh)
+| trkcrvxingsmc |  Vector-of-vector branch |   truth of one reco CRV crossing, parallel to <trk>crvxings| [see TrkCrvXingInfoMC.hh](../inc/TrkCrvXingInfoMC.hh)
+| trkcrvtruexingsmc |  Vector-of-vector branch |   one true CRV sector crossing by the track's particle or one of its ancestors| [see TrkCrvTrueXingInfoMC.hh](../inc/TrkCrvTrueXingInfoMC.hh)
 ## Straw Branches
 
 These branches contain a vector in which each element lists the properties of a straw hits in the tracker.
