@@ -1,5 +1,6 @@
 //
-// TrkCrvXingInfo: one CRV sector crossing of a track's extrapolation, with the layer probe of that sector
+// TrkCrvXingInfo: one CRV sector crossing of a track's extrapolation, or, for a straight-line track that crosses no
+// sector, its projection onto a sector's extended plane (inbounds false); with the layer probe of that sector
 //
 #ifndef TrkCrvXingInfo_HH
 #define TrkCrvXingInfo_HH
@@ -22,7 +23,7 @@ namespace mu2e
     float sigt = 0; // track time error (ns)
     float mom = 0; // track momentum at the crossing (MeV/c)
     float momerr = 0; // its error (MeV/c)
-    bool  inbounds = false; // crossing inside the sector rectangle
+    bool  inbounds = false; // crossing inside the sector rectangle (found by the extrapolation); false: a projection, whose candidates run to larger chi2
     float dedgeu = 0; // distance inside the sector edge along the bars (mm), negative outside
     float dedgev = 0; // distance inside the sector edge across the bars (mm), negative outside
     float edgesig = 0; // edge distance in units of the track error

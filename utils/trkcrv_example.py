@@ -3,7 +3,8 @@
 
 For a track branch <trk> (e.g. "trk") configured with trkCrvMatchTags, the ntuple holds, per track:
   <trk>crv        one TrkCrvInfo: counts, bestgeom / besttime indices into <trk>crvcands, reference times
-  <trk>crvxings   TrkCrvXingInfo per CRV sector crossing of the extrapolation, with the 4-layer probe
+  <trk>crvxings   TrkCrvXingInfo per CRV sector crossing of the extrapolation (inbounds), or, for a straight-line track
+                  that crosses no sector, per projection onto a sector's extended plane (not inbounds), with the 4-layer probe
   <trk>crvcands   TrkCrvCandInfo per associated CRV cluster: residuals, chi2, flags, and crvcoinc, the index into crvcoincs
 and, with MC, <trk>crvcandsmc (parallel to crvcands), <trk>crvxingsmc (parallel to crvxings) and <trk>crvtruexingsmc.
 
@@ -80,11 +81,12 @@ def main():
     matched = leaf(a, crv, "matched")
     bestgeom = leaf(a, crv, "bestgeom")
     ntracks = int(ak.sum(ak.num(matched, axis=1)))
-    nxing = leaf(a, crv, "nxings")
-    has_xing = nxing > 0
+    inbounds = leaf(a, xings, "inbounds")                             # [event][track][xing]
+    has_xing = ak.any(inbounds, axis=2)                               # crosses a CRV sector (not nxings > 0: projections)
+    has_proj = ak.any(~inbounds, axis=2)                              # a line track that crosses none, projected
     has_geom = bestgeom >= 0
-    print("tracks %d, with a TrkCrvMatch record %d, crossing the CRV %d, with a geometric candidate %d"
-          % (ntracks, ak.sum(matched), ak.sum(has_xing), ak.sum(has_geom)))
+    print("tracks %d, with a TrkCrvMatch record %d, crossing the CRV %d, projected only %d, with a geometric candidate %d"
+          % (ntracks, ak.sum(matched), ak.sum(has_xing), ak.sum(has_proj), ak.sum(has_geom)))
     best_dv = pick(leaf(a, cands, "dv"), bestgeom)
     best_dtxing = pick(leaf(a, cands, "dtxing"), bestgeom)
     best_chi2 = pick(leaf(a, cands, "chi2"), bestgeom)
@@ -125,8 +127,8 @@ def main():
     print("tracks with a time candidate at 0 < dtref < 150 ns: %d" % ak.sum(in_window))
 
     # --- 4. layer probe -------------------------------------------------------------------------------------------
-    pbar = leaf(a, xings, "probe_bar")                                # [event][track][xing][layer]
-    pdbar = leaf(a, xings, "probe_dbar")
+    pbar = leaf(a, xings, "probe_bar")[inbounds]                      # [event][track][xing][layer], crossed sectors only
+    pdbar = leaf(a, xings, "probe_dbar")[inbounds]
     predicted = pbar >= 0
     found = predicted & (pdbar != 127)
     pred_per_layer = np.array([ak.sum(predicted[..., L]) for L in range(4)])

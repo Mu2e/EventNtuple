@@ -26,7 +26,7 @@ namespace mu2e
     XYZVectorF deppos; // energy-weighted position of those deposits, detector frame (mm)
     int   crvcoinc = -1; // index into crvcoincs of the cluster with most energy from the particle in this sector, -1 if none or not in that collection
     int   cand = -1; // index into <trk>crvcands of that cluster, -1 if it is not a candidate
-    int   recoxing = -1; // index into <trk>crvxings of the reco crossing of this sector, -1 if not extrapolated there
+    int   recoxing = -1; // index into <trk>crvxings of the reco crossing of this sector (a projection if not inbounds), -1 if none
 
     void reset() { *this = TrkCrvTrueXingInfoMC(); }
   };
