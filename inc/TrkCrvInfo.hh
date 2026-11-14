@@ -8,7 +8,7 @@ namespace mu2e
 {
   struct TrkCrvInfo {
     bool  matched = false; // a TrkCrvMatch record exists for this track (false: the other leaves are defaults)
-    int   nxings = 0; // CRV sector crossings of the track's extrapolation (entries of <trk>crvxings)
+    int   nxings = 0; // entries of <trk>crvxings: the extrapolation's CRV crossings, or projections (inbounds false) for a line track with none
     int   ncands = 0; // associated CRV coincidence clusters (entries of <trk>crvcands)
     int   ngeom = 0; // candidates kept by the geometric test
     int   bestgeom = -1; // index into <trk>crvcands of the lowest-chi2 geometric candidate, -1 if none

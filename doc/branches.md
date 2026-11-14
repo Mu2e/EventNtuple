@@ -71,11 +71,12 @@ Reco files made with the association in Production's reco paths already hold the
 
 ```<trk>crv``` has one element per track. The other branches hold, per track, a vector of CRV sector crossings (```crvxings```, with the per-layer probe) or of associated clusters (```crvcands```).
 ```crvcands.crvcoinc``` is the index of the cluster in ```crvcoincs```; ```crvcandsmc``` and ```crvxingsmc``` are parallel to ```crvcands``` and ```crvxings```. See ```utils/trkcrv_example.py```.
+```crvxings.inbounds``` tells the crossings the extrapolation found (true) from projections (false): a straight-line track that crosses no CRV sector is projected onto the extended plane of each sector holding one of its candidates. Use ```inbounds```, not ```nxings > 0```, to select tracks that reach a CRV sector. Candidates from projections run to larger chi2 than those from extrapolated crossings, on which the error model was tuned.
 
 | branch | structure | explanation | leaf information |
 |--------|-----------|-------------|------------------|
 | trkcrv |  Vector branch |   track-CRV association summary of one track, from Offline TrkCrvMatch| [see TrkCrvInfo.hh](../inc/TrkCrvInfo.hh)
-| trkcrvxings |  Vector-of-vector branch |   one CRV sector crossing of a track's extrapolation, with the layer probe of that sector| [see TrkCrvXingInfo.hh](../inc/TrkCrvXingInfo.hh)
+| trkcrvxings |  Vector-of-vector branch |   one CRV sector crossing of a track's extrapolation (inbounds), or a projection onto a sector's extended plane for a straight-line track that crosses none, with the layer probe of that sector| [see TrkCrvXingInfo.hh](../inc/TrkCrvXingInfo.hh)
 | trkcrvcands |  Vector-of-vector branch |   one CRV coincidence cluster associated with a track (candidates ordered geometric by chi2, then time-only)| [see TrkCrvCandInfo.hh](../inc/TrkCrvCandInfo.hh)
 | trkcrvcandsmc |  Vector-of-vector branch |   truth of one track-CRV candidate, parallel to <trk>crvcands| [see TrkCrvCandInfoMC.hh](../inc/TrkCrvCandInfoMC.hh)
 | trkcrvxingsmc |  Vector-of-vector branch |   truth of one reco CRV crossing, parallel to <trk>crvxings| [see TrkCrvXingInfoMC.hh](../inc/TrkCrvXingInfoMC.hh)
