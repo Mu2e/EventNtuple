@@ -1,0 +1,84 @@
+#
+# Digitize, reconstruct and write the EventNtuple of primary-only detector
+# steps (dts) in one job: Production's digitize/OnSpill.fcl, then the
+# reconstruction of Production's recoMC/OnSpill.fcl, then the ntuple of
+# from_mcs-primary.fcl. The ntuple holds the events the digitize job's
+# Output would write (signal triggers and triggerable paths); the job writes
+# no art file.
+#
+# Where the two Production jobs configure a module or service differently,
+# the job that uses it decides:
+#  - a module both define: reconstruction's table, then the digitize and
+#    recoMC epilogs (both included below): so CaloShowerROMaker
+#    (digitization) reads compressDetStepMCs, CaloHitTruthMatch
+#    (reconstruction) reads compressDigiMCs, and the pattern recognition
+#    keeps reconstruction's cuts where the digitize prolog has its own.
+#  - ProditionsService.strawElectronics.overrideDbTimeOffsets stays true
+#    (digitize/epilog.fcl): only digitization reads it (uncalibrateTimes);
+#    reconstruction calibrates through StrawResponse.
+#  - GeometryService.bFieldFile is the reconstruction's full map list; the
+#    digitize job's list holds the DS map only, which comes first in both.
+#
+#include "Production/JobConfig/recoMC/prolog.fcl"
+#include "EventNtuple/fcl/prolog.fcl"
+#include "Production/JobConfig/digitize/OnSpill.fcl"
+
+# Later tables win: reconstruction and ntuple modules keep their own
+# settings, also where the digitize job defines (but does not run) a module
+# of the same name. The digitize epilog is applied again below, for the
+# modules digitization runs.
+physics.producers : {
+  @table::physics.producers
+  @table::Reconstruction.producers
+  @table::EventNtuple.producers
+}
+physics.filters : {
+  @table::physics.filters
+  @table::Reconstruction.filters
+}
+physics.analyzers : {
+  @table::physics.analyzers
+  @table::Reconstruction.analyzers
+  @table::EventNtuple.analyzers
+}
+# Reconstruction drops no event, as in recoMC/OnSpill.fcl
+physics.filters.LHFilter : {
+  module_type : FixedFilter
+  ReturnValue : true
+}
+
+physics.RecoPath : [
+  @sequence::Digitize.DigitizeSequence,
+  @sequence::Reconstruction.OnSpillPath,
+  @sequence::EventNtuple.PathOnline
+]
+physics.trigger_paths : [ @sequence::physics.trigger_paths, "RecoPath" ]
+physics.analyzers.LHCompressionCheck.SelectEvents : [ "RecoPath" ]
+physics.analyzers.EventNtuple.SelectEvents : [
+  @sequence::Digitize.SignalTriggers,
+  @sequence::physics.TriggerablePaths
+]
+physics.EndPath : [
+  digiCompressionCheck,
+  @sequence::Reconstruction.OnSpillEndSequence,
+  @sequence::EventNtuple.EndPath
+]
+outputs : {}
+
+# The ntuple of from_mcs-primary.fcl; these lines are from_mcs-mockdata.fcl's,
+# which is a whole job and cannot be included.
+physics.analyzers.EventNtuple.subruns.genEventCount.include : true
+physics.analyzers.EventNtuple.trk.fits : [ @local::All, @local::TrigApr, @local::TrigAprUe, @local::TrigCalDe ]
+physics.analyzers.EventNtuple.helices.fill : true
+physics.analyzers.EventNtuple.helices.tags : @local::HelixTags
+physics.analyzers.EventNtuple.helices.names : @local::HelixNames
+
+#include "Production/JobConfig/digitize/epilog.fcl"
+#include "mu2e-trig-config/core/trigDigiInputsEpilog.fcl"
+# the epilogs of recoMC/OnSpill.fcl, in its order: keep them in step with it
+#include "Production/JobConfig/recoMC/epilog.fcl"
+#include "Production/JobConfig/reco/run1a_epilog.fcl"
+#include "Production/JobConfig/common/epilog.fcl"
+
+services.GeometryService.bFieldFile : "Offline/Mu2eG4/geom/bfgeom_v01.txt"
+services.TFileService.fileName : "nts.owner.description.version.sequencer.root"

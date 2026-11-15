@@ -8,6 +8,8 @@ from_tier-type_extra.fcl
 
 where ```tier``` is the data tier of the input dataset, ```type``` is the type of dataset (e.g. primary-only, extracted position), and ```extra``` gives some extra information (optional)
 
+```from_dts-primary.fcl``` starts one tier earlier than the others: it digitizes, reconstructs and writes the ntuple of primary-only detector steps in one job (Production's digitize and reco configurations, the ntuple of ```from_mcs-primary.fcl```), and writes no art file.
+
 ## Track MVA outputs (TrkQual, TrkPID, ...)
 
 Each track fit stores any number of per-track `MVAResultCollection`s. List the
