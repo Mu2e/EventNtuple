@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
 
 find_package(cetmodules)
 
-project(event-ntuple VERSION 6.1.1)
+project(event-ntuple VERSION 6.17.0)
 
 include(CetCMakeEnv)
 cet_cmake_env()
