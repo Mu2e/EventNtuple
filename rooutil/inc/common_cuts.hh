@@ -140,7 +140,7 @@ bool is_downstream(Track& track) { // reconstructed fit segment at tracker middl
 }
 
 bool is_upstream(Track& track) { // reconstructed fit segment at tracker middle is going in -z direction
-  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && !has_mc_step(segment) && has_reco_step(segment); });
+  auto tracker_middle_segments = track.GetSegments([](TrackSegment& segment){ return tracker_middle(segment) && has_reco_step(segment); });
   if (tracker_middle_segments.size() > 1) {
     std::cout << "WARNING: " << tracker_middle_segments.size() << " track segments at tracker middle. Something might have gone wrong..." << std::endl;
     return false;
