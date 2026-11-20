@@ -134,7 +134,9 @@ namespace mu2e {
       simmom = kseedmc.simParticles().front()._mom.R();
     for(size_t i_digi = 0; i_digi < kseedmc._tshmcs.size(); ++i_digi) {
       const auto& tshmc = kseedmc._tshmcs.at(i_digi);
-      if (kseedmc.simParticle(tshmc._spindex)._rel == MCRelationship::same) {
+      // count digis from the track's main particle, which is SimPartStub 0. The stub's _rel is
+      // its relationship to the event primary, not to the track, so it is not used here.
+      if (tshmc.containsSimulation() && tshmc._spindex == 0) {
         ++trkinfomc.ndigi;
         if(tshmc.particleMomentum().R()/simmom > _mingood) {
           ++trkinfomc.ndigigood;
