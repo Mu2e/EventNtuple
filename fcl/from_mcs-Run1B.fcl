@@ -19,10 +19,27 @@ physics.analyzers.EventNtuple.trk.fits : [
     mvaTags : []
     mvaBranches : []
     trkDtDtTag : "TrkDtDt:MergeKKLines"
+    # one matcher per collection merged into MergeKKLines, see the Track-CRV association block below
+    trkCrvMatchTags : [ "TrkCrvMatchLineNtuple", "TrkCrvMatchProtonLineNtuple", "TrkCrvMatchCosmicLineNtuple" ]
+    trkCrvMatchMCTags : [ "TrkCrvMatchLineNtupleMC", "TrkCrvMatchProtonLineNtupleMC", "TrkCrvMatchCosmicLineNtupleMC" ]
   }
 ]
 physics.analyzers.EventNtuple.trk.fillTrkDtDt : false # Not yet added
 physics.EventNtuplePath : [ MergeKKLines, @sequence::physics.EventNtuplePath ]
+
+# Track-CRV association of the merged line fits, with truth: <trk>crv, <trk>crvxings, <trk>crvcands and their mc branches.
+# MergeKKLines holds Ptrs into KKLine, ProtonKKLine and CosmicKKLine, and the ntuple finds each track's match by that Ptr,
+# so each collection needs its own matcher. TrkCrvMatchLineNtuple (KKLine) and its MC companion come in from
+# from_mcs-extracted.fcl with the path above; add the other two.
+# Run 1B uses the Run 1 CRV geometry, whose T1 and T2 are both CRV sector type 1, so SigmaV takes one entry,
+# as for TrkCrvMatchCHmuNtuple in prolog.fcl. DtRefCenter keeps the Offline default (KKLine on extracted-geometry MC).
+physics.producers.TrkCrvMatchLineNtuple.SigmaV : [ 13 ]
+physics.producers.TrkCrvMatchProtonLineNtuple : { @table::physics.producers.TrkCrvMatchLineNtuple KalSeedCollection : "ProtonKKLine" }
+physics.producers.TrkCrvMatchCosmicLineNtuple : { @table::physics.producers.TrkCrvMatchLineNtuple KalSeedCollection : "CosmicKKLine" }
+physics.producers.TrkCrvMatchProtonLineNtupleMC : { @table::physics.producers.TrkCrvMatchLineNtupleMC TrkCrvMatchCollection : "TrkCrvMatchProtonLineNtuple" }
+physics.producers.TrkCrvMatchCosmicLineNtupleMC : { @table::physics.producers.TrkCrvMatchLineNtupleMC TrkCrvMatchCollection : "TrkCrvMatchCosmicLineNtuple" }
+physics.EventNtuplePath : [ @sequence::physics.EventNtuplePath,
+  TrkCrvMatchProtonLineNtuple, TrkCrvMatchCosmicLineNtuple, TrkCrvMatchProtonLineNtupleMC, TrkCrvMatchCosmicLineNtupleMC ]
 
 # Store time clusters for straight line track finding
 physics.analyzers.EventNtuple.timeclusters.fill : true

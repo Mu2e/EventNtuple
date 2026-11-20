@@ -86,7 +86,7 @@ touches the file.
 | `from_mcs-OffSpill.fcl` | `mcs`, off-spill cosmics, field on | `CentralHelix` fits (`Off`) plus online fits; `PathOffOnline` | Brown (1), MacKenzie (1) | 2026-10-13 | no |
 | `from_mcs-extracted.fcl` | `mcs`, extracted-position cosmics | `KinematicLine` fits (`Ext`), `PathExt`, no TrkDtDt, `genEventCount` on, extracted geometry | Edmonds (10), Brown (1) | 2026-08-10 | yes |
 | `from_mcs-extracted_withCrvPulses.fcl` | `mcs`, extracted all-events stream | Every CRV pulse, including unclustered ones; truth planes for T1, EX, T2 and M | Oksuzian (2) | 2026-10-29 | no |
-| `from_mcs-Run1B.fcl` | `mcs`, Run-1B `-KL` datasets | Merges three line-fit collections; time clusters and line seeds (with hits for two of them); VD steps; standard geometry | Edmonds (10), MacKenzie (8), Oksuzian (2) | 2026-10-29 | yes |
+| `from_mcs-Run1B.fcl` | `mcs`, Run-1B `-KL` datasets | Merges three line-fit collections, with track-CRV association for each; time clusters and line seeds (with hits for two of them); VD steps; standard geometry | Edmonds (10), MacKenzie (8), Oksuzian (2) | 2026-10-29 | yes |
 | `from_mcs-ceSimReco.fcl` | Output of `Production/Validation/ceSimReco.fcl` | Only De fits, with De-specific PID producers; no trigger info | Edmonds (9), MacKenzie (2) | 2026-10-29 | yes |
 | `from_mcs-ceSimRecoVal.fcl` | Output of `validation/ceTrig.fcl` | Adds `trkhitcalibs` and trigger info (`ceTrig` process) | Edmonds (4) | 2026-06-04 | yes |
 | `from_mcs-DeCalib.fcl` | `mcs`, primary or mixed | Keeps events with a calibration-quality De and writes only the best De track (`ENDeCalib`); no subrun ntuple | Brown (3), Edmonds (3) | 2026-10-24 | yes |
