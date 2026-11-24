@@ -134,7 +134,9 @@ namespace mu2e {
       simmom = kseedmc.simParticles().front()._mom.R();
     for(size_t i_digi = 0; i_digi < kseedmc._tshmcs.size(); ++i_digi) {
       const auto& tshmc = kseedmc._tshmcs.at(i_digi);
-      if (kseedmc.simParticle(tshmc._spindex)._rel == MCRelationship::same) {
+      // count digis from the track's main particle, which is SimPartStub 0. The stub's _rel is
+      // its relationship to the event primary, not to the track, so it is not used here.
+      if (tshmc.containsSimulation() && tshmc._spindex == 0) {
         ++trkinfomc.ndigi;
         if(tshmc.particleMomentum().R()/simmom > _mingood) {
           ++trkinfomc.ndigigood;
@@ -263,24 +265,24 @@ namespace mu2e {
     }
 
     // Now add all the primary particles
-    SimInfo sim_info;
     for(auto const& spp : primary.primarySimParticles()){
-      fillSimInfo(spp, sim_info);
-
-      // check whether we already put this primary in
+      // check whether we already put this primary in: allParts holds the particle of every entry in siminfos
       bool already_added = false;
-      for (const auto& i_sim_info : siminfos) {
-        if (i_sim_info.prirel == MCRelationship::same) {
+      for (auto const& part : allParts) {
+        if (MCRelationship(spp, part) == MCRelationship::same) {
           already_added = true;
           break;
         }
       }
       if (!already_added) {
+        SimInfo sim_info;
+        fillSimInfo(spp, sim_info);
         auto trkprimaryptr = kseedmc.simParticle().simParticle(_spcH);
         sim_info.trkrel = MCRelationship(spp, trkprimaryptr);
         sim_info.prirel = MCRelationship(spp, spp);
         sim_info.index = siminfos.size();
         siminfos.push_back(sim_info);
+        allParts.push_back(spp);
       }
     }
 

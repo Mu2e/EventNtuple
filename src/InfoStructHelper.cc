@@ -13,6 +13,7 @@
 #include "Offline/CalorimeterGeom/inc/Crystal.hh"
 #include "Offline/CaloCluster/inc/ClusterUtils.hh"
 #include "Offline/DataProducts/inc/CaloConst.hh"
+#include "Offline/DataProducts/inc/StrawId.hh"
 #include <cmath>
 #include <limits>
 #include <string>
@@ -237,7 +238,8 @@ namespace mu2e {
     static StrawHitFlag active(StrawHitFlag::active);
     std::set<unsigned> planes;
     std::set<unsigned> panels;
-    uint16_t minplane(0), maxplane(0);
+    // seed the minimum above any valid plane so the first active hit sets it
+    uint16_t minplane(StrawId::_nplanes), maxplane(0);
     static StrawHitFlag allsel("EnergySelection:TimeSelection:RadiusSelection");
     static StrawHitFlag allrej("Background:Dead:Noisy");
 
@@ -268,7 +270,8 @@ namespace mu2e {
       }
       trkinfo.nplanes = planes.size();
       trkinfo.npanels = panels.size();
-      trkinfo.planespan = abs(maxplane-minplane);
+      // planespan stays 0 until there is an active hit
+      trkinfo.planespan = (maxplane >= minplane) ? maxplane - minplane : 0;
     }
     trkinfo.avgedep /= trkinfo.nactive;
   }
